@@ -18,7 +18,7 @@ channels=$3
 layers=$4
 SAVED=./snapshots/NAS/${arch}-${dataset}-C${channels}-L${layers}-E250
 
-CUDA_VISIBLE_DEVICES=${gpus} python ./exps-nas/train_base.py \
+CUDA_VISIBLE_DEVICES=${gpus} python ./exps-cnn/train_base.py \
 	--data_path $TORCH_HOME/ILSVRC2012 \
 	--dataset ${dataset} --arch ${arch} \
 	--save_path ${SAVED} \

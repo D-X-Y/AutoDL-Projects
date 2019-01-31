@@ -11,8 +11,6 @@ from .CifarNet import NetworkCIFAR
 from .ImageNet import NetworkImageNet
 
 # genotypes
-from .genotypes import DARTS_V1, DARTS_V2
-from .genotypes import NASNet, PNASNet, AmoebaNet, ENASNet
-from .genotypes import DMS_V1, DMS_F1, GDAS_CC
+from .genotypes import model_types
 
 from .construct_utils import return_alphas_str

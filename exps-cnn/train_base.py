@@ -13,24 +13,10 @@ if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from utils import AverageMeter, time_string, convert_secs2time
 from utils import print_log, obtain_accuracy
 from utils import Cutout, count_parameters_in_MB
-from nas import DARTS_V1, DARTS_V2, NASNet, PNASNet, AmoebaNet, ENASNet
-from nas import DMS_V1, DMS_F1, GDAS_CC
-from meta_nas import META_V1, META_V2
+from nas import model_types as models
 from train_utils import main_procedure
 from train_utils_imagenet import main_procedure_imagenet
 from scheduler import load_config
-
-models = {'DARTS_V1': DARTS_V1,
-          'DARTS_V2': DARTS_V2,
-          'NASNet'  : NASNet,
-          'PNASNet' : PNASNet,
-          'ENASNet' : ENASNet,
-          'DMS_V1'  : DMS_V1,
-          'DMS_F1'  : DMS_F1,
-          'GDAS_CC' : GDAS_CC,
-          'META_V1' : META_V1,
-          'META_V2' : META_V2,
-          'AmoebaNet' : AmoebaNet}
 
 
 parser = argparse.ArgumentParser("cifar")

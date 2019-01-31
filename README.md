@@ -16,7 +16,20 @@ Searching CNNs
 ```
 ```
 
-Train the Searched RNN
+Train the searched CNN on CIFAR
+```
+bash ./scripts-cnn/train-imagenet.sh 0 GDAS_F1 52 14
+bash ./scripts-cnn/train-imagenet.sh 0 GDAS_V1 50 14
+```
+
+Train the searched CNN on ImageNet
+```
+bash ./scripts-cnn/train-imagenet.sh 0 GDAS_F1 52 14
+bash ./scripts-cnn/train-imagenet.sh 0 GDAS_V1 50 14
+```
+
+
+Train the searched RNN
 ```
 bash ./scripts-rnn/train-PTB.sh 0 DARTS_V1
 bash ./scripts-rnn/train-PTB.sh 0 DARTS_V2

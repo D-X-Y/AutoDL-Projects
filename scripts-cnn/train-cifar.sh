@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
-if [ "$#" -ne 2 ] ;then
+# bash scripts-cnn/train-cifar.sh 0 GDAS cifar10
+if [ "$#" -ne 3 ] ;then
   echo "Input illegal number of parameters " $#
-  echo "Need 2 parameters for the GPUs, the architecture"
+  echo "Need 3 parameters for the GPUs, the architecture, and the dataset-name"
   exit 1               
 fi 
 if [ "$TORCH_HOME" = "" ]; then
@@ -13,7 +14,7 @@ fi
 
 gpus=$1
 arch=$2
-dataset=cifar100
+dataset=$3
 SAVED=./snapshots/NAS/${arch}-${dataset}-E600
 
 CUDA_VISIBLE_DEVICES=${gpus} python ./exps-nas/train_base.py \
