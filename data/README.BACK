@@ -1,0 +1,90 @@
+# EraseReLU: A Simple Way to Ease the Training of Deep Convolution Neural Networks
+
+This project implements [this paper](https://arxiv.org/abs/1709.07634) in [PyTorch](pytorch.org). The implementation refers to [ResNeXt-DenseNet](https://github.com/D-X-Y/ResNeXt-DenseNet)
+
+## Usage
+All the model definations are located in the directory `models`.
+
+All the training scripts are located in the directory `scripts` and `Xscripts`.
+
+To train the ResNet-110 with EraseReLU on CIFAR-10:
+```bash
+sh scripts/warmup_train_2gpu.sh resnet110_erase cifar10
+```
+
+To train the original ResNet-110 on CIFAR-10:
+```bash
+sh scripts/warmup_train_2gpu.sh resnet110 cifar10
+```
+
+### MiniImageNet for PatchShuffle
+```
+sh scripts-shuffle/train_resnet_00000.sh ResNet18
+sh scripts-shuffle/train_resnet_10000.sh ResNet18
+sh scripts-shuffle/train_resnet_11000.sh ResNet18
+```
+
+```
+sh scripts-shuffle/train_pmd_00000.sh PMDNet18_300
+sh scripts-shuffle/train_pmd_00000.sh PMDNet34_300
+sh scripts-shuffle/train_pmd_00000.sh PMDNet50_300
+
+sh scripts-shuffle/train_pmd_11000.sh PMDNet18_300
+sh scripts-shuffle/train_pmd_11000.sh PMDNet34_300
+sh scripts-shuffle/train_pmd_11000.sh PMDNet50_300
+```
+
+### ImageNet
+- Use the scripts `train_imagenet.sh` to train models in PyTorch.
+- Or you can use the codes in `extra_torch` to train models in Torch.
+
+#### Group Noramlization
+```
+sh Xscripts/train_vgg_gn.sh 0,1,2,3,4,5,6,7 vgg16_gn 256
+sh Xscripts/train_vgg_gn.sh 0,1,2,3,4,5,6,7 vgg16_gn 64
+sh Xscripts/train_vgg_gn.sh 0,1,2,3,4,5,6,7 vgg16_gn 16
+sh Xscripts/train_res_gn.sh 0,1,2,3,4,5,6,7 resnext50_32_4_gn  16
+```
+
+| Model          | Batch Size | Top-1 Error | Top-5 Errpr | 
+|:--------------:|:----------:|:-----------:|:-----------:|
+| VGG16-GN       |   256      |  28.82      |  9.64       |
+
+
+## Results
+
+| Model          | Error on CIFAR-10 | Error on CIFAR-100|
+|:--------------:|:-----------------:|:-----------------:|
+| ResNet-56      |      6.97         |      30.60        |
+| ResNet-56 (ER) |      6.23         |      28.56        |
+
+
+## Citation
+If you find this project helos your research, please consider cite the paper:
+```
+@article{dong2017eraserelu,
+  title={EraseReLU: A Simple Way to Ease the Training of Deep Convolution Neural Networks},
+  author={Dong, Xuanyi and Kang, Guoliang and Zhan, Kun and Yang, Yi},
+  journal={arXiv preprint arXiv:1709.07634},
+  year={2017}
+}
+```
+
+## Download the ImageNet dataset
+The ImageNet Large Scale Visual Recognition Challenge (ILSVRC) dataset has 1000 categories and 1.2 million images. The images do not need to be preprocessed or packaged in any database, but the validation images need to be moved into appropriate subfolders.
+
+1. Download the images from http://image-net.org/download-images
+
+2. Extract the training data:
+  ```bash
+  mkdir train && mv ILSVRC2012_img_train.tar train/ && cd train
+  tar -xvf ILSVRC2012_img_train.tar && rm -f ILSVRC2012_img_train.tar
+  find . -name "*.tar" | while read NAME ; do mkdir -p "${NAME%.tar}"; tar -xvf "${NAME}" -C "${NAME%.tar}"; rm -f "${NAME}"; done
+  cd ..
+  ```
+
+3. Extract the validation data and move images to subfolders:
+  ```bash
+  mkdir val && mv ILSVRC2012_img_val.tar val/ && cd val && tar -xvf ILSVRC2012_img_val.tar
+  wget -qO- https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh | bash
+  ```
