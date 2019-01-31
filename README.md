@@ -15,6 +15,7 @@ conda install pytorch torchvision cuda100 -c pytorch
 
 Searching CNNs
 ```
+bash ./scripts-cnn/search.sh 1 base cifar10
 bash ./scripts-cnn/search-acc-v2.sh 3 acc2
 ```
 
