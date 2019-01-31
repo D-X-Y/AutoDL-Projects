@@ -40,6 +40,5 @@ CUDA_VISIBLE_DEVICES=${gpus} python ./exps-cnn/DARTS-Search.py \
 	--learning_rate_max 0.025 --learning_rate_min 0.001 --momentum 0.9 --weight_decay 0.0003 \
 	--epochs ${epoch} --cutout ${cutout} --validate --grad_clip 5 \
 	--init_channels 16 --layers 8 \
-	--manualSeed 3858 \
 	--model_config ./configs/nas-cifar-cos-cut.config \
 	--print_freq ${print_freq} --workers 8
