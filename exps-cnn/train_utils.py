@@ -21,7 +21,7 @@ def obtain_best(accuracies):
 
 def main_procedure(config, dataset, data_path, args, genotype, init_channels, layers, log):
   
-  train_data, test_data, class_num = get_datasets(dataset, data_path, args.cutout)
+  train_data, test_data, class_num = get_datasets(dataset, data_path, config.cutout)
 
   print_log('-------------------------------------- main-procedure', log)
   print_log('config        : {:}'.format(config), log)
@@ -39,9 +39,9 @@ def main_procedure(config, dataset, data_path, args, genotype, init_channels, la
   print_log('genotype      : {:}'.format(genotype), log)
   print_log('args          : {:}'.format(args), log)
   print_log('Train-Dataset : {:}'.format(train_data), log)
-  print_log('Train-Trans   : {:}'.format(train_transform), log)
+  print_log('Train-Trans   : {:}'.format(train_data.transform), log)
   print_log('Test--Dataset : {:}'.format(test_data ), log)
-  print_log('Test--Trans   : {:}'.format(test_transform ), log)
+  print_log('Test--Trans   : {:}'.format(test_data.transform ), log)
 
 
   train_loader = torch.utils.data.DataLoader(train_data, batch_size=config.batch_size, shuffle=True,

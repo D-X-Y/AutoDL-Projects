@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-# bash scripts-cnn/train-cifar.sh 0 GDAS cifar10
-if [ "$#" -ne 3 ] ;then
+# bash scripts-cnn/train-cifar.sh 0 GDAS cifar10 cut
+if [ "$#" -ne 4 ] ;then
   echo "Input illegal number of parameters " $#
-  echo "Need 3 parameters for the GPUs, the architecture, and the dataset-name"
+  echo "Need 4 parameters for the GPUs, the architecture, and the dataset-name, and the cutout"
   exit 1               
 fi 
 if [ "$TORCH_HOME" = "" ]; then
@@ -15,13 +15,14 @@ fi
 gpus=$1
 arch=$2
 dataset=$3
-SAVED=./snapshots/NAS/${arch}-${dataset}-E600
+cutout=$4
+SAVED=./snapshots/NAS/${arch}-${dataset}-${cutout}-E600
 
-CUDA_VISIBLE_DEVICES=${gpus} python ./exps-nas/train_base.py \
+CUDA_VISIBLE_DEVICES=${gpus} python ./exps-cnn/train_base.py \
 	--data_path $TORCH_HOME/cifar.python \
 	--dataset ${dataset} --arch ${arch} \
 	--save_path ${SAVED} \
 	--grad_clip 5 \
 	--init_channels 36 --layers 20 \
-	--model_config ./configs/nas-cifar-cos.config \
+	--model_config ./configs/nas-cifar-cos-${cutout}.config \
 	--print_freq 100 --workers 8

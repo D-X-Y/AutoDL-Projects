@@ -62,7 +62,7 @@ def main_procedure_imagenet(config, data_path, args, genotype, init_channels, la
 
   total_param, aux_param = count_parameters_in_MB(basemodel), count_parameters_in_MB(basemodel.auxiliary_param())
   print_log('Network =>\n{:}'.format(basemodel), log)
-  #print_FLOPs(basemodel, (1,3,224,224), [print_log, log])
+  print_FLOPs(basemodel, (1,3,224,224), [print_log, log])
   print_log('Parameters : {:} - {:} = {:.3f} MB'.format(total_param, aux_param, total_param - aux_param), log)
   print_log('config        : {:}'.format(config), log)
   print_log('genotype      : {:}'.format(genotype), log)
@@ -75,7 +75,7 @@ def main_procedure_imagenet(config, data_path, args, genotype, init_channels, la
   criterion_smooth = CrossEntropyLabelSmooth(class_num, config.label_smooth).cuda()
 
 
-  optimizer = torch.optim.SGD(model.parameters(), config.LR, momentum=config.momentum, weight_decay=config.decay, nestero=True)
+  optimizer = torch.optim.SGD(model.parameters(), config.LR, momentum=config.momentum, weight_decay=config.decay, nesterov=True)
   if config.type == 'cosine':
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(config.epochs))
   elif config.type == 'steplr':

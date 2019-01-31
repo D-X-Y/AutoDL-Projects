@@ -4,7 +4,6 @@ from .utils import test_imagenet_data
 from .utils import print_log
 from .evaluation_utils import obtain_accuracy
 from .draw_pts import draw_points
-from .fb_transform import ApplyOffset
 from .gpu_manager import GPUManager
 
 from .save_meta import Save_Meta

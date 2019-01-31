@@ -54,15 +54,15 @@ def main():
   if not os.path.isdir(args.save_path):
     os.makedirs(args.save_path)
   log = open(os.path.join(args.save_path, 'log-seed-{:}.txt'.format(args.manualSeed)), 'w')
-  print_log('save path : {}'.format(args.save_path), log)
+  print_log('Save Path      : {:}'.format(args.save_path), log)
   state = {k: v for k, v in args._get_kwargs()}
   print_log(state, log)
-  print_log("Random Seed: {}".format(args.manualSeed), log)
-  print_log("Python version : {}".format(sys.version.replace('\n', ' ')), log)
-  print_log("Torch  version : {}".format(torch.__version__), log)
-  print_log("CUDA   version : {}".format(torch.version.cuda), log)
-  print_log("cuDNN  version : {}".format(cudnn.version()), log)
-  print_log("Num of GPUs    : {}".format(torch.cuda.device_count()), log)
+  print_log("Random Seed    : {:}".format(args.manualSeed), log)
+  print_log("Python version : {:}".format(sys.version.replace('\n', ' ')), log)
+  print_log("Torch  version : {:}".format(torch.__version__), log)
+  print_log("CUDA   version : {:}".format(torch.version.cuda), log)
+  print_log("cuDNN  version : {:}".format(cudnn.version()), log)
+  print_log("Num of GPUs    : {:}".format(torch.cuda.device_count()), log)
   args.dataset = args.dataset.lower()
 
   config = load_config(args.model_config)
