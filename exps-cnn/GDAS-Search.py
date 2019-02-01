@@ -219,8 +219,8 @@ def main():
   print_log('Finish with training time = {:}'.format( convert_secs2time(total_train_time, True) ), log)
 
   # clear GPU cache
-  torch.cuda.empty_cache()
-  main_procedure(config, args.dataset, args.data_path, args, basemodel.genotype(), 36, 20, log)
+  #torch.cuda.empty_cache()
+  #main_procedure(config, args.dataset, args.data_path, args, basemodel.genotype(), 36, 20, log)
   log.close()
 
 
