@@ -22,8 +22,9 @@ bash ./scripts-cnn/search-acc-v2.sh 3 acc2
 
 Train the searched CNN on CIFAR
 ```
-bash ./scripts-cnn/train-cifar.sh 0 GDAS_F1 cifar10
-bash ./scripts-cnn/train-cifar.sh 0 GDAS_V1 cifar100
+bash ./scripts-cnn/train-cifar.sh 0 GDAS_FG cifar10  cut
+bash ./scripts-cnn/train-cifar.sh 0 GDAS_F1 cifar10  cut
+bash ./scripts-cnn/train-cifar.sh 0 GDAS_V1 cifar100 cut
 ```
 
 Train the searched CNN on ImageNet

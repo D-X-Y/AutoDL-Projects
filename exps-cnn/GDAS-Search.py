@@ -236,7 +236,6 @@ def train(train_queue, valid_queue, model, criterion, base_optimizer, arch_optim
 
     #inputs, targets = inputs.cuda(), targets.cuda(non_blocking=True)
     targets = targets.cuda(non_blocking=True)
-    data_time.update(time.time() - end)
 
     # get a random minibatch from the search queue with replacement
     try:
@@ -246,6 +245,7 @@ def train(train_queue, valid_queue, model, criterion, base_optimizer, arch_optim
       input_search, target_search = next(valid_iter)
     
     target_search = target_search.cuda(non_blocking=True)
+    data_time.update(time.time() - end)
 
     # update the architecture
     arch_optimizer.zero_grad()
