@@ -15,7 +15,7 @@ gpus=$1
 arch=$2
 SAVED=./snapshots/NAS-RNN/Search-${arch}-PTB
 
-CUDA_VISIBLE_DEVICES=${gpus} python ./exps-nas/rnn/train_rnn_base.py \
+CUDA_VISIBLE_DEVICES=${gpus} python ./exps-rnn/train_rnn_base.py \
 	--arch ${arch} \
 	--save_path ${SAVED} \
 	--config_path ./configs/NAS-PTB-BASE.config \

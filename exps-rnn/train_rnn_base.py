@@ -8,7 +8,8 @@ import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 from pathlib import Path
-lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
+lib_dir = (Path(__file__).parent / '..' / 'lib').resolve()
+print ('lib-dir : {:}'.format(lib_dir))
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from utils import AverageMeter, time_string, time_file_str, convert_secs2time
 from utils import print_log, obtain_accuracy
