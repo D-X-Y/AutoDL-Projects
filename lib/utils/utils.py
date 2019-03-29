@@ -1,9 +1,6 @@
 import os, sys, time
 import numpy as np
-import matplotlib
 import random
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 
 class AverageMeter(object):
   """Computes and stores the average and current value"""
@@ -53,6 +50,9 @@ class RecorderMeter(object):
     else:       return self.epoch_accuracy[:self.current_epoch, 1].max()
 
   def plot_curve(self, save_path):
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     title = 'the accuracy/loss curve of train/val'
     dpi = 100 
     width, height = 1600, 1000
@@ -97,7 +97,7 @@ class RecorderMeter(object):
     plt.close(fig)
     
 def print_log(print_string, log):
-  print("{}".format(print_string))
+  print ("{:}".format(print_string))
   if log is not None:
     log.write('{}\n'.format(print_string))
     log.flush()

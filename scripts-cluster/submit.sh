@@ -18,14 +18,15 @@ QUEUE=$1
 NAME=$2
 GPUs=$3
 CMD=$4
-TIME=$(date +"%Y-%h-%d-%T")
+TIME=$(date +"%Y-%h-%d--%T")
+TIME="${TIME//:/-}"
 
 JOB_SCRIPT="${FDIR}/tmps/job-${TIME}.sh"
+echo "JOB-SCRIPT: " ${JOB_SCRIPT}
 
 cat ${FDIR}/job-script.sh > ${JOB_SCRIPT}
 echo ${CMD}              >> ${JOB_SCRIPT}
 
-exit 1
 HGCP_CLIENT_BIN="${HOME}/.hgcp/software-install/HGCP_client/bin"
 
 
@@ -42,3 +43,6 @@ ${HGCP_CLIENT_BIN}/submit \
     --gpu-pnode ${GPUs} \
     --time-limit 0 \
     --job-script ${JOB_SCRIPT}
+
+#--job-script ${FDIR}/job-script.sh
+#echo "JOB-SCRIPT: " ${JOB_SCRIPT}

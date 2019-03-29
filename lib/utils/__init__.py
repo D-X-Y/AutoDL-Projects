@@ -3,7 +3,7 @@ from .utils import time_file_str, time_string
 from .utils import test_imagenet_data
 from .utils import print_log
 from .evaluation_utils import obtain_accuracy
-from .draw_pts import draw_points
+#from .draw_pts import draw_points
 from .gpu_manager import GPUManager
 
 from .save_meta import Save_Meta
