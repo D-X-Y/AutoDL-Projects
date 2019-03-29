@@ -2,7 +2,6 @@ import os, sys, time
 from copy import deepcopy
 import torch
 import torch.nn as nn
-import torchvision.datasets as dset
 import torchvision.transforms as transforms
 
 

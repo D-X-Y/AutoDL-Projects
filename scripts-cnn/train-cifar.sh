@@ -17,9 +17,10 @@ arch=$2
 dataset=$3
 cutout=$4
 SAVED=./snapshots/NAS/${arch}-${dataset}-${cutout}-E600
+#--data_path $TORCH_HOME/cifar.python \
 
 CUDA_VISIBLE_DEVICES=${gpus} python ./exps-cnn/train_base.py \
-	--data_path $TORCH_HOME/cifar.python \
+	--data_path ./data/data/cifar.python \
 	--dataset ${dataset} --arch ${arch} \
 	--save_path ${SAVED} \
 	--grad_clip 5 \
