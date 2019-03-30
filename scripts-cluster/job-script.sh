@@ -16,6 +16,7 @@ else
   exit 1
 fi
 echo "CHECK-DATA-DIR DONE"
+export TORCH_HOME="./data/data/"
 
 
 # config python
@@ -27,7 +28,7 @@ echo "JOB-PWD   : " `pwd`
 echo "JOB-files :  " `ls`
 echo "JOB-CUDA_VISIBLE_DEVICES: " ${CUDA_VISIBLE_DEVICES}
 
-echo `./env/bin/python --version`
+./env/bin/python --version
+echo "JOB-TORCH_HOME: "${TORCH_HOME}
 
 # real commands
-bash ./scripts-rnn/train-WT2.sh GDAS

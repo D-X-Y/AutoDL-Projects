@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
-if [ "$#" -ne 4 ] ;then
+if [ "$#" -ne 3 ] ;then
   echo "Input illegal number of parameters " $#
-  echo "Need 4 parameters for the GPUs, the architecture, and the channel and the layers"
+  echo "Need 3 parameters for the architecture, and the channel and the layers"
   exit 1               
 fi 
 if [ "$TORCH_HOME" = "" ]; then
@@ -11,14 +11,24 @@ else
   echo "TORCH_HOME : $TORCH_HOME"
 fi
 
-gpus=$1
-arch=$2
+arch=$1
 dataset=imagenet
-channels=$3
-layers=$4
-SAVED=./snapshots/NAS/${arch}-${dataset}-C${channels}-L${layers}-E250
+channels=$2
+layers=$3
+SAVED=./output/NAS-CNN/${arch}-${dataset}-C${channels}-L${layers}-E250
 
-CUDA_VISIBLE_DEVICES=${gpus} python ./exps-cnn/train_base.py \
+PY_C="./env/bin/python"
+
+if [ ! -f ${PY_C} ]; then
+  echo "Local Run with Python: "`which python`
+  PY_C="python"
+else
+  echo "Cluster Run with Python: "${PY_C}
+fi
+
+${PY_C} --version
+
+${PY_C} ./exps-cnn/train_base.py \
 	--data_path $TORCH_HOME/ILSVRC2012 \
 	--dataset ${dataset} --arch ${arch} \
 	--save_path ${SAVED} \

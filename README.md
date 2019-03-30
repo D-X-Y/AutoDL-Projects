@@ -15,15 +15,15 @@ conda install pytorch torchvision cuda100 -c pytorch
 
 Train the searched CNN on CIFAR
 ```
-bash ./scripts-cnn/train-cifar.sh 0 GDAS_FG cifar10  cut
-bash ./scripts-cnn/train-cifar.sh 0 GDAS_F1 cifar10  cut
-bash ./scripts-cnn/train-cifar.sh 0 GDAS_V1 cifar100 cut
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-cnn/train-cifar.sh GDAS_FG cifar10  cut
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-cnn/train-cifar.sh GDAS_F1 cifar10  cut
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-cnn/train-cifar.sh GDAS_V1 cifar100 cut
 ```
 
 Train the searched CNN on ImageNet
 ```
-bash ./scripts-cnn/train-imagenet.sh 0 GDAS_F1 52 14
-bash ./scripts-cnn/train-imagenet.sh 0 GDAS_V1 50 14
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-cnn/train-imagenet.sh GDAS_F1 52 14
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-cnn/train-imagenet.sh GDAS_V1 50 14
 ```
 
 

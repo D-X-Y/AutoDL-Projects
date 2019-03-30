@@ -3,9 +3,9 @@
 #find -name "._*" | xargs rm -rf
 ODIR=$(pwd)
 FDIR=$(cd $(dirname $0); pwd)
-echo "Bash-Dir : "${ODIR}
-echo "File-Dir : "${FDIR}
-echo "File-Name: "${0}
+echo "Bash-Dir  : "${ODIR}
+echo "File-Dir  : "${FDIR}
+echo "File-Name : "${0}
 
 if [ "$#" -ne 4 ] ;then
   echo "Input illegal number of parameters " $#
@@ -22,7 +22,7 @@ TIME=$(date +"%Y-%h-%d--%T")
 TIME="${TIME//:/-}"
 
 JOB_SCRIPT="${FDIR}/tmps/job-${TIME}.sh"
-echo "JOB-SCRIPT: " ${JOB_SCRIPT}
+echo "JOB-SCRIPT: "${JOB_SCRIPT}
 
 cat ${FDIR}/job-script.sh > ${JOB_SCRIPT}
 echo ${CMD}              >> ${JOB_SCRIPT}
