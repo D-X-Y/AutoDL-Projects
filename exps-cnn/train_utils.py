@@ -54,7 +54,7 @@ def main_procedure(config, dataset, data_path, args, genotype, init_channels, la
   optimizer = torch.optim.SGD(model.parameters(), config.LR, momentum=config.momentum, weight_decay=config.decay)
   #optimizer = torch.optim.SGD(model.parameters(), config.LR, momentum=config.momentum, weight_decay=config.decay, nestero=True)
   if config.type == 'cosine':
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(config.epochs))
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(config.epochs), eta_min=float(config.LR_MIN))
   else:
     raise ValueError('Can not find the schedular type : {:}'.format(config.type))
 
