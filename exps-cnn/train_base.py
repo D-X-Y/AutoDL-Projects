@@ -36,6 +36,9 @@ parser.add_argument('--print_freq',    type=int, help='print frequency (default:
 parser.add_argument('--manualSeed',    type=int, help='manual seed')
 args = parser.parse_args()
 
+if 'CUDA_VISIBLE_DEVICES' not in os.environ: print('Can not find CUDA_VISIBLE_DEVICES in os.environ')
+else                                       : print('Find CUDA_VISIBLE_DEVICES={:}'.format(os.environ['CUDA_VISIBLE_DEVICES']))
+
 assert torch.cuda.is_available(), 'torch.cuda is not available'
 
 

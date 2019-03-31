@@ -22,19 +22,23 @@ TIME=$(date +"%Y-%h-%d--%T")
 TIME="${TIME//:/-}"
 
 JOB_SCRIPT="${FDIR}/tmps/job-${TIME}.sh"
+HDFS_DIR="/user/COMM_KM_Data/${USER}/logs/alljobs/${TIME}"
 echo "JOB-SCRIPT: "${JOB_SCRIPT}
 
 cat ${FDIR}/job-script.sh > ${JOB_SCRIPT}
 echo ${CMD}              >> ${JOB_SCRIPT}
 
-HGCP_CLIENT_BIN="${HOME}/.hgcp/software-install/HGCP_client/bin"
+${HDP} -mkdir ${HDFS_DIR} 
+echo "Create "${HDFS_DIR}" done!"
+sleep 1s
 
+HGCP_CLIENT_BIN="${HOME}/.hgcp/software-install/HGCP_client/bin"
 
 ${HGCP_CLIENT_BIN}/submit \
     --hdfs afs://xingtian.afs.baidu.com:9902 \
     --hdfs-user COMM_KM_Data \
     --hdfs-passwd COMM_km_2018 \
-    --hdfs-path /user/COMM_KM_Data/dongxuanyi/logs \
+    --hdfs-path ${HDFS_DIR} \
     --file-dir ./ \
     --job-name ${NAME} \
     --queue-name ${QUEUE} \
