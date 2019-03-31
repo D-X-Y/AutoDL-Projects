@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+
 def count_parameters_in_MB(model):
   if isinstance(model, nn.Module):
     return np.sum(np.prod(v.size()) for v in model.parameters())/1e6

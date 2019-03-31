@@ -6,9 +6,11 @@ sh /home/HGCP_Program/software-install/afs_mount/bin/afs_mount.sh \
     `pwd`/hadoop-data \
     afs://xingtian.afs.baidu.com:9902/user/COMM_KM_Data/dongxuanyi/datasets
 
-tar xvf ./hadoop-data/cifar.python.tar -C ./data/data/
+export TORCH_HOME="./data/data/"
+tar xvf ./hadoop-data/cifar.python.tar -C ${TORCH_HOME}
+#tar xvf ./hadoop-data/ILSVRC2012.tar   -C ${TORCH_HOME}
 
-cifar_dir="./data/data/cifar.python"
+cifar_dir="${TORCH_HOME}/cifar.python"
 if [ -d ${cifar_dir} ]; then
   echo "Find cifar-dir: "${cifar_dir}
 else
@@ -16,7 +18,6 @@ else
   exit 1
 fi
 echo "CHECK-DATA-DIR DONE"
-export TORCH_HOME="./data/data/"
 
 
 # config python

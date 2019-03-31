@@ -102,3 +102,4 @@ main_main.py
 # Device
 scripts-nas/.nfs00*
 */.nfs00*
+*.DS_Store

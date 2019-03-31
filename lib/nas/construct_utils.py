@@ -128,7 +128,7 @@ class Transition(nn.Module):
 
     self.ops2 = nn.ModuleList(
                   [nn.Sequential(
-                      nn.MaxPool2d(3, stride=1, padding=1),
+                      nn.MaxPool2d(3, stride=2, padding=1),
                       nn.BatchNorm2d(C, affine=True)),
                    nn.Sequential(
                       nn.MaxPool2d(3, stride=2, padding=1),
@@ -144,7 +144,8 @@ class Transition(nn.Module):
     if self.training and drop_prob > 0.:
       X0, X1 = drop_path(X0, drop_prob), drop_path(X1, drop_prob)
 
-    X2 = self.ops2[0] (X0+X1)
+    #X2 = self.ops2[0] (X0+X1)
+    X2 = self.ops2[0] (s0)
     X3 = self.ops2[1] (s1)
     if self.training and drop_prob > 0.:
       X2, X3 = drop_path(X2, drop_prob), drop_path(X3, drop_prob)

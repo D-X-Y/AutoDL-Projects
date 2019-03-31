@@ -3,7 +3,7 @@ from copy import deepcopy
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-
+from shutil import copyfile
 
 from utils import print_log, obtain_accuracy, AverageMeter
 from utils import time_string, convert_secs2time
@@ -37,7 +37,7 @@ class CrossEntropyLabelSmooth(nn.Module):
     return loss
 
 
-def main_procedure_imagenet(config, data_path, args, genotype, init_channels, layers, log):
+def main_procedure_imagenet(config, data_path, args, genotype, init_channels, layers, pure_evaluate, log):
   
   # training data and testing data
   train_data, valid_data, class_num = get_datasets('imagenet-1k', data_path, -1)
@@ -47,8 +47,6 @@ def main_procedure_imagenet(config, data_path, args, genotype, init_channels, la
 
   valid_queue = torch.utils.data.DataLoader(
     valid_data, batch_size=config.batch_size, shuffle=False, pin_memory=True, num_workers=args.workers)
-
-  class_num   = 1000
 
   print_log('-------------------------------------- main-procedure', log)
   print_log('config        : {:}'.format(config), log)
@@ -84,9 +82,16 @@ def main_procedure_imagenet(config, data_path, args, genotype, init_channels, la
 
 
   checkpoint_path = os.path.join(args.save_path, 'checkpoint-imagenet-model.pth')
-  if os.path.isfile(checkpoint_path):
-    checkpoint = torch.load( checkpoint_path )
+  checkpoint_best = os.path.join(args.save_path, 'checkpoint-imagenet-best.pth')
 
+  if pure_evaluate:
+    print_log('-'*20 + 'Pure Evaluation' + '-'*20, log)
+    basemodel.load_state_dict( pure_evaluate )
+    with torch.no_grad():
+      valid_acc1, valid_acc5, valid_los = _train(valid_queue, model, criterion,           None, 'test' , -1, config, args.print_freq, log)
+    return (valid_acc1, valid_acc5)
+  elif os.path.isfile(checkpoint_path):
+    checkpoint  = torch.load( checkpoint_path )
     start_epoch = checkpoint['epoch']
     basemodel.load_state_dict(checkpoint['state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer'])
@@ -122,12 +127,14 @@ def main_procedure_imagenet(config, data_path, args, genotype, init_channels, la
                 'accuracies': accuracies},
                 checkpoint_path)
     best_acc = obtain_best( accuracies )
+    if accuracies[epoch] == best_acc: copyfile(checkpoint_path, checkpoint_best)
     print_log('----> Best Accuracy : Acc@1={:.2f}, Acc@5={:.2f}, Error@1={:.2f}, Error@5={:.2f}'.format(best_acc[0], best_acc[1], 100-best_acc[0], 100-best_acc[1]), log)
     print_log('----> Save into {:}'.format(checkpoint_path), log)
 
     # measure elapsed time
     epoch_time.update(time.time() - start_time)
     start_time = time.time()
+  return obtain_best( accuracies )
 
 
 def _train(xloader, model, criterion, optimizer, mode, epoch, config, print_freq, log):
