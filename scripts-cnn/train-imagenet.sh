@@ -25,7 +25,10 @@ if [ ! -f ${PY_C} ]; then
 else
   echo "Cluster Run with Python: "${PY_C}
   echo "Unzip ILSVRC2012"
-  tar xf ./hadoop-data/ILSVRC2012.tar   -C ${TORCH_HOME}
+  tar --version
+  #tar xf ./hadoop-data/ILSVRC2012.tar   -C ${TORCH_HOME}
+  ${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-TAR ./data/data/ILSVRC2012 5 | bash
+  echo "Unzip ILSVRC2012 done"
 fi
 
 ${PY_C} --version
