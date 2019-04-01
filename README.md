@@ -41,6 +41,9 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-rnn/train-WT2.sh DARTS_V2
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-rnn/train-WT2.sh GDAS
 ```
 
+## Training Logs
+Some training logs can be found in `./data/logs/`, and some pre-trained models can be found in [Google Driver](https://drive.google.com/open?id=1Ofhc49xC1PLIX4O708gJZ1ugzz4td_RJ).
+
 ## Citation
 ```
 @inproceedings{dong2019search,
