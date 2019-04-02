@@ -1,4 +1,5 @@
-# python ./data/decompress.py $TORCH_HOME/ILSVRC2012-TAR/ ./data/data/ILSVRC2012
+# python ./data/decompress.py $TORCH_HOME/ILSVRC2012-TAR/ ./data/data/ILSVRC2012 tar
+# python ./data/decompress.py $TORCH_HOME/ILSVRC2012-ZIP/ ./data/data/ILSVRC2012 zip
 import os, gc, sys
 from pathlib import Path
 import multiprocessing
@@ -15,14 +16,17 @@ def execute(cmds, idx, num):
 def command(prefix, cmd):
   #print ('{:}{:}'.format(prefix, cmd))
   #if execute: os.system(cmd)
-  return cmd
+  xcmd = '(echo {:}; {:}; sleep 0.1s)'.format(prefix, cmd)
+  return xcmd
 
 
-def main(source, destination, num_process):
+def main(source, destination, xtype):
   assert source.exists(), '{:} does not exist'.format(source)
   assert (source/'train'  ).exists(), '{:}/train does not exist'.format(source)
-  assert (source/'val.tar').exists(), '{:}/val   does not exist'.format(source)
-  assert num_process > 0, 'invalid num_process : {:}'.format(num_process)
+  if xtype == 'tar'  : assert (source/'val.tar').exists(), '{:}/val   does not exist'.format(source)
+  elif xtype == 'zip': assert (source/'val.zip').exists(), '{:}/val   does not exist'.format(source)
+  else               : raise ValueError('invalid unzip type : {:}'.format(xtype))
+  #assert num_process > 0, 'invalid num_process : {:}'.format(num_process)
   source      = source.resolve()
   destination = destination.resolve()
   destination.mkdir(parents=True, exist_ok=True)
@@ -33,11 +37,15 @@ def main(source, destination, num_process):
   subdirs = list( (source / 'train').glob('n*') )
   all_commands = []
   assert len(subdirs) == 1000, 'ILSVRC2012 should contain 1000 classes instead of {:}.'.format( len(subdirs) )
-  cmd = command('', 'tar -xf {:} -C {:}'.format(source/'val.tar', destination))
+  if xtype == 'tar'  : cmd = command('', 'tar -xf {:} -C {:}'.format(source/'val.tar', destination))
+  elif xtype == 'zip': cmd = command('', 'unzip -qd {:} {:}'.format(destination, source/'val.zip'))
+  else               : raise ValueError('invalid unzip type : {:}'.format(xtype))
   all_commands.append( cmd )
   for idx, subdir in enumerate(subdirs):
     name = subdir.name
-    cmd  = command('{:03d}/{:03d}-th: '.format(idx, len(subdirs)), 'tar -xf {:} -C {:}'.format(source/'train'/'{:}'.format(name), destination / 'train'))
+    if xtype == 'tar'  : cmd = command('{:03d}/{:03d}-th: '.format(idx, len(subdirs)), 'tar -xf {:} -C {:}'.format(source/'train'/'{:}'.format(name), destination / 'train'))
+    elif xtype == 'zip': cmd = command('{:03d}/{:03d}-th: '.format(idx, len(subdirs)), 'unzip -qd {:} {:}'.format(destination / 'train', source/'train'/'{:}'.format(name)))
+    else               : raise ValueError('invalid unzip type : {:}'.format(xtype))
     all_commands.append( cmd )
   #print ('Collect all commands done : {:} lines'.format( len(all_commands) ))
 
@@ -61,5 +69,5 @@ def main(source, destination, num_process):
 if __name__ == '__main__':
   assert len(sys.argv) == 4, 'invalid argv : {:}'.format(sys.argv)
   source, destination = Path(sys.argv[1]), Path(sys.argv[2])
-  num_process = int(sys.argv[3])
-  main(source, destination, num_process)
+  #num_process = int(sys.argv[3])
+  main(source, destination, sys.argv[3])

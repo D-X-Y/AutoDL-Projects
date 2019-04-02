@@ -22,7 +22,7 @@ TIME=$(date +"%Y-%h-%d--%T")
 TIME="${TIME//:/-}"
 
 JOB_SCRIPT="${FDIR}/tmps/job-${TIME}.sh"
-HDFS_DIR="/user/COMM_KM_Data/${USER}/logs/alljobs/${TIME}"
+HDFS_DIR="/user/COMM_KM_Data/${USER}/logs/alljobs/${NAME}-${TIME}"
 echo "JOB-SCRIPT: "${JOB_SCRIPT}
 
 cat ${FDIR}/job-script.sh > ${JOB_SCRIPT}

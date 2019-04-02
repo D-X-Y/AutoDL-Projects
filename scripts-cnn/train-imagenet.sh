@@ -27,7 +27,9 @@ else
   echo "Unzip ILSVRC2012"
   tar --version
   #tar xf ./hadoop-data/ILSVRC2012.tar   -C ${TORCH_HOME}
-  ${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-TAR ./data/data/ILSVRC2012 5 | bash
+  #${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-TAR ./data/data/ILSVRC2012 tar > ./data/data/get_imagenet.sh
+  ${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-ZIP ./data/data/ILSVRC2012 zip > ./data/data/get_imagenet.sh
+  bash ./data/data/get_imagenet.sh
   echo "Unzip ILSVRC2012 done"
 fi
 
