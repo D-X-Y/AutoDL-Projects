@@ -19,14 +19,16 @@ else
 fi
 echo "CHECK-DATA-DIR DONE"
 
+PID=$$
 
 # config python
 PYTHON_ENV=py36_pytorch1.0_env0.1.3.tar.gz
 wget -e "http_proxy=cp01-sys-hic-gpu-02.cp01:8888" http://cp01-sys-hic-gpu-02.cp01/HGCP_DEMO/$PYTHON_ENV > screen.log 2>&1
 tar xzf $PYTHON_ENV
 
-echo "JOB-PWD   : " `pwd`
-echo "JOB-files :  " `ls`
+echo "JOB-PID   : "${PID}
+echo "JOB-PWD   : "$(pwd)
+echo "JOB-files : "$(ls)
 echo "JOB-CUDA_VISIBLE_DEVICES: " ${CUDA_VISIBLE_DEVICES}
 
 ./env/bin/python --version

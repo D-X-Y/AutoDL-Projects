@@ -16,7 +16,7 @@ def execute(cmds, idx, num):
 def command(prefix, cmd):
   #print ('{:}{:}'.format(prefix, cmd))
   #if execute: os.system(cmd)
-  xcmd = '(echo {:}; {:}; sleep 0.1s)'.format(prefix, cmd)
+  xcmd = '(echo {:} $(date +\"%Y-%h-%d--%T\") \"PID:\"$$; {:}; sleep 0.1s)'.format(prefix, cmd)
   return xcmd
 
 

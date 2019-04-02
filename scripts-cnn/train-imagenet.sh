@@ -18,6 +18,7 @@ layers=$3
 SAVED=./output/NAS-CNN/${arch}-${dataset}-C${channels}-L${layers}-E250
 
 PY_C="./env/bin/python"
+#PY_C="$CONDA_PYTHON_EXE"
 
 if [ ! -f ${PY_C} ]; then
   echo "Local Run with Python: "`which python`
@@ -27,11 +28,22 @@ else
   echo "Unzip ILSVRC2012"
   tar --version
   #tar xf ./hadoop-data/ILSVRC2012.tar   -C ${TORCH_HOME}
-  #${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-TAR ./data/data/ILSVRC2012 tar > ./data/data/get_imagenet.sh
-  ${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-ZIP ./data/data/ILSVRC2012 zip > ./data/data/get_imagenet.sh
-  bash ./data/data/get_imagenet.sh
+  commands="./data/data/get_imagenet.sh"
+  ${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-TAR ./data/data/ILSVRC2012 tar > ${commands}
+  #${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-ZIP ./data/data/ILSVRC2012 zip > ./data/data/get_imagenet.sh
+  #bash ./data/data/get_imagenet.sh
+  count=0
+  while read -r line; do
+    temp_file="./data/data/TEMP-${count}.sh"
+    echo "${line}" > ${temp_file}
+    bash ${temp_file}
+    count=$((count+1))
+  done < "${commands}"
   echo "Unzip ILSVRC2012 done"
 fi
+
+exit 1
+
 
 ${PY_C} --version
 
