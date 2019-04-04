@@ -81,8 +81,8 @@ def main_procedure_imagenet(config, data_path, args, genotype, init_channels, la
     raise ValueError('Can not find the schedular type : {:}'.format(config.type))
 
 
-  checkpoint_path = os.path.join(args.save_path, 'checkpoint-imagenet-model.pth')
-  checkpoint_best = os.path.join(args.save_path, 'checkpoint-imagenet-best.pth')
+  checkpoint_path = os.path.join(args.save_path, 'seed-{:}-checkpoint-imagenet-model.pth'.format(args.manualSeed))
+  checkpoint_best = os.path.join(args.save_path, 'seed-{:}-checkpoint-imagenet-best.pth'.format(args.manualSeed))
 
   if pure_evaluate:
     print_log('-'*20 + 'Pure Evaluation' + '-'*20, log)

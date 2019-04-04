@@ -1,15 +1,16 @@
 #!/bin/bash
 #
 echo "CHECK-DATA-DIR START"
-#sh /home/HGCP_Program/software-install/afs_mount/bin/afs_mount.sh \
-#    COMM_KM_Data COMM_km_2018 \
-#    `pwd`/hadoop-data \
-#    afs://xingtian.afs.baidu.com:9902/user/COMM_KM_Data/dongxuanyi/datasets
+sh /home/HGCP_Program/software-install/afs_mount/bin/afs_mount.sh \
+    COMM_KM_Data COMM_km_2018 \
+    `pwd`/hadoop-data \
+    afs://xingtian.afs.baidu.com:9902/user/COMM_KM_Data/dongxuanyi/datasets
 
 export TORCH_HOME="./data/data/"
-wget -q http://10.127.2.44:8000/cifar.python.tar --directory-prefix=${TORCH_HOME}
-tar xvf ${TORCH_HOME}/cifar.python.tar -C ${TORCH_HOME}
-rm ${TORCH_HOME}/cifar.python.tar
+#wget -q http://10.127.2.44:8000/cifar.python.tar --directory-prefix=${TORCH_HOME}
+#tar -xvf ${TORCH_HOME}/cifar.python.tar -C ${TORCH_HOME}
+tar -xf ./hadoop-data/cifar.python.tar -C ${TORCH_HOME}
+#rm ${TORCH_HOME}/cifar.python.tar
 #tar xvf ./hadoop-data/ILSVRC2012.tar   -C ${TORCH_HOME}
 
 cifar_dir="${TORCH_HOME}/cifar.python"

@@ -59,8 +59,8 @@ def main_procedure(config, dataset, data_path, args, genotype, init_channels, la
     raise ValueError('Can not find the schedular type : {:}'.format(config.type))
 
 
-  checkpoint_path = os.path.join(args.save_path, 'checkpoint-{:}-model.pth'.format(dataset))
-  checkpoint_best = os.path.join(args.save_path, 'checkpoint-{:}-best.pth'.format(dataset))
+  checkpoint_path = os.path.join(args.save_path, 'seed-{:}-checkpoint-{:}-model.pth'.format(args.manualSeed, dataset))
+  checkpoint_best = os.path.join(args.save_path, 'seed-{:}-checkpoint-{:}-best.pth'.format(args.manualSeed, dataset))
   if pure_evaluate:
     print_log('-'*20 + 'Pure Evaluation' + '-'*20, log)
     basemodel.load_state_dict( pure_evaluate )

@@ -42,7 +42,7 @@ else                                       : print('Find CUDA_VISIBLE_DEVICES={:
 assert torch.cuda.is_available(), 'torch.cuda is not available'
 
 
-if args.manualSeed is None:
+if args.manualSeed is None or args.manualSeed < 0:
   args.manualSeed = random.randint(1, 10000)
 random.seed(args.manualSeed)
 cudnn.benchmark = True
@@ -54,10 +54,10 @@ torch.cuda.manual_seed_all(args.manualSeed)
 def main():
 
   # Init logger
-  args.save_path = os.path.join(args.save_path, 'seed-{:}'.format(args.manualSeed))
+  #args.save_path = os.path.join(args.save_path, 'seed-{:}'.format(args.manualSeed))
   if not os.path.isdir(args.save_path):
     os.makedirs(args.save_path)
-  log = open(os.path.join(args.save_path, 'log-seed-{:}.txt'.format(args.manualSeed)), 'w')
+  log = open(os.path.join(args.save_path, 'seed-{:}-log.txt'.format(args.manualSeed)), 'w')
   print_log('Save Path      : {:}'.format(args.save_path), log)
   state = {k: v for k, v in args._get_kwargs()}
   print_log(state, log)
