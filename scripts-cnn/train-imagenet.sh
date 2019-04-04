@@ -29,21 +29,34 @@ else
   tar --version
   #tar xf ./hadoop-data/ILSVRC2012.tar   -C ${TORCH_HOME}
   commands="./data/data/get_imagenet.sh"
-  ${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-TAR ./data/data/ILSVRC2012 tar > ${commands}
+  #${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-TAR ./data/data/ILSVRC2012 tar > ${commands}
   #${PY_C} ./data/decompress.py ./hadoop-data/ILSVRC2012-ZIP ./data/data/ILSVRC2012 zip > ./data/data/get_imagenet.sh
   #bash ./data/data/get_imagenet.sh
+  #count=0
+  #while read -r line; do
+  #  temp_file="./data/data/TEMP-${count}.sh"
+  #  echo "${line}" > ${temp_file}
+  #  bash ${temp_file}
+  #  count=$((count+1))
+    #${PY_C} ./data/ps_mem.py -p $$
+  #  free -g
+  #done < "${commands}"
+  #wget http://10.127.2.44:8000/ILSVRC2012.tar --directory-prefix=${TORCH_HOME}
+  ${PY_C} ./data/decompress.py ./data/classes.txt ${TORCH_HOME}/ILSVRC2012 wget > ${commands}
   count=0
   while read -r line; do
     temp_file="./data/data/TEMP-${count}.sh"
     echo "${line}" > ${temp_file}
     bash ${temp_file}
     count=$((count+1))
+   #${PY_C} ./data/ps_mem.py -p $$
+  #  free -g
   done < "${commands}"
+  #echo "Copy ILSVRC2012 done"
+  #tar -xvf ${TORCH_HOME}/ILSVRC2012.tar -C ${TORCH_HOME}
+  #rm ${TORCH_HOME}/ILSVRC2012.tar
   echo "Unzip ILSVRC2012 done"
 fi
-
-exit 1
-
 
 ${PY_C} --version
 

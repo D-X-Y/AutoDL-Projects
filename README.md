@@ -1,4 +1,4 @@
-## Searching for A Robust Neural Architecture in Four GPU Hours
+## [Searching for A Robust Neural Architecture in Four GPU Hours](http://xuanyidong.com/publication/gradient-based-diff-sampler/)
 
 We propose A Gradient-based neural architecture search approach using Differentiable Architecture Sampler (GDAS).
 
