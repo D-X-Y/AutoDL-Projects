@@ -108,10 +108,10 @@ def main_procedure_imagenet(config, data_path, args, genotype, init_channels, la
   for epoch in range(start_epoch, config.epochs):
     scheduler.step()
 
-    need_time = convert_secs2time(epoch_time.val * (config.epochs-epoch), True)
-    print_log("\n==>>{:s} [Epoch={:03d}/{:03d}] {:s} LR={:6.4f} ~ {:6.4f}, Batch={:d}".format(time_string(), epoch, config.epochs, need_time, min(scheduler.get_lr()), max(scheduler.get_lr()), config.batch_size), log)
-
     basemodel.update_drop_path(config.drop_path_prob * epoch / config.epochs)
+
+    need_time = convert_secs2time(epoch_time.val * (config.epochs-epoch), True)
+    print_log("\n==>>{:s} [Epoch={:03d}/{:03d}] {:s} LR={:6.4f} ~ {:6.4f}, Batch={:d}, Drop-Path-Prob={:}".format(time_string(), epoch, config.epochs, need_time, min(scheduler.get_lr()), max(scheduler.get_lr()), config.batch_size, basemodel.get_drop_path()), log)
 
     train_acc1, train_acc5, train_los = _train(train_queue, model, criterion_smooth, optimizer, 'train', epoch, config, args.print_freq, log)
 

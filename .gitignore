@@ -103,3 +103,7 @@ main_main.py
 scripts-nas/.nfs00*
 */.nfs00*
 *.DS_Store
+
+# logs and snapshots
+output
+logs

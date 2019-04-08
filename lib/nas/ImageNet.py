@@ -80,6 +80,9 @@ class NetworkImageNet(nn.Module):
   def update_drop_path(self, drop_path_prob):
     self.drop_path_prob = drop_path_prob
 
+  def get_drop_path(self):
+    return self.drop_path_prob
+
   def auxiliary_param(self):
     if self.auxiliary_head is None: return []
     else: return list( self.auxiliary_head.parameters() )
