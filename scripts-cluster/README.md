@@ -10,4 +10,5 @@ bash scripts-cluster/submit.sh yq01-v100-box-idl-2-8 PTB-GDAS 1 "bash ./scripts-
 ```
 bash scripts-cluster/submit.sh yq01-v100-box-idl-2-8 CIFAR10-CUT-GDAS-F1 1 "bash ./scripts-cnn/train-cifar.sh GDAS_F1 cifar10  cut"
 bash scripts-cluster/submit.sh yq01-v100-box-idl-2-8 IMAGENET-GDAS-F1    1 "bash ./scripts-cnn/train-imagenet.sh GDAS_F1 52 14"
+bash scripts-cluster/submit.sh yq01-v100-box-idl-2-8 IMAGENET-GDAS-V1    1 "bash ./scripts-cnn/train-imagenet.sh GDAS_V1 50 14"
 ```
