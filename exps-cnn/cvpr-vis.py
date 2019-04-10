@@ -1,3 +1,6 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 # python ./exps-nas/cvpr-vis.py --save_dir ./snapshots/NAS-VIS/
 import os, sys, time, glob, random, argparse
 import numpy as np

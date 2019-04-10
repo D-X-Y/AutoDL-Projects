@@ -1,3 +1,6 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 from .utils import AverageMeter, RecorderMeter, convert_secs2time
 from .utils import time_file_str, time_string
 from .utils import test_imagenet_data

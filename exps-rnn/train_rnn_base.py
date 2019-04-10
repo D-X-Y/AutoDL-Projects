@@ -1,3 +1,6 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 import os, gc, sys, math, time, glob, random, argparse
 import numpy as np
 from copy import deepcopy

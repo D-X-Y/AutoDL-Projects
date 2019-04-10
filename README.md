@@ -46,11 +46,12 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-rnn/train-WT2.sh GDAS
 ```
 
 ### Training Logs
-Some training logs can be found in `./data/logs/`, and some pre-trained models can be found in [Google Driver](https://drive.google.com/open?id=1Ofhc49xC1PLIX4O708gJZ1ugzz4td_RJ).
+You can find some training logs in [`./data/logs/`](https://github.com/D-X-Y/GDAS/tree/master/data/logs).  
+You can also find some pre-trained models in [Google Driver](https://drive.google.com/open?id=1Ofhc49xC1PLIX4O708gJZ1ugzz4td_RJ).
 
 ### Experimental Results
 <img src="data/imagenet-results.png" width="700">
-Figure 2. Top-1 and top-5 errors on ImageNet.
+Figure-2. Top-1 and top-5 errors on ImageNet.
 
 ### Citation
 If you find that this project (GDAS) helps your research, please cite the paper:

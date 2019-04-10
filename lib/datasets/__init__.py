@@ -1,3 +1,6 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 from .MetaBatchSampler import MetaBatchSampler
 from .TieredImageNet import TieredImageNet
 from .LanguageDataset import Corpus

@@ -1,3 +1,7 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
+# For evaluating the learned model
 import os, sys, time, glob, random, argparse
 import numpy as np
 from copy import deepcopy
