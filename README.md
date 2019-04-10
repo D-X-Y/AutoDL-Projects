@@ -24,8 +24,8 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-cnn/train-cifar.sh GDAS_V1 cifar100 cut
 
 Train the searched CNN on ImageNet
 ```
-CUDA_VISIBLE_DEVICES=0 bash ./scripts-cnn/train-imagenet.sh GDAS_F1 52 14 B128 -1
-CUDA_VISIBLE_DEVICES=0 bash ./scripts-cnn/train-imagenet.sh GDAS_V1 50 14 B128 -1
+CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts-cnn/train-imagenet.sh GDAS_F1 52 14 B128 -1
+CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts-cnn/train-imagenet.sh GDAS_V1 50 14 B256 -1
 ```
 
 Evaluate a trained CNN model
