@@ -32,6 +32,7 @@ Evaluate a trained CNN model
 ```
 CUDA_VISIBLE_DEVICES=0 python ./exps-cnn/evaluate.py --data_path  $TORCH_HOME/cifar.python --checkpoint ${checkpoint-path}
 CUDA_VISIBLE_DEVICES=0 python ./exps-cnn/evaluate.py --data_path  $TORCH_HOME/ILSVRC2012 --checkpoint ${checkpoint-path}
+CUDA_VISIBLE_DEVICES=0 python ./exps-cnn/evaluate.py --data_path  $TORCH_HOME/ILSVRC2012 --checkpoint GDAS-V1-C50-N14-ImageNet.pth
 ```
 
 Train the searched RNN
@@ -48,10 +49,11 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-rnn/train-WT2.sh GDAS
 Some training logs can be found in `./data/logs/`, and some pre-trained models can be found in [Google Driver](https://drive.google.com/open?id=1Ofhc49xC1PLIX4O708gJZ1ugzz4td_RJ).
 
 ### Experimental Results
-<img src="data/imagenet-results.png" width="600">
+<img src="data/imagenet-results.png" width="700">
 Figure 2. Top-1 and top-5 errors on ImageNet.
 
 ### Citation
+If you find that this project (GDAS) helps your research, please cite the paper:
 ```
 @inproceedings{dong2019search,
   title={Searching for A Robust Neural Architecture in Four GPU Hours},
