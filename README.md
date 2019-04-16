@@ -1,6 +1,6 @@
 ## [Searching for A Robust Neural Architecture in Four GPU Hours](http://xuanyidong.com/publication/gradient-based-diff-sampler/)
 
-We propose A Gradient-based neural architecture search approach using Differentiable Architecture Sampler (GDAS).
+We propose A Gradient-based neural architecture search approach using Differentiable Architecture Sampler (GDAS). Please find details in [our paper](https://github.com/D-X-Y/GDAS/blob/master/data/GDAS.pdf).
 
 <img src="data/GDAS.png" width="520">
 Figure-1. We utilize a DAG to represent the search space of a neural cell. Different operations (colored arrows) transform one node (square) to its intermediate features (little circles). Meanwhile, each node is the sum of the intermediate features transformed from the previous nodes. As indicated by the solid connections, the neural cell in the proposed GDAS is a sampled sub-graph of this DAG. Specifically, among the intermediate features between every two nodes, GDAS samples one feature in a differentiable way.
