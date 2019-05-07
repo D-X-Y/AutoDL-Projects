@@ -208,12 +208,37 @@ GDAS_FG = Genotype(
   reduce_concat=range(2, 6)
 )
 
+PDARTS = Genotype(
+  normal=[
+    ('skip_connect', 0, 1.0),
+    ('dil_conv_3x3', 1, 1.0),
+    ('skip_connect', 0, 1.0),
+    ('sep_conv_3x3', 1, 1.0),
+    ('sep_conv_3x3', 1, 1.0),
+    ('sep_conv_3x3', 3, 1.0),
+    ('sep_conv_3x3', 0, 1.0),
+    ('dil_conv_5x5', 4, 1.0)],
+  normal_concat=range(2, 6),
+  reduce=[
+    ('avg_pool_3x3', 0, 1.0),
+    ('sep_conv_5x5', 1, 1.0),
+    ('sep_conv_3x3', 0, 1.0),
+    ('dil_conv_5x5', 2, 1.0),
+    ('max_pool_3x3', 0, 1.0),
+    ('dil_conv_3x3', 1, 1.0),
+    ('dil_conv_3x3', 1, 1.0),
+    ('dil_conv_5x5', 3, 1.0)],
+  reduce_concat=range(2, 6)
+)
+
+
 model_types = {'DARTS_V1': DARTS_V1,
                'DARTS_V2': DARTS_V2,
                'NASNet'  : NASNet,
                'PNASNet' : PNASNet, 
                'AmoebaNet': AmoebaNet,
                'ENASNet' : ENASNet,
+               'PDARTS'  : PDARTS,
                'GDAS_V1' : GDAS_V1,
                'GDAS_F1' : GDAS_F1,
                'GDAS_GF' : GDAS_GF,
