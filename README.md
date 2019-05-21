@@ -60,6 +60,7 @@ If you find that this project (GDAS) helps your research, please cite the paper:
   title={Searching for A Robust Neural Architecture in Four GPU Hours},
   author={Dong, Xuanyi and Yang, Yi},
   booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages={1761--1770},
   year={2019}
 }
 ```
