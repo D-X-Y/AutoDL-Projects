@@ -35,6 +35,10 @@ bash ./scripts/base-train.sh 0 cifar-10 ResNet110
 bash ./scripts/train-nas.sh  0 cifar-10 GDAS_V1
 bash ./scripts/train-nas.sh  0 cifar-10 GDAS_V2
 bash ./scripts/train-nas.sh  0 cifar-10  SETN
+bash ./scripts/train-nas.sh  0 cifar-10 NASNet
+bash ./scripts/train-nas.sh  0 cifar-10 ENASNet
+bash ./scripts/train-nas.sh  0 cifar-10 AmoebaNet
+bash ./scripts/train-nas.sh  0 cifar-10 PNASNet
 bash ./scripts/train-nas.sh  0 cifar-100 SETN
 ```
 The first argument is the GPU-ID to train your program, the second argument is the dataset name, and the last one is the model name.
@@ -80,7 +84,7 @@ If you find that this project helps your research, please consider citing these 
 @inproceedings{liu2018darts,
   title     = {Darts: Differentiable architecture search},
   author    = {Liu, Hanxiao and Simonyan, Karen and Yang, Yiming},
-  booktitle = {ICLR},
+  booktitle = {International Conference on Learning Representations (ICLR)},
   year      = {2018}
 }
 @inproceedings{pham2018efficient,
@@ -107,31 +111,8 @@ If you find that this project helps your research, please consider citing these 
 @inproceedings{real2019regularized,
   title     = {Regularized evolution for image classifier architecture search},
   author    = {Real, Esteban and Aggarwal, Alok and Huang, Yanping and Le, Quoc V},
-  booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence},
+  booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence (AAAI)},
   pages     = {4780--4789},
   year      = {2019}
 }
-```
-
-
-```
-conda create -n PPD python=3.6 anaconda
-pip3 install paddlepaddle-gpu==1.5.1.post97
-pip3 install tb-paddle
-```
-
-## Active paddlepaddle environment
-```
-conda activate PPD
-bash ./scripts/base-train.sh 0 cifar-10 ResNet110
-bash ./scripts/train-nas.sh 0 cifar-10 GDAS_V1
-bash ./scripts/train-nas.sh 0 cifar-10 GDAS_V2
-bash ./scripts/train-nas.sh 0 cifar-10  SETN
-bash ./scripts/train-nas.sh 0 cifar-100 SETN
-```
-
-use pytorch training
-```
-#CUDA_VISIBLE_DEVICES=0 bash ./scripts/com-paddle.sh cifar10 ResNet110 -1
-CUDA_VISIBLE_DEVICES=0 bash ./scripts/com-paddle.sh cifar10
 ```
