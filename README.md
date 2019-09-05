@@ -53,6 +53,10 @@ You can also find some pre-trained models in [Google Driver](https://drive.googl
 <img src="data/imagenet-results.png" width="700">
 Figure-2. Top-1 and top-5 errors on ImageNet.
 
+### Correction
+
+The Gumbel-softmax tempurature during searching should decrease from 10 to 0.1.
+
 ### Citation
 If you find that this project (GDAS) helps your research, please cite the paper:
 ```
