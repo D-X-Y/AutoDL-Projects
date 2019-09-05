@@ -1,7 +1,7 @@
 # Image Classification based on NAS-Searched Models
 
 This directory contains 10 image classification models.
-Nine of them are automatically searched models from different Neural Architecture Search (NAS) algorithms. The other is the residual network.
+Nine of them are automatically searched models using different Neural Architecture Search (NAS) algorithms, and the other is the residual network.
 We provide codes and scripts to train these models on both CIFAR-10 and CIFAR-100.
 We use the standard data augmentation, i.e., random crop, random flip, and normalization.
 
@@ -18,6 +18,7 @@ We use the standard data augmentation, i.e., random crop, random flip, and norma
 This project has the following requirements:
 - Python = 3.6
 - PadddlePaddle Fluid >= v0.15.0
+- numpy, tarfile, cPickle, PIL
 
 
 ### Data Preparation
@@ -29,7 +30,7 @@ After data preparation, there should be two files `${TORCH_HOME}/cifar.python/ci
 
 ### Training Models
 
-After setting up the environment and preparing the data, one can train the model. The main function entrance is `train_cifar.py`. We also provide some scripts for easy usage.
+After setting up the environment and preparing the data, you can train the model. The main function entrance is `train_cifar.py`. We also provide some scripts for easy usage.
 ```
 bash ./scripts/base-train.sh 0 cifar-10 ResNet110
 bash ./scripts/train-nas.sh  0 cifar-10 GDAS_V1
@@ -41,7 +42,7 @@ bash ./scripts/train-nas.sh  0 cifar-10 AmoebaNet
 bash ./scripts/train-nas.sh  0 cifar-10 PNASNet
 bash ./scripts/train-nas.sh  0 cifar-100 SETN
 ```
-The first argument is the GPU-ID to train your program, the second argument is the dataset name, and the last one is the model name.
+The first argument is the GPU-ID to train your program, the second argument is the dataset name (`cifar-10` or `cifar-100`), and the last one is the model name.
 Please use `./scripts/base-train.sh` for ResNet and use `./scripts/train-nas.sh` for NAS-searched models.
 
 
