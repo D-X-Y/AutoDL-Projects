@@ -1,10 +1,10 @@
 # Nueral Architecture Search
 
-This project contains the following neural architecture search algorithms, implemented in PyTorch.
+This project contains the following neural architecture search algorithms, implemented in [PyTorch](http://pytorch.org).
 
-- Network Pruning via Transformable Architecture Search
-- One-Shot Neural Architecture Search via Self-Evaluated Template Network
-- Searching for A Robust Neural Architecture in Four GPU Hours
+- Network Pruning via Transformable Architecture Search, NeurIPS 2019
+- One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
+- Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019
 
 
 ## Requirements and Preparation
@@ -55,7 +55,7 @@ Searching codes come soon!
 
 ## [Searching for A Robust Neural Architecture in Four GPU Hours](http://openaccess.thecvf.com/content_CVPR_2019/papers/Dong_Searching_for_a_Robust_Neural_Architecture_in_Four_GPU_Hours_CVPR_2019_paper.pdf)
 
-The old version is located in `others/GDAS`.
+The old version is located at [`others/GDAS`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS) and a paddlepaddle implementation is locate at [`others/paddlepaddle`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/paddlepaddle).
 
 Train the searched GDAS-searched CNN on CIFAR-10, CIFAR-100, and ImageNet.
 ```
