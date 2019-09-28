@@ -20,6 +20,8 @@ In this paper, we proposed a differentiable searching strategy for transformable
 
 <img src="https://d-x-y.github.com/resources/paper-icon/NIPS-2019-TAS.png" width="700">
 
+### Usage
+
 Use `bash ./scripts/prepare.sh` to prepare data splits for `CIFAR-10`, `CIFARR-100`, and `ILSVRC2012`.
 If you do not have `ILSVRC2012` data, pleasee comment L12 in `./scripts/prepare.sh`.
 
@@ -43,8 +45,11 @@ args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel n
 
 ## One-Shot Neural Architecture Search via Self-Evaluated Template Network
 
+Highlight: we equip one-shot NAS with an architecture sampler and train network weights using uniformly sampling.
+
 <img src="https://d-x-y.github.com/resources/paper-icon/ICCV-2019-SETN.png" width="450">
 
+### Usage
 Train the searched SETN-searched CNN on CIFAR-10, CIFAR-100, and ImageNet.
 ```
 CUDA_VISIBLE_DEVICES=0 bash ./scripts/nas-infer-train.sh cifar10  SETN 96 -1
@@ -57,10 +62,13 @@ Searching codes come soon!
 
 ## [Searching for A Robust Neural Architecture in Four GPU Hours](http://openaccess.thecvf.com/content_CVPR_2019/papers/Dong_Searching_for_a_Robust_Neural_Architecture_in_Four_GPU_Hours_CVPR_2019_paper.pdf)
 
+We proposed a gradient-based searching algorithm using differentiable architecture sampling (improving DARTS with Gumbel-softmax sampling).
+
 <img src="https://d-x-y.github.com/resources/paper-icon/CVPR-2019-GDAS.png" width="350">
 
 The old version is located at [`others/GDAS`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS) and a paddlepaddle implementation is locate at [`others/paddlepaddle`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/paddlepaddle).
 
+### Usage
 Train the searched GDAS-searched CNN on CIFAR-10, CIFAR-100, and ImageNet.
 ```
 CUDA_VISIBLE_DEVICES=0 bash ./scripts/nas-infer-train.sh cifar10  GDAS_V1 96 -1
