@@ -15,7 +15,10 @@ The CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
 Some methods use knowledge distillation (KD), which require pre-trained models. Please download these models from [Google Driver](https://drive.google.com/open?id=1ANmiYEGX-IQZTfH8w0aSpj-Wypg-0DR-) (or train by yourself) and save into `.latent-data`.
 
 
-## Network Pruning via Transformable Architecture Search
+## [Network Pruning via Transformable Architecture Search](https://arxiv.org/abs/1905.09717)
+
+
+<img src="https://d-x-y.github.com/resources/paper-icon/NIPS-2019-TAS.png" width="700">
 
 Use `bash ./scripts/prepare.sh` to prepare data splits for `CIFAR-10`, `CIFARR-100`, and `ILSVRC2012`.
 If you do not have `ILSVRC2012` data, pleasee comment L12 in `./scripts/prepare.sh`.
@@ -50,7 +53,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts/nas-infer-train.sh imagenet-1k SETN 
 Searching codes come soon!
 
 
-## Searching for A Robust Neural Architecture in Four GPU Hours
+## [Searching for A Robust Neural Architecture in Four GPU Hours](http://openaccess.thecvf.com/content_CVPR_2019/papers/Dong_Searching_for_a_Robust_Neural_Architecture_in_Four_GPU_Hours_CVPR_2019_paper.pdf)
 
 The old version is located in `others/GDAS`.
 
