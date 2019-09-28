@@ -17,7 +17,6 @@ Some methods use knowledge distillation (KD), which require pre-trained models. 
 
 ## [Network Pruning via Transformable Architecture Search](https://arxiv.org/abs/1905.09717)
 
-
 <img src="https://d-x-y.github.com/resources/paper-icon/NIPS-2019-TAS.png" width="700">
 
 Use `bash ./scripts/prepare.sh` to prepare data splits for `CIFAR-10`, `CIFARR-100`, and `ILSVRC2012`.
@@ -43,6 +42,7 @@ args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel n
 
 ## One-Shot Neural Architecture Search via Self-Evaluated Template Network
 
+<img src="https://d-x-y.github.com/resources/paper-icon/ICCV-2019-SETN.png" width="550">
 Train the searched SETN-searched CNN on CIFAR-10, CIFAR-100, and ImageNet.
 ```
 CUDA_VISIBLE_DEVICES=0 bash ./scripts/nas-infer-train.sh cifar10  SETN 96 -1
@@ -54,6 +54,8 @@ Searching codes come soon!
 
 
 ## [Searching for A Robust Neural Architecture in Four GPU Hours](http://openaccess.thecvf.com/content_CVPR_2019/papers/Dong_Searching_for_a_Robust_Neural_Architecture_in_Four_GPU_Hours_CVPR_2019_paper.pdf)
+
+<img src="https://d-x-y.github.com/resources/paper-icon/CVPR-2019-GDAS.png" width="450">
 
 The old version is located at [`others/GDAS`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS) and a paddlepaddle implementation is locate at [`others/paddlepaddle`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/paddlepaddle).
 
@@ -83,10 +85,10 @@ If you find that this project helps your research, please consider citing some o
   year      = {2019}
 }
 @inproceedings{dong2019search,
-  title={Searching for A Robust Neural Architecture in Four GPU Hours},
-  author={Dong, Xuanyi and Yang, Yi},
-  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
-  pages={1761--1770},
-  year={2019}
+  title     = {Searching for A Robust Neural Architecture in Four GPU Hours},
+  author    = {Dong, Xuanyi and Yang, Yi},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {1761--1770},
+  year      = {2019}
 }
 ```
