@@ -2,7 +2,7 @@
 
 We propose A Gradient-based neural architecture search approach using Differentiable Architecture Sampler (GDAS).
 
-<img src="https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS/data/GDAS.png" width="520">
+<img src="https://github.com/D-X-Y/NAS-Projects/blob/master/others/GDAS/data/GDAS.png" width="520">
 Figure-1. We utilize a DAG to represent the search space of a neural cell. Different operations (colored arrows) transform one node (square) to its intermediate features (little circles). Meanwhile, each node is the sum of the intermediate features transformed from the previous nodes. As indicated by the solid connections, the neural cell in the proposed GDAS is a sampled sub-graph of this DAG. Specifically, among the intermediate features between every two nodes, GDAS samples one feature in a differentiable way.
 
 ### Requirements
@@ -51,9 +51,10 @@ You can also find some pre-trained models in [Google Driver](https://drive.googl
 
 
 ### Experimental Results
-<img src="https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS/data/imagenet-results.png" width="700">
-Figure-2. Top-1 and top-5 errors on ImageNet.
 
+<img src="https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS/data/imagenet-results.png" width="700">
+
+Figure-2. Top-1 and top-5 errors on ImageNet.
 
 ### Correction
 
