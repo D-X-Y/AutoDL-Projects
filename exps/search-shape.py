@@ -10,6 +10,7 @@ from copy    import deepcopy
 from pathlib import Path
 
 lib_dir = (Path(__file__).parent / '..' / 'lib').resolve()
+print ('lib_dir : {:}'.format(lib_dir))
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, configure2str, obtain_search_single_args as obtain_args
 from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint

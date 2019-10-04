@@ -22,21 +22,13 @@ batch=$5
 rseed=$6
 
 
-PY_C="./env/bin/python"
-if [ ! -f ${PY_C} ]; then
-  echo "Local Run with Python: "`which python`
-  PY_C="python"
-  SAVE_ROOT="./output"
-else
-  echo "Cluster Run with Python: "${PY_C}
-  SAVE_ROOT="./hadoop-data/SearchCheckpoints"
-fi
+SAVE_ROOT="./output"
 
 save_dir=${SAVE_ROOT}/basic/${dataset}/${model}-${epoch}-${LR}-${batch}
 
-${PY_C} --version
+python --version
 
-${PY_C} ./exps/basic-main.py --dataset ${dataset} \
+python ./exps/basic-main.py --dataset ${dataset} \
 	--data_path $TORCH_HOME/cifar.python \
 	--model_config ./configs/archs/CIFAR-${model}.config \
 	--optim_config ./configs/opts/CIFAR-${epoch}-W5-${LR}-COS.config \

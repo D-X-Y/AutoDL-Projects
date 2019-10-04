@@ -1,6 +1,6 @@
 # Nueral Architecture Search
 
-This project contains the following neural architecture search algorithms, implemented in [PyTorch](http://pytorch.org).
+This project contains the following neural architecture search algorithms, implemented in [PyTorch](http://pytorch.org). More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesome-NAS).
 
 - Network Pruning via Transformable Architecture Search, NeurIPS 2019
 - One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
@@ -19,6 +19,7 @@ Some methods use knowledge distillation (KD), which require pre-trained models. 
 In this paper, we proposed a differentiable searching strategy for transformable architectures, i.e., searching for the depth and width of a deep neural network.
 
 <img src="https://d-x-y.github.com/resources/paper-icon/NIPS-2019-TAS.png" width="700">
+
 
 ### Usage
 
@@ -50,6 +51,7 @@ Highlight: we equip one-shot NAS with an architecture sampler and train network 
 <img src="https://d-x-y.github.com/resources/paper-icon/ICCV-2019-SETN.png" width="450">
 
 ### Usage
+
 Please use the following scripts to train the searched SETN-searched CNN on CIFAR-10, CIFAR-100, and ImageNet.
 ```
 CUDA_VISIBLE_DEVICES=0 bash ./scripts/nas-infer-train.sh cifar10  SETN 96 -1
@@ -81,6 +83,7 @@ Searching codes come soon!
 
 
 # Citation
+
 If you find that this project helps your research, please consider citing some of the following papers:
 ```
 @inproceedings{dong2019tas,
