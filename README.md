@@ -1,4 +1,4 @@
-# Nueral Architecture Search
+# Nueral Architecture Search (NAS)
 
 This project contains the following neural architecture search algorithms, implemented in [PyTorch](http://pytorch.org). More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesome-NAS).
 
@@ -52,7 +52,7 @@ args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel n
 
 <img align="right" src="https://d-x-y.github.com/resources/paper-icon/ICCV-2019-SETN.png" width="450">
 
-Highlight: we equip one-shot NAS with an architecture sampler and train network weights using uniformly sampling.
+<strong>Highlight</strong>: we equip one-shot NAS with an architecture sampler and train network weights using uniformly sampling.
 
 
 ### Usage
@@ -72,9 +72,11 @@ Searching codes come soon!
 
 <img align="right" src="https://d-x-y.github.com/resources/paper-icon/CVPR-2019-GDAS.png" width="300">
 
-We proposed a gradient-based searching algorithm using differentiable architecture sampling (improving DARTS with Gumbel-softmax sampling).
+We proposed a Gradient-based searching algorithm using Differentiable Architecture Sampling (GDAS). GDAS is baseed on DARTS and improves it with Gumbel-softmax sampling.
+Experiments on CIFAR-10, CIFAR-100, ImageNet, PTB, and WT2 are reported.
 
 The old version is located at [`others/GDAS`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS) and a paddlepaddle implementation is locate at [`others/paddlepaddle`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/paddlepaddle).
+
 
 ### Usage
 
