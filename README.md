@@ -17,8 +17,12 @@ Some methods use knowledge distillation (KD), which require pre-trained models. 
 
 ## [Network Pruning via Transformable Architecture Search](https://arxiv.org/abs/1905.09717)
 In this paper, we proposed a differentiable searching strategy for transformable architectures, i.e., searching for the depth and width of a deep neural network.
+You could see the highlight of our Transformable Architecture Search (TAS) at our [project page](https://xuanyidong.com/assets/projects/NeurIPS-2019-TAS.html).
 
-<img src="https://d-x-y.github.com/resources/paper-icon/NIPS-2019-TAS.png" width="700">
+<p float="left">
+<img src="https://d-x-y.github.com/resources/paper-icon/NIPS-2019-TAS.png" width="680px"/>
+<img src="https://d-x-y.github.com/resources/videos/NeurIPS-2019-TAS/TAS-arch.gif?raw=true" width="180px"/>
+</p>
 
 
 ### Usage
@@ -46,9 +50,10 @@ args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel n
 
 ## One-Shot Neural Architecture Search via Self-Evaluated Template Network
 
+<img align="right" src="https://d-x-y.github.com/resources/paper-icon/ICCV-2019-SETN.png" width="450">
+
 Highlight: we equip one-shot NAS with an architecture sampler and train network weights using uniformly sampling.
 
-<img src="https://d-x-y.github.com/resources/paper-icon/ICCV-2019-SETN.png" width="450">
 
 ### Usage
 
@@ -64,9 +69,10 @@ Searching codes come soon!
 
 ## [Searching for A Robust Neural Architecture in Four GPU Hours](http://openaccess.thecvf.com/content_CVPR_2019/papers/Dong_Searching_for_a_Robust_Neural_Architecture_in_Four_GPU_Hours_CVPR_2019_paper.pdf)
 
-We proposed a gradient-based searching algorithm using differentiable architecture sampling (improving DARTS with Gumbel-softmax sampling).
 
-<img src="https://d-x-y.github.com/resources/paper-icon/CVPR-2019-GDAS.png" width="300">
+<img align="right" src="https://d-x-y.github.com/resources/paper-icon/CVPR-2019-GDAS.png" width="300">
+
+We proposed a gradient-based searching algorithm using differentiable architecture sampling (improving DARTS with Gumbel-softmax sampling).
 
 The old version is located at [`others/GDAS`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS) and a paddlepaddle implementation is locate at [`others/paddlepaddle`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/paddlepaddle).
 
