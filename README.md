@@ -87,7 +87,7 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts/nas-infer-train.sh cifar100 GDAS_V1 96 -1
 CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts/nas-infer-train.sh imagenet-1k GDAS_V1 256 -1
 ```
 
-Searching codes come soon!
+Searching codes come soon! A small example forward code segment for searching can be found in [this issue](https://github.com/D-X-Y/NAS-Projects/issues/12).
 
 
 # Citation
