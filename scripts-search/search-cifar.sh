@@ -24,23 +24,11 @@ gumbel_max=5
 expected_FLOP_ratio=$4
 rseed=$5
 
-PY_C="./env/bin/python"
-if [ ! -f ${PY_C} ]; then
-  echo "Local Run with Python: "`which python`
-  PY_C="python"
-  SAVE_ROOT="./output"
-else
-  echo "Cluster Run with Python: "${PY_C}
-  SAVE_ROOT="./hadoop-data/TAS-checkpoints"
-  mkdir -p $TORCH_HOME/TAS-checkpoints/
-  cp -r ./hadoop-data/TAS-checkpoints/basemodels $TORCH_HOME/TAS-checkpoints/
-fi
+save_dir=./output/search-shape/${dataset}-${model}-${optim}-Gumbel_${gumbel_min}_${gumbel_max}-${expected_FLOP_ratio}
 
-save_dir=${SAVE_ROOT}/search-shape/${dataset}-${model}-${optim}-Gumbel_${gumbel_min}_${gumbel_max}-${expected_FLOP_ratio}
+python --version
 
-${PY_C} --version
-
-${PY_C} ./exps/search-transformable.py --dataset ${dataset} \
+OMP_NUM_THREADS=4 python ./exps/search-transformable.py --dataset ${dataset} \
 	--data_path $TORCH_HOME/cifar.python \
 	--model_config ./configs/archs/CIFAR-${model}.config \
 	--split_path   ./.latent-data/splits/${dataset}-0.5.pth \
@@ -60,7 +48,7 @@ if [ "$rseed" = "-1" ]; then
 else
   # normal training
   xsave_dir=${save_dir}/seed-${rseed}-NMT
-  ${PY_C} ./exps/basic-main.py --dataset ${dataset} \
+  OMP_NUM_THREADS=4 python ./exps/basic-main.py --dataset ${dataset} \
 	--data_path $TORCH_HOME/cifar.python \
 	--model_config ${save_dir}/seed-${rseed}-last.config \
 	--optim_config ./configs/opts/CIFAR-E300-W5-L1-COS.config \
@@ -71,7 +59,7 @@ else
 	--eval_frequency 1 --print_freq 100 --print_freq_eval 200
   # KD training
   xsave_dir=${save_dir}/seed-${rseed}-KDT
-  ${PY_C} ./exps/KD-main.py --dataset ${dataset} \
+  OMP_NUM_THREADS=4 python ./exps/KD-main.py --dataset ${dataset} \
 	--data_path $TORCH_HOME/cifar.python \
 	--model_config  ${save_dir}/seed-${rseed}-last.config \
 	--optim_config  ./configs/opts/CIFAR-E300-W5-L1-COS.config \
