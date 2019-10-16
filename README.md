@@ -48,7 +48,7 @@ CUDA_VISIBLE_DEVICES=0,1 bash ./scripts-search/search-cifar.sh cifar10 ResNet56 
 args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel name, `CIFARX` indicates the searching hyper-parameters, `0.47/0.57` indicates the expected FLOP ratio, `-1` indicates the random seed.
 
 
-## One-Shot Neural Architecture Search via Self-Evaluated Template Network
+## [One-Shot Neural Architecture Search via Self-Evaluated Template Network](https://arxiv.org/abs/1910.05733)
 
 <img align="right" src="https://d-x-y.github.com/resources/paper-icon/ICCV-2019-SETN.png" width="450">
 
@@ -67,7 +67,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts/nas-infer-train.sh imagenet-1k SETN 
 Searching codes come soon!
 
 
-## [Searching for A Robust Neural Architecture in Four GPU Hours](http://openaccess.thecvf.com/content_CVPR_2019/papers/Dong_Searching_for_a_Robust_Neural_Architecture_in_Four_GPU_Hours_CVPR_2019_paper.pdf)
+## [Searching for A Robust Neural Architecture in Four GPU Hours](https://arxiv.org/abs/1910.04465)
 
 
 <img align="right" src="https://d-x-y.github.com/resources/paper-icon/CVPR-2019-GDAS.png" width="300">
