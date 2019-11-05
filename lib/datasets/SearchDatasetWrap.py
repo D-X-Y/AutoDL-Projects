@@ -4,15 +4,18 @@ import torch.utils.data as data
 
 class SearchDataset(data.Dataset):
 
-  def __init__(self, name, data, train_split, valid_split):
+  def __init__(self, name, data, train_split, valid_split, check=True):
     self.datasetname = name
     self.data        = data
     self.train_split = train_split.copy()
     self.valid_split = valid_split.copy()
+    if check:
+      intersection = set(train_split).intersection(set(valid_split))
+      assert len(intersection) == 0, 'the splitted train and validation sets should have no intersection'
     self.length      = len(self.train_split)
 
   def __repr__(self):
-    return ('{name}(name={datasetname}, train={tr_L}, valid={val_L})'.format(name=self.__class__.__name__, tr_L=len(self.train_split), val_L=len(self.valid_split)))
+    return ('{name}(name={datasetname}, train={tr_L}, valid={val_L})'.format(name=self.__class__.__name__, datasetname=self.datasetname, tr_L=len(self.train_split), val_L=len(self.valid_split)))
 
   def __len__(self):
     return self.length
