@@ -1,8 +1,8 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-###########################################################################
-# Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019 #
-###########################################################################
+########################################################
+# DARTS: Differentiable Architecture Search, ICLR 2019 #
+########################################################
 import torch
 import torch.nn as nn
 from copy import deepcopy
@@ -11,10 +11,10 @@ from .search_cells     import SearchCell
 from .genotypes        import Structure
 
 
-class TinyNetworkGDAS(nn.Module):
+class TinyNetworkDartsV1(nn.Module):
 
   def __init__(self, C, N, max_nodes, num_classes, search_space):
-    super(TinyNetworkGDAS, self).__init__()
+    super(TinyNetworkDartsV1, self).__init__()
     self._C        = C
     self._layerN   = N
     self.max_nodes = max_nodes
@@ -43,19 +43,12 @@ class TinyNetworkGDAS(nn.Module):
     self.global_pooling = nn.AdaptiveAvgPool2d(1)
     self.classifier = nn.Linear(C_prev, num_classes)
     self.arch_parameters = nn.Parameter( 1e-3*torch.randn(num_edge, len(search_space)) )
-    self.tau        = 10
 
   def get_weights(self):
     xlist = list( self.stem.parameters() ) + list( self.cells.parameters() )
     xlist+= list( self.lastact.parameters() ) + list( self.global_pooling.parameters() )
     xlist+= list( self.classifier.parameters() )
     return xlist
-
-  def set_tau(self, tau):
-    self.tau = tau
-
-  def get_tau(self):
-    return self.tau
 
   def get_alphas(self):
     return [self.arch_parameters]
@@ -83,10 +76,12 @@ class TinyNetworkGDAS(nn.Module):
     return Structure( genotypes )
 
   def forward(self, inputs):
+    alphas  = nn.functional.softmax(self.arch_parameters, dim=-1)
+
     feature = self.stem(inputs)
     for i, cell in enumerate(self.cells):
       if isinstance(cell, SearchCell):
-        feature = cell.forward_gdas(feature, self.arch_parameters, self.tau)
+        feature = cell(feature, alphas)
       else:
         feature = cell(feature)
 

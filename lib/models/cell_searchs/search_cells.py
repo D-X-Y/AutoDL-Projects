@@ -1,4 +1,5 @@
-import math, torch
+import math, random, torch
+import warnings
 import torch.nn as nn
 import torch.nn.functional as F
 from copy import deepcopy
@@ -43,17 +44,35 @@ class SearchCell(nn.Module):
     return nodes[-1]
 
   # GDAS
-  def forward_acc(self, inputs, weightss, indexess):
-    nodes = [inputs]
-    for i in range(1, self.max_nodes):
-      inter_nodes = []
-      for j in range(i):
-        node_str = '{:}<-{:}'.format(i, j)
-        weights  = weightss[ self.edge2index[node_str] ]
-        indexes  = indexess[ self.edge2index[node_str] ].item()
-        import pdb; pdb.set_trace() # to-do
-        #inter_nodes.append( self.edges[node_str][indexes](nodes[j]) * weights[indexes] )
-      nodes.append( sum(inter_nodes) )
+  def forward_gdas(self, inputs, alphas, _tau):
+    avoid_zero = 0
+    while True:
+      gumbels = -torch.empty_like(alphas).exponential_().log()
+      logits  = (alphas.log_softmax(dim=1) + gumbels) / _tau
+      probs   = nn.functional.softmax(logits, dim=1)
+      index   = probs.max(-1, keepdim=True)[1]
+      one_h   = torch.zeros_like(logits).scatter_(-1, index, 1.0)
+      hardwts = one_h - probs.detach() + probs
+      if (torch.isinf(gumbels).any()) or (torch.isinf(probs).any()) or (torch.isnan(probs).any()):
+        continue # avoid the numerical error
+      nodes   = [inputs]
+      for i in range(1, self.max_nodes):
+        inter_nodes = []
+        for j in range(i):
+          node_str = '{:}<-{:}'.format(i, j)
+          weights  = hardwts[ self.edge2index[node_str] ]
+          argmaxs  = index[ self.edge2index[node_str] ].item()
+          weigsum  = sum( weights[_ie] * edge(nodes[j]) if _ie == argmaxs else weights[_ie] for _ie, edge in enumerate(self.edges[node_str]) )
+          inter_nodes.append( weigsum )
+        nodes.append( sum(inter_nodes) )
+      avoid_zero += 1
+      if nodes[-1].sum().item() == 0:
+        if avoid_zero < 10: continue
+        else:
+          warnings.warn('get zero outputs with avoid_zero={:}'.format(avoid_zero))
+          break
+      else:
+        break
     return nodes[-1]
 
   # joint
@@ -101,7 +120,7 @@ class SearchCell(nn.Module):
       nodes.append( sum(inter_nodes) )
     return nodes[-1]
 
-  # select the argmax
+  # forward with a specific structure
   def forward_dynamic(self, inputs, structure):
     nodes = [inputs]
     for i in range(1, self.max_nodes):

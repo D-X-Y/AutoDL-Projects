@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-__all__ = ['OPS', 'ReLUConvBN', 'SearchSpaceNames']
+__all__ = ['OPS', 'ReLUConvBN', 'ResNetBasicblock', 'SearchSpaceNames']
 
 OPS = {
   'none'         : lambda C_in, C_out, stride: Zero(C_in, C_out, stride),
@@ -14,8 +14,60 @@ OPS = {
 }
 
 CONNECT_NAS_BENCHMARK  = ['none', 'skip_connect', 'nor_conv_3x3']
+AA_NAS_BENCHMARK       = ['none', 'skip_connect', 'nor_conv_1x1', 'nor_conv_3x3', 'avg_pool_3x3']
 
-SearchSpaceNames = {'connect-nas' : CONNECT_NAS_BENCHMARK}
+SearchSpaceNames = {'connect-nas' : CONNECT_NAS_BENCHMARK,
+                    'aa-nas'      : AA_NAS_BENCHMARK}
+
+
+class ReLUConvBN(nn.Module):
+
+  def __init__(self, C_in, C_out, kernel_size, stride, padding, dilation):
+    super(ReLUConvBN, self).__init__()
+    self.op = nn.Sequential(
+      nn.ReLU(inplace=False),
+      nn.Conv2d(C_in, C_out, kernel_size, stride=stride, padding=padding, dilation=dilation, bias=False),
+      nn.BatchNorm2d(C_out)
+    )
+
+  def forward(self, x):
+    return self.op(x)
+
+
+class ResNetBasicblock(nn.Module):
+
+  def __init__(self, inplanes, planes, stride):
+    super(ResNetBasicblock, self).__init__()
+    assert stride == 1 or stride == 2, 'invalid stride {:}'.format(stride)
+    self.conv_a = ReLUConvBN(inplanes, planes, 3, stride, 1, 1)
+    self.conv_b = ReLUConvBN(  planes, planes, 3,      1, 1, 1)
+    if stride == 2:
+      self.downsample = nn.Sequential(
+                           nn.AvgPool2d(kernel_size=2, stride=2, padding=0),
+                           nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, padding=0, bias=False))
+    elif inplanes != planes:
+      self.downsample = ReLUConvBN(inplanes, planes, 1, 1, 0, 1)
+    else:
+      self.downsample = None
+    self.in_dim  = inplanes
+    self.out_dim = planes
+    self.stride  = stride
+    self.num_conv = 2
+
+  def extra_repr(self):
+    string = '{name}(inC={in_dim}, outC={out_dim}, stride={stride})'.format(name=self.__class__.__name__, **self.__dict__)
+    return string
+
+  def forward(self, inputs):
+
+    basicblock = self.conv_a(inputs)
+    basicblock = self.conv_b(basicblock)
+
+    if self.downsample is not None:
+      residual = self.downsample(inputs)
+    else:
+      residual = inputs
+    return residual + basicblock
 
 
 class POOLING(nn.Module):
@@ -33,20 +85,6 @@ class POOLING(nn.Module):
   def forward(self, inputs):
     if self.preprocess: x = self.preprocess(inputs)
     else              : x = inputs
-    return self.op(x)
-
-
-class ReLUConvBN(nn.Module):
-
-  def __init__(self, C_in, C_out, kernel_size, stride, padding, dilation):
-    super(ReLUConvBN, self).__init__()
-    self.op = nn.Sequential(
-      nn.ReLU(inplace=False),
-      nn.Conv2d(C_in, C_out, kernel_size, stride=stride, padding=padding, dilation=dilation, bias=False),
-      nn.BatchNorm2d(C_out)
-    )
-
-  def forward(self, x):
     return self.op(x)
 
 

@@ -1,8 +1,8 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-###########################################################################
-# Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019 #
-###########################################################################
+######################################################################################
+# One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019 #
+######################################################################################
 import torch
 import torch.nn as nn
 from copy import deepcopy
@@ -11,10 +11,10 @@ from .search_cells     import SearchCell
 from .genotypes        import Structure
 
 
-class TinyNetworkGDAS(nn.Module):
+class TinyNetworkSETN(nn.Module):
 
   def __init__(self, C, N, max_nodes, num_classes, search_space):
-    super(TinyNetworkGDAS, self).__init__()
+    super(TinyNetworkSETN, self).__init__()
     self._C        = C
     self._layerN   = N
     self.max_nodes = max_nodes
@@ -43,19 +43,23 @@ class TinyNetworkGDAS(nn.Module):
     self.global_pooling = nn.AdaptiveAvgPool2d(1)
     self.classifier = nn.Linear(C_prev, num_classes)
     self.arch_parameters = nn.Parameter( 1e-3*torch.randn(num_edge, len(search_space)) )
-    self.tau        = 10
+    self.mode       = 'urs'
+    self.dynamic_cell = None
+    
+  def set_cal_mode(self, mode, dynamic_cell=None):
+    assert mode in ['urs', 'joint', 'select', 'dynamic']
+    self.mode = mode
+    if mode == 'dynamic': self.dynamic_cell = deepcopy( dynamic_cell )
+    else                : self.dynamic_cell = None
+
+  def get_cal_mode(self):
+    return self.mode
 
   def get_weights(self):
     xlist = list( self.stem.parameters() ) + list( self.cells.parameters() )
     xlist+= list( self.lastact.parameters() ) + list( self.global_pooling.parameters() )
     xlist+= list( self.classifier.parameters() )
     return xlist
-
-  def set_tau(self, tau):
-    self.tau = tau
-
-  def get_tau(self):
-    return self.tau
 
   def get_alphas(self):
     return [self.arch_parameters]
@@ -82,13 +86,41 @@ class TinyNetworkGDAS(nn.Module):
       genotypes.append( tuple(xlist) )
     return Structure( genotypes )
 
+
+  def dync_genotype(self):
+    genotypes = []
+    with torch.no_grad():
+      alphas_cpu = nn.functional.softmax(self.arch_parameters, dim=-1)
+    for i in range(1, self.max_nodes):
+      xlist = []
+      for j in range(i):
+        node_str = '{:}<-{:}'.format(i, j)
+        weights  = alphas_cpu[ self.edge2index[node_str] ]
+        op_index = torch.multinomial(weights, 1).item()
+        op_name  = self.op_names[ op_index ]
+        xlist.append((op_name, j))
+      genotypes.append( tuple(xlist) )
+    return Structure( genotypes )
+
+
   def forward(self, inputs):
+    alphas  = nn.functional.softmax(self.arch_parameters, dim=-1)
+    with torch.no_grad():
+      alphas_cpu = alphas.detach().cpu()
+
     feature = self.stem(inputs)
     for i, cell in enumerate(self.cells):
       if isinstance(cell, SearchCell):
-        feature = cell.forward_gdas(feature, self.arch_parameters, self.tau)
-      else:
-        feature = cell(feature)
+        if self.mode == 'urs':
+          feature = cell.forward_urs(feature)
+        elif self.mode == 'select':
+          feature = cell.forward_select(feature, alphas_cpu)
+        elif self.mode == 'joint':
+          feature = cell.forward_joint(feature, alphas)
+        elif self.mode == 'dynamic':
+          feature = cell.forward_dynamic(feature, self.dynamic_cell)
+        else: raise ValueError('invalid mode={:}'.format(self.mode))
+      else: feature = cell(feature)
 
     out = self.lastact(feature)
     out = self.global_pooling( out )

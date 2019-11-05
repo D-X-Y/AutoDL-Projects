@@ -12,7 +12,7 @@ class SearchDataset(data.Dataset):
     self.length      = len(self.train_split)
 
   def __repr__(self):
-    return ('{name}(name={datasetname}, length={length})'.format(name=self.__class__.__name__, **self.__dict__))
+    return ('{name}(name={datasetname}, train={tr_L}, valid={val_L})'.format(name=self.__class__.__name__, tr_L=len(self.train_split), val_L=len(self.valid_split)))
 
   def __len__(self):
     return self.length
