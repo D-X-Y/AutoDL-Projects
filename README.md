@@ -6,6 +6,7 @@ This project contains the following neural architecture search algorithms, imple
 - One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
 - Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019
 - Auto-ReID: Searching for a Part-Aware ConvNet for Person Re-Identification, ICCV 2019
+- several typical classification models, e.g., ResNet and DenseNet (see BASELINE.md)
 
 
 ## Requirements and Preparation

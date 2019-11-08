@@ -60,6 +60,13 @@ class Structure:
       strings.append( string )
     return '+'.join(strings)
 
+  def check_valid_op(self, op_names):
+    for node_info in self.nodes:
+      for inode_edge in node_info:
+        #assert inode_edge[0] in op_names, 'invalid op-name : {:}'.format(inode_edge[0])
+        if inode_edge[0] not in op_names: return False
+    return True
+
   def __repr__(self):
     return ('{name}({node_num} nodes with {node_info})'.format(name=self.__class__.__name__, node_info=self.tostr(), **self.__dict__))
 

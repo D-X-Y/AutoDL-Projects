@@ -17,7 +17,8 @@ CONNECT_NAS_BENCHMARK  = ['none', 'skip_connect', 'nor_conv_3x3']
 AA_NAS_BENCHMARK       = ['none', 'skip_connect', 'nor_conv_1x1', 'nor_conv_3x3', 'avg_pool_3x3']
 
 SearchSpaceNames = {'connect-nas' : CONNECT_NAS_BENCHMARK,
-                    'aa-nas'      : AA_NAS_BENCHMARK}
+                    'aa-nas'      : AA_NAS_BENCHMARK,
+                    'full'        : sorted(list(OPS.keys()))}
 
 
 class ReLUConvBN(nn.Module):
