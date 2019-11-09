@@ -1,6 +1,6 @@
 #!/bin/bash
-# One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
-# bash ./scripts-search/scripts/algos/SETN.sh cifar10 -1
+# Efficient Neural Architecture Search via Parameter Sharing, ICML 2018
+# bash ./scripts-search/scripts/algos/ENAS.sh cifar10 -1
 echo script name: $0
 echo $# arguments
 if [ "$#" -ne 2 ] ;then
@@ -27,13 +27,16 @@ else
   data_path="$TORCH_HOME/cifar.python/ImageNet16"
 fi
 
-save_dir=./output/cell-search-tiny/SETN-${dataset}
+save_dir=./output/cell-search-tiny/ENAS-${dataset}
 
-OMP_NUM_THREADS=4 python ./exps/algos/SETN.py \
+OMP_NUM_THREADS=4 python ./exps/algos/ENAS.py \
 	--save_dir ${save_dir} --max_nodes ${max_nodes} --channel ${channel} --num_cells ${num_cells} \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name aa-nas \
-	--config_path configs/nas-benchmark/algos/SETN.config \
-	--arch_learning_rate 0.0003 --arch_weight_decay 0.001 \
-	--select_num 100 \
+	--config_path ./configs/nas-benchmark/algos/ENAS.config \
+	--controller_entropy_weight 0.0001 \
+	--controller_bl_dec 0.99 \
+	--controller_train_steps 50 \
+	--controller_num_aggregate 20 \
+	--controller_num_samples 100 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}
