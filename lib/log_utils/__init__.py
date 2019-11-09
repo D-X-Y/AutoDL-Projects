@@ -1,6 +1,3 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
 from .logger       import Logger
 from .print_logger import PrintLogger
 from .meter        import AverageMeter

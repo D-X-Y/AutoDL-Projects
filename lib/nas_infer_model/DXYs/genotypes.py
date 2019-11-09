@@ -1,6 +1,3 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
 from collections import namedtuple
 
 Genotype = namedtuple('Genotype', 'normal normal_concat reduce reduce_concat connectN connects')

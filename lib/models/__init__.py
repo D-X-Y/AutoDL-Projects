@@ -1,6 +1,3 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
 import torch
 from os import path as osp
 

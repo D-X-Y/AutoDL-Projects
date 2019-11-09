@@ -1,5 +1,3 @@
-# Xuanyi Dong
-
 def parse_channel_info(xstring):
   blocks = xstring.split(' ')
   blocks = [x.split('-') for x in blocks]

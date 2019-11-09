@@ -107,3 +107,6 @@ scripts-nas/.nfs00*
 # logs and snapshots
 output
 logs
+
+# snapshot
+a.pth

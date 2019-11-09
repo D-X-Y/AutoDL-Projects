@@ -1,8 +1,4 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
-import importlib, warnings
-import os, sys, time, numpy as np
+import os, sys, time
 
 
 class PrintLogger(object):

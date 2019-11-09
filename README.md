@@ -5,7 +5,6 @@ This project contains the following neural architecture search algorithms, imple
 - Network Pruning via Transformable Architecture Search, NeurIPS 2019
 - One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
 - Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019
-- Auto-ReID: Searching for a Part-Aware ConvNet for Person Re-Identification, ICCV 2019
 - several typical classification models, e.g., ResNet and DenseNet (see BASELINE.md)
 
 
@@ -103,12 +102,6 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 -1
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 -1
 ```
 
-
-## [Auto-ReID: Searching for a Part-Aware ConvNet for Person Re-Identification](https://arxiv.org/abs/1903.09776)
-
-The part-aware module is defined at [here](https://github.com/D-X-Y/NAS-Projects/blob/master/lib/models/cell_searchs/operations.py#L85).
-
-For more questions, please contact Ruijie Quan (Ruijie.Quan@student.uts.edu.au).
 
 # Citation
 

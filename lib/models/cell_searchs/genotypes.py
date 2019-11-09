@@ -60,6 +60,24 @@ class Structure:
       strings.append( string )
     return '+'.join(strings)
 
+  def to_unique_str(self, consider_zero=False):
+    # this is used to identify the isomorphic cell, which rerquires the prior knowledge of operation
+    # two operations are special, i.e., none and skip_connect
+    nodes = {0: '0'}
+    for i_node, node_info in enumerate(self.nodes):
+      cur_node = []
+      for op, xin in node_info:
+        if consider_zero:
+          if op == 'none' or nodes[xin] == '#': x = '#' # zero
+          elif op == 'skip_connect': x = nodes[xin]
+          else: x = nodes[xin] + '@{:}'.format(op)
+        else:
+          if op == 'skip_connect': x = nodes[xin]
+          else: x = nodes[xin] + '@{:}'.format(op)
+        cur_node.append(x)
+      nodes[i_node+1] = '+'.join( sorted(cur_node) )
+    return nodes[ len(self.nodes) ]
+
   def check_valid_op(self, op_names):
     for node_info in self.nodes:
       for inode_edge in node_info:

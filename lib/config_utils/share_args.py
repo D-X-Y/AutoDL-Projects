@@ -1,6 +1,3 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
 import os, sys, time, random, argparse
 
 def add_shared_args( parser ):

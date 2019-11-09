@@ -1,6 +1,3 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
 from .starts     import prepare_seed, prepare_logger, get_machine_info, save_checkpoint, copy_checkpoint
 from .optimizers import get_optim_scheduler
 
