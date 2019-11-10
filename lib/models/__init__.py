@@ -13,7 +13,7 @@ from .cell_searchs import CellStructure, CellArchitectures
 
 # Cell-based NAS Models
 def get_cell_based_tiny_net(config):
-  group_names = ['DARTS-V1', 'DARTS-V2', 'GDAS', 'SETN', 'ENAS']
+  group_names = ['DARTS-V1', 'DARTS-V2', 'GDAS', 'SETN', 'ENAS', 'RANDOM']
   from .cell_searchs import nas_super_nets
   if config.name in group_names:
     return nas_super_nets[config.name](config.C, config.N, config.max_nodes, config.num_classes, config.space)

@@ -1,6 +1,3 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
 import os, sys, time, torch, random, argparse
 from PIL     import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True

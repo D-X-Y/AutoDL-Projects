@@ -60,6 +60,17 @@ class Structure:
       strings.append( string )
     return '+'.join(strings)
 
+  def check_valid(self):
+    nodes = {0: True}
+    for i, node_info in enumerate(self.nodes):
+      sums = []
+      for op, xin in node_info:
+        if op == 'none' or nodes[xin] == False: x = False
+        else: x = True
+        sums.append( x )
+      nodes[i+1] = sum(sums) > 0
+    return nodes[len(self.nodes)]
+
   def to_unique_str(self, consider_zero=False):
     # this is used to identify the isomorphic cell, which rerquires the prior knowledge of operation
     # two operations are special, i.e., none and skip_connect
