@@ -84,7 +84,6 @@ class TinyNetworkSETN(nn.Module):
       genotypes.append( tuple(xlist) )
     return Structure( genotypes )
 
-
   def dync_genotype(self, use_random=False):
     genotypes = []
     with torch.no_grad():
@@ -102,6 +101,26 @@ class TinyNetworkSETN(nn.Module):
         xlist.append((op_name, j))
       genotypes.append( tuple(xlist) )
     return Structure( genotypes )
+
+  def get_log_prob(self, arch):
+    with torch.no_grad():
+      logits = nn.functional.log_softmax(self.arch_parameters, dim=-1)
+    select_logits = []
+    for i, node_info in enumerate(arch.nodes):
+      for op, xin in node_info:
+        node_str = '{:}<-{:}'.format(i+1, xin)
+        op_index = self.op_names.index(op)
+        select_logits.append( logits[self.edge2index[node_str], op_index] )
+    return sum(select_logits).item()
+
+
+  def return_topK(self, K):
+    archs = Structure.gen_all(self.op_names, self.max_nodes, False)
+    pairs = [(self.get_log_prob(arch), arch) for arch in archs]
+    if K < 0 or K >= len(archs): K = len(archs)
+    sorted_pairs = sorted(pairs, key=lambda x: -x[0])
+    return_pairs = [sorted_pairs[_][1] for _ in range(K)]
+    return return_pairs
 
 
   def forward(self, inputs):

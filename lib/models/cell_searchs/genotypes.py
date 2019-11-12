@@ -81,10 +81,10 @@ class Structure:
         if consider_zero:
           if op == 'none' or nodes[xin] == '#': x = '#' # zero
           elif op == 'skip_connect': x = nodes[xin]
-          else: x = nodes[xin] + '@{:}'.format(op)
+          else: x = '('+nodes[xin]+')' + '@{:}'.format(op)
         else:
           if op == 'skip_connect': x = nodes[xin]
-          else: x = nodes[xin] + '@{:}'.format(op)
+          else: x = '('+nodes[xin]+')' + '@{:}'.format(op)
         cur_node.append(x)
       nodes[i_node+1] = '+'.join( sorted(cur_node) )
     return nodes[ len(self.nodes) ]

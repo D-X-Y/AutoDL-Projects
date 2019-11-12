@@ -11,11 +11,16 @@ from models     import CellStructure
 
 def get_unique_matrix(archs, consider_zero):
   UniquStrs = [arch.to_unique_str(consider_zero) for arch in archs]
-  print ('{:} create unique-string done'.format(time_string()))
+  print ('{:} create unique-string ({:}/{:}) done'.format(time_string(), len(set(UniquStrs)), len(UniquStrs)))
+  Unique2Index = dict()
+  for index, xstr in enumerate(UniquStrs):
+    if xstr not in Unique2Index: Unique2Index[xstr] = list()
+    Unique2Index[xstr].append( index )
   sm_matrix = torch.eye(len(archs)).bool()
-  for i, _ in enumerate(UniquStrs):
-    for j in range(i):
-      sm_matrix[i,j] = sm_matrix[j,i] = UniquStrs[i] == UniquStrs[j]
+  for _, xlist in Unique2Index.items():
+    for i in xlist:
+      for j in xlist:
+        sm_matrix[i,j] = True
   unique_ids, unique_num = [-1 for _ in archs], 0
   for i in range(len(unique_ids)):
     if unique_ids[i] > -1: continue
