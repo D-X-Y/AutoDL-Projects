@@ -58,8 +58,10 @@ def test_aa_nas_api():
   arch_result = ArchResults.create_from_state_dict('output/AA-NAS-BENCH-4/simplifies/architectures/000002-FULL.pth')
   arch_result.show(True)
   result = arch_result.query('cifar100')
-  #xfile = '/home/dxy/search-configures/output/TINY-NAS-BENCHMARK-4/simplifies/C16-N5-final-infos.pth'
-  #api   = AANASBenchAPI(xfile)
+  #xfile = 'output/AA-NAS-BENCH-4/simplifies/000000-000389-C16-N5.pth'
+  api = AANASBenchAPI('output/AA-NAS-BENCH-4/simplifies/C16-N5-final-infos.pth')
+  results = api.query_by_index(1, 'cifar100')
+  print ('There are {:} trials for this architecture [{:}] on cifar10'.format(len(results), api[1]))
   import pdb; pdb.set_trace()
 
 if __name__ == '__main__':
