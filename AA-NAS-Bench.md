@@ -15,6 +15,7 @@ Note: please use `PyTorch >= 1.1.0` and `Python >= 3.6.0`.
 ```
 from aa_nas_api import AANASBenchAPI
 api = AANASBenchAPI('$path_to_meta_aa_nas_bench_file')
+api = AANASBenchAPI('AA-NAS-Bench-v1_0.pth')
 ```
 
 2. Show the number of architectures `len(api)` and each architecture `api[i]`:
