@@ -5,7 +5,7 @@ This project contains the following neural architecture search algorithms, imple
 - Network Pruning via Transformable Architecture Search, NeurIPS 2019
 - One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
 - Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019
-- several typical classification models, e.g., ResNet and DenseNet (see BASELINE.md)
+- several typical classification models, e.g., ResNet and DenseNet (see [BASELINE.md](https://github.com/D-X-Y/NAS-Projects/blob/master/BASELINE.md))
 
 
 ## Requirements and Preparation
