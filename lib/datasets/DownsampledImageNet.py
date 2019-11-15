@@ -1,3 +1,6 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 import os, sys, hashlib, torch
 import numpy as np
 from PIL import Image

@@ -1,3 +1,6 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 import os, sys, time, torch
 from log_utils import AverageMeter, time_string
 from utils     import obtain_accuracy

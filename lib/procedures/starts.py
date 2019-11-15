@@ -1,9 +1,6 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-#
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 import os, sys, time, torch, random, PIL, copy, numpy as np
 from os import path as osp
 from shutil  import copyfile

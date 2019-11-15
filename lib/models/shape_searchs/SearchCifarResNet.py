@@ -1,3 +1,6 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 import math, torch
 from collections import OrderedDict
 from bisect import bisect_right
