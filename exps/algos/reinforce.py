@@ -1,6 +1,8 @@
 ##################################################
-# modified from https://github.com/pytorch/examples/blob/master/reinforcement_learning/reinforce.py
-##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+#####################################################################################################
+# modified from https://github.com/pytorch/examples/blob/master/reinforcement_learning/reinforce.py #
+#####################################################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
 from copy import deepcopy

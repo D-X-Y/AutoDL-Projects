@@ -22,9 +22,7 @@ batch=$5
 rseed=$6
 
 
-SAVE_ROOT="./output"
-
-save_dir=${SAVE_ROOT}/basic/${dataset}/${model}-${epoch}-${LR}-${batch}
+save_dir=./output/basic/${dataset}/${model}-${epoch}-${LR}-${batch}
 
 python --version
 

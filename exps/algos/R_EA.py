@@ -1,3 +1,8 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################################
+# Regularized Evolution for Image Classifier Architecture Search #
+##################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
 from copy import deepcopy
@@ -15,7 +20,6 @@ from aa_nas_api   import AANASBenchAPI
 from models       import CellStructure, get_search_spaces
 
 
-# Regularized Evolution for Image Classifier Architecture Search
 class Model(object):
 
   def __init__(self):

@@ -1,4 +1,6 @@
 ##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 # required to install hpbandster #################
 ##################################################
 import os, sys, time, glob, random, argparse
