@@ -1,7 +1,9 @@
-###########################################################################
-# Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019 #
-###########################################################################
-import torch
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##############################################################################
+# Random Search and Reproducibility for Neural Architecture Search, UAI 2019 # 
+##############################################################################
+import torch, random
 import torch.nn as nn
 from copy import deepcopy
 from ..cell_operations import ResNetBasicblock
@@ -9,10 +11,10 @@ from .search_cells     import SearchCell
 from .genotypes        import Structure
 
 
-class TinyNetworkGDAS(nn.Module):
+class TinyNetworkRANDOM(nn.Module):
 
   def __init__(self, C, N, max_nodes, num_classes, search_space):
-    super(TinyNetworkGDAS, self).__init__()
+    super(TinyNetworkRANDOM, self).__init__()
     self._C        = C
     self._layerN   = N
     self.max_nodes = max_nodes
@@ -40,24 +42,8 @@ class TinyNetworkGDAS(nn.Module):
     self.lastact    = nn.Sequential(nn.BatchNorm2d(C_prev), nn.ReLU(inplace=True))
     self.global_pooling = nn.AdaptiveAvgPool2d(1)
     self.classifier = nn.Linear(C_prev, num_classes)
-    self.arch_parameters = nn.Parameter( 1e-3*torch.randn(num_edge, len(search_space)) )
-    self.tau        = 10
-
-  def get_weights(self):
-    xlist = list( self.stem.parameters() ) + list( self.cells.parameters() )
-    xlist+= list( self.lastact.parameters() ) + list( self.global_pooling.parameters() )
-    xlist+= list( self.classifier.parameters() )
-    return xlist
-
-  def set_tau(self, tau):
-    self.tau = tau
-
-  def get_tau(self):
-    return self.tau
-
-  def get_alphas(self):
-    return [self.arch_parameters]
-
+    self.arch_cache = None
+    
   def get_message(self):
     string = self.extra_repr()
     for i, cell in enumerate(self.cells):
@@ -67,38 +53,29 @@ class TinyNetworkGDAS(nn.Module):
   def extra_repr(self):
     return ('{name}(C={_C}, Max-Nodes={max_nodes}, N={_layerN}, L={_Layer})'.format(name=self.__class__.__name__, **self.__dict__))
 
-  def genotype(self):
+  def random_genotype(self, set_cache):
     genotypes = []
     for i in range(1, self.max_nodes):
       xlist = []
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
-        with torch.no_grad():
-          weights = self.arch_parameters[ self.edge2index[node_str] ]
-          op_name = self.op_names[ weights.argmax().item() ]
+        op_name  = random.choice( self.op_names )
         xlist.append((op_name, j))
       genotypes.append( tuple(xlist) )
-    return Structure( genotypes )
+    arch = Structure( genotypes )
+    if set_cache: self.arch_cache = arch
+    return arch
 
   def forward(self, inputs):
-    while True:
-      gumbels = -torch.empty_like(self.arch_parameters).exponential_().log()
-      logits  = (self.arch_parameters.log_softmax(dim=1) + gumbels) / self.tau
-      probs   = nn.functional.softmax(logits, dim=1)
-      index   = probs.max(-1, keepdim=True)[1]
-      one_h   = torch.zeros_like(logits).scatter_(-1, index, 1.0)
-      hardwts = one_h - probs.detach() + probs
-      if (torch.isinf(gumbels).any()) or (torch.isinf(probs).any()) or (torch.isnan(probs).any()): continue
 
     feature = self.stem(inputs)
     for i, cell in enumerate(self.cells):
       if isinstance(cell, SearchCell):
-        feature = cell.forward_gdas(feature, hardwts, index)
-      else:
-        feature = cell(feature)
+        feature = cell.forward_dynamic(feature, self.arch_cache)
+      else: feature = cell(feature)
+
     out = self.lastact(feature)
     out = self.global_pooling( out )
     out = out.view(out.size(0), -1)
     logits = self.classifier(out)
-
     return out, logits
