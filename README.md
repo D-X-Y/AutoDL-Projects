@@ -22,6 +22,8 @@ from utils import get_model_infos
 flop, param  = get_model_infos(net, (1,3,32,32))
 ```
 
+2. Different NAS-searched architectures are defined [here](https://github.com/D-X-Y/NAS-Projects/blob/master/lib/nas_infer_model/DXYs/genotypes.py).
+
 
 ## [Network Pruning via Transformable Architecture Search](https://arxiv.org/abs/1905.09717)
 In this paper, we proposed a differentiable searching strategy for transformable architectures, i.e., searching for the depth and width of a deep neural network.
