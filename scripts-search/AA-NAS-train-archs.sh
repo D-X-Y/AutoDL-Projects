@@ -29,6 +29,7 @@ save_dir=./output/AA-NAS-BENCH-4/
 
 OMP_NUM_THREADS=4 python ./exps/AA-NAS-Bench-main.py \
 	--mode ${mode} --save_dir ${save_dir} --max_node 4 \
+	--use_less 0 \
 	--datasets cifar10 cifar10 cifar100 ImageNet16-120 \
 	--splits   1       0       0        0 \
 	--xpaths $TORCH_HOME/cifar.python \

@@ -22,7 +22,7 @@ class TinyNetwork(nn.Module):
     self.cells = nn.ModuleList()
     for index, (C_curr, reduction) in enumerate(zip(layer_channels, layer_reductions)):
       if reduction:
-        cell = ResNetBasicblock(C_prev, C_curr, 2)
+        cell = ResNetBasicblock(C_prev, C_curr, 2, True)
       else:
         cell = InferCell(genotype, C_prev, C_curr, 1)
       self.cells.append( cell )

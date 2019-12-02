@@ -23,9 +23,9 @@ class SearchCell(nn.Module):
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
         if j == 0:
-          xlists = [OPS[op_name](C_in , C_out, stride) for op_name in op_names]
+          xlists = [OPS[op_name](C_in , C_out, stride, False) for op_name in op_names]
         else:
-          xlists = [OPS[op_name](C_in , C_out,      1) for op_name in op_names]
+          xlists = [OPS[op_name](C_in , C_out,      1, False) for op_name in op_names]
         self.edges[ node_str ] = nn.ModuleList( xlists )
     self.edge_keys  = sorted(list(self.edges.keys()))
     self.edge2index = {key:i for i, key in enumerate(self.edge_keys)}

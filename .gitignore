@@ -111,3 +111,4 @@ logs
 # snapshot
 a.pth
 cal-merge*.sh
+GPU-*.sh
