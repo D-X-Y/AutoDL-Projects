@@ -57,6 +57,9 @@ CUDA_VISIBLE_DEVICES=0,1 bash ./scripts-search/search-cifar.sh cifar10 ResNet56 
 
 args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel name, `CIFARX` indicates the searching hyper-parameters, `0.47/0.57` indicates the expected FLOP ratio, `-1` indicates the random seed.
 
+### Model Configuration
+The searched shapes for ResNet-20/32/56/110/164 in Table 3 in the original paper are listed in [`configs/NeurIPS-2019`](https://github.com/D-X-Y/NAS-Projects/tree/master/configs/NeurIPS-2019).
+
 
 ## [One-Shot Neural Architecture Search via Self-Evaluated Template Network](https://arxiv.org/abs/1910.05733)
 
