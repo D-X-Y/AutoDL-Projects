@@ -7,7 +7,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 from copy    import deepcopy
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / '..' / 'lib').resolve()
+lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from config_utils import load_config
 from procedures   import save_checkpoint, copy_checkpoint
@@ -15,7 +15,7 @@ from procedures   import get_machine_info
 from datasets     import get_datasets
 from log_utils    import Logger, AverageMeter, time_string, convert_secs2time
 from models       import CellStructure, CellArchitectures, get_search_spaces
-from AA_functions_v2 import evaluate_for_seed
+from functions    import evaluate_for_seed
 
 
 def evaluate_all_datasets(arch, datasets, xpaths, splits, use_less, seed, arch_config, workers, logger):
@@ -156,14 +156,14 @@ def main(save_dir, workers, datasets, xpaths, splits, use_less, srange, arch_ind
   logger.close()
 
 
-def train_single_model(save_dir, workers, datasets, xpaths, use_less, splits, seeds, model_str, arch_config):
+def train_single_model(save_dir, workers, datasets, xpaths, splits, use_less, seeds, model_str, arch_config):
   assert torch.cuda.is_available(), 'CUDA is not available.'
   torch.backends.cudnn.enabled   = True
   torch.backends.cudnn.deterministic = True
   #torch.backends.cudnn.benchmark = True
   torch.set_num_threads( workers )
   
-  save_dir = Path(save_dir) / 'specifics' / '{:}-{:}-{:}'.format(model_str, arch_config['channel'], arch_config['num_cells'])
+  save_dir = Path(save_dir) / 'specifics' / '{:}-{:}-{:}-{:}'.format('LESS' if use_less else 'FULL', model_str, arch_config['channel'], arch_config['num_cells'])
   logger   = Logger(str(save_dir), 0, False)
   if model_str in CellArchitectures:
     arch   = CellArchitectures[model_str]
@@ -247,18 +247,22 @@ def generate_meta_info(save_dir, max_node, divide=40):
   torch.save(info, save_name)
   print ('save the meta file into {:}'.format(save_name))
 
-  script_name = save_dir / 'meta-node-{:}.opt-script.txt'.format(max_node)
-  with open(str(script_name), 'w') as cfile:
-    gaps = total_arch // divide
-    for start in range(0, total_arch, gaps):
-      xend = min(start+gaps, total_arch)
-      cfile.write('bash ./scripts-search/AA-NAS-train-archs.sh {:5d} {:5d} -1 \'777 888 999\'\n'.format(start, xend-1))
-  print ('save the training script into {:}'.format(script_name))
+  script_name_full = save_dir / 'BENCH-102-N{:}.opt-full.script'.format(max_node)
+  script_name_less = save_dir / 'BENCH-102-N{:}.opt-less.script'.format(max_node)
+  full_file = open(str(script_name_full), 'w')
+  less_file = open(str(script_name_less), 'w')
+  gaps = total_arch // divide
+  for start in range(0, total_arch, gaps):
+    xend = min(start+gaps, total_arch)
+    full_file.write('bash ./scripts-search/NAS-Bench-102/train-models.sh 0 {:5d} {:5d} -1 \'777 888 999\'\n'.format(start, xend-1))
+    less_file.write('bash ./scripts-search/NAS-Bench-102/train-models.sh 1 {:5d} {:5d} -1 \'777 888 999\'\n'.format(start, xend-1))
+  print ('save the training script into {:} and {:}'.format(script_name_full, script_name_less))
+  full_file.close()
+  less_file.close()
 
   script_name = save_dir / 'meta-node-{:}.cal-script.txt'.format(max_node)
   macro = 'OMP_NUM_THREADS=6 CUDA_VISIBLE_DEVICES=0'
   with open(str(script_name), 'w') as cfile:
-    gaps = total_arch // divide
     for start in range(0, total_arch, gaps):
       xend = min(start+gaps, total_arch)
       cfile.write('{:} python exps/AA-NAS-statistics.py --mode cal --target_dir {:06d}-{:06d}-C16-N5\n'.format(macro, start, xend-1))
@@ -278,7 +282,7 @@ if __name__ == '__main__':
   parser.add_argument('--datasets',    type=str,   nargs='+',      help='The applied datasets.')
   parser.add_argument('--xpaths',      type=str,   nargs='+',      help='The root path for this dataset.')
   parser.add_argument('--splits',      type=int,   nargs='+',      help='The root path for this dataset.')
-  parser.add_argument('--use_less',    type=int,   default=0,      help='Using the less-training-epoch config.')
+  parser.add_argument('--use_less',    type=int,   default=0, choices=[0,1], help='Using the less-training-epoch config.')
   parser.add_argument('--seeds'  ,     type=int,   nargs='+',      help='The range of models to be evaluated')
   parser.add_argument('--channel',     type=int,                   help='The number of channels.')
   parser.add_argument('--num_cells',   type=int,                   help='The number of cells in one stage.')

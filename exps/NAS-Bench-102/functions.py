@@ -9,35 +9,8 @@ from log_utils    import AverageMeter, time_string, convert_secs2time
 from models       import get_cell_based_tiny_net
 
 
-__all__ = ['evaluate_for_seed', 'pure_evaluate']
 
-
-def pure_evaluate(xloader, network, criterion=torch.nn.CrossEntropyLoss()):
-  data_time, batch_time, batch = AverageMeter(), AverageMeter(), None
-  losses, top1, top5 = AverageMeter(), AverageMeter(), AverageMeter()
-  latencies = []
-  network.eval()
-  with torch.no_grad():
-    end = time.time()
-    for i, (inputs, targets) in enumerate(xloader):
-      targets = targets.cuda(non_blocking=True)
-      inputs  = inputs.cuda(non_blocking=True)
-      data_time.update(time.time() - end)
-      # forward
-      features, logits = network(inputs)
-      loss             = criterion(logits, targets)
-      batch_time.update(time.time() - end)
-      if batch is None or batch == inputs.size(0):
-        batch = inputs.size(0)
-        latencies.append( batch_time.val - data_time.val )
-      # record loss and accuracy
-      prec1, prec5 = obtain_accuracy(logits.data, targets.data, topk=(1, 5))
-      losses.update(loss.item(),  inputs.size(0))
-      top1.update  (prec1.item(), inputs.size(0))
-      top5.update  (prec5.item(), inputs.size(0))
-      end = time.time()
-  if len(latencies) > 2: latencies = latencies[1:]
-  return losses.avg, top1.avg, top5.avg, latencies
+__all__ = ['evaluate_for_seed']
 
 
 
@@ -47,7 +20,7 @@ def procedure(xloader, network, criterion, scheduler, optimizer, mode):
   elif mode == 'valid': network.eval()
   else: raise ValueError("The mode is not right : {:}".format(mode))
 
-  batch_time, end = AverageMeter(), time.time()
+  data_time, batch_time, end = AverageMeter(), AverageMeter(), time.time()
   for i, (inputs, targets) in enumerate(xloader):
     if mode == 'train': scheduler.update(None, 1.0 * i / len(xloader))
 
@@ -72,7 +45,7 @@ def procedure(xloader, network, criterion, scheduler, optimizer, mode):
 
 
 
-def evaluate_for_seed(arch_config, config, arch, train_loader, valid_loader, seed, logger):
+def evaluate_for_seed(arch_config, config, arch, train_loader, valid_loaders, seed, logger):
 
   prepare_seed(seed) # random seed
   net = get_cell_based_tiny_net(dict2config({'name': 'infer.tiny',
@@ -83,7 +56,7 @@ def evaluate_for_seed(arch_config, config, arch, train_loader, valid_loader, see
   #net = TinyNetwork(arch_config['channel'], arch_config['num_cells'], arch, config.class_num)
   flop, param  = get_model_infos(net, config.xshape)
   logger.log('Network : {:}'.format(net.get_message()), False)
-  logger.log('Seed-------------------------- {:} --------------------------'.format(seed))
+  logger.log('{:} Seed-------------------------- {:} --------------------------'.format(time_string(), seed))
   logger.log('FLOP = {:} MB, Param = {:} MB'.format(flop, param))
   # train and valid
   optimizer, scheduler, criterion = get_optim_scheduler(net.parameters(), config)
@@ -96,16 +69,17 @@ def evaluate_for_seed(arch_config, config, arch, train_loader, valid_loader, see
     scheduler.update(epoch, 0.0)
 
     train_loss, train_acc1, train_acc5, train_tm = procedure(train_loader, network, criterion, scheduler, optimizer, 'train')
-    with torch.no_grad():
-      valid_loss, valid_acc1, valid_acc5, valid_tm = procedure(valid_loader, network, criterion,      None,      None, 'valid')
     train_losses[epoch] = train_loss
     train_acc1es[epoch] = train_acc1 
     train_acc5es[epoch] = train_acc5
-    valid_losses[epoch] = valid_loss
-    valid_acc1es[epoch] = valid_acc1 
-    valid_acc5es[epoch] = valid_acc5
     train_times [epoch] = train_tm
-    valid_times [epoch] = valid_tm
+    with torch.no_grad():
+      for key, xloder in valid_loaders.items():
+        valid_loss, valid_acc1, valid_acc5, valid_tm = procedure(xloder  , network, criterion,      None,      None, 'valid')
+        valid_losses['{:}@{:}'.format(key,epoch)] = valid_loss
+        valid_acc1es['{:}@{:}'.format(key,epoch)] = valid_acc1 
+        valid_acc5es['{:}@{:}'.format(key,epoch)] = valid_acc5
+        valid_times ['{:}@{:}'.format(key,epoch)] = valid_tm
 
     # measure elapsed time
     epoch_time.update(time.time() - start_time)

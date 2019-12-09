@@ -1,5 +1,5 @@
 #!/bin/bash
-# bash ./scripts-search/search-cifar.sh cifar10 ResNet110 CIFAR 0.57 777
+# bash ./scripts-search/search-shape-cifar.sh cifar10 ResNet110 CIFAR 0.57 777
 set -e
 echo script name: $0
 echo $# arguments

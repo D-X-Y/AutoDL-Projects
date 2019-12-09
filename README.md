@@ -1,11 +1,13 @@
 # Nueral Architecture Search (NAS)
 
-This project contains the following neural architecture search algorithms, implemented in [PyTorch](http://pytorch.org). More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesome-NAS).
+This project contains the following neural architecture search algorithms, implemented in [PyTorch](http://pytorch.org).
+More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesome-NAS).
 
 - Network Pruning via Transformable Architecture Search, NeurIPS 2019
 - One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
 - Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019
-- several typical classification models, e.g., ResNet and DenseNet (see [BASELINE.md](https://github.com/D-X-Y/NAS-Projects/blob/master/BASELINE.md))
+- 10 NAS algorithms for the neural topology in `exps/algos`
+- Several typical classification models, e.g., ResNet and DenseNet (see [BASELINE.md](https://github.com/D-X-Y/NAS-Projects/blob/master/BASELINE.md))
 
 
 ## Requirements and Preparation
@@ -15,7 +17,7 @@ Please install `PyTorch>=1.1.0`, `Python>=3.6`, and `opencv`.
 The CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
 Some methods use knowledge distillation (KD), which require pre-trained models. Please download these models from [Google Driver](https://drive.google.com/open?id=1ANmiYEGX-IQZTfH8w0aSpj-Wypg-0DR-) (or train by yourself) and save into `.latent-data`.
 
-### usefull tools
+### Usefull tools
 1. Compute the number of parameters and FLOPs of a model:
 ```
 from utils import get_model_infos
@@ -52,13 +54,18 @@ CUDA_VISIBLE_DEVICES=0,1 bash ./scripts-search/search-width-gumbel.sh cifar10 Re
 
 Search for both depth and width configuration of ResNet:
 ```
-CUDA_VISIBLE_DEVICES=0,1 bash ./scripts-search/search-cifar.sh cifar10 ResNet56  CIFARX 0.47 -1
+CUDA_VISIBLE_DEVICES=0,1 bash ./scripts-search/search-shape-cifar.sh cifar10 ResNet56  CIFARX 0.47 -1
 ```
 
 args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel name, `CIFARX` indicates the searching hyper-parameters, `0.47/0.57` indicates the expected FLOP ratio, `-1` indicates the random seed.
 
 ### Model Configuration
 The searched shapes for ResNet-20/32/56/110/164 in Table 3 in the original paper are listed in [`configs/NeurIPS-2019`](https://github.com/D-X-Y/NAS-Projects/tree/master/configs/NeurIPS-2019).
+If you want to directly train a model with searched configuration of TAS, try these:
+```
+CUDA_VISIBLE_DEVICES=0,1 bash ./scripts/tas-infer-train.sh cifar10  C010-ResNet32 -1
+CUDA_VISIBLE_DEVICES=0,1 bash ./scripts/tas-infer-train.sh cifar100 C100-ResNet32 -1
+```
 
 
 ## [One-Shot Neural Architecture Search via Self-Evaluated Template Network](https://arxiv.org/abs/1910.05733)
