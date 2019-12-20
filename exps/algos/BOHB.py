@@ -17,7 +17,7 @@ from datasets     import get_datasets, SearchDataset
 from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
-from aa_nas_api   import AANASBenchAPI
+from nas_102_api  import NASBench102API as API
 from models       import CellStructure, get_search_spaces
 from R_EA import train_and_eval
 # BOHB: Robust and Efficient Hyperparameter Optimization at Scale, ICML 2018
@@ -112,7 +112,7 @@ def main(xargs, nas_bench):
   num_workers = 1
 
   #nas_bench = AANASBenchAPI(xargs.arch_nas_dataset)
-  logger.log('{:} Create AA-NAS-BENCH-API DONE'.format(time_string()))
+  #logger.log('{:} Create NAS-BENCH-API DONE'.format(time_string()))
   workers = []
   for i in range(num_workers):
     w = MyWorker(nameserver=ns_host, nameserver_port=ns_port, convert_func=config2structure, nas_bench=nas_bench, run_id=hb_run_id, id=i)
@@ -179,7 +179,7 @@ if __name__ == '__main__':
     nas_bench = None
   else:
     print ('{:} build NAS-Benchmark-API from {:}'.format(time_string(), args.arch_nas_dataset))
-    nas_bench = AANASBenchAPI(args.arch_nas_dataset)
+    nas_bench = API(args.arch_nas_dataset)
   if args.rand_seed < 0:
     save_dir, all_indexes, num = None, [], 500
     for i in range(num):

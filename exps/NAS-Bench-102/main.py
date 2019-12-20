@@ -1,4 +1,6 @@
 ##################################################
+# NAS-Bench-102 ##################################
+##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ##################################################
 import os, sys, time, torch, random, argparse
@@ -265,13 +267,14 @@ def generate_meta_info(save_dir, max_node, divide=40):
   with open(str(script_name), 'w') as cfile:
     for start in range(0, total_arch, gaps):
       xend = min(start+gaps, total_arch)
-      cfile.write('{:} python exps/AA-NAS-statistics.py --mode cal --target_dir {:06d}-{:06d}-C16-N5\n'.format(macro, start, xend-1))
+      cfile.write('{:} python exps/NAS-Bench-102/statistics.py --mode cal --target_dir {:06d}-{:06d}-C16-N5\n'.format(macro, start, xend-1))
   print ('save the post-processing script into {:}'.format(script_name))
 
 
 if __name__ == '__main__':
   #mode_choices = ['meta', 'new', 'cover'] + ['specific-{:}'.format(_) for _ in CellArchitectures.keys()]
-  parser = argparse.ArgumentParser(description='Algorithm-Agnostic NAS Benchmark', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  #parser = argparse.ArgumentParser(description='Algorithm-Agnostic NAS Benchmark', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(description='NAS-Bench-102', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--mode'   ,     type=str,   required=True,  help='The script mode.')
   parser.add_argument('--save_dir',    type=str,                   help='Folder to save checkpoints and log.')
   parser.add_argument('--max_node',    type=int,                   help='The maximum node in a cell.')

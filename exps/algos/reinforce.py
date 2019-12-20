@@ -17,7 +17,7 @@ from datasets     import get_datasets, SearchDataset
 from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
-from aa_nas_api   import AANASBenchAPI
+from nas_102_api  import NASBench102API
 from models       import CellStructure, get_search_spaces
 from R_EA import train_and_eval
 

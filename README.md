@@ -6,7 +6,8 @@ More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesom
 - Network Pruning via Transformable Architecture Search, NeurIPS 2019
 - One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
 - Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019
-- 10 NAS algorithms for the neural topology in `exps/algos`
+- NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search, ICLR 2020
+- 10 NAS algorithms for the neural topology in `exps/algos` (see [NAS-Bench-102.md](https://github.com/D-X-Y/NAS-Projects/blob/master/NAS-Bench-102.md) for more details)
 - Several typical classification models, e.g., ResNet and DenseNet (see [BASELINE.md](https://github.com/D-X-Y/NAS-Projects/blob/master/BASELINE.md))
 
 
@@ -27,6 +28,10 @@ flop, param  = get_model_infos(net, (1,3,32,32))
 2. Different NAS-searched architectures are defined [here](https://github.com/D-X-Y/NAS-Projects/blob/master/lib/nas_infer_model/DXYs/genotypes.py).
 
 
+## NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search
+
+We build a new benchmark for neural architecture search, please see more details in [NAS-Bench-102.md](https://github.com/D-X-Y/NAS-Projects/blob/master/NAS-Bench-102.md).
+
 ## [Network Pruning via Transformable Architecture Search](https://arxiv.org/abs/1905.09717)
 In this paper, we proposed a differentiable searching strategy for transformable architectures, i.e., searching for the depth and width of a deep neural network.
 You could see the highlight of our Transformable Architecture Search (TAS) at our [project page](https://xuanyidong.com/assets/projects/NeurIPS-2019-TAS.html).
@@ -42,30 +47,32 @@ You could see the highlight of our Transformable Architecture Search (TAS) at ou
 Use `bash ./scripts/prepare.sh` to prepare data splits for `CIFAR-10`, `CIFARR-100`, and `ILSVRC2012`.
 If you do not have `ILSVRC2012` data, pleasee comment L12 in `./scripts/prepare.sh`.
 
-Search the depth configuration of ResNet:
+args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel name, `CIFARX` indicates the searching hyper-parameters, `0.47/0.57` indicates the expected FLOP ratio, `-1` indicates the random seed.
+
+#### Search for the depth configuration of ResNet:
 ```
 CUDA_VISIBLE_DEVICES=0,1 bash ./scripts-search/search-depth-gumbel.sh cifar10 ResNet110 CIFARX 0.57 -1
 ```
 
-Search the width configuration of ResNet:
+#### Search for the width configuration of ResNet:
 ```
 CUDA_VISIBLE_DEVICES=0,1 bash ./scripts-search/search-width-gumbel.sh cifar10 ResNet110 CIFARX 0.57 -1
 ```
 
-Search for both depth and width configuration of ResNet:
+#### Search for both depth and width configuration of ResNet:
 ```
 CUDA_VISIBLE_DEVICES=0,1 bash ./scripts-search/search-shape-cifar.sh cifar10 ResNet56  CIFARX 0.47 -1
 ```
 
-args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel name, `CIFARX` indicates the searching hyper-parameters, `0.47/0.57` indicates the expected FLOP ratio, `-1` indicates the random seed.
-
-### Model Configuration
-The searched shapes for ResNet-20/32/56/110/164 in Table 3 in the original paper are listed in [`configs/NeurIPS-2019`](https://github.com/D-X-Y/NAS-Projects/tree/master/configs/NeurIPS-2019).
+#### Training the searched shape config from TAS
 If you want to directly train a model with searched configuration of TAS, try these:
 ```
 CUDA_VISIBLE_DEVICES=0,1 bash ./scripts/tas-infer-train.sh cifar10  C010-ResNet32 -1
 CUDA_VISIBLE_DEVICES=0,1 bash ./scripts/tas-infer-train.sh cifar100 C100-ResNet32 -1
 ```
+
+### Model Configuration
+The searched shapes for ResNet-20/32/56/110/164 in Table 3 in the original paper are listed in [`configs/NeurIPS-2019`](https://github.com/D-X-Y/NAS-Projects/tree/master/configs/NeurIPS-2019).
 
 
 ## [One-Shot Neural Architecture Search via Self-Evaluated Template Network](https://arxiv.org/abs/1910.05733)
@@ -103,6 +110,7 @@ The old version is located at [`others/GDAS`](https://github.com/D-X-Y/NAS-Proje
 
 ### Usage
 
+#### Reproducing the results of our searched architecture in GDAS
 Please use the following scripts to train the searched GDAS-searched CNN on CIFAR-10, CIFAR-100, and ImageNet.
 ```
 CUDA_VISIBLE_DEVICES=0 bash ./scripts/nas-infer-train.sh cifar10  GDAS_V1 96 -1
@@ -110,6 +118,7 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts/nas-infer-train.sh cifar100 GDAS_V1 96 -1
 CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts/nas-infer-train.sh imagenet-1k GDAS_V1 256 -1
 ```
 
+#### Searching on a small search space (NAS-Bench-102)
 The GDAS searching codes on a small search space:
 ```
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh cifar10 -1
@@ -121,11 +130,24 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 -1
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 -1
 ```
 
+#### Training the searched architecture
+To train the searched architecture found by the above scripts, please use the following codes:
+```
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-102/train-a-net.sh '|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|skip_connect~1|skip_connect~2|' 16 5
+```
+`|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|skip_connect~1|skip_connect~2|` represents the structure of a searched architecture. My codes will automatically print it during the searching procedure.
+
 
 # Citation
 
 If you find that this project helps your research, please consider citing some of the following papers:
 ```
+@inproceedings{dong2020nasbench102,
+  title     = {NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search},
+  author    = {Dong, Xuanyi and Yang, Yi},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2020}
+}
 @inproceedings{dong2019tas,
   title     = {Network Pruning via Transformable Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},

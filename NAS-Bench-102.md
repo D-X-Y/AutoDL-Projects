@@ -1,0 +1,156 @@
+# NAS-BENCH-102: Extending the Scope of Reproducible Neural Architecture Search
+
+We propose an algorithm-agnostic NAS benchmark (NAS-Bench-102) with a fixed search space, which provides a unified benchmark for almost any up-to-date NAS algorithms.
+The design of our search space is inspired from that used in the most popular cell-based searching algorithms, where a cell is represented as a directed acyclic graph.
+Each edge here is associated with an operation selected from a predefined operation set.
+For it to be applicable for all NAS algorithms, the search space defined in NAS-Bench-102 includes 4 nodes and 5 associated operation options, which generates 15,625 neural cell candidates in total.
+
+In this Markdown file, we provide:
+- Detailed instruction to reproduce NAS-Bench-102.
+- 10 NAS algorithms evaluated in our paper.
+
+Note: please use `PyTorch >= 1.2.0` and `Python >= 3.6.0`.
+
+## How to Use NAS-Bench-102
+
+1. Creating an API instance from a file:
+```
+from nas_102_api import NASBench102API
+api = NASBench102API('$path_to_meta_nas_bench_file')
+api = NASBench102API('NAS-Bench-102-v1_0.pth')
+```
+
+2. Show the number of architectures `len(api)` and each architecture `api[i]`:
+```
+num = len(api)
+for i, arch_str in enumerate(api):
+  print ('{:5d}/{:5d} : {:}'.format(i, len(api), arch_str))
+```
+
+3. Show the results of all trials for a single architecture:
+```
+# show all information for a specific architecture
+api.show(1)
+api.show(2)
+
+# show the mean loss and accuracy of an architecture
+info = api.query_meta_info_by_index(1)
+loss, accuracy = info.get_metrics('cifar10', 'train')
+flops, params, latency = info.get_comput_costs('cifar100')
+
+# get the detailed information
+results = api.query_by_index(1, 'cifar100')
+print ('There are {:} trials for this architecture [{:}] on cifar100'.format(len(results), api[1]))
+print ('Latency : {:}'.format(results[0].get_latency()))
+print ('Train Info : {:}'.format(results[0].get_train()))
+print ('Valid Info : {:}'.format(results[0].get_eval('x-valid')))
+print ('Test  Info : {:}'.format(results[0].get_eval('x-test')))
+# for the metric after a specific epoch
+print ('Train Info [10-th epoch] : {:}'.format(results[0].get_train(10)))
+```
+
+4. Query the index of an architecture by string
+```
+index = api.query_index_by_arch('|nor_conv_3x3~0|+|nor_conv_3x3~0|avg_pool_3x3~1|+|skip_connect~0|nor_conv_3x3~1|skip_connect~2|')
+api.show(index)
+```
+
+5. For other usages, please see `lib/aa_nas_api/api.py`
+
+### Detailed Instruction
+
+In `nas_102_api`, we define three classes: `NASBench102API`, `ArchResults`, `ResultsCount`.
+
+`ResultsCount` maintains all information of a specific trial. One can instantiate ResultsCount and get the info via the following codes (`000157-FULL.pth` saves all information of all trials of 157-th architecture):
+```
+from nas_102_api import ResultsCount
+xdata  = torch.load('000157-FULL.pth')
+odata  = xdata['full']['all_results'][('cifar10-valid', 777)]
+result = ResultsCount.create_from_state_dict( odata )
+print(result) # print it
+print(result.get_train())   # print the final training loss/accuracy/[optional:time-cost-of-a-training-epoch]
+print(result.get_train(11)) # print the training info of the 11-th epoch
+print(result.get_eval('x-valid'))     # print the final evaluation info on the validation set
+print(result.get_eval('x-valid', 11)) # print the info on the validation set of the 11-th epoch
+print(result.get_latency())           # print the evaluation latency [in batch]
+result.get_net_param()                # the trained parameters of this trial
+arch_config = result.get_config(CellStructure.str2structure) # create the network with params
+net_config  = dict2config(arch_config, None)
+network    = get_cell_based_tiny_net(net_config)
+network.load_state_dict(result.get_net_param())
+```
+
+`ArchResults` maintains all information of all trials of an architecture. Please see the following usages:
+```
+from nas_102_api import ArchResults
+xdata   = torch.load('000157-FULL.pth')
+archRes = ArchResults.create_from_state_dict(xdata['less']) # load trials trained with  12 epochs
+archRes = ArchResults.create_from_state_dict(xdata['full']) # load trials trained with 200 epochs
+
+print(archRes.arch_idx_str())      # print the index of this architecture 
+print(archRes.get_dataset_names()) # print the supported training data
+print(archRes.get_comput_costs('cifar10-valid')) # print all computational info when training on cifar10-valid 
+print(archRes.get_metrics('cifar10-valid', 'x-valid', None, False)) # print the average loss/accuracy/time on all trials
+print(archRes.get_metrics('cifar10-valid', 'x-valid', None,  True)) # print loss/accuracy/time of a randomly selected trial
+```
+
+`NASBench102API` is the topest level api. Please see the following usages:
+```
+from nas_102_api import NASBench102API as API
+api = API('NAS-Bench-102-v1_0.pth')
+```
+
+## Instruction to Re-Generate NAS-Bench-102
+
+1. generate the meta file for NAS-Bench-102 using the following script, where `NAS-BENCH-102` indicates the name and `4` indicates the maximum number of nodes in a cell.
+```
+bash scripts-search/NAS-Bench-102/meta-gen.sh NAS-BENCH-102 4
+```
+
+2. train earch architecture on a single GPU (see commands in `output/NAS-BENCH-102-4/BENCH-102-N4.opt-full.script`, which is automatically generated by step-1).
+```
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-102/train-models.sh 0     0   389 -1 '777 888 999'
+```
+This command will train 390 architectures (id from 0 to 389) using the following four kinds of splits with three random seeds (777, 888, 999).
+
+|     Dataset     |     Train     |      Eval    |
+|:---------------:|:-------------:|:------------:|
+| CIFAR-10        | train         | valid / test |
+| CIFAR-10        | train + valid | test         |
+| CIFAR-100       | train         | valid / test |
+| ImageNet-16-120 | train         | valid / test |
+
+3. calculate the latency, merge the results of all architectures, and simplify the results.
+(see commands in `output/NAS-BENCH-102-4/meta-node-4.cal-script.txt` which is automatically generated by step-1).
+```
+OMP_NUM_THREADS=6 CUDA_VISIBLE_DEVICES=0 python exps/NAS-Bench-102/statistics.py --mode cal --target_dir 000000-000389-C16-N5
+```
+
+4. merge all results into a single file for NAS-Bench-102-API.
+```
+OMP_NUM_THREADS=4 python exps/NAS-Bench-102/statistics.py --mode merge
+```
+This command will generate a single file `output/NAS-BENCH-102-4/simplifies/C16-N5-final-infos.pth` contains all the data for NAS-Bench-102.
+This generated file will serve as the input for our NAS-Bench-102 API.
+
+[option] train a single architecture on a single GPU.
+```
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-102/train-a-net.sh resnet 16 5
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-102/train-a-net.sh '|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|skip_connect~1|skip_connect~2|' 16 5
+```
+
+## To Reproduce 10 Baseline NAS Algorithms in NAS-Bench-102
+
+We have tried our best to implement each method. However, still, some algorithms might obtain non-optimal results since their hyper-parameters might not fit our NAS-Bench-102.
+If researchers can provide better results with different hyper-parameters, we are happy to update results according to the new experimental results. We also welcome more NAS algorithms to test on our dataset and would include them accordingly.
+
+- [1] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 -1`
+- [2] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 -1`
+- [3] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh     cifar10 -1`
+- [4] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/SETN.sh     cifar10 -1`
+- [5] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/ENAS.sh     cifar10 -1`
+- [6] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/RANDOM-NAS.sh cifar10 -1`
+- [7] `bash ./scripts-search/algos/R-EA.sh -1`
+- [8] `bash ./scripts-search/algos/Random.sh -1`
+- [9] `bash ./scripts-search/algos/REINFORCE.sh -1`
+- [10] `bash ./scripts-search/algos/BOHB.sh -1`

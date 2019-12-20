@@ -10,7 +10,36 @@ from models       import get_cell_based_tiny_net
 
 
 
-__all__ = ['evaluate_for_seed']
+__all__ = ['evaluate_for_seed', 'pure_evaluate']
+
+
+
+def pure_evaluate(xloader, network, criterion=torch.nn.CrossEntropyLoss()):
+  data_time, batch_time, batch = AverageMeter(), AverageMeter(), None
+  losses, top1, top5 = AverageMeter(), AverageMeter(), AverageMeter()
+  latencies = []
+  network.eval()
+  with torch.no_grad():
+    end = time.time()
+    for i, (inputs, targets) in enumerate(xloader):
+      targets = targets.cuda(non_blocking=True)
+      inputs  = inputs.cuda(non_blocking=True)
+      data_time.update(time.time() - end)
+      # forward
+      features, logits = network(inputs)
+      loss             = criterion(logits, targets)
+      batch_time.update(time.time() - end)
+      if batch is None or batch == inputs.size(0):
+        batch = inputs.size(0)
+        latencies.append( batch_time.val - data_time.val )
+      # record loss and accuracy
+      prec1, prec5 = obtain_accuracy(logits.data, targets.data, topk=(1, 5))
+      losses.update(loss.item(),  inputs.size(0))
+      top1.update  (prec1.item(), inputs.size(0))
+      top5.update  (prec5.item(), inputs.size(0))
+      end = time.time()
+  if len(latencies) > 2: latencies = latencies[1:]
+  return losses.avg, top1.avg, top5.avg, latencies
 
 
 
