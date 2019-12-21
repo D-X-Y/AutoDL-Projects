@@ -115,3 +115,6 @@ GPU-*.sh
 cal.sh
 aaa
 cx.sh
+
+NAS-Bench-102-v1_0.pth
+lib/NAS-Bench-102-v1_0.pth
