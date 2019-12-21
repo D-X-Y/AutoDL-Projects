@@ -32,6 +32,8 @@ flop, param  = get_model_infos(net, (1,3,32,32))
 
 We build a new benchmark for neural architecture search, please see more details in [NAS-Bench-102.md](https://github.com/D-X-Y/NAS-Projects/blob/master/NAS-Bench-102.md).
 
+The benchmark data file (v1.0) is `NAS-Bench-102-v1_0-e61699.pth`, which can be downloaded from [Google Drive](https://drive.google.com/open?id=1SKW0Cu0u8-gb18zDpaAGi0f74UdXeGKs).
+
 ## [Network Pruning via Transformable Architecture Search](https://arxiv.org/abs/1905.09717)
 In this paper, we proposed a differentiable searching strategy for transformable architectures, i.e., searching for the depth and width of a deep neural network.
 You could see the highlight of our Transformable Architecture Search (TAS) at our [project page](https://xuanyidong.com/assets/projects/NeurIPS-2019-TAS.html).

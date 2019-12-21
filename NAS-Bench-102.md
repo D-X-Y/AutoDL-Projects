@@ -16,6 +16,7 @@ Note: please use `PyTorch >= 1.2.0` and `Python >= 3.6.0`.
 
 The benchmark file of NAS-Bench-102 can be downloaded from [Google Drive](https://drive.google.com/open?id=1SKW0Cu0u8-gb18zDpaAGi0f74UdXeGKs) or [Baidu-Wangpan].
 You can move it to anywhere you want and send its path to our API for initialization.
+- v1.0: `NAS-Bench-102-v1_0-e61699.pth`, where `e61699` is the last six digits for this file.
 
 The training and evaluation data used in NAS-Bench-102 can be downloaded from [Google Drive](https://drive.google.com/open?id=1L0Lzq8rWpZLPfiQGd6QR8q5xLV88emU7) or [Baidu-Wangpan].
 It is recommended to put these data into `$TORCH_HOME` (`~/.torch/` by default). If you want to generate NAS-Bench-102 or similar NAS datasets or training models by yourself, you need these data.
@@ -26,7 +27,7 @@ It is recommended to put these data into `$TORCH_HOME` (`~/.torch/` by default).
 ```
 from nas_102_api import NASBench102API
 api = NASBench102API('$path_to_meta_nas_bench_file')
-api = NASBench102API('NAS-Bench-102-v1_0.pth')
+api = NASBench102API('NAS-Bench-102-v1_0-e61699.pth')
 ```
 
 2. Show the number of architectures `len(api)` and each architecture `api[i]`:
@@ -107,7 +108,7 @@ print(archRes.get_metrics('cifar10-valid', 'x-valid', None,  True)) # print loss
 `NASBench102API` is the topest level api. Please see the following usages:
 ```
 from nas_102_api import NASBench102API as API
-api = API('NAS-Bench-102-v1_0.pth')
+api = API('NAS-Bench-102-v1_0-e61699.pth')
 api.show(-1)  # show info of all architectures
 ```
 
