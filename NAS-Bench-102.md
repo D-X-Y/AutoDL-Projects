@@ -1,4 +1,4 @@
-# NAS-BENCH-102: Extending the Scope of Reproducible Neural Architecture Search
+# [NAS-BENCH-102: Extending the Scope of Reproducible Neural Architecture Search](https://openreview.net/forum?id=HJxyZkBKDr)
 
 We propose an algorithm-agnostic NAS benchmark (NAS-Bench-102) with a fixed search space, which provides a unified benchmark for almost any up-to-date NAS algorithms.
 The design of our search space is inspired from that used in the most popular cell-based searching algorithms, where a cell is represented as a directed acyclic graph.
@@ -158,7 +158,7 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-102/train-a-net.sh '|nor_
 We have tried our best to implement each method. However, still, some algorithms might obtain non-optimal results since their hyper-parameters might not fit our NAS-Bench-102.
 If researchers can provide better results with different hyper-parameters, we are happy to update results according to the new experimental results. We also welcome more NAS algorithms to test on our dataset and would include them accordingly.
 
-Note that you need to prepare the training and test data as described in [Preparation and Download](#preparation-and-download)
+**Note that** you need to prepare the training and test data as described in [Preparation and Download](#preparation-and-download)
 
 - [1] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 -1`
 - [2] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 -1`

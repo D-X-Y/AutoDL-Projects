@@ -3,10 +3,10 @@
 This project contains the following neural architecture search algorithms, implemented in [PyTorch](http://pytorch.org).
 More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesome-NAS).
 
+- NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search, ICLR 2020
 - Network Pruning via Transformable Architecture Search, NeurIPS 2019
 - One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
 - Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019
-- NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search, ICLR 2020
 - 10 NAS algorithms for the neural topology in `exps/algos` (see [NAS-Bench-102.md](https://github.com/D-X-Y/NAS-Projects/blob/master/NAS-Bench-102.md) for more details)
 - Several typical classification models, e.g., ResNet and DenseNet (see [BASELINE.md](https://github.com/D-X-Y/NAS-Projects/blob/master/BASELINE.md))
 
@@ -28,7 +28,7 @@ flop, param  = get_model_infos(net, (1,3,32,32))
 2. Different NAS-searched architectures are defined [here](https://github.com/D-X-Y/NAS-Projects/blob/master/lib/nas_infer_model/DXYs/genotypes.py).
 
 
-## NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search
+## [NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search](https://openreview.net/forum?id=HJxyZkBKDr)
 
 We build a new benchmark for neural architecture search, please see more details in [NAS-Bench-102.md](https://github.com/D-X-Y/NAS-Projects/blob/master/NAS-Bench-102.md).
 
@@ -106,8 +106,6 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/SETN.sh cifar10 -1
 
 We proposed a Gradient-based searching algorithm using Differentiable Architecture Sampling (GDAS). GDAS is baseed on DARTS and improves it with Gumbel-softmax sampling.
 Experiments on CIFAR-10, CIFAR-100, ImageNet, PTB, and WT2 are reported.
-
-The old version is located at [`others/GDAS`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/GDAS) and a paddlepaddle implementation is locate at [`others/paddlepaddle`](https://github.com/D-X-Y/NAS-Projects/tree/master/others/paddlepaddle).
 
 
 ### Usage

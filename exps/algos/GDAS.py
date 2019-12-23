@@ -104,7 +104,8 @@ def main(xargs):
   search_space = get_search_spaces('cell', xargs.search_space_name)
   model_config = dict2config({'name': 'GDAS', 'C': xargs.channel, 'N': xargs.num_cells,
                               'max_nodes': xargs.max_nodes, 'num_classes': class_num,
-                              'space'    : search_space}, None)
+                              'space'    : search_space,
+                              'affine'   : False, 'track_running_stats': True}, None)
   search_model = get_cell_based_tiny_net(model_config)
   logger.log('search-model :\n{:}'.format(search_model))
   
@@ -194,7 +195,7 @@ def main(xargs):
 
   logger.log('\n' + '-'*100)
   # check the performance from the architecture dataset
-  logger.log('DARTS-V1 : run {:} epochs, cost {:.1f} s, last-geno is {:}.'.format(total_epoch, search_time.sum, genotypes[total_epoch-1]))
+  logger.log('GDAS : run {:} epochs, cost {:.1f} s, last-geno is {:}.'.format(total_epoch, search_time.sum, genotypes[total_epoch-1]))
   if api is not None: logger.log('{:}'.format( api.query_by_arch(genotypes[total_epoch-1]) ))
   logger.close()
   
