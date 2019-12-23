@@ -1,7 +1,7 @@
 # [NAS-BENCH-102: Extending the Scope of Reproducible Neural Architecture Search](https://openreview.net/forum?id=HJxyZkBKDr)
 
 We propose an algorithm-agnostic NAS benchmark (NAS-Bench-102) with a fixed search space, which provides a unified benchmark for almost any up-to-date NAS algorithms.
-The design of our search space is inspired from that used in the most popular cell-based searching algorithms, where a cell is represented as a directed acyclic graph.
+The design of our search space is inspired by that used in the most popular cell-based searching algorithms, where a cell is represented as a directed acyclic graph.
 Each edge here is associated with an operation selected from a predefined operation set.
 For it to be applicable for all NAS algorithms, the search space defined in NAS-Bench-102 includes 4 nodes and 5 associated operation options, which generates 15,625 neural cell candidates in total.
 

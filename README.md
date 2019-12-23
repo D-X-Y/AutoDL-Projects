@@ -1,6 +1,6 @@
-# Nueral Architecture Search (NAS)
+# Neural Architecture Search (NAS)
 
-This project contains the following neural architecture search algorithms, implemented in [PyTorch](http://pytorch.org).
+This project contains the following neural architecture search (NAS) algorithms, implemented in [PyTorch](http://pytorch.org).
 More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesome-NAS).
 
 - NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search, ICLR 2020
@@ -158,6 +158,7 @@ If you find that this project helps your research, please consider citing some o
   title     = {One-Shot Neural Architecture Search via Self-Evaluated Template Network},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {Proceedings of the IEEE International Conference on Computer Vision (ICCV)},
+  pages     = {3681--3690},
   year      = {2019}
 }
 @inproceedings{dong2019search,
