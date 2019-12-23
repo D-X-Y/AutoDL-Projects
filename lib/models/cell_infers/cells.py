@@ -19,9 +19,9 @@ class InferCell(nn.Module):
       cur_innod = []
       for (op_name, op_in) in node_info:
         if op_in == 0:
-          layer = OPS[op_name](C_in , C_out, stride, True)
+          layer = OPS[op_name](C_in , C_out, stride, True, True)
         else:
-          layer = OPS[op_name](C_out, C_out,      1, True)
+          layer = OPS[op_name](C_out, C_out,      1, True, True)
         cur_index.append( len(self.layers) )
         cur_innod.append( op_in )
         self.layers.append( layer )
