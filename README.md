@@ -13,7 +13,7 @@ More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesom
 
 ## Requirements and Preparation
 
-Please install `PyTorch>=1.1.0`, `Python>=3.6`, and `opencv`.
+Please install `PyTorch>=1.2.0`, `Python>=3.6`, and `opencv`.
 
 The CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
 Some methods use knowledge distillation (KD), which require pre-trained models. Please download these models from [Google Driver](https://drive.google.com/open?id=1ANmiYEGX-IQZTfH8w0aSpj-Wypg-0DR-) (or train by yourself) and save into `.latent-data`.

@@ -213,7 +213,7 @@ def train_single_model(save_dir, workers, datasets, xpaths, splits, use_less, se
 
 
 def generate_meta_info(save_dir, max_node, divide=40):
-  aa_nas_bench_ss = get_search_spaces('cell', 'aa-nas')
+  aa_nas_bench_ss = get_search_spaces('cell', 'nas-bench-102')
   archs = CellStructure.gen_all(aa_nas_bench_ss, max_node, False)
   print ('There are {:} archs vs {:}.'.format(len(archs), len(aa_nas_bench_ss) ** ((max_node-1)*max_node/2)))
 

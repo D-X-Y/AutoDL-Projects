@@ -36,6 +36,7 @@ def get_cell_based_tiny_net(config):
 def get_search_spaces(xtype, name):
   if xtype == 'cell':
     from .cell_operations import SearchSpaceNames
+    assert name in SearchSpaceNames, 'invalid name [{:}] in {:}'.format(name, SearchSpaceNames.keys())
     return SearchSpaceNames[name]
   else:
     raise ValueError('invalid search-space type is {:}'.format(xtype))

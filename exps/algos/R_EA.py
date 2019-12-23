@@ -59,9 +59,9 @@ def train_and_eval(arch, nas_bench, extra_info):
   if nas_bench is not None:
     arch_index = nas_bench.query_index_by_arch( arch )
     assert arch_index >= 0, 'can not find this arch : {:}'.format(arch)
-    info = nas_bench.arch2infos[ arch_index ]
-    _, valid_acc = info.get_metrics('cifar10-valid', 'x-valid' , 25, True) # use the validation accuracy after 25 training epochs
-    #import pdb; pdb.set_trace()
+    info = nas_bench.get_more_info(arch_index, 'cifar10-valid', True)
+    import pdb; pdb.set_trace()
+    #_, valid_acc = info.get_metrics('cifar10-valid', 'x-valid' , 25, True) # use the validation accuracy after 25 training epochs
   else:
     # train a model from scratch.
     raise ValueError('NOT IMPLEMENT YET')

@@ -118,3 +118,5 @@ cx.sh
 
 NAS-Bench-102-v1_0.pth
 lib/NAS-Bench-102-v1_0.pth
+others/TF
+scripts-search/l2s-algos

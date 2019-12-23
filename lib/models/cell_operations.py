@@ -16,12 +16,13 @@ OPS = {
   'skip_connect' : lambda C_in, C_out, stride, affine: Identity() if stride == 1 and C_in == C_out else FactorizedReduce(C_in, C_out, stride, affine),
 }
 
-CONNECT_NAS_BENCHMARK  = ['none', 'skip_connect', 'nor_conv_3x3']
-AA_NAS_BENCHMARK       = ['none', 'skip_connect', 'nor_conv_1x1', 'nor_conv_3x3', 'avg_pool_3x3']
+CONNECT_NAS_BENCHMARK = ['none', 'skip_connect', 'nor_conv_3x3']
+NAS_BENCH_102         = ['none', 'skip_connect', 'nor_conv_1x1', 'nor_conv_3x3', 'avg_pool_3x3']
 
-SearchSpaceNames = {'connect-nas' : CONNECT_NAS_BENCHMARK,
-                    'aa-nas'      : AA_NAS_BENCHMARK,
-                    'full'        : sorted(list(OPS.keys()))}
+SearchSpaceNames = {'connect-nas'  : CONNECT_NAS_BENCHMARK,
+                    'aa-nas'       : NAS_BENCH_102,
+                    'nas-bench-102': NAS_BENCH_102,
+                    'full'         : sorted(list(OPS.keys()))}
 
 
 class ReLUConvBN(nn.Module):
