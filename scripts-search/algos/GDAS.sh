@@ -34,6 +34,7 @@ OMP_NUM_THREADS=4 python ./exps/algos/GDAS.py \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
 	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-102-v1_0-e61699.pth \
-	--tau_max 10 --tau_min 0.1 \
+	--config_path configs/nas-benchmark/algos/GDAS.config \
+	--tau_max 10 --tau_min 0.1 --track_running_stats 1 \
 	--arch_learning_rate 0.0003 --arch_weight_decay 0.001 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}

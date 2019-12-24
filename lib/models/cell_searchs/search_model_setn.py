@@ -13,7 +13,7 @@ from .genotypes        import Structure
 
 class TinyNetworkSETN(nn.Module):
 
-  def __init__(self, C, N, max_nodes, num_classes, search_space):
+  def __init__(self, C, N, max_nodes, num_classes, search_space, affine, track_running_stats):
     super(TinyNetworkSETN, self).__init__()
     self._C        = C
     self._layerN   = N
@@ -31,7 +31,7 @@ class TinyNetworkSETN(nn.Module):
       if reduction:
         cell = ResNetBasicblock(C_prev, C_curr, 2)
       else:
-        cell = SearchCell(C_prev, C_curr, 1, max_nodes, search_space)
+        cell = SearchCell(C_prev, C_curr, 1, max_nodes, search_space, affine, track_running_stats)
         if num_edge is None: num_edge, edge2index = cell.num_edges, cell.edge2index
         else: assert num_edge == cell.num_edges and edge2index == cell.edge2index, 'invalid {:} vs. {:}.'.format(num_edge, cell.num_edges)
       self.cells.append( cell )

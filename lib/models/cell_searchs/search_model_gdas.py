@@ -11,7 +11,8 @@ from .genotypes        import Structure
 
 class TinyNetworkGDAS(nn.Module):
 
-  def __init__(self, C, N, max_nodes, num_classes, search_space, affine=False, track_running_stats=True):
+  #def __init__(self, C, N, max_nodes, num_classes, search_space, affine=False, track_running_stats=True):
+  def __init__(self, C, N, max_nodes, num_classes, search_space, affine, track_running_stats):
     super(TinyNetworkGDAS, self).__init__()
     self._C        = C
     self._layerN   = N

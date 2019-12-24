@@ -35,5 +35,6 @@ OMP_NUM_THREADS=4 python ./exps/algos/R_EA.py \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
 	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-102-v1_0-e61699.pth \
-	--ea_cycles 30 --ea_population 10 --ea_sample_size 3 --ea_fast_by_api 1 \
+	--time_budget 12000 \
+	--ea_cycles 100 --ea_population 10 --ea_sample_size 3 --ea_fast_by_api 1 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}
