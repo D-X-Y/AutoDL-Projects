@@ -34,5 +34,6 @@ OMP_NUM_THREADS=4 python ./exps/algos/reinforce.py \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
 	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-102-v1_0-e61699.pth \
-	--learning_rate 0.001 --RL_steps 100 --EMA_momentum 0.9 \
+	--time_budget 12000 \
+	--learning_rate 0.001 --EMA_momentum 0.9 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}
