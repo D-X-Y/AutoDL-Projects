@@ -34,6 +34,6 @@ OMP_NUM_THREADS=4 python ./exps/algos/BOHB.py \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
 	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-102-v1_0-e61699.pth \
-	--time_budget 12000 \
-	--n_iters 100 --num_samples 4 --random_fraction 0 \
+	--time_budget 12000 --time_scale 200 \
+	--n_iters 64 --num_samples 4 --random_fraction 0 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}
