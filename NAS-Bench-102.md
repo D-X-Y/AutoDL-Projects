@@ -51,7 +51,7 @@ res_metrics = info.get_metrics('cifar10', 'train') # This is a dict with metric 
 cost_metrics = info.get_comput_costs('cifar100') # This is a dict with metric names as keys, e.g., flops, params, latency
 
 # get the detailed information
-results = api.query_by_index(1, 'cifar100') # a list of all trials on cifar100
+results = api.query_by_index(1, 'cifar100') # a dict of all trials for 1st net on cifar100, where the key is the seed
 print ('There are {:} trials for this architecture [{:}] on cifar100'.format(len(results), api[1]))
 print ('Latency : {:}'.format(results[0].get_latency()))
 print ('Train Info : {:}'.format(results[0].get_train()))

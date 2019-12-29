@@ -26,8 +26,6 @@ def get_depth_choices(nDepth, return_num):
   else         : return choices
   
 
-
-
 def conv_forward(inputs, conv, choices):
   iC = conv.in_channels
   fill_size = list(inputs.size())
