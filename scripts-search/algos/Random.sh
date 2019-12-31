@@ -21,17 +21,11 @@ num_cells=5
 max_nodes=4
 space=nas-bench-102
 
-if [ "$dataset" == "cifar10" ] || [ "$dataset" == "cifar100" ]; then
-  data_path="$TORCH_HOME/cifar.python"
-else
-  data_path="$TORCH_HOME/cifar.python/ImageNet16"
-fi
-
 save_dir=./output/search-cell-${space}/RAND-${dataset}
 
 OMP_NUM_THREADS=4 python ./exps/algos/RANDOM.py \
 	--save_dir ${save_dir} --max_nodes ${max_nodes} --channel ${channel} --num_cells ${num_cells} \
-	--dataset ${dataset} --data_path ${data_path} \
+	--dataset ${dataset} \
 	--search_space_name ${space} \
 	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-102-v1_0-e61699.pth \
 	--time_budget 12000 \

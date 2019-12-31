@@ -74,15 +74,22 @@ class Structure:
       nodes[i+1] = sum(sums) > 0
     return nodes[len(self.nodes)]
 
-  def to_unique_str(self):
+  def to_unique_str(self, consider_zero=False):
     # this is used to identify the isomorphic cell, which rerquires the prior knowledge of operation
     # two operations are special, i.e., none and skip_connect
     nodes = {0: '0'}
     for i_node, node_info in enumerate(self.nodes):
       cur_node = []
       for op, xin in node_info:
-        if op == 'skip_connect': x = nodes[xin]
-        else: x = '('+nodes[xin]+')' + '@{:}'.format(op)
+        if consider_zero is None:
+          x = '('+nodes[xin]+')' + '@{:}'.format(op)
+        elif consider_zero:
+          if op == 'none' or nodes[xin] == '#': x = '#' # zero
+          elif op == 'skip_connect': x = nodes[xin]
+          else: x = '('+nodes[xin]+')' + '@{:}'.format(op)
+        else:
+          if op == 'skip_connect': x = nodes[xin]
+          else: x = '('+nodes[xin]+')' + '@{:}'.format(op)
         cur_node.append(x)
       nodes[i_node+1] = '+'.join( sorted(cur_node) )
     return nodes[ len(self.nodes) ]
