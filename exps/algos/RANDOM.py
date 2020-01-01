@@ -56,6 +56,7 @@ def main(xargs, nas_bench):
   search_space = get_search_spaces('cell', xargs.search_space_name)
   random_arch = random_architecture_func(xargs.max_nodes, search_space)
   #x =random_arch() ; y = mutate_arch(x)
+  x_start_time = time.time()
   logger.log('{:} use nas_bench : {:}'.format(time_string(), nas_bench))
   best_arch, best_acc, total_time_cost, history = None, -1, 0, []
   #for idx in range(xargs.random_num):
@@ -68,7 +69,7 @@ def main(xargs, nas_bench):
     if best_arch is None or best_acc < accuracy:
       best_acc, best_arch = accuracy, arch
     logger.log('[{:03d}] : {:} : accuracy = {:.2f}%'.format(len(history), arch, accuracy))
-  logger.log('{:} best arch is {:}, accuracy = {:.2f}%, visit {:} archs with {:.1f} s.'.format(time_string(), best_arch, best_acc, len(history), total_time_cost))
+  logger.log('{:} best arch is {:}, accuracy = {:.2f}%, visit {:} archs with {:.1f} s (real-cost = {:.3f} s).'.format(time_string(), best_arch, best_acc, len(history), total_time_cost, time.time()-x_start_time))
   
   info = nas_bench.query_by_arch( best_arch )
   if info is None: logger.log('Did not find this architecture : {:}.'.format(best_arch))

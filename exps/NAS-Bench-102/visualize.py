@@ -383,4 +383,4 @@ if __name__ == '__main__':
   #visualize_info(str(meta_file), 'cifar10' , vis_save_dir)
   #visualize_info(str(meta_file), 'cifar100', vis_save_dir)
   #visualize_info(str(meta_file), 'ImageNet16-120', vis_save_dir)
-  visualize_relative_ranking(vis_save_dir)
+  #visualize_relative_ranking(vis_save_dir)

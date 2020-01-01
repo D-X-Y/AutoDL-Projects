@@ -174,7 +174,7 @@ def main(xargs, nas_bench):
 
   id2config = results.get_id2config_mapping()
   incumbent = results.get_incumbent_id()
-  logger.log('Best found configuration: {:}'.format(id2config[incumbent]['config']))
+  logger.log('Best found configuration: {:} within {:.3f} s'.format(id2config[incumbent]['config'], real_cost_time))
   best_arch = config2structure( id2config[incumbent]['config'] )
 
   info = nas_bench.query_by_arch( best_arch )

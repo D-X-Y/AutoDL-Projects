@@ -139,6 +139,7 @@ def main(xargs, nas_bench):
 
   # REINFORCE
   # attempts = 0
+  x_start_time = time.time()
   logger.log('Will start searching with time budget of {:} s.'.format(xargs.time_budget))
   total_steps, total_costs = 0, 0
   #for istep in range(xargs.RL_steps):
@@ -166,7 +167,7 @@ def main(xargs, nas_bench):
     #logger.log('')
 
   best_arch = policy.genotype()
-  logger.log('REINFORCE finish with {:} steps and {:.1f} s.'.format(total_steps, total_costs))
+  logger.log('REINFORCE finish with {:} steps and {:.1f} s (real cost={:.3f}).'.format(total_steps, total_costs, time.time()-x_start_time))
   info = nas_bench.query_by_arch( best_arch )
   if info is None: logger.log('Did not find this architecture : {:}.'.format(best_arch))
   else           : logger.log('{:}'.format(info))

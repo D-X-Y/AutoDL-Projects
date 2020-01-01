@@ -201,10 +201,11 @@ def main(xargs, nas_bench):
   random_arch = random_architecture_func(xargs.max_nodes, search_space)
   mutate_arch = mutate_arch_func(search_space)
   #x =random_arch() ; y = mutate_arch(x)
+  x_start_time = time.time()
   logger.log('{:} use nas_bench : {:}'.format(time_string(), nas_bench))
   logger.log('-'*30 + ' start searching with the time budget of {:} s'.format(xargs.time_budget))
   history, total_cost = regularized_evolution(xargs.ea_cycles, xargs.ea_population, xargs.ea_sample_size, xargs.time_budget, random_arch, mutate_arch, nas_bench if args.ea_fast_by_api else None, extra_info)
-  logger.log('{:} regularized_evolution finish with history of {:} arch with {:.1f} s.'.format(time_string(), len(history), total_cost))
+  logger.log('{:} regularized_evolution finish with history of {:} arch with {:.1f} s (real-cost={:.2f} s).'.format(time_string(), len(history), total_cost, time.time()-x_start_time))
   best_arch = max(history, key=lambda i: i.accuracy)
   best_arch = best_arch.arch
   logger.log('{:} best arch is {:}'.format(time_string(), best_arch))
