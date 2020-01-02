@@ -464,18 +464,17 @@ def just_show(api):
     print ('[{:10s}-{:10s} ::: index={:5d}, accuracy={:.2f}'.format(dataset, metric_on_set, arch_index, highest_acc))
 
 
-def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims):
+def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims, x_maxs):
   color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
   dpi, width, height = 300, 3400, 2600
   LabelSize, LegendFontsize = 28, 28
   figsize = width / float(dpi), height / float(dpi)
   fig = plt.figure(figsize=figsize)
-  x_maxs = 250
-  x_axis = np.arange(0, x_maxs)
-  plt.xlim(0, x_maxs)
+  #x_maxs = 250
+  plt.xlim(0, x_maxs+1)
   plt.ylim(y_lims[0], y_lims[1])
   interval_x, interval_y = x_maxs // 5, y_lims[2]
-  plt.xticks(np.arange(0, x_maxs, interval_x), fontsize=LegendFontsize)
+  plt.xticks(np.arange(0, x_maxs+1, interval_x), fontsize=LegendFontsize)
   plt.yticks(np.arange(y_lims[0],y_lims[1], interval_y), fontsize=LegendFontsize)
   plt.grid()
   plt.xlabel('The searching epoch', fontsize=LabelSize)
@@ -505,17 +504,24 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims):
       xresults.append( metrics['accuracy'] )
     return xresults
 
-  for idx, method in enumerate(['RSPS', 'GDAS', 'SETN', 'ENAS']):
+  if x_maxs == 50:
+    xox, xxxstrs = 'v2', ['DARTS-V1', 'DARTS-V2']
+  elif x_maxs == 250:
+    xox, xxxstrs = 'v1', ['RSPS', 'GDAS', 'SETN', 'ENAS']
+  else: raise ValueError('invalid x_maxs={:}'.format(x_maxs))
+
+  for idx, method in enumerate(xxxstrs):
     xkey = method
     all_paths = [ '{:}/seed-{:}-basic.pth'.format(xpaths[xkey], seed) for seed in xseeds[xkey] ]
-    all_datas = [torch.load(xpath) for xpath in all_paths]
+    all_datas = [torch.load(xpath, map_location='cpu') for xpath in all_paths]
     accyss = [get_accs(xdatas) for xdatas in all_datas]
     accyss = np.array( accyss )
     epochs = list(range(accyss.shape[1]))
     plt.plot(epochs, [accyss[:,i].mean() for i in epochs], color=color_set[idx], linestyle='-', label='{:}'.format(method), lw=2)
     plt.fill_between(epochs, [accyss[:,i].mean()-accyss[:,i].std() for i in epochs], [accyss[:,i].mean()+accyss[:,i].std() for i in epochs], alpha=0.2, color=color_set[idx])
-  plt.legend(loc=4, fontsize=LegendFontsize)
-  save_path = vis_save_dir / '{:}-{:}-{:}'.format(dataset, subset, file_name)
+  #plt.legend(loc=4, fontsize=LegendFontsize)
+  plt.legend(loc=0, fontsize=LegendFontsize)
+  save_path = vis_save_dir / '{:}-{:}-{:}-{:}'.format(xox, dataset, subset, file_name)
   print('save figure into {:}\n'.format(save_path))
   fig.savefig(str(save_path), dpi=dpi, bbox_inches='tight', format='pdf')
 
@@ -540,7 +546,13 @@ if __name__ == '__main__':
   #visualize_relative_ranking(vis_save_dir)
 
   api = API(args.api_path)
-  show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-plot.pdf', (5,95,10))
+  for x_maxs in [50, 250]:
+    show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
+    show_nas_sharing_w(api, 'cifar10'       , 'ori-test', vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
+    show_nas_sharing_w(api, 'cifar100'      , 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
+    show_nas_sharing_w(api, 'cifar100'      , 'x-test'  , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
+    show_nas_sharing_w(api, 'ImageNet16-120', 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
+    show_nas_sharing_w(api, 'ImageNet16-120', 'x-test'  , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
   """
   just_show(api)
   plot_results_nas(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-com.pdf', (85,95, 1))
