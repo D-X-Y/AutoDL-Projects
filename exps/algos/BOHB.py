@@ -184,7 +184,7 @@ def main(xargs, nas_bench):
 
   logger.log('workers : {:.1f}s with {:} archs'.format(workers[0].time_budget, len(workers[0].seen_archs)))
   logger.close()
-  return logger.log_dir, nas_bench.query_index_by_arch( best_arch )
+  return logger.log_dir, nas_bench.query_index_by_arch( best_arch ), real_cost_time
   
 
 
@@ -219,12 +219,14 @@ if __name__ == '__main__':
     print ('{:} build NAS-Benchmark-API from {:}'.format(time_string(), args.arch_nas_dataset))
     nas_bench = API(args.arch_nas_dataset)
   if args.rand_seed < 0:
-    save_dir, all_indexes, num = None, [], 500
+    save_dir, all_indexes, num, all_times = None, [], 500, []
     for i in range(num):
       print ('{:} : {:03d}/{:03d}'.format(time_string(), i, num))
       args.rand_seed = random.randint(1, 100000)
-      save_dir, index = main(args, nas_bench)
+      save_dir, index, ctime = main(args, nas_bench)
       all_indexes.append( index ) 
+      all_times.append( ctime )
+    print ('\n average time : {:.3f} s'.format(sum(all_times)/len(all_times)))
     torch.save(all_indexes, save_dir / 'results.pth')
   else:
     main(args, nas_bench)

@@ -5,6 +5,7 @@
 ##################################################
 import os, sys, time, argparse, collections
 from tqdm import tqdm
+from collections import OrderedDict
 import numpy as np
 import torch
 import torch.nn as nn
@@ -412,7 +413,7 @@ def plot_results_nas(api, dataset, xset, root, file_name, y_lims):
 
 
 def just_show(api):
-  xtimes = {'RSPS': [8082.5, 7794.2, 8144.7],
+  xtimes = {'RSPS'    : [8082.5, 7794.2, 8144.7],
             'DARTS-V1': [11582.1, 11347.0, 11948.2],
             'DARTS-V2': [35694.7, 36132.7, 35518.0],
             'GDAS'    : [31334.1, 31478.6, 32016.7],
@@ -420,7 +421,7 @@ def just_show(api):
             'ENAS'    : [14340.2, 13817.3, 14018.9]}
   for xkey, xlist in xtimes.items():
     xlist = np.array(xlist)
-    print ('{:4s} : mean-time={:.1f} s'.format(xkey, xlist.mean()))
+    print ('{:4s} : mean-time={:.2f} s'.format(xkey, xlist.mean()))
 
   xpaths = {'RSPS'    : 'output/search-cell-nas-bench-102/RANDOM-NAS-cifar10/checkpoint/',
             'DARTS-V1': 'output/search-cell-nas-bench-102/DARTS-V1-cifar10/checkpoint/',
@@ -546,6 +547,7 @@ if __name__ == '__main__':
   #visualize_relative_ranking(vis_save_dir)
 
   api = API(args.api_path)
+  """
   for x_maxs in [50, 250]:
     show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
     show_nas_sharing_w(api, 'cifar10'       , 'ori-test', vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
@@ -553,12 +555,11 @@ if __name__ == '__main__':
     show_nas_sharing_w(api, 'cifar100'      , 'x-test'  , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
     show_nas_sharing_w(api, 'ImageNet16-120', 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
     show_nas_sharing_w(api, 'ImageNet16-120', 'x-test'  , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
-  """
   just_show(api)
+  """
   plot_results_nas(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-com.pdf', (85,95, 1))
   plot_results_nas(api, 'cifar10'       , 'ori-test', vis_save_dir, 'nas-com.pdf', (85,95, 1))
   plot_results_nas(api, 'cifar100'      , 'x-valid' , vis_save_dir, 'nas-com.pdf', (55,75, 3))
   plot_results_nas(api, 'cifar100'      , 'x-test'  , vis_save_dir, 'nas-com.pdf', (55,75, 3))
   plot_results_nas(api, 'ImageNet16-120', 'x-valid' , vis_save_dir, 'nas-com.pdf', (35,50, 3))
   plot_results_nas(api, 'ImageNet16-120', 'x-test'  , vis_save_dir, 'nas-com.pdf', (35,50, 3))
-  """

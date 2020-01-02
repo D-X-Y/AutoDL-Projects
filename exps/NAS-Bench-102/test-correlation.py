@@ -148,6 +148,7 @@ def check_cor_for_bandit(meta_file, test_epoch, use_less_or_not, is_rand=True, n
     api = meta_file
   else:
     api = API(str(meta_file))
+  cifar10_currs     = []
   cifar10_valid     = []
   cifar10_test      = []
   cifar100_valid    = []
@@ -156,6 +157,9 @@ def check_cor_for_bandit(meta_file, test_epoch, use_less_or_not, is_rand=True, n
   imagenet_valid    = []
   for idx, arch in enumerate(api):
     results = api.get_more_info(idx, 'cifar10-valid' , test_epoch-1, use_less_or_not, is_rand)
+    cifar10_currs.append( results['valid-accuracy'] )
+    # --->>>>>
+    results = api.get_more_info(idx, 'cifar10-valid' , None, False, is_rand)
     cifar10_valid.append( results['valid-accuracy'] )
     results = api.get_more_info(idx, 'cifar10'       , None, False, is_rand)
     cifar10_test.append( results['test-accuracy'] )
@@ -168,8 +172,8 @@ def check_cor_for_bandit(meta_file, test_epoch, use_less_or_not, is_rand=True, n
   def get_cor(A, B):
     return float(np.corrcoef(A, B)[0,1])
   cors = []
-  for basestr, xlist in zip(['CIFAR-010', 'C-100-V', 'C-100-T', 'I16-V', 'I16-T'], [cifar10_test, cifar100_valid, cifar100_test, imagenet_valid, imagenet_test]):
-    correlation = get_cor(cifar10_valid, xlist)
+  for basestr, xlist in zip(['C-010-V', 'C-010-T', 'C-100-V', 'C-100-T', 'I16-V', 'I16-T'], [cifar10_valid, cifar10_test, cifar100_valid, cifar100_test, imagenet_valid, imagenet_test]):
+    correlation = get_cor(cifar10_currs, xlist)
     if need_print: print ('With {:3d}/{:}-epochs-training, the correlation between cifar10-valid and {:} is : {:}'.format(test_epoch, '012' if use_less_or_not else '200', basestr, correlation))
     cors.append( correlation )
     #print ('With {:3d}/200-epochs-training, the correlation between cifar10-valid and {:} is : {:}'.format(test_epoch, basestr, get_cor(cifar10_valid_200, xlist)))
@@ -183,7 +187,8 @@ def check_cor_for_bandit_v2(meta_file, test_epoch, use_less_or_not, is_rand):
   for i in tqdm(range(100)):
     x = check_cor_for_bandit(meta_file, test_epoch, use_less_or_not, is_rand, False)
     corrs.append( x )
-  xstrs = ['CIFAR-010', 'C-100-V', 'C-100-T', 'I16-V', 'I16-T']
+  #xstrs = ['CIFAR-010', 'C-100-V', 'C-100-T', 'I16-V', 'I16-T']
+  xstrs = ['C-010-V', 'C-010-T', 'C-100-V', 'C-100-T', 'I16-V', 'I16-T']
   correlations = np.array(corrs)
   print('------>>>>>>>> {:03d}/{:} >>>>>>>> ------'.format(test_epoch, '012' if use_less_or_not else '200'))
   for idx, xstr in enumerate(xstrs):
@@ -213,5 +218,6 @@ if __name__ == '__main__':
   check_cor_for_bandit_v2(api,  24, False, True)
   check_cor_for_bandit_v2(api, 100, False, True)
   check_cor_for_bandit_v2(api, 150, False, True)
+  check_cor_for_bandit_v2(api, 175, False, True)
   check_cor_for_bandit_v2(api, 200, False, True)
   print('----')
