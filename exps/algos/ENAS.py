@@ -184,6 +184,7 @@ def main(xargs):
   logger = prepare_logger(args)
 
   train_data, test_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
+  assert xargs.dataset == 'cifar10', 'currently only support CIFAR-10'
   if xargs.dataset == 'cifar10' or xargs.dataset == 'cifar100':
     split_Fpath = 'configs/nas-benchmark/cifar-split.txt'
     cifar_split = load_config(split_Fpath, None, None)

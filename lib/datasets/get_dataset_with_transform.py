@@ -5,7 +5,6 @@ import os, sys, torch
 import os.path as osp
 import numpy as np
 import torchvision.datasets as dset
-import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 from PIL import Image
 from .DownsampledImageNet import ImageNet16
