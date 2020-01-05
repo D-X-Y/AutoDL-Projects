@@ -6,7 +6,6 @@ import numpy as np
 from collections import OrderedDict
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
-from graphviz import Digraph
 
 
 def test_nas_api():
@@ -29,6 +28,7 @@ OPS    = ['skip-connect', 'conv-1x1', 'conv-3x3', 'pool-3x3']
 COLORS = ['chartreuse'  , 'cyan'    , 'navyblue', 'chocolate1']
 
 def plot(filename):
+  from graphviz import Digraph
   g = Digraph(
       format='png',
       edge_attr=dict(fontsize='20', fontname="times"),
@@ -53,6 +53,26 @@ def plot(filename):
   g.render(filename, cleanup=True, view=False)
 
 
+def test_auto_grad():
+  class Net(torch.nn.Module):
+    def __init__(self, iS):
+      super(Net, self).__init__()
+      self.layer = torch.nn.Linear(iS, 1)
+    def forward(self, inputs):
+      outputs = self.layer(inputs)
+      outputs = torch.exp(outputs)
+      return outputs.mean()
+  net = Net(10)
+  inputs = torch.rand(256, 10)
+  loss = net(inputs)
+  first_order_grads = torch.autograd.grad(loss, net.parameters(), retain_graph=True, create_graph=True)
+  first_order_grads = torch.cat([x.view(-1) for x in first_order_grads])
+  second_order_grads = []
+  for grads in  first_order_grads:
+    s_grads = torch.autograd.grad(grads, net.parameters())
+    second_order_grads.append( s_grads )
+
 if __name__ == '__main__':
-  test_nas_api()
-  for i in range(200): plot('{:04d}'.format(i))
+  #test_nas_api()
+  #for i in range(200): plot('{:04d}'.format(i))
+  test_auto_grad()

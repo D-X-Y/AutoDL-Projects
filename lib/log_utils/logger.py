@@ -1,9 +1,6 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-#
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+##################################################
 from pathlib import Path
 import importlib, warnings
 import os, sys, time, numpy as np
@@ -14,6 +11,19 @@ else:                           # Python 3.x
 
 if importlib.util.find_spec('tensorflow'):
   import tensorflow as tf
+
+
+class PrintLogger(object):
+  
+  def __init__(self):
+    """Create a summary writer logging to log_dir."""
+    self.name = 'PrintLogger'
+
+  def log(self, string):
+    print (string)
+
+  def close(self):
+    print ('-'*30 + ' close printer ' + '-'*30)
 
 
 class Logger(object):
