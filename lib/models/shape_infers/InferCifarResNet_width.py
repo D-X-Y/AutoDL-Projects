@@ -1,4 +1,4 @@
-import math, torch
+import math
 import torch.nn as nn
 import torch.nn.functional as F
 from ..initialization import initialize_resnet

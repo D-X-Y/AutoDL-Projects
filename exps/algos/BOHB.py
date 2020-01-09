@@ -10,7 +10,6 @@ from copy import deepcopy
 from pathlib import Path
 import torch
 import torch.nn as nn
-from torch.distributions import Categorical
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str

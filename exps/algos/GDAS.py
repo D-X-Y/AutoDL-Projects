@@ -3,7 +3,7 @@
 ###########################################################################
 # Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019 #
 ###########################################################################
-import os, sys, time, glob, random, argparse
+import os, sys, time, random, argparse
 import numpy as np
 from copy import deepcopy
 import torch
@@ -11,7 +11,7 @@ import torch.nn as nn
 from pathlib import Path
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
-from config_utils import load_config, dict2config, configure2str
+from config_utils import load_config, dict2config
 from datasets     import get_datasets, SearchDataset
 from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
 from utils        import get_model_infos, obtain_accuracy

@@ -4,7 +4,7 @@
 
 The following is a set of guidelines for contributing to NAS-Projects.
 
-#### Table Of Contents
+## Table Of Contents
 
 [How Can I Contribute?](#how-can-i-contribute)
   * [Reporting Bugs](#reporting-bugs)

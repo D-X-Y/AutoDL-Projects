@@ -181,8 +181,8 @@ def main(xargs):
     logger.log('Load split file from {:}'.format(split_Fpath))
   else:
     raise ValueError('invalid dataset : {:}'.format(xargs.dataset))
-  config_path = 'configs/nas-benchmark/algos/DARTS.config'
-  config = load_config(config_path, {'class_num': class_num, 'xshape': xshape}, logger)
+  #config_path = 'configs/nas-benchmark/algos/DARTS.config'
+  config = load_config(xargs.config_path, {'class_num': class_num, 'xshape': xshape}, logger)
   # To split data
   train_data_v2 = deepcopy(train_data)
   train_data_v2.transform = valid_data.transform
@@ -233,7 +233,7 @@ def main(xargs):
     logger.log("=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(last_info, start_epoch))
   else:
     logger.log("=> do not find the last-info file : {:}".format(last_info))
-    start_epoch, valid_accuracies, genotypes = 0, {'best': -1}, {}
+    start_epoch, valid_accuracies, genotypes = 0, {'best': -1}, {-1: search_model.genotype()}
 
   # start training
   start_time, search_time, epoch_time, total_epoch = time.time(), AverageMeter(), AverageMeter(), config.epochs + config.warmup
@@ -297,6 +297,7 @@ if __name__ == '__main__':
   parser.add_argument('--data_path',          type=str,   help='Path to dataset')
   parser.add_argument('--dataset',            type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
   # channels and number-of-cells
+  parser.add_argument('--config_path',        type=str,   help='The config path.')
   parser.add_argument('--search_space_name',  type=str,   help='The search space name.')
   parser.add_argument('--max_nodes',          type=int,   help='The maximum number of nodes.')
   parser.add_argument('--channel',            type=int,   help='The number of channels.')

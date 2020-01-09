@@ -34,7 +34,7 @@ class PointMeta():
 
   def get_box(self, return_diagonal=False):
     if self.box is None: return None
-    if return_diagonal == False:
+    if not return_diagonal:
       return self.box.clone()
     else:
       W = (self.box[2]-self.box[0]).item()

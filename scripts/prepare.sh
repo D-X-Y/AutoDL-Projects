@@ -1,6 +1,6 @@
 #!/bin/bash
 # bash ./scripts/prepare.sh
-datasets='cifar10 cifar100 imagenet-1k'
+#datasets='cifar10 cifar100 imagenet-1k'
 #ratios='0.5 0.8 0.9'
 ratios='0.5'
 save_dir=./.latent-data/splits

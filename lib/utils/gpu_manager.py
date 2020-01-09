@@ -27,7 +27,7 @@ class GPUManager():
         find = False
         for gpu in all_gpus:
           if gpu['index'] == CUDA_VISIBLE_DEVICE:
-            assert find==False, 'Duplicate cuda device index : {}'.format(CUDA_VISIBLE_DEVICE)
+            assert not find, 'Duplicate cuda device index : {}'.format(CUDA_VISIBLE_DEVICE)
             find = True
             selected_gpus.append( gpu.copy() )
             selected_gpus[-1]['index'] = '{}'.format(idx)

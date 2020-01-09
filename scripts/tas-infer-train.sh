@@ -33,7 +33,7 @@ OMP_NUM_THREADS=4 python ./exps/basic-main.py --dataset ${dataset} \
 	--procedure    basic \
 	--save_dir     ${xsave_dir} \
 	--cutout_length -1 \
-	--batch_size 256 --rand_seed ${rseed} --workers 6 \
+	--batch_size ${batch} --rand_seed ${rseed} --workers 6 \
 	--eval_frequency 1 --print_freq 100 --print_freq_eval 200
 
 # KD training
@@ -47,5 +47,5 @@ OMP_NUM_THREADS=4 python ./exps/KD-main.py --dataset ${dataset} \
 	--save_dir     ${xsave_dir} \
 	--KD_alpha 0.9 --KD_temperature 4 \
 	--cutout_length -1 \
-	--batch_size 256 --rand_seed ${rseed} --workers 6 \
+	--batch_size ${batch} --rand_seed ${rseed} --workers 6 \
 	--eval_frequency 1 --print_freq 100 --print_freq_eval 200

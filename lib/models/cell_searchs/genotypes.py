@@ -68,7 +68,7 @@ class Structure:
     for i, node_info in enumerate(self.nodes):
       sums = []
       for op, xin in node_info:
-        if op == 'none' or nodes[xin] == False: x = False
+        if op == 'none' or nodes[xin] is False: x = False
         else: x = True
         sums.append( x )
       nodes[i+1] = sum(sums) > 0

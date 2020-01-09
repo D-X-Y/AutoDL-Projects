@@ -1,7 +1,7 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ##################################################
-import os, sys, time, torch, random, PIL, copy, numpy as np
+import os, sys, torch, random, PIL, copy, numpy as np
 from os import path as osp
 from shutil  import copyfile
 

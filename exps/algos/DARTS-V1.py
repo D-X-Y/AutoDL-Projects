@@ -121,9 +121,19 @@ def main(xargs):
     search_loader = torch.utils.data.DataLoader(search_data, batch_size=config.batch_size, shuffle=True , num_workers=xargs.workers, pin_memory=True)
     valid_loader  = torch.utils.data.DataLoader(valid_data , batch_size=config.batch_size, sampler=torch.utils.data.sampler.SubsetRandomSampler(valid_split), num_workers=xargs.workers, pin_memory=True)
   elif xargs.dataset == 'cifar100':
-    raise ValueError('not support yet : {:}'.format(xargs.dataset))
-  elif xargs.dataset.startswith('ImageNet16'):
-    raise ValueError('not support yet : {:}'.format(xargs.dataset))
+    cifar100_test_split = load_config('configs/nas-benchmark/cifar100-test-split.txt', None, None)
+    search_train_data = train_data
+    search_valid_data = deepcopy(valid_data) ; search_valid_data.transform = train_data.transform
+    search_data   = SearchDataset(xargs.dataset, [search_train_data,search_valid_data], list(range(len(search_train_data))), cifar100_test_split.xvalid)
+    search_loader = torch.utils.data.DataLoader(search_data, batch_size=config.batch_size, shuffle=True , num_workers=xargs.workers, pin_memory=True)
+    valid_loader  = torch.utils.data.DataLoader(valid_data , batch_size=config.batch_size, sampler=torch.utils.data.sampler.SubsetRandomSampler(cifar100_test_split.xvalid), num_workers=xargs.workers, pin_memory=True)
+  elif xargs.dataset == 'ImageNet16-120':
+    imagenet_test_split = load_config('configs/nas-benchmark/imagenet-16-120-test-split.txt', None, None)
+    search_train_data = train_data
+    search_valid_data = deepcopy(valid_data) ; search_valid_data.transform = train_data.transform
+    search_data   = SearchDataset(xargs.dataset, [search_train_data,search_valid_data], list(range(len(search_train_data))), imagenet_test_split.xvalid)
+    search_loader = torch.utils.data.DataLoader(search_data, batch_size=config.batch_size, shuffle=True , num_workers=xargs.workers, pin_memory=True)
+    valid_loader  = torch.utils.data.DataLoader(valid_data , batch_size=config.batch_size, sampler=torch.utils.data.sampler.SubsetRandomSampler(imagenet_test_split.xvalid), num_workers=xargs.workers, pin_memory=True)
   else:
     raise ValueError('invalid dataset : {:}'.format(xargs.dataset))
   logger.log('||||||| {:10s} ||||||| Search-Loader-Num={:}, Valid-Loader-Num={:}, batch size={:}'.format(xargs.dataset, len(search_loader), len(valid_loader), config.batch_size))
@@ -168,7 +178,7 @@ def main(xargs):
     logger.log("=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(last_info, start_epoch))
   else:
     logger.log("=> do not find the last-info file : {:}".format(last_info))
-    start_epoch, valid_accuracies, genotypes = 0, {'best': -1}, {}
+    start_epoch, valid_accuracies, genotypes = 0, {'best': -1}, {-1: search_model.genotype()}
 
   # start training
   start_time, search_time, epoch_time, total_epoch = time.time(), AverageMeter(), AverageMeter(), config.epochs + config.warmup
@@ -230,7 +240,7 @@ if __name__ == '__main__':
   parser.add_argument('--data_path',          type=str,   help='Path to dataset')
   parser.add_argument('--dataset',            type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
   # channels and number-of-cells
-  parser.add_argument('--config_path',        type=str,   help='The config paths.')
+  parser.add_argument('--config_path',        type=str,   help='The config path.')
   parser.add_argument('--search_space_name',  type=str,   help='The search space name.')
   parser.add_argument('--max_nodes',          type=int,   help='The maximum number of nodes.')
   parser.add_argument('--channel',            type=int,   help='The number of channels.')

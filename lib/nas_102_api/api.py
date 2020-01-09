@@ -70,6 +70,9 @@ class NASBench102API(object):
   def __repr__(self):
     return ('{name}({num}/{total} architectures)'.format(name=self.__class__.__name__, num=len(self.evaluated_indexes), total=len(self.meta_archs)))
 
+  def random(self):
+    return random.randint(0, len(self.meta_archs)-1)
+
   def query_index_by_arch(self, arch):
     if isinstance(arch, str):
       if arch in self.archstr2index: arch_index = self.archstr2index[ arch ]

@@ -85,7 +85,7 @@ class SearchCell(nn.Module):
           candidates = self.edges[node_str]
           select_op  = random.choice(candidates)
           sops.append( select_op )
-          if not hasattr(select_op, 'is_zero') or select_op.is_zero == False: has_non_zero=True
+          if not hasattr(select_op, 'is_zero') or select_op.is_zero is False: has_non_zero=True
         if has_non_zero: break
       inter_nodes = []
       for j, select_op in enumerate(sops):

@@ -40,39 +40,39 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts/nas-infer-train.sh imagenet-1k GDAS_
 
 ## Performance on ImageNet
 
-|      Model     | FLOPs (GB) | Params (M) | Top-1 Error | Top-5 Error |  Optimizer |
-|:--------------:|:----------:|:----------:|:-----------:|:-----------:|:----------:|
-| ResNet-18      | 1.814      |  11.69     |   30.24     |   10.92     | Official   |
-| ResNet-18      | 1.814      |  11.69     |   29.97     |   10.43     | Step-120   |
-| ResNet-18      | 1.814      |  11.69     |   29.35     |   10.13     | Cosine-120 |
-| ResNet-18      | 1.814      |  11.69     |   29.45     |   10.25     | Cosine-120 B1024 |
-| ResNet-18      | 1.814      |  11.69     |   29.44     |   10.12     |Cosine-S-120|
-| ResNet-18 (DS) | 2.053      |  11.71     |   28.53     |   9.69      |Cosine-S-120|
-| ResNet-34      | 3.663      |  21.80     |   25.65     |   8.06      |Cosine-120  |
-| ResNet-34 (DS) | 3.903      |  21.82     |   25.05     |   7.67      |Cosine-S-120|
-| ResNet-50      | 4.089      |  25.56     |   23.85     |   7.13      | Official   |
-| ResNet-50      | 4.089      |  25.56     |   22.54     |   6.45      |Cosine-120  |
-| ResNet-50      | 4.089      |  25.56     |   22.71     |   6.38      |Cosine-120 B1024 |
-| ResNet-50      | 4.089      |  25.56     |   22.34     |   6.22      |Cosine-S-120|
-| ResNet-50 (DS) | 4.328      |  25.58     |   22.67     |   6.39      | Step-120   |
-| ResNet-50 (DS) | 4.328      |  25.58     |   21.94     |   6.23      | Cosine-120 |
-| ResNet-50 (DS) | 4.328      |  25.58     |   21.71     |   5.99      |Cosine-S-120|
-| ResNet-101     | 7.801      |  44.55     |   20.93     |   5.57      |Cosine-120  |
-| ResNet-101     | 7.801      |  44.55     |   20.92     |   5.58      |Cosine-120 B1024 |
-| ResNet-101 (DS)| 8.041      |  44.57     |   20.36     |   5.22      |Cosine-S-120|
-| ResNet-152     | 11.514     |  60.19     |   20.10     |   5.17      |Cosine-120 B1024 |
-| ResNet-152 (DS)| 11.753     |  60.21     |   19.83     |   5.02      |Cosine-S-120|
-| ResNet-200     | 15.007     |  64.67     |   20.06     |   4.98      |Cosine-S-120|
-| Next50-32x4d (DS)| 4.2      |  25.0      |   22.2      |     -       | Official   |
-| Next50-32x4d (DS)| 4.470    |  25.05     |   21.16     |   5.65      |Cosine-S-120|
-| MobileNet-V2   | 0.300      |  3.40      |   28.0      |     -       | Official   |
-| MobileNet-V2   | 0.300      |  3.50      |   27.92     |   9.50      | MobileFast |
-| MobileNet-V2   | 0.300      |  3.50      |   27.56     |   9.26      | MobileFast-Smooth |
-| ShuffleNet-V2 1.0| 0.146    |  2.28      |   30.6      |   11.1      | Official   |
-| ShuffleNet-V2 1.0| 0.145    |  2.28      |             |             |Cosine-S-120|
-| ShuffleNet-V2 1.5| 0.299    |            |   27.4      |     -       | Official   |
-| ShuffleNet-V2 1.5|          |            |             |             |Cosine-S-120|
-| ShuffleNet-V2 2.0|          |            |             |             |Cosine-S-120|
+|        Model      | FLOPs (GB) | Params (M) | Top-1 Error | Top-5 Error |  Optimizer |
+|:-----------------:|:----------:|:----------:|:-----------:|:-----------:|:----------:|
+| ResNet-18         | 1.814      |  11.69     |   30.24     |   10.92     | Official   |
+| ResNet-18         | 1.814      |  11.69     |   29.97     |   10.43     | Step-120   |
+| ResNet-18         | 1.814      |  11.69     |   29.35     |   10.13     | Cosine-120 |
+| ResNet-18         | 1.814      |  11.69     |   29.45     |   10.25     | Cosine-120 B1024 |
+| ResNet-18         | 1.814      |  11.69     |   29.44     |   10.12     | Cosine-S-120 |
+| ResNet-18 (DS)    | 2.053      |  11.71     |   28.53     |   9.69      | Cosine-S-120 |
+| ResNet-34         | 3.663      |  21.80     |   25.65     |   8.06      | Cosine-120   |
+| ResNet-34 (DS)    | 3.903      |  21.82     |   25.05     |   7.67      | Cosine-S-120 |
+| ResNet-50         | 4.089      |  25.56     |   23.85     |   7.13      | Official     |
+| ResNet-50         | 4.089      |  25.56     |   22.54     |   6.45      | Cosine-120   |
+| ResNet-50         | 4.089      |  25.56     |   22.71     |   6.38      | Cosine-120 B1024 |
+| ResNet-50         | 4.089      |  25.56     |   22.34     |   6.22      | Cosine-S-120 |
+| ResNet-50 (DS)    | 4.328      |  25.58     |   22.67     |   6.39      | Step-120     |
+| ResNet-50 (DS)    | 4.328      |  25.58     |   21.94     |   6.23      | Cosine-120   |
+| ResNet-50 (DS)    | 4.328      |  25.58     |   21.71     |   5.99      | Cosine-S-120 |
+| ResNet-101        | 7.801      |  44.55     |   20.93     |   5.57      | Cosine-120   |
+| ResNet-101        | 7.801      |  44.55     |   20.92     |   5.58      | Cosine-120 B1024 |
+| ResNet-101 (DS)   | 8.041      |  44.57     |   20.36     |   5.22      | Cosine-S-120 |
+| ResNet-152        | 11.514     |  60.19     |   20.10     |   5.17      | Cosine-120 B1024 |
+| ResNet-152 (DS)   | 11.753     |  60.21     |   19.83     |   5.02      | Cosine-S-120 |
+| ResNet-200        | 15.007     |  64.67     |   20.06     |   4.98      | Cosine-S-120 |
+| Next50-32x4d (DS) | 4.2        |  25.0      |   22.2      |     -       | Official     |
+| Next50-32x4d (DS) | 4.470      |  25.05     |   21.16     |   5.65      | Cosine-S-120 |
+| MobileNet-V2      | 0.300      |  3.40      |   28.0      |     -       | Official     |
+| MobileNet-V2      | 0.300      |  3.50      |   27.92     |   9.50      | MobileFast   |
+| MobileNet-V2      | 0.300      |  3.50      |   27.56     |   9.26      | MobileFast-Smooth |
+| ShuffleNet-V2 1.0 | 0.146      |  2.28      |   30.6      |   11.1      | Official     |
+| ShuffleNet-V2 1.0 | 0.145      |  2.28      |             |             | Cosine-S-120 |
+| ShuffleNet-V2 1.5 | 0.299      |            |   27.4      |     -       | Official     |
+| ShuffleNet-V2 1.5 |            |            |             |             | Cosine-S-120 |
+| ShuffleNet-V2 2.0 |            |            |             |             | Cosine-S-120 |
 
 `DS` indicates deep-stem for the first convolutional layer.
 ```
