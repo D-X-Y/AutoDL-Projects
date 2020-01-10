@@ -12,6 +12,10 @@ In this Markdown file, we provide:
 
 Note: please use `PyTorch >= 1.2.0` and `Python >= 3.6.0`.
 
+Simply type `pip install nas-bench-102` to install our api.
+
+If you have any questions or issues, please post it at [here](https://github.com/D-X-Y/NAS-Projects/issues) or email me.
+
 ### Preparation and Download
 
 The benchmark file of NAS-Bench-102 can be downloaded from [Google Drive](https://drive.google.com/open?id=1SKW0Cu0u8-gb18zDpaAGi0f74UdXeGKs) or [Baidu-Wangpan (code:6u5d)](https://pan.baidu.com/s/1CiaNH6C12zuZf7q-Ilm09w).
@@ -179,3 +183,17 @@ If researchers can provide better results with different hyper-parameters, we ar
 - [8] `bash ./scripts-search/algos/Random.sh -1`
 - [9] `bash ./scripts-search/algos/REINFORCE.sh -1`
 - [10] `bash ./scripts-search/algos/BOHB.sh -1`
+
+
+
+# Citation
+
+If you find that NAS-Bench-102 helps your research, please consider citing it:
+```
+@inproceedings{dong2020nasbench102,
+  title     = {NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search},
+  author    = {Dong, Xuanyi and Yang, Yi},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2020}
+}
+```

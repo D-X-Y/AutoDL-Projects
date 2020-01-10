@@ -34,6 +34,8 @@ We build a new benchmark for neural architecture search, please see more details
 
 The benchmark data file (v1.0) is `NAS-Bench-102-v1_0-e61699.pth`, which can be downloaded from [Google Drive](https://drive.google.com/open?id=1SKW0Cu0u8-gb18zDpaAGi0f74UdXeGKs).
 
+Now you can simply use our API by `pip install nas-bench-102`.
+
 ## [Network Pruning via Transformable Architecture Search](https://arxiv.org/abs/1905.09717)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/network-pruning-via-transformable/network-pruning-on-cifar-100)](https://paperswithcode.com/sota/network-pruning-on-cifar-100?p=network-pruning-via-transformable)
 

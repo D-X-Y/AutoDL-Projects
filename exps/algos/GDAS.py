@@ -12,7 +12,7 @@ from pathlib import Path
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config
-from datasets     import get_datasets, SearchDataset
+from datasets     import get_datasets, get_nas_search_loaders
 from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
@@ -80,25 +80,10 @@ def main(xargs):
   prepare_seed(xargs.rand_seed)
   logger = prepare_logger(args)
 
-  train_data, _, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
-  assert xargs.dataset == 'cifar10', 'currently only support CIFAR-10'
-  if xargs.dataset == 'cifar10' or xargs.dataset == 'cifar100':
-    split_Fpath = 'configs/nas-benchmark/cifar-split.txt'
-    cifar_split = load_config(split_Fpath, None, None)
-    train_split, valid_split = cifar_split.train, cifar_split.valid
-    logger.log('Load split file from {:}'.format(split_Fpath))
-  elif xargs.dataset.startswith('ImageNet16'):
-    split_Fpath = 'configs/nas-benchmark/{:}-split.txt'.format(xargs.dataset)
-    imagenet16_split = load_config(split_Fpath, None, None)
-    train_split, valid_split = imagenet16_split.train, imagenet16_split.valid
-    logger.log('Load split file from {:}'.format(split_Fpath))
-  else:
-    raise ValueError('invalid dataset : {:}'.format(xargs.dataset))
+  train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
   #config_path = 'configs/nas-benchmark/algos/GDAS.config'
   config = load_config(xargs.config_path, {'class_num': class_num, 'xshape': xshape}, logger)
-  search_data   = SearchDataset(xargs.dataset, train_data, train_split, valid_split)
-  # data loader
-  search_loader = torch.utils.data.DataLoader(search_data, batch_size=config.batch_size, shuffle=True , num_workers=xargs.workers, pin_memory=True)
+  search_loader, _, valid_loader = get_nas_search_loaders(train_data, valid_data, xargs.dataset, 'configs/nas-benchmark/', config.batch_size, xargs.workers)
   logger.log('||||||| {:10s} ||||||| Search-Loader-Num={:}, batch size={:}'.format(xargs.dataset, len(search_loader), config.batch_size))
   logger.log('||||||| {:10s} ||||||| Config={:}'.format(xargs.dataset, config))
 
@@ -143,7 +128,7 @@ def main(xargs):
     logger.log("=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(last_info, start_epoch))
   else:
     logger.log("=> do not find the last-info file : {:}".format(last_info))
-    start_epoch, valid_accuracies, genotypes = 0, {'best': -1}, {}
+    start_epoch, valid_accuracies, genotypes = 0, {'best': -1}, {-1: search_model.genotype()}
 
   # start training
   start_time, search_time, epoch_time, total_epoch = time.time(), AverageMeter(), AverageMeter(), config.epochs + config.warmup

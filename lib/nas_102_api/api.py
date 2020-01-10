@@ -1,8 +1,12 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-#################################################################################
-# NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search #
-#################################################################################
+############################################################################################
+# NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search, ICLR 2020 #
+############################################################################################
+# NAS-Bench-102-v1_0-e61699.pth : 6219 architectures are trained once, 1621 architectures are trained twice, 7785 architectures are trained three times. `LESS` only supports CIFAR10-VALID.
+#
+#
+#
 import os, sys, copy, random, torch, numpy as np
 from collections import OrderedDict, defaultdict
 

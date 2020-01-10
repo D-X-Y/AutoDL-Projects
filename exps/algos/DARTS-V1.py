@@ -12,7 +12,7 @@ from pathlib import Path
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
-from datasets     import get_datasets, SearchDataset
+from datasets     import get_datasets, get_nas_search_loaders
 from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
@@ -107,35 +107,7 @@ def main(xargs):
   train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
   #config_path = 'configs/nas-benchmark/algos/DARTS.config'
   config = load_config(xargs.config_path, {'class_num': class_num, 'xshape': xshape}, logger)
-  if xargs.dataset == 'cifar10':
-    split_Fpath = 'configs/nas-benchmark/cifar-split.txt'
-    cifar_split = load_config(split_Fpath, None, None)
-    train_split, valid_split = cifar_split.train, cifar_split.valid # search over the proposed training and validation set
-    logger.log('Load split file from {:}'.format(split_Fpath))      # they are two disjoint groups in the original CIFAR-10 training set
-    # To split data
-    train_data_v2 = deepcopy(train_data)
-    train_data_v2.transform = valid_data.transform
-    valid_data    = train_data_v2
-    search_data   = SearchDataset(xargs.dataset, train_data, train_split, valid_split)
-    # data loader
-    search_loader = torch.utils.data.DataLoader(search_data, batch_size=config.batch_size, shuffle=True , num_workers=xargs.workers, pin_memory=True)
-    valid_loader  = torch.utils.data.DataLoader(valid_data , batch_size=config.batch_size, sampler=torch.utils.data.sampler.SubsetRandomSampler(valid_split), num_workers=xargs.workers, pin_memory=True)
-  elif xargs.dataset == 'cifar100':
-    cifar100_test_split = load_config('configs/nas-benchmark/cifar100-test-split.txt', None, None)
-    search_train_data = train_data
-    search_valid_data = deepcopy(valid_data) ; search_valid_data.transform = train_data.transform
-    search_data   = SearchDataset(xargs.dataset, [search_train_data,search_valid_data], list(range(len(search_train_data))), cifar100_test_split.xvalid)
-    search_loader = torch.utils.data.DataLoader(search_data, batch_size=config.batch_size, shuffle=True , num_workers=xargs.workers, pin_memory=True)
-    valid_loader  = torch.utils.data.DataLoader(valid_data , batch_size=config.batch_size, sampler=torch.utils.data.sampler.SubsetRandomSampler(cifar100_test_split.xvalid), num_workers=xargs.workers, pin_memory=True)
-  elif xargs.dataset == 'ImageNet16-120':
-    imagenet_test_split = load_config('configs/nas-benchmark/imagenet-16-120-test-split.txt', None, None)
-    search_train_data = train_data
-    search_valid_data = deepcopy(valid_data) ; search_valid_data.transform = train_data.transform
-    search_data   = SearchDataset(xargs.dataset, [search_train_data,search_valid_data], list(range(len(search_train_data))), imagenet_test_split.xvalid)
-    search_loader = torch.utils.data.DataLoader(search_data, batch_size=config.batch_size, shuffle=True , num_workers=xargs.workers, pin_memory=True)
-    valid_loader  = torch.utils.data.DataLoader(valid_data , batch_size=config.batch_size, sampler=torch.utils.data.sampler.SubsetRandomSampler(imagenet_test_split.xvalid), num_workers=xargs.workers, pin_memory=True)
-  else:
-    raise ValueError('invalid dataset : {:}'.format(xargs.dataset))
+  search_loader, _, valid_loader = get_nas_search_loaders(train_data, valid_data, xargs.dataset, 'configs/nas-benchmark/', config.batch_size, xargs.workers)
   logger.log('||||||| {:10s} ||||||| Search-Loader-Num={:}, Valid-Loader-Num={:}, batch size={:}'.format(xargs.dataset, len(search_loader), len(valid_loader), config.batch_size))
   logger.log('||||||| {:10s} ||||||| Config={:}'.format(xargs.dataset, config))
 
