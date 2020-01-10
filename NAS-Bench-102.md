@@ -6,9 +6,9 @@ Each edge here is associated with an operation selected from a predefined operat
 For it to be applicable for all NAS algorithms, the search space defined in NAS-Bench-102 includes 4 nodes and 5 associated operation options, which generates 15,625 neural cell candidates in total.
 
 In this Markdown file, we provide:
--	[How to Use NAS-Bench-102](#how-to-use-nas-bench-102)
--	[Instruction to re-generate NAS-Bench-102](#instruction-to-re-generate-nas-bench-102)
--	[10 NAS algorithms evaluated in our paper](#to-reproduce-10-baseline-nas-algorithms-in-nas-bench-102)
+- [How to Use NAS-Bench-102](#how-to-use-nas-bench-102)
+- [Instruction to re-generate NAS-Bench-102](#instruction-to-re-generate-nas-bench-102)
+- [10 NAS algorithms evaluated in our paper](#to-reproduce-10-baseline-nas-algorithms-in-nas-bench-102)
 
 Note: please use `PyTorch >= 1.2.0` and `Python >= 3.6.0`.
 

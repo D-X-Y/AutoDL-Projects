@@ -87,7 +87,8 @@ def test_one_shot_model(ckpath, use_train):
   ckp = torch.load(ckpath)
   xargs = ckp['args']
   train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
-  config = load_config(xargs.config_path, {'class_num': class_num, 'xshape': xshape}, None)
+  #config = load_config(xargs.config_path, {'class_num': class_num, 'xshape': xshape}, None)
+  config = load_config('./configs/nas-benchmark/algos/DARTS.config', {'class_num': class_num, 'xshape': xshape}, None)
   if xargs.dataset == 'cifar10':
     cifar_split = load_config('configs/nas-benchmark/cifar-split.txt', None, None)
     xvalid_data = deepcopy(train_data)
