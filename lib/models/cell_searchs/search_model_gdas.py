@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from copy import deepcopy
 from ..cell_operations import ResNetBasicblock
-from .search_cells     import SearchCell
+from .search_cells     import NAS102SearchCell as SearchCell
 from .genotypes        import Structure
 
 
@@ -58,6 +58,10 @@ class TinyNetworkGDAS(nn.Module):
 
   def get_alphas(self):
     return [self.arch_parameters]
+
+  def show_alphas(self):
+    with torch.no_grad():
+      return 'arch-parameters :\n{:}'.format( nn.functional.softmax(self.arch_parameters, dim=-1).cpu() )
 
   def get_message(self):
     string = self.extra_repr()

@@ -122,6 +122,12 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts/nas-infer-train.sh cifar100 GDAS_V1 96 -1
 CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts/nas-infer-train.sh imagenet-1k GDAS_V1 256 -1
 ```
 
+#### Searching on the NASNet search space
+Please use the following scripts to use GDAS to search as in the original paper:
+```
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/GDAS-search-NASNet-space.sh cifar10 1 -1
+```
+
 #### Searching on a small search space (NAS-Bench-102)
 The GDAS searching codes on a small search space:
 ```

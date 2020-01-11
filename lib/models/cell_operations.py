@@ -28,7 +28,6 @@ SearchSpaceNames = {'connect-nas'  : CONNECT_NAS_BENCHMARK,
                     'aa-nas'       : NAS_BENCH_102,
                     'nas-bench-102': NAS_BENCH_102,
                     'darts'        : DARTS_SPACE}
-                    #'full'         : sorted(list(OPS.keys()))}
 
 
 class ReLUConvBN(nn.Module):
