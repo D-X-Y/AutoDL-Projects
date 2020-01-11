@@ -35,5 +35,6 @@ OMP_NUM_THREADS=4 python ./exps/algos/DARTS-V2.py \
 	--search_space_name ${space} \
 	--config_path configs/nas-benchmark/algos/DARTS.config \
 	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-102-v1_0-e61699.pth \
+	--track_running_stats 1 \
 	--arch_learning_rate 0.0003 --arch_weight_decay 0.001 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}

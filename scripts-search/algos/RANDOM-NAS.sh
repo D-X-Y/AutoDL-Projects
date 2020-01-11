@@ -34,6 +34,7 @@ OMP_NUM_THREADS=4 python ./exps/algos/RANDOM-NAS.py \
 	--save_dir ${save_dir} --max_nodes ${max_nodes} --channel ${channel} --num_cells ${num_cells} \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
+	--track_running_stats 1 \
 	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-102-v1_0-e61699.pth \
 	--config_path ./configs/nas-benchmark/algos/RANDOM.config \
 	--select_num 100 \

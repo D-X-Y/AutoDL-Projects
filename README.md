@@ -15,7 +15,7 @@ More NAS resources can be found in [Awesome-NAS](https://github.com/D-X-Y/Awesom
 
 Please install `PyTorch>=1.2.0`, `Python>=3.6`, and `opencv`.
 
-The CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
+CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
 Some methods use knowledge distillation (KD), which require pre-trained models. Please download these models from [Google Driver](https://drive.google.com/open?id=1ANmiYEGX-IQZTfH8w0aSpj-Wypg-0DR-) (or train by yourself) and save into `.latent-data`.
 
 ### Usefull tools
@@ -150,6 +150,7 @@ If you find that this project helps your research, please consider citing some o
   title     = {NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {International Conference on Learning Representations (ICLR)},
+  url       = {https://openreview.net/forum?id=HJxyZkBKDr},
   year      = {2020}
 }
 @inproceedings{dong2019tas,

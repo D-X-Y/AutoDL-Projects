@@ -194,6 +194,7 @@ If you find that NAS-Bench-102 helps your research, please consider citing it:
   title     = {NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {International Conference on Learning Representations (ICLR)},
+  url       = {https://openreview.net/forum?id=HJxyZkBKDr},
   year      = {2020}
 }
 ```

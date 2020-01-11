@@ -198,7 +198,8 @@ def main(xargs):
   search_space = get_search_spaces('cell', xargs.search_space_name)
   model_config = dict2config({'name': 'ENAS', 'C': xargs.channel, 'N': xargs.num_cells,
                               'max_nodes': xargs.max_nodes, 'num_classes': class_num,
-                              'space'    : search_space}, None)
+                              'space'    : search_space,
+                              'affine'   : False, 'track_running_stats': bool(xargs.track_running_stats)}, None)
   shared_cnn = get_cell_based_tiny_net(model_config)
   controller = shared_cnn.create_controller()
   
@@ -319,6 +320,7 @@ if __name__ == '__main__':
   parser.add_argument('--data_path',          type=str,   help='Path to dataset')
   parser.add_argument('--dataset',            type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
   # channels and number-of-cells
+  parser.add_argument('--track_running_stats',type=int,   choices=[0,1],help='Whether use track_running_stats or not in the BN layer.')
   parser.add_argument('--search_space_name',  type=str,   help='The search space name.')
   parser.add_argument('--max_nodes',          type=int,   help='The maximum number of nodes.')
   parser.add_argument('--channel',            type=int,   help='The number of channels.')
