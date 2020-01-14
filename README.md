@@ -27,37 +27,50 @@ At the moment, this project provides the following algorithms and scripts to run
  <tbody>
     <tr align="center" valign="bottom">
       <th>Type</th>
+      <th>ABBRV</th>
       <th>Algorithms</th>
       <th>Description</th>
     </tr>
     <tr> <!-- (1-st row) -->
-    <td rowspan="5" align="center" valign="middle" halign="middle"> NAS </td>
+    <td rowspan="6" align="center" valign="middle" halign="middle"> NAS </td>
+    <td align="center" valign="middle"> TAS </td>
     <td align="center" valign="middle"> Network Pruning via Transformable Architecture Search </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NIPS-2019-TAS.md">NIPS-2019-TAS.md</a> </td>
     </tr>
     <tr> <!-- (2-nd row) -->
+    <td align="center" valign="middle"> DARTS </td>
+    <td align="center" valign="middle"> DARTS: Differentiable Architecture Search </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NAS-Bench-201.md">CVPR-2019-GDAS.md</a> </td>
+    </tr>
+    <tr> <!-- (3-nd row) -->
+    <td align="center" valign="middle"> GDAS </td>
     <td align="center" valign="middle"> Searching for A Robust Neural Architecture in Four GPU Hours </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/CVPR-2019-GDAS.md">CVPR-2019-GDAS.md</a> </td>
     </tr>
-    <tr> <!-- (3-rd row) -->
+    <tr> <!-- (4-rd row) -->
+    <td align="center" valign="middle"> SETN </td>
     <td align="center" valign="middle"> One-Shot Neural Architecture Search via Self-Evaluated Template Network </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/ICCV-2019-SETN.md">ICCV-2019-SETN.md</a> </td>
     </tr>
-    <tr> <!-- (4-th row) -->
-    <td align="center" valign="middle"> NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search </td>
+    <tr> <!-- (5-th row) -->
+    <td align="center" valign="middle"> NAS-Bench-201 </td>
+    <td align="center" valign="middle"> <a href="https://openreview.net/forum?id=HJxyZkBKDr"> NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search</a> </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NAS-Bench-201.md">NAS-Bench-201.md</a> </td>
     </tr>
-    <tr> <!-- (5-th row) -->
-    <td align="center" valign="middle"> ENAS / DARTS / REA / REINFORCE / BOHB </td>
+    <tr> <!-- (6-th row) -->
+    <td align="center" valign="middle"> ... </td>
+    <td align="center" valign="middle"> ENAS / REA / REINFORCE / BOHB </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NAS-Bench-201.md">NAS-Bench-201.md</a> </td>
     </tr>
     <tr> <!-- (start second block) -->
     <td rowspan="1" align="center" valign="middle" halign="middle"> HPO </td>
-    <td align="center" valign="middle"> coming soon </td>
+    <td align="center" valign="middle"> HPO-CG </td>
+    <td align="center" valign="middle"> Hyperparameter optimization with approximate gradient </td>
     <td align="center" valign="middle"> coming soon </a> </td>
     </tr>
     <tr> <!-- (start third block) -->
     <td rowspan="1" align="center" valign="middle" halign="middle"> Basic </td>
+    <td align="center" valign="middle"> ResNet </td>
     <td align="center" valign="middle"> Deep Learning-based Image Classification </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/BASELINE.md">BASELINE.md</a> </a> </td>
     </tr>
