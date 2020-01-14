@@ -1,11 +1,10 @@
-# Auto Deep Learning (AutoDL)
+# Automated Deep Learning (AutoDL)
 
 ---------
 [![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
-Auto Deep Learning by DXY (AutoDL-Projects) is an open source, lightweight, but useful project for researchers.
-In this project, Xuanyi Dong implemented several neural architecture search (NAS) and hyper-parameter optimization (HPO) algorithms.
-He hopes to build it as an easy-to-use AutoDL toolkit in future.
+Automated Deep Learning (AutoDL-Projects) is an open source, lightweight, but useful project for researchers.
+This project implemented several neural architecture search (NAS) and hyper-parameter optimization (HPO) algorithms.
 
 ## **Who should consider using AutoDL-Projects**
 
@@ -42,7 +41,7 @@ At the moment, this project provides the following algorithms and scripts to run
     </tr>
     <tr> <!-- (3-rd row) -->
     <td align="center" valign="middle"> One-Shot Neural Architecture Search via Self-Evaluated Template Network </td>
-    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/ICCV-2019-SETN.py">ICCV-2019-SETN.py</a> </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/ICCV-2019-SETN.md">ICCV-2019-SETN.md</a> </td>
     </tr>
     <tr> <!-- (4-th row) -->
     <td align="center" valign="middle"> NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search </td>
