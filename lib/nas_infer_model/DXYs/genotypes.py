@@ -167,3 +167,6 @@ Networks = {'DARTS_V1': DARTS_V1,
             'PNASNet' : PNASNet,
             'SETN'    : SETN,
            }
+
+def build_genotype_from_dict(xdict):
+  import pdb; pdb.set_trace()

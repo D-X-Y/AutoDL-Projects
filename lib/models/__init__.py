@@ -19,7 +19,7 @@ def get_cell_based_tiny_net(config):
   super_type = getattr(config, 'super_type', 'basic')
   group_names = ['DARTS-V1', 'DARTS-V2', 'GDAS', 'SETN', 'ENAS', 'RANDOM']
   if super_type == 'basic' and config.name in group_names:
-    from .cell_searchs import nas102_super_nets as nas_super_nets
+    from .cell_searchs import nas201_super_nets as nas_super_nets
     try:
       return nas_super_nets[config.name](config.C, config.N, config.max_nodes, config.num_classes, config.space, config.affine, config.track_running_stats)
     except:

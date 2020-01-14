@@ -8,15 +8,15 @@ def read(fname='README.md'):
 
 
 setup(
-    name = "nas_bench_102",
+    name = "nas_bench_201",
     version = "1.0",
     author = "Xuanyi Dong",
     author_email = "dongxuanyi888@gmail.com",
-    description = "API for NAS-Bench-102 (a benchmark for neural architecture search).",
+    description = "API for NAS-Bench-201 (a benchmark for neural architecture search).",
     license = "MIT",
     keywords = "NAS Dataset API DeepLearning",
-    url = "https://github.com/D-X-Y/NAS-Projects",
-    packages=['nas_102_api'],
+    url = "https://github.com/D-X-Y/NAS-Bench-201",
+    packages=['nas_201_api'],
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     classifiers=[

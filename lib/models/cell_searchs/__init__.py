@@ -1,7 +1,7 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ##################################################
-# The macro structure is defined in NAS-Bench-102
+# The macro structure is defined in NAS-Bench-201
 from .search_model_darts    import TinyNetworkDarts
 from .search_model_gdas     import TinyNetworkGDAS
 from .search_model_setn     import TinyNetworkSETN
@@ -12,7 +12,7 @@ from .genotypes             import Structure as CellStructure, architectures as 
 from .search_model_gdas_nasnet import NASNetworkGDAS
 
 
-nas102_super_nets = {'DARTS-V1': TinyNetworkDarts,
+nas201_super_nets = {'DARTS-V1': TinyNetworkDarts,
                   'DARTS-V2': TinyNetworkDarts,
                   'GDAS'    : TinyNetworkGDAS,
                   'SETN'    : TinyNetworkSETN,

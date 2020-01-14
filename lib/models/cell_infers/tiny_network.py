@@ -1,9 +1,13 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
+##################################################
 import torch
 import torch.nn as nn
 from ..cell_operations import ResNetBasicblock
 from .cells import InferCell
 
 
+# The macro structure for architectures in NAS-Bench-201
 class TinyNetwork(nn.Module):
 
   def __init__(self, C, N, genotype, num_classes):

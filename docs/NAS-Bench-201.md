@@ -1,40 +1,40 @@
-# [NAS-BENCH-102: Extending the Scope of Reproducible Neural Architecture Search](https://openreview.net/forum?id=HJxyZkBKDr)
+# [NAS-BENCH-201: Extending the Scope of Reproducible Neural Architecture Search](https://openreview.net/forum?id=HJxyZkBKDr)
 
-We propose an algorithm-agnostic NAS benchmark (NAS-Bench-102) with a fixed search space, which provides a unified benchmark for almost any up-to-date NAS algorithms.
+We propose an algorithm-agnostic NAS benchmark (NAS-Bench-201) with a fixed search space, which provides a unified benchmark for almost any up-to-date NAS algorithms.
 The design of our search space is inspired by that used in the most popular cell-based searching algorithms, where a cell is represented as a directed acyclic graph.
 Each edge here is associated with an operation selected from a predefined operation set.
-For it to be applicable for all NAS algorithms, the search space defined in NAS-Bench-102 includes 4 nodes and 5 associated operation options, which generates 15,625 neural cell candidates in total.
+For it to be applicable for all NAS algorithms, the search space defined in NAS-Bench-201 includes 4 nodes and 5 associated operation options, which generates 15,625 neural cell candidates in total.
 
 In this Markdown file, we provide:
-- [How to Use NAS-Bench-102](#how-to-use-nas-bench-102)
-- [Instruction to re-generate NAS-Bench-102](#instruction-to-re-generate-nas-bench-102)
-- [10 NAS algorithms evaluated in our paper](#to-reproduce-10-baseline-nas-algorithms-in-nas-bench-102)
+- [How to Use NAS-Bench-201](#how-to-use-nas-bench-201)
+- [Instruction to re-generate NAS-Bench-201](#instruction-to-re-generate-nas-bench-201)
+- [10 NAS algorithms evaluated in our paper](#to-reproduce-10-baseline-nas-algorithms-in-nas-bench-201)
 
 Note: please use `PyTorch >= 1.2.0` and `Python >= 3.6.0`.
 
-Simply type `pip install nas-bench-102` to install our api.
+Simply type `pip install nas-bench-201` to install our api.
 
-If you have any questions or issues, please post it at [here](https://github.com/D-X-Y/NAS-Projects/issues) or email me.
+If you have any questions or issues, please post it at [here](https://github.com/D-X-Y/AutoDL-Projects/issues) or email me.
 
 ### Preparation and Download
 
-The benchmark file of NAS-Bench-102 can be downloaded from [Google Drive](https://drive.google.com/open?id=1SKW0Cu0u8-gb18zDpaAGi0f74UdXeGKs) or [Baidu-Wangpan (code:6u5d)](https://pan.baidu.com/s/1CiaNH6C12zuZf7q-Ilm09w).
+The benchmark file of NAS-Bench-201 can be downloaded from [Google Drive](https://drive.google.com/open?id=1SKW0Cu0u8-gb18zDpaAGi0f74UdXeGKs) or [Baidu-Wangpan (code:6u5d)](https://pan.baidu.com/s/1CiaNH6C12zuZf7q-Ilm09w).
 You can move it to anywhere you want and send its path to our API for initialization.
-- v1.0: `NAS-Bench-102-v1_0-e61699.pth`, where `e61699` is the last six digits for this file. It contains all information except for the trained weights of each trial.
+- v1.0: `NAS-Bench-201-v1_0-e61699.pth`, where `e61699` is the last six digits for this file. It contains all information except for the trained weights of each trial.
 - v1.0: The full data of each architecture can be download from [Google Drive](https://drive.google.com/open?id=1X2i-JXaElsnVLuGgM4tP-yNwtsspXgdQ) (about 226GB). This compressed folder has 15625 files containing the the trained weights.
 - v1.0: Checkpoints for 3 runs of each baseline NAS algorithm are provided in [Google Drive](https://drive.google.com/open?id=1eAgLZQAViP3r6dA0_ZOOGG9zPLXhGwXi).
 
-The training and evaluation data used in NAS-Bench-102 can be downloaded from [Google Drive](https://drive.google.com/open?id=1L0Lzq8rWpZLPfiQGd6QR8q5xLV88emU7) or [Baidu-Wangpan (code:4fg7)](https://pan.baidu.com/s/1XAzavPKq3zcat1yBA1L2tQ).
-It is recommended to put these data into `$TORCH_HOME` (`~/.torch/` by default). If you want to generate NAS-Bench-102 or similar NAS datasets or training models by yourself, you need these data.
+The training and evaluation data used in NAS-Bench-201 can be downloaded from [Google Drive](https://drive.google.com/open?id=1L0Lzq8rWpZLPfiQGd6QR8q5xLV88emU7) or [Baidu-Wangpan (code:4fg7)](https://pan.baidu.com/s/1XAzavPKq3zcat1yBA1L2tQ).
+It is recommended to put these data into `$TORCH_HOME` (`~/.torch/` by default). If you want to generate NAS-Bench-201 or similar NAS datasets or training models by yourself, you need these data.
 
-## How to Use NAS-Bench-102
+## How to Use NAS-Bench-201
 
 1. Creating an API instance from a file:
 ```
-from nas_102_api import NASBench102API as API
+from nas_201_api import NASBench201API as API
 api = API('$path_to_meta_nas_bench_file')
-api = API('NAS-Bench-102-v1_0-e61699.pth')
-api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-102-v1_0-e61699.pth'))
+api = API('NAS-Bench-201-v1_0-e61699.pth')
+api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_0-e61699.pth'))
 ```
 
 2. Show the number of architectures `len(api)` and each architecture `api[i]`:
@@ -72,16 +72,16 @@ index = api.query_index_by_arch('|nor_conv_3x3~0|+|nor_conv_3x3~0|avg_pool_3x3~1
 api.show(index)
 ```
 
-5. For other usages, please see `lib/nas_102_api/api.py`
+5. For other usages, please see `lib/nas_201_api/api.py`
 
 
 ### Detailed Instruction
 
-In `nas_102_api`, we define three classes: `NASBench102API`, `ArchResults`, `ResultsCount`.
+In `nas_201_api`, we define three classes: `NASBench201API`, `ArchResults`, `ResultsCount`.
 
 `ResultsCount` maintains all information of a specific trial. One can instantiate ResultsCount and get the info via the following codes (`000157-FULL.pth` saves all information of all trials of 157-th architecture):
 ```
-from nas_102_api import ResultsCount
+from nas_201_api import ResultsCount
 xdata  = torch.load('000157-FULL.pth')
 odata  = xdata['full']['all_results'][('cifar10-valid', 777)]
 result = ResultsCount.create_from_state_dict( odata )
@@ -100,7 +100,7 @@ network.load_state_dict(result.get_net_param())
 
 `ArchResults` maintains all information of all trials of an architecture. Please see the following usages:
 ```
-from nas_102_api import ArchResults
+from nas_201_api import ArchResults
 xdata   = torch.load('000157-FULL.pth')
 archRes = ArchResults.create_from_state_dict(xdata['less']) # load trials trained with  12 epochs
 archRes = ArchResults.create_from_state_dict(xdata['full']) # load trials trained with 200 epochs
@@ -112,28 +112,30 @@ print(archRes.get_metrics('cifar10-valid', 'x-valid', None, False)) # print the 
 print(archRes.get_metrics('cifar10-valid', 'x-valid', None,  True)) # print loss/accuracy/time of a randomly selected trial
 ```
 
-`NASBench102API` is the topest level api. Please see the following usages:
+`NASBench201API` is the topest level api. Please see the following usages:
 ```
-from nas_102_api import NASBench102API as API
-api = API('NAS-Bench-102-v1_0-e61699.pth') # This will load all the information of NAS-Bench-102 except the trained weights
-api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-102-v1_0-e61699.pth')) # The same as the above line while I usually save NAS-Bench-102-v1_0-e61699.pth in ~/.torch/.
+from nas_201_api import NASBench201API as API
+api = API('NAS-Bench-201-v1_0-e61699.pth') # This will load all the information of NAS-Bench-201 except the trained weights
+api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_0-e61699.pth')) # The same as the above line while I usually save NAS-Bench-201-v1_0-e61699.pth in ~/.torch/.
 api.show(-1)  # show info of all architectures
-api.reload('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-BENCH-102-4-v1.0-archive'), 3) # This code will reload the information 3-th architecture with the trained weights
+api.reload('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-BENCH-201-4-v1.0-archive'), 3) # This code will reload the information 3-th architecture with the trained weights
 
 weights = api.get_net_param(3, 'cifar10', None) # Obtaining the weights of all trials for the 3-th architecture on cifar10. It will returns a dict, where the key is the seed and the value is the trained weights.
 ```
 
 
-## Instruction to Re-Generate NAS-Bench-102
+## Instruction to Re-Generate NAS-Bench-201
 
-1. generate the meta file for NAS-Bench-102 using the following script, where `NAS-BENCH-102` indicates the name and `4` indicates the maximum number of nodes in a cell.
+There are four steps to build NAS-Bench-201.
+
+1. generate the meta file for NAS-Bench-201 using the following script, where `NAS-BENCH-201` indicates the name and `4` indicates the maximum number of nodes in a cell.
 ```
-bash scripts-search/NAS-Bench-102/meta-gen.sh NAS-BENCH-102 4
+bash scripts-search/NAS-Bench-201/meta-gen.sh NAS-BENCH-201 4
 ```
 
-2. train earch architecture on a single GPU (see commands in `output/NAS-BENCH-102-4/BENCH-102-N4.opt-full.script`, which is automatically generated by step-1).
+2. train earch architecture on a single GPU (see commands in `output/NAS-BENCH-201-4/BENCH-201-N4.opt-full.script`, which is automatically generated by step-1).
 ```
-CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-102/train-models.sh 0     0   389 -1 '777 888 999'
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201/train-models.sh 0     0   389 -1 '777 888 999'
 ```
 This command will train 390 architectures (id from 0 to 389) using the following four kinds of splits with three random seeds (777, 888, 999).
 
@@ -144,54 +146,55 @@ This command will train 390 architectures (id from 0 to 389) using the following
 | CIFAR-100       | train         | valid / test |
 | ImageNet-16-120 | train         | valid / test |
 
-Note that the above `train`, `valid`, and `test` indicate the proposed splits in our NAS-Bench-102, and they might be different with the original splits.
+Note that the above `train`, `valid`, and `test` indicate the proposed splits in our NAS-Bench-201, and they might be different with the original splits.
 
 3. calculate the latency, merge the results of all architectures, and simplify the results.
-(see commands in `output/NAS-BENCH-102-4/meta-node-4.cal-script.txt` which is automatically generated by step-1).
+(see commands in `output/NAS-BENCH-201-4/meta-node-4.cal-script.txt` which is automatically generated by step-1).
 ```
-OMP_NUM_THREADS=6 CUDA_VISIBLE_DEVICES=0 python exps/NAS-Bench-102/statistics.py --mode cal --target_dir 000000-000389-C16-N5
+OMP_NUM_THREADS=6 CUDA_VISIBLE_DEVICES=0 python exps/NAS-Bench-201/statistics.py --mode cal --target_dir 000000-000389-C16-N5
 ```
 
-4. merge all results into a single file for NAS-Bench-102-API.
+4. merge all results into a single file for NAS-Bench-201-API.
 ```
-OMP_NUM_THREADS=4 python exps/NAS-Bench-102/statistics.py --mode merge
+OMP_NUM_THREADS=4 python exps/NAS-Bench-201/statistics.py --mode merge
 ```
-This command will generate a single file `output/NAS-BENCH-102-4/simplifies/C16-N5-final-infos.pth` contains all the data for NAS-Bench-102.
-This generated file will serve as the input for our NAS-Bench-102 API.
+This command will generate a single file `output/NAS-BENCH-201-4/simplifies/C16-N5-final-infos.pth` contains all the data for NAS-Bench-201.
+This generated file will serve as the input for our NAS-Bench-201 API.
 
 [option] train a single architecture on a single GPU.
 ```
-CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-102/train-a-net.sh resnet 16 5
-CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-102/train-a-net.sh '|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|skip_connect~1|skip_connect~2|' 16 5
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201/train-a-net.sh resnet 16 5
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201/train-a-net.sh '|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|skip_connect~1|skip_connect~2|' 16 5
 ```
 
 
-## To Reproduce 10 Baseline NAS Algorithms in NAS-Bench-102
+## To Reproduce 10 Baseline NAS Algorithms in NAS-Bench-201
 
-We have tried our best to implement each method. However, still, some algorithms might obtain non-optimal results since their hyper-parameters might not fit our NAS-Bench-102.
+We have tried our best to implement each method. However, still, some algorithms might obtain non-optimal results since their hyper-parameters might not fit our NAS-Bench-201.
 If researchers can provide better results with different hyper-parameters, we are happy to update results according to the new experimental results. We also welcome more NAS algorithms to test on our dataset and would include them accordingly.
 
 **Note that** you need to prepare the training and test data as described in [Preparation and Download](#preparation-and-download)
 
-- [1] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 -1`, where `cifar10` can be replaced with `cifar100` or `ImageNet16-120`.
-- [2] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 -1`
-- [3] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh     cifar10 -1`
-- [4] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/SETN.sh     cifar10 -1`
-- [5] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/ENAS.sh     cifar10 -1`
-- [6] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/RANDOM-NAS.sh cifar10 -1`
+- [1] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 1 -1`, where `cifar10` can be replaced with `cifar100` or `ImageNet16-120`.
+- [2] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 1 -1`
+- [3] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh     cifar10 1 -1`
+- [4] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/SETN.sh     cifar10 1 -1`
+- [5] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/ENAS.sh     cifar10 1 -1`
+- [6] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/RANDOM-NAS.sh cifar10 1 -1`
 - [7] `bash ./scripts-search/algos/R-EA.sh -1`
 - [8] `bash ./scripts-search/algos/Random.sh -1`
-- [9] `bash ./scripts-search/algos/REINFORCE.sh -1`
+- [9] `bash ./scripts-search/algos/REINFORCE.sh 0.5 -1`
 - [10] `bash ./scripts-search/algos/BOHB.sh -1`
 
+In commands [1-6], the first args `cifar10` indicates the dataset name, the second args `1` indicates the behavior of BN, and the first args `-1` indicates the random seed.
 
 
 # Citation
 
-If you find that NAS-Bench-102 helps your research, please consider citing it:
+If you find that NAS-Bench-201 helps your research, please consider citing it:
 ```
-@inproceedings{dong2020nasbench102,
-  title     = {NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search},
+@inproceedings{dong2020nasbench201,
+  title     = {NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {International Conference on Learning Representations (ICLR)},
   url       = {https://openreview.net/forum?id=HJxyZkBKDr},

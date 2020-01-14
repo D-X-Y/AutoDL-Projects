@@ -1,7 +1,7 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ##################################################
-# python exps/NAS-Bench-102/visualize.py --api_path $HOME/.torch/NAS-Bench-102-v1_0-e61699.pth
+# python exps/NAS-Bench-201/visualize.py --api_path $HOME/.torch/NAS-Bench-201-v1_0-e61699.pth
 ##################################################
 import os, sys, time, argparse, collections
 from tqdm import tqdm
@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from log_utils    import time_string
-from nas_102_api  import NASBench102API as API
+from nas_201_api  import NASBench201API as API
 
 
 
@@ -367,13 +367,66 @@ def write_video(save_dir):
 
 
 
+def plot_results_nas_v2(api, dataset_xset_a, dataset_xset_b, root, file_name, y_lims):
+  #print ('root-path={:}, dataset={:}, xset={:}'.format(root, dataset, xset))
+  print ('root-path : {:} and {:}'.format(dataset_xset_a, dataset_xset_b))
+  checkpoints = ['./output/search-cell-nas-bench-201/R-EA-cifar10/results.pth',
+                 './output/search-cell-nas-bench-201/REINFORCE-cifar10/results.pth',
+                 './output/search-cell-nas-bench-201/RAND-cifar10/results.pth',
+                 './output/search-cell-nas-bench-201/BOHB-cifar10/results.pth'
+                ]
+  legends, indexes = ['REA', 'REINFORCE', 'RANDOM', 'BOHB'], None
+  All_Accs_A, All_Accs_B = OrderedDict(), OrderedDict()
+  for legend, checkpoint in zip(legends, checkpoints):
+    all_indexes = torch.load(checkpoint, map_location='cpu')
+    accuracies_A, accuracies_B = [], []
+    accuracies = []
+    for x in all_indexes:
+      info = api.arch2infos_full[ x ]
+      metrics = info.get_metrics(dataset_xset_a[0], dataset_xset_a[1], None, False)
+      accuracies_A.append( metrics['accuracy'] )
+      metrics = info.get_metrics(dataset_xset_b[0], dataset_xset_b[1], None, False)
+      accuracies_B.append( metrics['accuracy'] )
+      accuracies.append( (accuracies_A[-1], accuracies_B[-1]) )
+    if indexes is None: indexes = list(range(len(all_indexes)))
+    accuracies = sorted(accuracies)
+    All_Accs_A[legend] = [x[0] for x in accuracies]
+    All_Accs_B[legend] = [x[1] for x in accuracies]
+
+  color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
+  dpi, width, height = 300, 3400, 2600
+  LabelSize, LegendFontsize = 28, 28
+  figsize = width / float(dpi), height / float(dpi)
+  fig = plt.figure(figsize=figsize)
+  x_axis = np.arange(0, 600)
+  plt.xlim(0, max(indexes))
+  plt.ylim(y_lims[0], y_lims[1])
+  interval_x, interval_y = 100, y_lims[2]
+  plt.xticks(np.arange(0, max(indexes), interval_x), fontsize=LegendFontsize)
+  plt.yticks(np.arange(y_lims[0],y_lims[1], interval_y), fontsize=LegendFontsize)
+  plt.grid()
+  plt.xlabel('The index of runs', fontsize=LabelSize)
+  plt.ylabel('The accuracy (%)', fontsize=LabelSize)
+
+  for idx, legend in enumerate(legends):
+    plt.plot(indexes, All_Accs_B[legend], color=color_set[idx], linestyle='--', label='{:}'.format(legend), lw=1, alpha=0.5)
+    plt.plot(indexes, All_Accs_A[legend], color=color_set[idx], linestyle='-', lw=1)
+    for All_Accs in [All_Accs_A, All_Accs_B]:
+      print ('{:} : mean = {:}, std = {:} :: {:.2f}$\\pm${:.2f}'.format(legend, np.mean(All_Accs[legend]), np.std(All_Accs[legend]), np.mean(All_Accs[legend]), np.std(All_Accs[legend])))
+  plt.legend(loc=4, fontsize=LegendFontsize)
+  save_path = root / '{:}'.format(file_name)
+  print('save figure into {:}\n'.format(save_path))
+  fig.savefig(str(save_path), dpi=dpi, bbox_inches='tight', format='pdf')
+
+
+
 
 def plot_results_nas(api, dataset, xset, root, file_name, y_lims):
   print ('root-path={:}, dataset={:}, xset={:}'.format(root, dataset, xset))
-  checkpoints = ['./output/search-cell-nas-bench-102/R-EA-cifar10/results.pth',
-                 './output/search-cell-nas-bench-102/REINFORCE-cifar10/results.pth',
-                 './output/search-cell-nas-bench-102/RAND-cifar10/results.pth',
-                 './output/search-cell-nas-bench-102/BOHB-cifar10/results.pth'
+  checkpoints = ['./output/search-cell-nas-bench-201/R-EA-cifar10/results.pth',
+                 './output/search-cell-nas-bench-201/REINFORCE-cifar10/results.pth',
+                 './output/search-cell-nas-bench-201/RAND-cifar10/results.pth',
+                 './output/search-cell-nas-bench-201/BOHB-cifar10/results.pth'
                 ]
   legends, indexes = ['REA', 'REINFORCE', 'RANDOM', 'BOHB'], None
   All_Accs = OrderedDict()
@@ -422,19 +475,19 @@ def just_show(api):
     xlist = np.array(xlist)
     print ('{:4s} : mean-time={:.2f} s'.format(xkey, xlist.mean()))
 
-  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-102/RANDOM-NAS-cifar10/checkpoint/',
-            'DARTS-V1': 'output/search-cell-nas-bench-102/DARTS-V1-cifar10/checkpoint/',
-            'DARTS-V2': 'output/search-cell-nas-bench-102/DARTS-V2-cifar10/checkpoint/',
-            'GDAS'    : 'output/search-cell-nas-bench-102/GDAS-cifar10/checkpoint/',
-            'SETN'    : 'output/search-cell-nas-bench-102/SETN-cifar10/checkpoint/',
-            'ENAS'    : 'output/search-cell-nas-bench-102/ENAS-cifar10/checkpoint/',
+  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-201/RANDOM-NAS-cifar10/checkpoint/',
+            'DARTS-V1': 'output/search-cell-nas-bench-201/DARTS-V1-cifar10/checkpoint/',
+            'DARTS-V2': 'output/search-cell-nas-bench-201/DARTS-V2-cifar10/checkpoint/',
+            'GDAS'    : 'output/search-cell-nas-bench-201/GDAS-cifar10/checkpoint/',
+            'SETN'    : 'output/search-cell-nas-bench-201/SETN-cifar10/checkpoint/',
+            'ENAS'    : 'output/search-cell-nas-bench-201/ENAS-cifar10/checkpoint/',
            }
   xseeds = {'RSPS'    : [5349, 59613, 5983],
             'DARTS-V1': [11416, 72873, 81184],
             'DARTS-V2': [43330, 79405, 79423],
             'GDAS'    : [19677, 884, 95950],
             'SETN'    : [20518, 61817, 89144],
-            'ENAS'    : [30801, 75610, 97745],
+            'ENAS'    : [3231, 34238, 96929],
            }
 
   def get_accs(xdata, index=-1):
@@ -480,24 +533,27 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims, x_
   plt.xlabel('The searching epoch', fontsize=LabelSize)
   plt.ylabel('The accuracy (%)', fontsize=LabelSize)
 
-  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-102/RANDOM-NAS-cifar10/checkpoint/',
-            'DARTS-V1': 'output/search-cell-nas-bench-102/DARTS-V1-cifar10/checkpoint/',
-            'DARTS-V2': 'output/search-cell-nas-bench-102/DARTS-V2-cifar10/checkpoint/',
-            'GDAS'    : 'output/search-cell-nas-bench-102/GDAS-cifar10/checkpoint/',
-            'SETN'    : 'output/search-cell-nas-bench-102/SETN-cifar10/checkpoint/',
-            'ENAS'    : 'output/search-cell-nas-bench-102/ENAS-cifar10/checkpoint/',
+  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-201/RANDOM-NAS-cifar10/checkpoint/',
+            'DARTS-V1': 'output/search-cell-nas-bench-201/DARTS-V1-cifar10/checkpoint/',
+            'DARTS-V2': 'output/search-cell-nas-bench-201/DARTS-V2-cifar10/checkpoint/',
+            'GDAS'    : 'output/search-cell-nas-bench-201/GDAS-cifar10/checkpoint/',
+            'SETN'    : 'output/search-cell-nas-bench-201/SETN-cifar10/checkpoint/',
+            'ENAS'    : 'output/search-cell-nas-bench-201/ENAS-cifar10/checkpoint/',
            }
   xseeds = {'RSPS'    : [5349, 59613, 5983],
-            'DARTS-V1': [11416, 72873, 81184],
+            'DARTS-V1': [11416, 72873, 81184, 28640],
             'DARTS-V2': [43330, 79405, 79423],
             'GDAS'    : [19677, 884, 95950],
             'SETN'    : [20518, 61817, 89144],
-            'ENAS'    : [30801, 75610, 97745],
+            'ENAS'    : [3231, 34238, 96929],
            }
 
   def get_accs(xdata):
     epochs, xresults = xdata['epoch'], []
-    metrics = api.arch2infos_full[ api.random() ].get_metrics(dataset, subset, None, False)
+    if -1 in xdata['genotypes']:
+      metrics = api.arch2infos_full[ api.query_index_by_arch(xdata['genotypes'][-1]) ].get_metrics(dataset, subset, None, False)
+    else:
+      metrics = api.arch2infos_full[ api.random() ].get_metrics(dataset, subset, None, False)
     xresults.append( metrics['accuracy'] )
     for iepoch in range(epochs):
       genotype = xdata['genotypes'][iepoch]
@@ -528,12 +584,120 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims, x_
   fig.savefig(str(save_path), dpi=dpi, bbox_inches='tight', format='pdf')
 
 
+def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, file_name, y_lims, x_maxs):
+  color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
+  dpi, width, height = 300, 3400, 2600
+  LabelSize, LegendFontsize = 28, 28
+  figsize = width / float(dpi), height / float(dpi)
+  fig = plt.figure(figsize=figsize)
+  #x_maxs = 250
+  plt.xlim(0, x_maxs+1)
+  plt.ylim(y_lims[0], y_lims[1])
+  interval_x, interval_y = x_maxs // 5, y_lims[2]
+  plt.xticks(np.arange(0, x_maxs+1, interval_x), fontsize=LegendFontsize)
+  plt.yticks(np.arange(y_lims[0],y_lims[1], interval_y), fontsize=LegendFontsize)
+  plt.grid()
+  plt.xlabel('The searching epoch', fontsize=LabelSize)
+  plt.ylabel('The accuracy (%)', fontsize=LabelSize)
+
+  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-201/RANDOM-NAS-cifar10/checkpoint/',
+            'DARTS-V1': 'output/search-cell-nas-bench-201/DARTS-V1-cifar10/checkpoint/',
+            'DARTS-V2': 'output/search-cell-nas-bench-201/DARTS-V2-cifar10/checkpoint/',
+            'GDAS'    : 'output/search-cell-nas-bench-201/GDAS-cifar10/checkpoint/',
+            'SETN'    : 'output/search-cell-nas-bench-201/SETN-cifar10/checkpoint/',
+            'ENAS'    : 'output/search-cell-nas-bench-201/ENAS-cifar10/checkpoint/',
+           }
+  xseeds = {'RSPS'    : [5349, 59613, 5983],
+            'DARTS-V1': [11416, 72873, 81184, 28640],
+            'DARTS-V2': [43330, 79405, 79423],
+            'GDAS'    : [19677, 884, 95950],
+            'SETN'    : [20518, 61817, 89144],
+            'ENAS'    : [3231, 34238, 96929],
+           }
+
+  def get_accs(xdata, dataset, subset):
+    epochs, xresults = xdata['epoch'], []
+    if -1 in xdata['genotypes']:
+      metrics = api.arch2infos_full[ api.query_index_by_arch(xdata['genotypes'][-1]) ].get_metrics(dataset, subset, None, False)
+    else:
+      metrics = api.arch2infos_full[ api.random() ].get_metrics(dataset, subset, None, False)
+    xresults.append( metrics['accuracy'] )
+    for iepoch in range(epochs):
+      genotype = xdata['genotypes'][iepoch]
+      index = api.query_index_by_arch(genotype)
+      metrics = api.arch2infos_full[index].get_metrics(dataset, subset, None, False)
+      xresults.append( metrics['accuracy'] )
+    return xresults
+
+  if x_maxs == 50:
+    xox, xxxstrs = 'v2', ['DARTS-V1', 'DARTS-V2']
+  elif x_maxs == 250:
+    xox, xxxstrs = 'v1', ['RSPS', 'GDAS', 'SETN', 'ENAS']
+  else: raise ValueError('invalid x_maxs={:}'.format(x_maxs))
+
+  for idx, method in enumerate(xxxstrs):
+    xkey = method
+    all_paths = [ '{:}/seed-{:}-basic.pth'.format(xpaths[xkey], seed) for seed in xseeds[xkey] ]
+    all_datas = [torch.load(xpath, map_location='cpu') for xpath in all_paths]
+    accyss_A = np.array( [get_accs(xdatas, data_sub_a[0], data_sub_a[1]) for xdatas in all_datas] )
+    accyss_B = np.array( [get_accs(xdatas, data_sub_b[0], data_sub_b[1]) for xdatas in all_datas] )
+    epochs = list(range(accyss_A.shape[1]))
+    for j, accyss in enumerate([accyss_A, accyss_B]):
+      plt.plot(epochs, [accyss[:,i].mean() for i in epochs], color=color_set[idx*2+j], linestyle='-' if j==0 else '--', label='{:} ({:})'.format(method, 'VALID' if j == 0 else 'TEST'), lw=2, alpha=0.9)
+      plt.fill_between(epochs, [accyss[:,i].mean()-accyss[:,i].std() for i in epochs], [accyss[:,i].mean()+accyss[:,i].std() for i in epochs], alpha=0.2, color=color_set[idx*2+j])
+  #plt.legend(loc=4, fontsize=LegendFontsize)
+  plt.legend(loc=0, fontsize=LegendFontsize)
+  save_path = vis_save_dir / '{:}-{:}'.format(xox, file_name)
+  print('save figure into {:}\n'.format(save_path))
+  fig.savefig(str(save_path), dpi=dpi, bbox_inches='tight', format='pdf')
+
+
+def show_reinforce(api, root, dataset, xset, file_name, y_lims):
+  print ('root-path={:}, dataset={:}, xset={:}'.format(root, dataset, xset))
+  LRs = ['0.01', '0.02', '0.1', '0.2', '0.5', '1.0', '1.5', '2.0', '2.5', '3.0']
+  checkpoints = ['./output/search-cell-nas-bench-201/REINFORCE-cifar10-{:}/results.pth'.format(x) for x in LRs]
+  acc_lr_dict, indexes = {}, None
+  for lr, checkpoint in zip(LRs, checkpoints):
+    all_indexes, accuracies = torch.load(checkpoint, map_location='cpu'), []
+    for x in all_indexes:
+      info = api.arch2infos_full[ x ]
+      metrics = info.get_metrics(dataset, xset, None, False)
+      accuracies.append( metrics['accuracy'] )
+    if indexes is None: indexes = list(range(len(accuracies)))
+    acc_lr_dict[lr] = np.array( sorted(accuracies) )
+    print ('LR={:.3f}, mean={:}, std={:}'.format(float(lr), acc_lr_dict[lr].mean(), acc_lr_dict[lr].std()))
+  
+  color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
+  dpi, width, height = 300, 3400, 2600
+  LabelSize, LegendFontsize = 28, 22
+  figsize = width / float(dpi), height / float(dpi)
+  fig = plt.figure(figsize=figsize)
+  x_axis = np.arange(0, 600)
+  plt.xlim(0, max(indexes))
+  plt.ylim(y_lims[0], y_lims[1])
+  interval_x, interval_y = 100, y_lims[2]
+  plt.xticks(np.arange(0, max(indexes), interval_x), fontsize=LegendFontsize)
+  plt.yticks(np.arange(y_lims[0],y_lims[1], interval_y), fontsize=LegendFontsize)
+  plt.grid()
+  plt.xlabel('The index of runs', fontsize=LabelSize)
+  plt.ylabel('The accuracy (%)', fontsize=LabelSize)
+
+  for idx, LR in enumerate(LRs):
+    legend = 'LR={:.2f}'.format(float(LR))
+    color, linestyle = color_set[idx // 2], '-' if idx % 2 == 0 else '-.'
+    plt.plot(indexes, acc_lr_dict[LR], color=color, linestyle=linestyle, label=legend, lw=2, alpha=0.8)
+    print ('{:} : mean = {:}, std = {:} :: {:.2f}$\\pm${:.2f}'.format(legend, np.mean(acc_lr_dict[LR]), np.std(acc_lr_dict[LR]), np.mean(acc_lr_dict[LR]), np.std(acc_lr_dict[LR])))
+  plt.legend(loc=4, fontsize=LegendFontsize)
+  save_path = root / '{:}-{:}-{:}.pdf'.format(dataset, xset, file_name)
+  print('save figure into {:}\n'.format(save_path))
+  fig.savefig(str(save_path), dpi=dpi, bbox_inches='tight', format='pdf')
+
 
 if __name__ == '__main__':
 
-  parser = argparse.ArgumentParser(description='NAS-Bench-102', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument('--save_dir',  type=str, default='./output/search-cell-nas-bench-102/visuals', help='The base-name of folder to save checkpoints and log.')
-  parser.add_argument('--api_path',  type=str, default=None,                                         help='The path to the NAS-Bench-102 benchmark file.')
+  parser = argparse.ArgumentParser(description='NAS-Bench-201', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('--save_dir',  type=str, default='./output/search-cell-nas-bench-201/visuals', help='The base-name of folder to save checkpoints and log.')
+  parser.add_argument('--api_path',  type=str, default=None,                                         help='The path to the NAS-Bench-201 benchmark file.')
   args = parser.parse_args()
   
   vis_save_dir = Path(args.save_dir)
@@ -548,6 +712,9 @@ if __name__ == '__main__':
   #visualize_relative_ranking(vis_save_dir)
 
   api = API(args.api_path)
+  show_reinforce(api, vis_save_dir, 'cifar10-valid' , 'x-valid', 'REINFORCE-CIFAR-10', (75, 95, 5))
+  import pdb; pdb.set_trace()
+
   for x_maxs in [50, 250]:
     show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
     show_nas_sharing_w(api, 'cifar10'       , 'ori-test', vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
@@ -555,12 +722,19 @@ if __name__ == '__main__':
     show_nas_sharing_w(api, 'cifar100'      , 'x-test'  , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
     show_nas_sharing_w(api, 'ImageNet16-120', 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
     show_nas_sharing_w(api, 'ImageNet16-120', 'x-test'  , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
+  
+  show_nas_sharing_w_v2(api, ('cifar10-valid' , 'x-valid'), ('cifar10'       , 'ori-test') , vis_save_dir, 'DARTS-CIFAR010.pdf', (0, 100,10), 50)
+  show_nas_sharing_w_v2(api, ('cifar100'      , 'x-valid'), ('cifar100'      , 'x-test'  ) , vis_save_dir, 'DARTS-CIFAR100.pdf', (0, 100,10), 50)
+  show_nas_sharing_w_v2(api, ('ImageNet16-120', 'x-valid'), ('ImageNet16-120', 'x-test'  ) , vis_save_dir, 'DARTS-ImageNet.pdf', (0, 100,10), 50)
+  #just_show(api)
   """
-  just_show(api)
   plot_results_nas(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-com.pdf', (85,95, 1))
   plot_results_nas(api, 'cifar10'       , 'ori-test', vis_save_dir, 'nas-com.pdf', (85,95, 1))
   plot_results_nas(api, 'cifar100'      , 'x-valid' , vis_save_dir, 'nas-com.pdf', (55,75, 3))
   plot_results_nas(api, 'cifar100'      , 'x-test'  , vis_save_dir, 'nas-com.pdf', (55,75, 3))
   plot_results_nas(api, 'ImageNet16-120', 'x-valid' , vis_save_dir, 'nas-com.pdf', (35,50, 3))
   plot_results_nas(api, 'ImageNet16-120', 'x-test'  , vis_save_dir, 'nas-com.pdf', (35,50, 3))
+  plot_results_nas_v2(api, ('cifar10-valid' , 'x-valid'), ('cifar10'       , 'ori-test'), vis_save_dir, 'nas-com-v2-cifar010.pdf', (85,95, 1))
+  plot_results_nas_v2(api, ('cifar100'      , 'x-valid'), ('cifar100'      , 'x-test'  ), vis_save_dir, 'nas-com-v2-cifar100.pdf', (60,75, 3))
+  plot_results_nas_v2(api, ('ImageNet16-120', 'x-valid'), ('ImageNet16-120', 'x-test'  ), vis_save_dir, 'nas-com-v2-imagenet.pdf', (35,48, 2))
   """

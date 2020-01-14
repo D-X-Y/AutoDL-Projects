@@ -1,5 +1,5 @@
 #!/bin/bash
-# bash ./scripts-search/NAS-Bench-102/train-a-net.sh resnet 16 5
+# bash ./scripts-search/NAS-Bench-201/train-a-net.sh resnet 16 5
 echo script name: $0
 echo $# arguments
 if [ "$#" -ne 3 ] ;then
@@ -18,9 +18,9 @@ model=$1
 channel=$2
 num_cells=$3
 
-save_dir=./output/NAS-BENCH-102-4/
+save_dir=./output/NAS-BENCH-201-4/
 
-OMP_NUM_THREADS=4 python ./exps/NAS-Bench-102/main.py \
+OMP_NUM_THREADS=4 python ./exps/NAS-Bench-201/main.py \
 	--mode specific-${model} --save_dir ${save_dir} --max_node 4 \
 	--datasets cifar10 cifar10 cifar100 ImageNet16-120 \
 	--use_less 0 \

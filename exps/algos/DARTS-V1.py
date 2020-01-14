@@ -1,5 +1,5 @@
 ##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
 ########################################################
 # DARTS: Differentiable Architecture Search, ICLR 2019 #
 ########################################################
@@ -17,7 +17,7 @@ from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_che
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from models       import get_cell_based_tiny_net, get_search_spaces
-from nas_102_api  import NASBench102API as API
+from nas_201_api  import NASBench201API as API
 
 
 def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, epoch_str, print_freq, logger):

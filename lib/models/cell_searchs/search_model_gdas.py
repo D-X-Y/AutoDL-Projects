@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from copy import deepcopy
 from ..cell_operations import ResNetBasicblock
-from .search_cells     import NAS102SearchCell as SearchCell
+from .search_cells     import NAS201SearchCell as SearchCell
 from .genotypes        import Structure
 
 

@@ -1,7 +1,7 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ########################################################
-# python exps/NAS-Bench-102/test-correlation.py --api_path $HOME/.torch/NAS-Bench-102-v1_0-e61699.pth
+# python exps/NAS-Bench-201/test-correlation.py --api_path $HOME/.torch/NAS-Bench-201-v1_0-e61699.pth
 ########################################################
 import os, sys, time, glob, random, argparse
 import numpy as np
@@ -18,7 +18,7 @@ from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_che
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from models       import get_cell_based_tiny_net, get_search_spaces, CellStructure
-from nas_102_api  import NASBench102API as API
+from nas_201_api  import NASBench201API as API
 
   
 def valid_func(xloader, network, criterion):
@@ -197,9 +197,9 @@ def check_cor_for_bandit_v2(meta_file, test_epoch, use_less_or_not, is_rand):
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser("Analysis of NAS-Bench-102")
-  parser.add_argument('--save_dir',  type=str, default='./output/search-cell-nas-bench-102/visuals', help='The base-name of folder to save checkpoints and log.')
-  parser.add_argument('--api_path',  type=str, default=None,                                         help='The path to the NAS-Bench-102 benchmark file.')
+  parser = argparse.ArgumentParser("Analysis of NAS-Bench-201")
+  parser.add_argument('--save_dir',  type=str, default='./output/search-cell-nas-bench-201/visuals', help='The base-name of folder to save checkpoints and log.')
+  parser.add_argument('--api_path',  type=str, default=None,                                         help='The path to the NAS-Bench-201 benchmark file.')
   args = parser.parse_args()
 
   vis_save_dir = Path(args.save_dir)

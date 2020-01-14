@@ -1,5 +1,5 @@
 ##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
 ##################################################
 import os, sys, time, random, argparse
 from .share_args import add_shared_args

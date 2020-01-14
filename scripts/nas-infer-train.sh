@@ -30,6 +30,7 @@ elif [ ${dataset} == 'imagenet-1k' ]; then
   workers=28
   cutout_length=-1
 else
+  exit 1
   echo 'Unknown dataset: '${dataset}
 fi
 

@@ -1,6 +1,11 @@
 ##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
 ##################################################
+# I write this package to make AutoDL-Projects to be compatible with the old GDAS projects.
+# Ideally, this package will be merged into lib/models/cell_infers in future.
+# Currently, this package is used to reproduce the results in GDAS (Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019).
+##################################################
+
 import torch
 
 def obtain_nas_infer_model(config):

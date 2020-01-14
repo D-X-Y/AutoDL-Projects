@@ -14,10 +14,10 @@ OPS = {
   'skip_connect': lambda C_in, C_out, stride, affine: Identity(C_in, C_out, stride)
 }
 
-NAS_BENCH_102         = ['none', 'skip_connect', 'nor_conv_1x1', 'nor_conv_3x3', 'avg_pool_3x3']
+NAS_BENCH_201         = ['none', 'skip_connect', 'nor_conv_1x1', 'nor_conv_3x3', 'avg_pool_3x3']
 
 SearchSpaceNames = {
-                    'nas-bench-102': NAS_BENCH_102,
+                    'nas-bench-201': NAS_BENCH_201,
                    }
 
 

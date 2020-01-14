@@ -48,7 +48,7 @@ def main(xargs):
   # Create an instance of the model
   config = dict2config({'name': 'GDAS',
                         'C'   : xargs.channel, 'N': xargs.num_cells, 'max_nodes': xargs.max_nodes,
-                        'num_classes': 10, 'space': 'nas-bench-102', 'affine': True}, None)
+                        'num_classes': 10, 'space': 'nas-bench-201', 'affine': True}, None)
   model = get_cell_based_tiny_net(config)
   #import pdb; pdb.set_trace()
   #model.build(((64, 32, 32, 3), (1,)))
@@ -126,7 +126,7 @@ def main(xargs):
     print('{:} genotype : {:}\n{:}\n'.format(time_string(), genotype, model.get_np_alphas()))
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='NAS-Bench-102', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(description='NAS-Bench-201', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   # training details
   parser.add_argument('--epochs'            , type=int  ,   default= 250  ,   help='')
   parser.add_argument('--tau_max'           , type=float,   default= 10   ,   help='')

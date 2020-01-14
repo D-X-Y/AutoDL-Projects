@@ -1,5 +1,5 @@
 ###############################################################
-# NAS-Bench-102, ICLR 2020 (https://arxiv.org/abs/2001.00326) #
+# NAS-Bench-201, ICLR 2020 (https://arxiv.org/abs/2001.00326) #
 ###############################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019-2020         #
 ###############################################################
@@ -213,7 +213,7 @@ def train_single_model(save_dir, workers, datasets, xpaths, splits, use_less, se
 
 
 def generate_meta_info(save_dir, max_node, divide=40):
-  aa_nas_bench_ss = get_search_spaces('cell', 'nas-bench-102')
+  aa_nas_bench_ss = get_search_spaces('cell', 'nas-bench-201')
   archs = CellStructure.gen_all(aa_nas_bench_ss, max_node, False)
   print ('There are {:} archs vs {:}.'.format(len(archs), len(aa_nas_bench_ss) ** ((max_node-1)*max_node/2)))
 
@@ -249,15 +249,15 @@ def generate_meta_info(save_dir, max_node, divide=40):
   torch.save(info, save_name)
   print ('save the meta file into {:}'.format(save_name))
 
-  script_name_full = save_dir / 'BENCH-102-N{:}.opt-full.script'.format(max_node)
-  script_name_less = save_dir / 'BENCH-102-N{:}.opt-less.script'.format(max_node)
+  script_name_full = save_dir / 'BENCH-201-N{:}.opt-full.script'.format(max_node)
+  script_name_less = save_dir / 'BENCH-201-N{:}.opt-less.script'.format(max_node)
   full_file = open(str(script_name_full), 'w')
   less_file = open(str(script_name_less), 'w')
   gaps = total_arch // divide
   for start in range(0, total_arch, gaps):
     xend = min(start+gaps, total_arch)
-    full_file.write('bash ./scripts-search/NAS-Bench-102/train-models.sh 0 {:5d} {:5d} -1 \'777 888 999\'\n'.format(start, xend-1))
-    less_file.write('bash ./scripts-search/NAS-Bench-102/train-models.sh 1 {:5d} {:5d} -1 \'777 888 999\'\n'.format(start, xend-1))
+    full_file.write('bash ./scripts-search/NAS-Bench-201/train-models.sh 0 {:5d} {:5d} -1 \'777 888 999\'\n'.format(start, xend-1))
+    less_file.write('bash ./scripts-search/NAS-Bench-201/train-models.sh 1 {:5d} {:5d} -1 \'777 888 999\'\n'.format(start, xend-1))
   print ('save the training script into {:} and {:}'.format(script_name_full, script_name_less))
   full_file.close()
   less_file.close()
@@ -267,14 +267,14 @@ def generate_meta_info(save_dir, max_node, divide=40):
   with open(str(script_name), 'w') as cfile:
     for start in range(0, total_arch, gaps):
       xend = min(start+gaps, total_arch)
-      cfile.write('{:} python exps/NAS-Bench-102/statistics.py --mode cal --target_dir {:06d}-{:06d}-C16-N5\n'.format(macro, start, xend-1))
+      cfile.write('{:} python exps/NAS-Bench-201/statistics.py --mode cal --target_dir {:06d}-{:06d}-C16-N5\n'.format(macro, start, xend-1))
   print ('save the post-processing script into {:}'.format(script_name))
 
 
 if __name__ == '__main__':
   #mode_choices = ['meta', 'new', 'cover'] + ['specific-{:}'.format(_) for _ in CellArchitectures.keys()]
   #parser = argparse.ArgumentParser(description='Algorithm-Agnostic NAS Benchmark', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser = argparse.ArgumentParser(description='NAS-Bench-102', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(description='NAS-Bench-201', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--mode'   ,     type=str,   required=True,  help='The script mode.')
   parser.add_argument('--save_dir',    type=str,                   help='Folder to save checkpoints and log.')
   parser.add_argument('--max_node',    type=int,                   help='The maximum node in a cell.')

@@ -1,7 +1,7 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ##################################################
-# python exps/NAS-Bench-102/check.py --base_save_dir 
+# python exps/NAS-Bench-201/check.py --base_save_dir 
 ##################################################
 import os, sys, time, argparse, collections
 from shutil import copyfile
@@ -67,8 +67,8 @@ def check_files(save_dir, meta_file, basestr):
 
 if __name__ == '__main__':
 
-  parser = argparse.ArgumentParser(description='NAS Benchmark 102', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument('--base_save_dir',  type=str, default='./output/NAS-BENCH-102-4',     help='The base-name of folder to save checkpoints and log.')
+  parser = argparse.ArgumentParser(description='NAS Benchmark 201', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('--base_save_dir',  type=str, default='./output/NAS-BENCH-201-4',     help='The base-name of folder to save checkpoints and log.')
   parser.add_argument('--max_node',       type=int, default=4,                                 help='The maximum node in a cell.')
   parser.add_argument('--channel',        type=int, default=16,                                help='The number of channels.')
   parser.add_argument('--num_cells',      type=int, default=5,                                 help='The number of cells in one stage.')
@@ -78,7 +78,7 @@ if __name__ == '__main__':
   meta_path = save_dir / 'meta-node-{:}.pth'.format(args.max_node)
   assert save_dir.exists(),  'invalid save dir path : {:}'.format(save_dir)
   assert meta_path.exists(), 'invalid saved meta path : {:}'.format(meta_path)
-  print ('check NAS-Bench-102 in {:}'.format(save_dir))
+  print ('check NAS-Bench-201 in {:}'.format(save_dir))
 
   basestr = 'C{:}-N{:}'.format(args.channel, args.num_cells)
   check_files(save_dir, meta_path, basestr)

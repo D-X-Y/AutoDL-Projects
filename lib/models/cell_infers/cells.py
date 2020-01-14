@@ -1,8 +1,13 @@
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
+##################################################
+
 import torch.nn as nn
 from copy import deepcopy
 from ..cell_operations import OPS
 
 
+# Cell for NAS-Bench-201
 class InferCell(nn.Module):
 
   def __init__(self, genotype, C_in, C_out, stride):

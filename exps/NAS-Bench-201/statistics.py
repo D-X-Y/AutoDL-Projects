@@ -12,9 +12,9 @@ if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from config_utils import load_config, dict2config
 from datasets     import get_datasets
-# NAS-Bench-102 related module or function
+# NAS-Bench-201 related module or function
 from models       import CellStructure, get_cell_based_tiny_net
-from nas_102_api  import ArchResults, ResultsCount
+from nas_201_api  import ArchResults, ResultsCount
 from functions    import pure_evaluate
 
 
@@ -271,9 +271,9 @@ def merge_all(save_dir, meta_file, basestr):
 
 if __name__ == '__main__':
 
-  parser = argparse.ArgumentParser(description='NAS-BENCH-102', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(description='NAS-BENCH-201', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--mode'         ,  type=str, choices=['cal', 'merge'],            help='The running mode for this script.')
-  parser.add_argument('--base_save_dir',  type=str, default='./output/NAS-BENCH-102-4',  help='The base-name of folder to save checkpoints and log.')
+  parser.add_argument('--base_save_dir',  type=str, default='./output/NAS-BENCH-201-4',  help='The base-name of folder to save checkpoints and log.')
   parser.add_argument('--target_dir'   ,  type=str,                                      help='The target directory.')
   parser.add_argument('--max_node'     ,  type=int, default=4,                           help='The maximum node in a cell.')
   parser.add_argument('--channel'      ,  type=int, default=16,                          help='The number of channels.')

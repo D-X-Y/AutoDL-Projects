@@ -1,9 +1,9 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ############################################################################################
-# NAS-Bench-102: Extending the Scope of Reproducible Neural Architecture Search, ICLR 2020 #
+# NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search, ICLR 2020 #
 ############################################################################################
-# NAS-Bench-102-v1_0-e61699.pth : 6219 architectures are trained once, 1621 architectures are trained twice, 7785 architectures are trained three times. `LESS` only supports CIFAR10-VALID.
+# NAS-Bench-201-v1_0-e61699.pth : 6219 architectures are trained once, 1621 architectures are trained twice, 7785 architectures are trained three times. `LESS` only supports CIFAR10-VALID.
 #
 #
 #
@@ -38,11 +38,11 @@ def print_information(information, extra_info=None, show=False):
   return strings
 
 
-class NASBench102API(object):
+class NASBench201API(object):
 
   def __init__(self, file_path_or_dict, verbose=True):
     if isinstance(file_path_or_dict, str):
-      if verbose: print('try to create the NAS-Bench-102 api from {:}'.format(file_path_or_dict))
+      if verbose: print('try to create the NAS-Bench-201 api from {:}'.format(file_path_or_dict))
       assert os.path.isfile(file_path_or_dict), 'invalid path : {:}'.format(file_path_or_dict)
       file_path_or_dict = torch.load(file_path_or_dict)
     elif isinstance(file_path_or_dict, dict):

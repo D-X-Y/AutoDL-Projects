@@ -1,9 +1,10 @@
 ##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
-# required to install hpbandster #################
-# bash ./scripts-search/algos/BOHB.sh -1         #
-##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
+###################################################################
+# BOHB: Robust and Efficient Hyperparameter Optimization at Scale #
+# required to install hpbandster ##################################
+# bash ./scripts-search/algos/BOHB.sh -1         ##################
+###################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
 from copy import deepcopy
@@ -17,7 +18,7 @@ from datasets     import get_datasets, SearchDataset
 from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
-from nas_102_api  import NASBench102API as API
+from nas_201_api  import NASBench201API as API
 from models       import CellStructure, get_search_spaces
 # BOHB: Robust and Efficient Hyperparameter Optimization at Scale, ICML 2018
 import ConfigSpace

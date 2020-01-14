@@ -20,7 +20,7 @@ xend=$3
 arch_index=$4
 all_seeds=$5
 
-save_dir=./output/NAS-BENCH-102-4/
+save_dir=./output/NAS-BENCH-201-4/
 
 if [ ${arch_index} == "-1" ]; then
   mode=new
@@ -28,7 +28,7 @@ else
   mode=cover
 fi
 
-OMP_NUM_THREADS=4 python ./exps/NAS-Bench-102/main.py \
+OMP_NUM_THREADS=4 python ./exps/NAS-Bench-201/main.py \
 	--mode ${mode} --save_dir ${save_dir} --max_node 4 \
 	--use_less ${use_less} \
 	--datasets cifar10 cifar10 cifar100 ImageNet16-120 \

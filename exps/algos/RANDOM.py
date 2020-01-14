@@ -1,6 +1,6 @@
 ##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
+##############################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
 from copy import deepcopy
@@ -15,7 +15,7 @@ from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_che
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from models       import get_search_spaces
-from nas_102_api  import NASBench102API as API
+from nas_201_api  import NASBench201API as API
 from R_EA         import train_and_eval, random_architecture_func
 
 
