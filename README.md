@@ -8,14 +8,14 @@ This project implemented several neural architecture search (NAS) and hyper-para
 
 ## **Who should consider using AutoDL-Projects**
 
-- Beginner who want to **try different AutoDL algorithms** for study
-- Engineer who want to **try AutoDL** to investigate whether AutoDL works on your projects
+- Beginners who want to **try different AutoDL algorithms**
+- Engineers who want to **try AutoDL** to investigate whether AutoDL works on your projects
 - Researchers who want to **easily** implement and experiement **new** AutoDL algorithms.
 
 ## **Why should we use AutoDL-Projects**
-- Simplest library dependencies: each examlpe is purely relied on PyTorch or Tensorflow (except for some basic libraries in Anaconda)
-- All algorithms are in the same codebase. If you implement new algorithms, it is easy to fairly compare with many other baselines.
-- I will actively support this project, because all my furture AutoDL research will be built upon this project.
+- Simple library dependencies
+- All algorithms are in the same codebase
+- Active maintenance
 
 
 ## AutoDL-Projects Capabilities
