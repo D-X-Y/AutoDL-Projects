@@ -1,18 +1,17 @@
 # Automated Deep Learning (AutoDL)
-
 ---------
 [![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
 Automated Deep Learning (AutoDL-Projects) is an open source, lightweight, but useful project for researchers.
 This project implemented several neural architecture search (NAS) and hyper-parameter optimization (HPO) algorithms.
 
-## **Who should consider using AutoDL-Projects**
+**Who should consider using AutoDL-Projects**
 
 - Beginners who want to **try different AutoDL algorithms**
 - Engineers who want to **try AutoDL** to investigate whether AutoDL works on your projects
 - Researchers who want to **easily** implement and experiement **new** AutoDL algorithms.
 
-## **Why should we use AutoDL-Projects**
+**Why should we use AutoDL-Projects**
 - Simple library dependencies
 - All algorithms are in the same codebase
 - Active maintenance
@@ -40,7 +39,7 @@ At the moment, this project provides the following algorithms and scripts to run
     <tr> <!-- (2-nd row) -->
     <td align="center" valign="middle"> DARTS </td>
     <td align="center" valign="middle"> DARTS: Differentiable Architecture Search </td>
-    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NAS-Bench-201.md">CVPR-2019-GDAS.md</a> </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NAS-Bench-201.md">NAS-Bench-201.md</a> </td>
     </tr>
     <tr> <!-- (3-nd row) -->
     <td align="center" valign="middle"> GDAS </td>
