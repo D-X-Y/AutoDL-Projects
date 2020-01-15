@@ -517,7 +517,7 @@ def just_show(api):
     print ('[{:10s}-{:10s} ::: index={:5d}, accuracy={:.2f}'.format(dataset, metric_on_set, arch_index, highest_acc))
 
 
-def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims, x_maxs):
+def show_nas_sharing_w(api, dataset, subset, vis_save_dir, sufix, file_name, y_lims, x_maxs):
   color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
   dpi, width, height = 300, 3400, 2600
   LabelSize, LegendFontsize = 28, 28
@@ -533,13 +533,14 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims, x_
   plt.xlabel('The searching epoch', fontsize=LabelSize)
   plt.ylabel('The accuracy (%)', fontsize=LabelSize)
 
-  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-201/RANDOM-NAS-cifar10/checkpoint/',
-            'DARTS-V1': 'output/search-cell-nas-bench-201/DARTS-V1-cifar10/checkpoint/',
-            'DARTS-V2': 'output/search-cell-nas-bench-201/DARTS-V2-cifar10/checkpoint/',
-            'GDAS'    : 'output/search-cell-nas-bench-201/GDAS-cifar10/checkpoint/',
-            'SETN'    : 'output/search-cell-nas-bench-201/SETN-cifar10/checkpoint/',
-            'ENAS'    : 'output/search-cell-nas-bench-201/ENAS-cifar10/checkpoint/',
+  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-201/RANDOM-NAS-cifar10-{:}/checkpoint/'.format(sufix), 
+            'DARTS-V1': 'output/search-cell-nas-bench-201/DARTS-V1-cifar10-{:}/checkpoint/'.format(sufix),
+            'DARTS-V2': 'output/search-cell-nas-bench-201/DARTS-V2-cifar10-{:}/checkpoint/'.format(sufix),
+            'GDAS'    : 'output/search-cell-nas-bench-201/GDAS-cifar10-{:}/checkpoint/'.format(sufix),
+            'SETN'    : 'output/search-cell-nas-bench-201/SETN-cifar10-{:}/checkpoint/'.format(sufix),
+            'ENAS'    : 'output/search-cell-nas-bench-201/ENAS-cifar10-{:}/checkpoint/'.format(sufix),
            }
+  """
   xseeds = {'RSPS'    : [5349, 59613, 5983],
             'DARTS-V1': [11416, 72873, 81184, 28640],
             'DARTS-V2': [43330, 79405, 79423],
@@ -547,6 +548,15 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims, x_
             'SETN'    : [20518, 61817, 89144],
             'ENAS'    : [3231, 34238, 96929],
            }
+  """
+  xseeds = {'RSPS'    : [23814, 28015, 95809],
+            'DARTS-V1': [48349, 80877, 81920],
+            'DARTS-V2': [61712, 7941 , 87041] ,
+            'GDAS'    : [72818, 72996, 78877],
+            'SETN'    : [26985, 55206, 95404],
+            'ENAS'    : [21792, 36605, 45029]
+           }
+
 
   def get_accs(xdata):
     epochs, xresults = xdata['epoch'], []
@@ -579,12 +589,13 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, file_name, y_lims, x_
     plt.fill_between(epochs, [accyss[:,i].mean()-accyss[:,i].std() for i in epochs], [accyss[:,i].mean()+accyss[:,i].std() for i in epochs], alpha=0.2, color=color_set[idx])
   #plt.legend(loc=4, fontsize=LegendFontsize)
   plt.legend(loc=0, fontsize=LegendFontsize)
-  save_path = vis_save_dir / '{:}-{:}-{:}-{:}'.format(xox, dataset, subset, file_name)
+  save_path = vis_save_dir / '{:}.pdf'.format(file_name)
   print('save figure into {:}\n'.format(save_path))
   fig.savefig(str(save_path), dpi=dpi, bbox_inches='tight', format='pdf')
 
 
-def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, file_name, y_lims, x_maxs):
+
+def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, sufix, file_name, y_lims, x_maxs):
   color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
   dpi, width, height = 300, 3400, 2600
   LabelSize, LegendFontsize = 28, 28
@@ -600,13 +611,14 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, file_name, 
   plt.xlabel('The searching epoch', fontsize=LabelSize)
   plt.ylabel('The accuracy (%)', fontsize=LabelSize)
 
-  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-201/RANDOM-NAS-cifar10/checkpoint/',
-            'DARTS-V1': 'output/search-cell-nas-bench-201/DARTS-V1-cifar10/checkpoint/',
-            'DARTS-V2': 'output/search-cell-nas-bench-201/DARTS-V2-cifar10/checkpoint/',
-            'GDAS'    : 'output/search-cell-nas-bench-201/GDAS-cifar10/checkpoint/',
-            'SETN'    : 'output/search-cell-nas-bench-201/SETN-cifar10/checkpoint/',
-            'ENAS'    : 'output/search-cell-nas-bench-201/ENAS-cifar10/checkpoint/',
+  xpaths = {'RSPS'    : 'output/search-cell-nas-bench-201/RANDOM-NAS-cifar10-{:}/checkpoint/'.format(sufix), 
+            'DARTS-V1': 'output/search-cell-nas-bench-201/DARTS-V1-cifar10-{:}/checkpoint/'.format(sufix),
+            'DARTS-V2': 'output/search-cell-nas-bench-201/DARTS-V2-cifar10-{:}/checkpoint/'.format(sufix),
+            'GDAS'    : 'output/search-cell-nas-bench-201/GDAS-cifar10-{:}/checkpoint/'.format(sufix),
+            'SETN'    : 'output/search-cell-nas-bench-201/SETN-cifar10-{:}/checkpoint/'.format(sufix),
+            'ENAS'    : 'output/search-cell-nas-bench-201/ENAS-cifar10-{:}/checkpoint/'.format(sufix),
            }
+  """
   xseeds = {'RSPS'    : [5349, 59613, 5983],
             'DARTS-V1': [11416, 72873, 81184, 28640],
             'DARTS-V2': [43330, 79405, 79423],
@@ -614,6 +626,15 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, file_name, 
             'SETN'    : [20518, 61817, 89144],
             'ENAS'    : [3231, 34238, 96929],
            }
+  """
+  xseeds = {'RSPS'    : [23814, 28015, 95809],
+            'DARTS-V1': [48349, 80877, 81920],
+            'DARTS-V2': [61712, 7941 , 87041] ,
+            'GDAS'    : [72818, 72996, 78877],
+            'SETN'    : [26985, 55206, 95404],
+            'ENAS'    : [21792, 36605, 45029]
+           }
+
 
   def get_accs(xdata, dataset, subset):
     epochs, xresults = xdata['epoch'], []
@@ -643,8 +664,15 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, file_name, 
     accyss_B = np.array( [get_accs(xdatas, data_sub_b[0], data_sub_b[1]) for xdatas in all_datas] )
     epochs = list(range(accyss_A.shape[1]))
     for j, accyss in enumerate([accyss_A, accyss_B]):
-      plt.plot(epochs, [accyss[:,i].mean() for i in epochs], color=color_set[idx*2+j], linestyle='-' if j==0 else '--', label='{:} ({:})'.format(method, 'VALID' if j == 0 else 'TEST'), lw=2, alpha=0.9)
-      plt.fill_between(epochs, [accyss[:,i].mean()-accyss[:,i].std() for i in epochs], [accyss[:,i].mean()+accyss[:,i].std() for i in epochs], alpha=0.2, color=color_set[idx*2+j])
+      if x_maxs == 50:
+        color, line = color_set[idx*2+j], '-' if j==0 else '--'
+      elif x_maxs == 250:
+        color, line = color_set[idx], '-' if j==0 else '--'
+      else: raise ValueError('invalid x-maxs={:}'.format(x_maxs))
+      plt.plot(epochs, [accyss[:,i].mean() for i in epochs], color=color, linestyle=line, label='{:} ({:})'.format(method, 'VALID' if j == 0 else 'TEST'), lw=2, alpha=0.9)
+      plt.fill_between(epochs, [accyss[:,i].mean()-accyss[:,i].std() for i in epochs], [accyss[:,i].mean()+accyss[:,i].std() for i in epochs], alpha=0.2, color=color)
+      setname = data_sub_a if j == 0 else data_sub_b
+      print('{:} -- {:} ---- {:.2f}$\\pm${:.2f}'.format(method, setname, accyss[:,-1].mean(), accyss[:,-1].std()))
   #plt.legend(loc=4, fontsize=LegendFontsize)
   plt.legend(loc=0, fontsize=LegendFontsize)
   save_path = vis_save_dir / '{:}-{:}'.format(xox, file_name)
@@ -654,7 +682,7 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, file_name, 
 
 def show_reinforce(api, root, dataset, xset, file_name, y_lims):
   print ('root-path={:}, dataset={:}, xset={:}'.format(root, dataset, xset))
-  LRs = ['0.01', '0.02', '0.1', '0.2', '0.5', '1.0', '1.5', '2.0', '2.5', '3.0']
+  LRs = ['0.01', '0.02', '0.1', '0.2', '0.5']
   checkpoints = ['./output/search-cell-nas-bench-201/REINFORCE-cifar10-{:}/results.pth'.format(x) for x in LRs]
   acc_lr_dict, indexes = {}, None
   for lr, checkpoint in zip(LRs, checkpoints):
@@ -684,9 +712,53 @@ def show_reinforce(api, root, dataset, xset, file_name, y_lims):
 
   for idx, LR in enumerate(LRs):
     legend = 'LR={:.2f}'.format(float(LR))
-    color, linestyle = color_set[idx // 2], '-' if idx % 2 == 0 else '-.'
+    #color, linestyle = color_set[idx // 2], '-' if idx % 2 == 0 else '-.'
+    color, linestyle = color_set[idx], '-'
     plt.plot(indexes, acc_lr_dict[LR], color=color, linestyle=linestyle, label=legend, lw=2, alpha=0.8)
     print ('{:} : mean = {:}, std = {:} :: {:.2f}$\\pm${:.2f}'.format(legend, np.mean(acc_lr_dict[LR]), np.std(acc_lr_dict[LR]), np.mean(acc_lr_dict[LR]), np.std(acc_lr_dict[LR])))
+  plt.legend(loc=4, fontsize=LegendFontsize)
+  save_path = root / '{:}-{:}-{:}.pdf'.format(dataset, xset, file_name)
+  print('save figure into {:}\n'.format(save_path))
+  fig.savefig(str(save_path), dpi=dpi, bbox_inches='tight', format='pdf')
+
+
+
+def show_rea(api, root, dataset, xset, file_name, y_lims):
+  print ('root-path={:}, dataset={:}, xset={:}'.format(root, dataset, xset))
+  SSs = [3, 5, 10]
+  checkpoints = ['./output/search-cell-nas-bench-201/R-EA-cifar10-SS{:}/results.pth'.format(x) for x in SSs]
+  acc_ss_dict, indexes = {}, None
+  for ss, checkpoint in zip(SSs, checkpoints):
+    all_indexes, accuracies = torch.load(checkpoint, map_location='cpu'), []
+    for x in all_indexes:
+      info = api.arch2infos_full[ x ]
+      metrics = info.get_metrics(dataset, xset, None, False)
+      accuracies.append( metrics['accuracy'] )
+    if indexes is None: indexes = list(range(len(accuracies)))
+    acc_ss_dict[ss] = np.array( sorted(accuracies) )
+    print ('Sample-Size={:2d}, mean={:}, std={:}'.format(ss, acc_ss_dict[ss].mean(), acc_ss_dict[ss].std()))
+  
+  color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
+  dpi, width, height = 300, 3400, 2600
+  LabelSize, LegendFontsize = 28, 22
+  figsize = width / float(dpi), height / float(dpi)
+  fig = plt.figure(figsize=figsize)
+  x_axis = np.arange(0, 600)
+  plt.xlim(0, max(indexes))
+  plt.ylim(y_lims[0], y_lims[1])
+  interval_x, interval_y = 100, y_lims[2]
+  plt.xticks(np.arange(0, max(indexes), interval_x), fontsize=LegendFontsize)
+  plt.yticks(np.arange(y_lims[0],y_lims[1], interval_y), fontsize=LegendFontsize)
+  plt.grid()
+  plt.xlabel('The index of runs', fontsize=LabelSize)
+  plt.ylabel('The accuracy (%)', fontsize=LabelSize)
+
+  for idx, ss in enumerate(SSs):
+    legend = 'sample-size={:2d}'.format(ss)
+    #color, linestyle = color_set[idx // 2], '-' if idx % 2 == 0 else '-.'
+    color, linestyle = color_set[idx], '-'
+    plt.plot(indexes, acc_ss_dict[ss], color=color, linestyle=linestyle, label=legend, lw=2, alpha=0.8)
+    print ('{:} : mean = {:}, std = {:} :: {:.2f}$\\pm${:.2f}'.format(legend, np.mean(acc_ss_dict[ss]), np.std(acc_ss_dict[ss]), np.mean(acc_ss_dict[ss]), np.std(acc_ss_dict[ss])))
   plt.legend(loc=4, fontsize=LegendFontsize)
   save_path = root / '{:}-{:}-{:}.pdf'.format(dataset, xset, file_name)
   print('save figure into {:}\n'.format(save_path))
@@ -712,9 +784,25 @@ if __name__ == '__main__':
   #visualize_relative_ranking(vis_save_dir)
 
   api = API(args.api_path)
-  show_reinforce(api, vis_save_dir, 'cifar10-valid' , 'x-valid', 'REINFORCE-CIFAR-10', (75, 95, 5))
-  import pdb; pdb.set_trace()
+  #show_reinforce(api, vis_save_dir, 'cifar10-valid' , 'x-valid', 'REINFORCE-CIFAR-10', (85, 92, 2))
+  #show_rea      (api, vis_save_dir, 'cifar10-valid' , 'x-valid', 'REA-CIFAR-10', (88, 92, 1))
 
+  #plot_results_nas_v2(api, ('cifar10-valid' , 'x-valid'), ('cifar10'       , 'ori-test'), vis_save_dir, 'nas-com-v2-cifar010.pdf', (85,95, 1))
+  #plot_results_nas_v2(api, ('cifar100'      , 'x-valid'), ('cifar100'      , 'x-test'  ), vis_save_dir, 'nas-com-v2-cifar100.pdf', (60,75, 3))
+  #plot_results_nas_v2(api, ('ImageNet16-120', 'x-valid'), ('ImageNet16-120', 'x-test'  ), vis_save_dir, 'nas-com-v2-imagenet.pdf', (35,48, 2))
+
+  show_nas_sharing_w_v2(api, ('cifar10-valid' , 'x-valid'), ('cifar10'       , 'ori-test') , vis_save_dir, 'BN0', 'BN0-DARTS-CIFAR010.pdf', (0, 100,10), 50)
+  show_nas_sharing_w_v2(api, ('cifar100'      , 'x-valid'), ('cifar100'      , 'x-test'  ) , vis_save_dir, 'BN0', 'BN0-DARTS-CIFAR100.pdf', (0, 100,10), 50)
+  show_nas_sharing_w_v2(api, ('ImageNet16-120', 'x-valid'), ('ImageNet16-120', 'x-test'  ) , vis_save_dir, 'BN0', 'BN0-DARTS-ImageNet.pdf', (0, 100,10), 50)
+
+  show_nas_sharing_w_v2(api, ('cifar10-valid' , 'x-valid'), ('cifar10'       , 'ori-test') , vis_save_dir, 'BN0', 'BN0-OTHER-CIFAR010.pdf', (0, 100,10), 250)
+  show_nas_sharing_w_v2(api, ('cifar100'      , 'x-valid'), ('cifar100'      , 'x-test'  ) , vis_save_dir, 'BN0', 'BN0-OTHER-CIFAR100.pdf', (0, 100,10), 250)
+  show_nas_sharing_w_v2(api, ('ImageNet16-120', 'x-valid'), ('ImageNet16-120', 'x-test'  ) , vis_save_dir, 'BN0', 'BN0-OTHER-ImageNet.pdf', (0, 100,10), 250)
+
+  show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'BN0', 'BN0-XX-CIFAR010-VALID.pdf', (0, 100,10), 250)
+  show_nas_sharing_w(api, 'cifar10'       , 'ori-test', vis_save_dir, 'BN0', 'BN0-XX-CIFAR010-TEST.pdf' , (0, 100,10), 250)
+  import pdb; pdb.set_trace()
+  """
   for x_maxs in [50, 250]:
     show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
     show_nas_sharing_w(api, 'cifar10'       , 'ori-test', vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
@@ -724,17 +812,11 @@ if __name__ == '__main__':
     show_nas_sharing_w(api, 'ImageNet16-120', 'x-test'  , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)
   
   show_nas_sharing_w_v2(api, ('cifar10-valid' , 'x-valid'), ('cifar10'       , 'ori-test') , vis_save_dir, 'DARTS-CIFAR010.pdf', (0, 100,10), 50)
-  show_nas_sharing_w_v2(api, ('cifar100'      , 'x-valid'), ('cifar100'      , 'x-test'  ) , vis_save_dir, 'DARTS-CIFAR100.pdf', (0, 100,10), 50)
-  show_nas_sharing_w_v2(api, ('ImageNet16-120', 'x-valid'), ('ImageNet16-120', 'x-test'  ) , vis_save_dir, 'DARTS-ImageNet.pdf', (0, 100,10), 50)
-  #just_show(api)
-  """
+  just_show(api)
   plot_results_nas(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-com.pdf', (85,95, 1))
   plot_results_nas(api, 'cifar10'       , 'ori-test', vis_save_dir, 'nas-com.pdf', (85,95, 1))
   plot_results_nas(api, 'cifar100'      , 'x-valid' , vis_save_dir, 'nas-com.pdf', (55,75, 3))
   plot_results_nas(api, 'cifar100'      , 'x-test'  , vis_save_dir, 'nas-com.pdf', (55,75, 3))
   plot_results_nas(api, 'ImageNet16-120', 'x-valid' , vis_save_dir, 'nas-com.pdf', (35,50, 3))
   plot_results_nas(api, 'ImageNet16-120', 'x-test'  , vis_save_dir, 'nas-com.pdf', (35,50, 3))
-  plot_results_nas_v2(api, ('cifar10-valid' , 'x-valid'), ('cifar10'       , 'ori-test'), vis_save_dir, 'nas-com-v2-cifar010.pdf', (85,95, 1))
-  plot_results_nas_v2(api, ('cifar100'      , 'x-valid'), ('cifar100'      , 'x-test'  ), vis_save_dir, 'nas-com-v2-cifar100.pdf', (60,75, 3))
-  plot_results_nas_v2(api, ('ImageNet16-120', 'x-valid'), ('ImageNet16-120', 'x-test'  ), vis_save_dir, 'nas-com-v2-imagenet.pdf', (35,48, 2))
   """

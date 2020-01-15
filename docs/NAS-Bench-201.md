@@ -181,7 +181,7 @@ If researchers can provide better results with different hyper-parameters, we ar
 - [4] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/SETN.sh     cifar10 1 -1`
 - [5] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/ENAS.sh     cifar10 1 -1`
 - [6] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/RANDOM-NAS.sh cifar10 1 -1`
-- [7] `bash ./scripts-search/algos/R-EA.sh -1`
+- [7] `bash ./scripts-search/algos/R-EA.sh cifar10 3 -1`
 - [8] `bash ./scripts-search/algos/Random.sh -1`
 - [9] `bash ./scripts-search/algos/REINFORCE.sh 0.5 -1`
 - [10] `bash ./scripts-search/algos/BOHB.sh -1`

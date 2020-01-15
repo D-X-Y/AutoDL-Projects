@@ -33,13 +33,38 @@ class Model(object):
 
 # This function is to mimic the training and evaluatinig procedure for a single architecture `arch`.
 # The time_cost is calculated as the total training time for a few (e.g., 12 epochs) plus the evaluation time for one epoch.
-def train_and_eval(arch, nas_bench, extra_info):
-  if nas_bench is not None:
+# For use_converged_LR = True, the architecture is trained for 12 epochs, with LR being decaded from 0.1 to 0.
+#       In this case, the LR schedular is converged.
+# For use_converged_LR = False, the architecture is planed to be trained for 200 epochs, but we early stop its procedure.
+#       
+def train_and_eval(arch, nas_bench, extra_info, dataname='cifar10-valid', use_converged_LR=True):
+  if use_converged_LR and nas_bench is not None:
     arch_index = nas_bench.query_index_by_arch( arch )
     assert arch_index >= 0, 'can not find this arch : {:}'.format(arch)
-    info = nas_bench.get_more_info(arch_index, 'cifar10-valid', None, True)
+    info = nas_bench.get_more_info(arch_index, dataname, None, True)
     valid_acc, time_cost = info['valid-accuracy'], info['train-all-time'] + info['valid-per-time']
     #_, valid_acc = info.get_metrics('cifar10-valid', 'x-valid' , 25, True) # use the validation accuracy after 25 training epochs
+  elif not use_converged_LR and nas_bench is not None:
+    # Please use `use_converged_LR=False` for cifar10 only.
+    # It did return values for cifar100 and ImageNet16-120, but it has some potential issues. (Please email me for more details)
+    arch_index, nepoch = nas_bench.query_index_by_arch( arch ), 25
+    assert arch_index >= 0, 'can not find this arch : {:}'.format(arch)
+    xoinfo = nas_bench.get_more_info(arch_index, 'cifar10-valid', None, True)
+    xocost = nas_bench.get_cost_info(arch_index, 'cifar10-valid', False)
+    info = nas_bench.get_more_info(arch_index, dataname, nepoch, False, True) # use the validation accuracy after 25 training epochs, which is used in our ICLR submission (not the camera ready).
+    cost = nas_bench.get_cost_info(arch_index, dataname, False)
+    # The following codes are used to estimate the time cost.
+    # When we build NAS-Bench-201, architectures are trained on different machines and we can not use that time record.
+    # When we create checkpoints for converged_LR, we run all experiments on 1080Ti, and thus the time for each architecture can be fairly compared.
+    nums = {'ImageNet16-120-train': 151700, 'ImageNet16-120-valid': 3000,
+            'cifar10-valid-train' : 25000,  'cifar10-valid-valid' : 25000,
+            'cifar100-train'      : 50000,  'cifar100-valid'      : 5000}
+    estimated_train_cost = xoinfo['train-per-time'] / nums['cifar10-valid-train'] * nums['{:}-train'.format(dataname)] / xocost['latency'] * cost['latency'] * nepoch
+    estimated_valid_cost = xoinfo['valid-per-time'] / nums['cifar10-valid-valid'] * nums['{:}-valid'.format(dataname)] / xocost['latency'] * cost['latency']
+    try:
+      valid_acc, time_cost = info['valid-accuracy'], estimated_train_cost + estimated_valid_cost
+    except:
+      valid_acc, time_cost = info['est-valid-accuracy'], estimated_train_cost + estimated_valid_cost
   else:
     # train a model from scratch.
     raise ValueError('NOT IMPLEMENT YET')
@@ -79,7 +104,7 @@ def mutate_arch_func(op_names):
   return mutate_arch_func
 
 
-def regularized_evolution(cycles, population_size, sample_size, time_budget, random_arch, mutate_arch, nas_bench, extra_info):
+def regularized_evolution(cycles, population_size, sample_size, time_budget, random_arch, mutate_arch, nas_bench, extra_info, dataname):
   """Algorithm for regularized evolution (i.e. aging evolution).
   
   Follows "Algorithm 1" in Real et al. "Regularized Evolution for Image
@@ -150,6 +175,10 @@ def main(xargs, nas_bench):
   logger = prepare_logger(args)
 
   assert xargs.dataset == 'cifar10', 'currently only support CIFAR-10'
+  if xargs.dataset == 'cifar10':
+    dataname = 'cifar10-valid'
+  else:
+    dataname = xargs.dataset
   if xargs.data_path is not None:
     train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
     split_Fpath = 'configs/nas-benchmark/cifar-split.txt'
@@ -182,7 +211,7 @@ def main(xargs, nas_bench):
   x_start_time = time.time()
   logger.log('{:} use nas_bench : {:}'.format(time_string(), nas_bench))
   logger.log('-'*30 + ' start searching with the time budget of {:} s'.format(xargs.time_budget))
-  history, total_cost = regularized_evolution(xargs.ea_cycles, xargs.ea_population, xargs.ea_sample_size, xargs.time_budget, random_arch, mutate_arch, nas_bench if args.ea_fast_by_api else None, extra_info)
+  history, total_cost = regularized_evolution(xargs.ea_cycles, xargs.ea_population, xargs.ea_sample_size, xargs.time_budget, random_arch, mutate_arch, nas_bench if args.ea_fast_by_api else None, extra_info, dataname)
   logger.log('{:} regularized_evolution finish with history of {:} arch with {:.1f} s (real-cost={:.2f} s).'.format(time_string(), len(history), total_cost, time.time()-x_start_time))
   best_arch = max(history, key=lambda i: i.accuracy)
   best_arch = best_arch.arch

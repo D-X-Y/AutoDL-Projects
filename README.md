@@ -39,7 +39,7 @@ At the moment, this project provides the following algorithms and scripts to run
     <tr> <!-- (2-nd row) -->
     <td align="center" valign="middle"> DARTS </td>
     <td align="center" valign="middle"> DARTS: Differentiable Architecture Search </td>
-    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NAS-Bench-201.md">NAS-Bench-201.md</a> </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/ICLR-2019-DARTS.md">ICLR-2019-DARTS.md</a> </td>
     </tr>
     <tr> <!-- (3-nd row) -->
     <td align="center" valign="middle"> GDAS </td>
