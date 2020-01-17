@@ -10,6 +10,11 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 1 -1
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh     cifar10 1 -1
 ```
 
+**Run the first-order DARTS on the NASNet search space**:
+```
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/DARTS1V-search-NASNet-space.sh cifar10 -1
+```
+
 # Citation
 
 ```

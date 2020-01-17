@@ -46,13 +46,13 @@ If you want to train the searched architecture found by the above scripts, you n
 ### Searching on a small search space (NAS-Bench-201)
 The GDAS searching codes on a small search space:
 ```
-CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh cifar10 -1
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh cifar10 1 -1
 ```
 
 The baseline searching codes are DARTS:
 ```
-CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 -1
-CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 -1
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 1 -1
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 1 -1
 ```
 
 **After searching**, if you want to train the searched architecture found by the above scripts, please use the following codes:

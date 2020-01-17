@@ -10,6 +10,7 @@ from .search_model_random   import TinyNetworkRANDOM
 from .genotypes             import Structure as CellStructure, architectures as CellArchitectures
 # NASNet-based macro structure
 from .search_model_gdas_nasnet import NASNetworkGDAS
+from .search_model_darts_nasnet import NASNetworkDARTS
 
 
 nas201_super_nets = {'DARTS-V1': TinyNetworkDarts,
@@ -19,4 +20,5 @@ nas201_super_nets = {'DARTS-V1': TinyNetworkDarts,
                   'ENAS'    : TinyNetworkENAS,
                   'RANDOM'  : TinyNetworkRANDOM}
 
-nasnet_super_nets = {'GDAS' : NASNetworkGDAS}
+nasnet_super_nets = {'GDAS' : NASNetworkGDAS,
+                     'DARTS': NASNetworkDARTS}
