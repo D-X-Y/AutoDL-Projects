@@ -1,6 +1,6 @@
 #!/bin/bash
 # One-Shot Neural Architecture Search via Self-Evaluated Template Network, ICCV 2019
-# bash ./scripts-search/scripts/algos/SETN.sh cifar10 0 -1
+# bash ./scripts-search/algos/SETN.sh cifar10 0 -1
 echo script name: $0
 echo $# arguments
 if [ "$#" -ne 3 ] ;then
