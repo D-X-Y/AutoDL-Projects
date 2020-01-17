@@ -1,8 +1,8 @@
-# Contributing to NAS-Projects
+# Contributing to AutoDL-Projects
 
 :+1::tada: First off, thanks for taking the time to contribute! :tada::+1:
 
-The following is a set of guidelines for contributing to NAS-Projects.
+The following is a set of guidelines for contributing to AutoDL-Projects.
 
 ## Table Of Contents
 
@@ -15,11 +15,11 @@ The following is a set of guidelines for contributing to NAS-Projects.
 
 ### Reporting Bugs
 
-This section guides you through submitting a bug report for NAS-Projects.
+This section guides you through submitting a bug report for AutoDL-Projects.
 Following these guidelines helps maintainers and the community understand your report :pencil:, reproduce the behavior :computer: :computer:, and find related reports :mag_right:.
 
 When you are creating a bug report, please include as many details as possible.
-Fill out [the required template](https://github.com/D-X-Y/NAS-Projects/blob/master/.github/ISSUE_TEMPLATE/bug-report.md). The information it asks for helps us resolve issues faster.
+Fill out [the required template](https://github.com/D-X-Y/AutoDL-Projects/blob/master/.github/ISSUE_TEMPLATE/bug-report.md). The information it asks for helps us resolve issues faster.
 
 > **Note:** If you find a **Closed** issue that seems like it is the same thing that you're experiencing, open a new issue and include a link to the original issue in the body of your new one.
 

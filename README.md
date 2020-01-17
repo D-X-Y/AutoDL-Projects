@@ -33,22 +33,22 @@ At the moment, this project provides the following algorithms and scripts to run
     <tr> <!-- (1-st row) -->
     <td rowspan="6" align="center" valign="middle" halign="middle"> NAS </td>
     <td align="center" valign="middle"> TAS </td>
-    <td align="center" valign="middle"> Network Pruning via Transformable Architecture Search </td>
+    <td align="center" valign="middle"> <a href="https://arxiv.org/abs/1905.09717">Network Pruning via Transformable Architecture Search</a> </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NIPS-2019-TAS.md">NIPS-2019-TAS.md</a> </td>
     </tr>
     <tr> <!-- (2-nd row) -->
     <td align="center" valign="middle"> DARTS </td>
-    <td align="center" valign="middle"> DARTS: Differentiable Architecture Search </td>
+    <td align="center" valign="middle"> <a href="https://arxiv.org/abs/1806.09055">DARTS: Differentiable Architecture Search</a> </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/ICLR-2019-DARTS.md">ICLR-2019-DARTS.md</a> </td>
     </tr>
     <tr> <!-- (3-nd row) -->
     <td align="center" valign="middle"> GDAS </td>
-    <td align="center" valign="middle"> Searching for A Robust Neural Architecture in Four GPU Hours </td>
+    <td align="center" valign="middle"> <a href="https://arxiv.org/abs/1910.04465">Searching for A Robust Neural Architecture in Four GPU Hours</a> </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/CVPR-2019-GDAS.md">CVPR-2019-GDAS.md</a> </td>
     </tr>
     <tr> <!-- (4-rd row) -->
     <td align="center" valign="middle"> SETN </td>
-    <td align="center" valign="middle"> One-Shot Neural Architecture Search via Self-Evaluated Template Network </td>
+    <td align="center" valign="middle"> <a href="https://arxiv.org/abs/1910.05733">One-Shot Neural Architecture Search via Self-Evaluated Template Network</a> </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/ICCV-2019-SETN.md">ICCV-2019-SETN.md</a> </td>
     </tr>
     <tr> <!-- (5-th row) -->
@@ -80,8 +80,8 @@ At the moment, this project provides the following algorithms and scripts to run
 ## History of this repo
 
 At first, this repo is `GDAS`, which is used to reproduce results in Searching for A Robust Neural Architecture in Four GPU Hours.
-After that, more functions and more NAS algorithms are continuely added in this repo. After it supports more than five algorithms, it is upgraded from `GDAS` to `NAS-Project`.
-Now, since both HPO and NAS are supported in this repo, it is upgraded from `NAS-Project` to `AutoDL-Projects`.
+After that, more functions and more NAS algorithms are continuely added in this repo. After it supports more than five algorithms, it is upgraded from `GDAS` to `NAS-Projects`.
+Now, since both HPO and NAS are supported in this repo, it is upgraded from `NAS-Projects` to `AutoDL-Projects`.
 
 
 ## Requirements and Preparation
@@ -125,10 +125,10 @@ If you find that this project helps your research, please consider citing some o
 }
 ```
 
-## Related Projects
+# Others
 
-- [Awesome-NAS](https://github.com/D-X-Y/Awesome-NAS) : A curated list of neural architecture search and related resources.
-- [AutoML Freiburg-Hannover](https://www.automl.org/) : A website maintained by Frank Hutter's team, containing many AutoML resources.
+If you want to contribute to this repo, please see [CONTRIBUTING.md](.github/CONTRIBUTING.md).
+Besides, please follow [CODE-OF-CONDUCT.md](.github/CODE-OF-CONDUCT.md).
 
 # License
 The entire codebase is under [MIT license](LICENSE.md)

@@ -12,7 +12,7 @@ In this Markdown file, we provide:
 
 Note: please use `PyTorch >= 1.2.0` and `Python >= 3.6.0`.
 
-Simply type `pip install nas-bench-201` to install our api.
+You can simply type `pip install nas-bench-201` to install our api. Please see source codes of `nas-bench-201` module in [this repo](https://github.com/D-X-Y/NAS-Bench-201).
 
 If you have any questions or issues, please post it at [here](https://github.com/D-X-Y/AutoDL-Projects/issues) or email me.
 
