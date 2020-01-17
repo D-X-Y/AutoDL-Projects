@@ -1,6 +1,6 @@
 #!/bin/bash
 # Efficient Neural Architecture Search via Parameter Sharing, ICML 2018
-# bash ./scripts-search/scripts/algos/ENAS.sh cifar10 0 -1
+# bash ./scripts-search/algos/ENAS.sh cifar10 0 -1
 echo script name: $0
 echo $# arguments
 if [ "$#" -ne 3 ] ;then
