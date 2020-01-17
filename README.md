@@ -1,4 +1,7 @@
-# Automated Deep Learning (AutoDL)
+<p align="center">
+<img src="https://xuanyidong.com/resources/images/AutoDL-log.png" width="400"/>
+</p>
+
 ---------
 [![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
