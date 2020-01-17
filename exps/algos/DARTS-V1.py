@@ -199,7 +199,8 @@ def main(xargs):
       logger.log('<<<--->>> The {:}-th epoch : find the highest validation accuracy : {:.2f}%.'.format(epoch_str, valid_a_top1))
       copy_checkpoint(model_base_path, model_best_path, logger)
     with torch.no_grad():
-      logger.log('arch-parameters :\n{:}'.format( nn.functional.softmax(search_model.arch_parameters, dim=-1).cpu() ))
+      #logger.log('arch-parameters :\n{:}'.format( nn.functional.softmax(search_model.arch_parameters, dim=-1).cpu() ))
+      logger.log('{:}'.format(search_model.show_alphas()))
     if api is not None: logger.log('{:}'.format(api.query_by_arch( genotypes[epoch] )))
     # measure elapsed time
     epoch_time.update(time.time() - start_time)

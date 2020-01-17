@@ -53,6 +53,10 @@ class TinyNetworkDarts(nn.Module):
   def get_alphas(self):
     return [self.arch_parameters]
 
+  def show_alphas(self):
+    with torch.no_grad():
+      return 'arch-parameters :\n{:}'.format( nn.functional.softmax(self.arch_parameters, dim=-1).cpu() )
+
   def get_message(self):
     string = self.extra_repr()
     for i, cell in enumerate(self.cells):
