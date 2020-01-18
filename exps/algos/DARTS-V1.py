@@ -20,7 +20,7 @@ from models       import get_cell_based_tiny_net, get_search_spaces
 from nas_201_api  import NASBench201API as API
 
 
-def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, epoch_str, print_freq, logger):
+def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, epoch_str, print_freq, logger, gradient_clip):
   data_time, batch_time = AverageMeter(), AverageMeter()
   base_losses, base_top1, base_top5 = AverageMeter(), AverageMeter(), AverageMeter()
   arch_losses, arch_top1, arch_top5 = AverageMeter(), AverageMeter(), AverageMeter()
@@ -38,7 +38,7 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
     _, logits = network(base_inputs)
     base_loss = criterion(logits, base_targets)
     base_loss.backward()
-    torch.nn.utils.clip_grad_norm_(network.parameters(), 5)
+    if gradient_clip > 0: torch.nn.utils.clip_grad_norm_(network.parameters(), gradient_clip)
     w_optimizer.step()
     # record
     base_prec1, base_prec5 = obtain_accuracy(logits.data, base_targets.data, topk=(1, 5))
@@ -165,7 +165,7 @@ def main(xargs):
     epoch_str = '{:03d}-{:03d}'.format(epoch, total_epoch)
     logger.log('\n[Search the {:}-th epoch] {:}, LR={:}'.format(epoch_str, need_time, min(w_scheduler.get_lr())))
 
-    search_w_loss, search_w_top1, search_w_top5 = search_func(search_loader, network, criterion, w_scheduler, w_optimizer, a_optimizer, epoch_str, xargs.print_freq, logger)
+    search_w_loss, search_w_top1, search_w_top5 = search_func(search_loader, network, criterion, w_scheduler, w_optimizer, a_optimizer, epoch_str, xargs.print_freq, logger, xargs.gradient_clip)
     search_time.update(time.time() - start_time)
     logger.log('[{:}] searching : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%, time-cost={:.1f} s'.format(epoch_str, search_w_loss, search_w_top1, search_w_top5, search_time.sum))
     valid_a_loss , valid_a_top1 , valid_a_top5  = valid_func(valid_loader, network, criterion)
@@ -225,6 +225,7 @@ if __name__ == '__main__':
   parser.add_argument('--track_running_stats',type=int,   choices=[0,1],help='Whether use track_running_stats or not in the BN layer.')
   parser.add_argument('--config_path',        type=str,   help='The config path.')
   parser.add_argument('--model_config',       type=str,   help='The path of the model configuration. When this arg is set, it will cover max_nodes / channels / num_cells.')
+  parser.add_argument('--gradient_clip',      type=float, default=5, help='')
   # architecture leraning rate
   parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='learning rate for arch encoding')
   parser.add_argument('--arch_weight_decay',  type=float, default=1e-3, help='weight decay for arch encoding')
