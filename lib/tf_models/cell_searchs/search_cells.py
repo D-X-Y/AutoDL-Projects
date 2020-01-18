@@ -7,10 +7,10 @@ from copy import deepcopy
 from ..cell_operations import OPS
 
 
-class SearchCell(tf.keras.layers.Layer):
+class NAS201SearchCell(tf.keras.layers.Layer):
 
   def __init__(self, C_in, C_out, stride, max_nodes, op_names, affine=False):
-    super(SearchCell, self).__init__()
+    super(NAS201SearchCell, self).__init__()
 
     self.op_names  = deepcopy(op_names)
     self.max_nodes = max_nodes

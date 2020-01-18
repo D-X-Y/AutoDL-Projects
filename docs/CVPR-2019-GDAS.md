@@ -62,6 +62,8 @@ CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201/train-a-net.sh '|nor_
 `|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|skip_connect~1|skip_connect~2|` represents the structure of a searched architecture. My codes will automatically print it during the searching procedure.
 
 
+**Tensorflow codes for GDAS are in experimental state**, which locates at `exps-tf`.
+
 # Citation
 
 If you find that this project helps your research, please consider citing the following paper:

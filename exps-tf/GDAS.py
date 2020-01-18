@@ -1,4 +1,9 @@
+# [D-X-Y]
+# Run GDAS
 # CUDA_VISIBLE_DEVICES=0 python exps-tf/GDAS.py
+# Run DARTS
+# CUDA_VISIBLE_DEVICES=0 python exps-tf/GDAS.py --tau_max -1 --tau_min -1 --epochs 50
+#
 import os, sys, math, time, random, argparse
 import tensorflow as tf
 from pathlib import Path

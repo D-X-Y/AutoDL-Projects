@@ -5,7 +5,7 @@ import tensorflow as tf
 import numpy as np
 from copy import deepcopy
 from ..cell_operations import ResNetBasicblock
-from .search_cells     import SearchCell
+from .search_cells     import NAS201SearchCell as SearchCell
 
 
 def sample_gumbel(shape, eps=1e-20):
