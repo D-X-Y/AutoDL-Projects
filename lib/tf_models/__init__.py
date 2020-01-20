@@ -9,7 +9,7 @@ __all__ = ['get_cell_based_tiny_net', 'get_search_spaces']
 
 # the cell-based NAS models
 def get_cell_based_tiny_net(config):
-  group_names = ['GDAS']
+  group_names = ['GDAS', 'DARTS']
   if config.name in group_names:
     from .cell_searchs import nas_super_nets
     from .cell_operations import SearchSpaceNames
