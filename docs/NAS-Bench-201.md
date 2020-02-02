@@ -72,7 +72,7 @@ index = api.query_index_by_arch('|nor_conv_3x3~0|+|nor_conv_3x3~0|avg_pool_3x3~1
 api.show(index)
 ```
 
-5. For other usages, please see `lib/nas_201_api/api.py`
+5. For other usages, please see `lib/nas_201_api/api.py`. We provide some usage information in the comments for the corresponding functions. If what you want is not provided, please feel free to open an issue for discussion, and I am happy to answer any questions regarding NAS-Bench-201.
 
 
 ### Detailed Instruction
