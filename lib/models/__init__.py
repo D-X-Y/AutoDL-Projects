@@ -2,6 +2,7 @@
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ##################################################
 from os import path as osp
+from typing import List, Text
 
 __all__ = ['change_key', 'get_cell_based_tiny_net', 'get_search_spaces', 'get_cifar_models', 'get_imagenet_models', \
            'obtain_model', 'obtain_search_model', 'load_net_from_checkpoint', \
@@ -42,7 +43,7 @@ def get_cell_based_tiny_net(config):
 
 
 # obtain the search space, i.e., a dict mapping the operation name into a python-function for this op
-def get_search_spaces(xtype, name):
+def get_search_spaces(xtype, name) -> List[Text]:
   if xtype == 'cell':
     from .cell_operations import SearchSpaceNames
     assert name in SearchSpaceNames, 'invalid name [{:}] in {:}'.format(name, SearchSpaceNames.keys())
