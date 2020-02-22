@@ -1,8 +1,8 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
+#####################################################
 # python exps/NAS-Bench-201/visualize.py --api_path $HOME/.torch/NAS-Bench-201-v1_0-e61699.pth
-##################################################
+#####################################################
 import os, sys, time, argparse, collections
 from tqdm import tqdm
 from collections import OrderedDict

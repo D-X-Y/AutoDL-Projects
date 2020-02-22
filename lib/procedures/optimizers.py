@@ -1,6 +1,6 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
+#####################################################
 import math, torch
 import torch.nn as nn
 from bisect import bisect_right

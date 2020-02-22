@@ -1,6 +1,6 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
+#####################################################
 import os, sys, time, torch
 import torch.nn.functional as F
 # our modules

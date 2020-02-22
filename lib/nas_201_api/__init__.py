@@ -1,6 +1,6 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
+#####################################################
 from .api import NASBench201API
 from .api import ArchResults, ResultsCount
 

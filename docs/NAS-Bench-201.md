@@ -71,6 +71,13 @@ print ('Train Info [10-th epoch] : {:}'.format(results[0].get_train(10)))
 index = api.query_index_by_arch('|nor_conv_3x3~0|+|nor_conv_3x3~0|avg_pool_3x3~1|+|skip_connect~0|nor_conv_3x3~1|skip_connect~2|')
 api.show(index)
 ```
+This string `|nor_conv_3x3~0|+|nor_conv_3x3~0|avg_pool_3x3~1|+|skip_connect~0|nor_conv_3x3~1|skip_connect~2|` means:
+```
+node-0: the input tensor
+node-1: conv-3x3( node-0 )
+node-2: conv-3x3( node-0 ) + avg-pool-3x3( node-1 )
+node-3: skip-connect( node-0 ) + conv-3x3( node-1 ) + skip-connect( node-2 )
+```
 
 5. Create the network from api:
 ```

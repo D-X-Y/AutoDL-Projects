@@ -1,6 +1,6 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
+#####################################################
 import os, sys, time, argparse, collections
 from copy import deepcopy
 import torch

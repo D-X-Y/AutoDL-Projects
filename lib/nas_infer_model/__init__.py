@@ -1,6 +1,6 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
-##################################################
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
+#####################################################
 # I write this package to make AutoDL-Projects to be compatible with the old GDAS projects.
 # Ideally, this package will be merged into lib/models/cell_infers in future.
 # Currently, this package is used to reproduce the results in GDAS (Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019).

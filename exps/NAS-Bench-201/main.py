@@ -1,7 +1,7 @@
 ###############################################################
 # NAS-Bench-201, ICLR 2020 (https://arxiv.org/abs/2001.00326) #
 ###############################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019-2020         #
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08           #
 ###############################################################
 import os, sys, time, torch, random, argparse
 from PIL     import ImageFile

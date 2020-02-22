@@ -1,6 +1,6 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
+#####################################################
 import os, sys, time, torch
 from procedures   import prepare_seed, get_optim_scheduler
 from utils        import get_model_infos, obtain_accuracy

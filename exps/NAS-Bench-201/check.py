@@ -1,8 +1,8 @@
-##################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
-##################################################
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
+#####################################################
 # python exps/NAS-Bench-201/check.py --base_save_dir 
-##################################################
+#####################################################
 import os, sys, time, argparse, collections
 from shutil import copyfile
 import torch
