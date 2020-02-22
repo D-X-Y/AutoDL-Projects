@@ -234,3 +234,58 @@ class PartAwareOp(nn.Module):
     final_fea = torch.cat((x,features), dim=1)
     outputs   = self.last( final_fea )
     return outputs
+
+
+# Searching for A Robust Neural Architecture in Four GPU Hours
+class GDAS_Reduction_Cell(nn.Module):
+
+  def __init__(self, C_prev_prev, C_prev, C, reduction_prev, multiplier, affine, track_running_stats):
+    super(GDAS_Reduction_Cell, self).__init__()
+    if reduction_prev:
+      self.preprocess0 = FactorizedReduce(C_prev_prev, C, 2, affine, track_running_stats)
+    else:
+      self.preprocess0 = ReLUConvBN(C_prev_prev, C, 1, 1, 0, 1, affine, track_running_stats)
+    self.preprocess1 = ReLUConvBN(C_prev, C, 1, 1, 0, 1, affine, track_running_stats)
+    self.multiplier  = multiplier
+
+    self.reduction = True
+    self.ops1 = nn.ModuleList(
+                  [nn.Sequential(
+                      nn.ReLU(inplace=False),
+                      nn.Conv2d(C, C, (1, 3), stride=(1, 2), padding=(0, 1), groups=8, bias=False),
+                      nn.Conv2d(C, C, (3, 1), stride=(2, 1), padding=(1, 0), groups=8, bias=False),
+                      nn.BatchNorm2d(C, affine=True),
+                      nn.ReLU(inplace=False),
+                      nn.Conv2d(C, C, 1, stride=1, padding=0, bias=False),
+                      nn.BatchNorm2d(C, affine=True)),
+                   nn.Sequential(
+                      nn.ReLU(inplace=False),
+                      nn.Conv2d(C, C, (1, 3), stride=(1, 2), padding=(0, 1), groups=8, bias=False),
+                      nn.Conv2d(C, C, (3, 1), stride=(2, 1), padding=(1, 0), groups=8, bias=False),
+                      nn.BatchNorm2d(C, affine=True),
+                      nn.ReLU(inplace=False),
+                      nn.Conv2d(C, C, 1, stride=1, padding=0, bias=False),
+                      nn.BatchNorm2d(C, affine=True))])
+
+    self.ops2 = nn.ModuleList(
+                  [nn.Sequential(
+                      nn.MaxPool2d(3, stride=1, padding=1),
+                      nn.BatchNorm2d(C, affine=True)),
+                   nn.Sequential(
+                      nn.MaxPool2d(3, stride=2, padding=1),
+                      nn.BatchNorm2d(C, affine=True))])
+
+  def forward(self, s0, s1, drop_prob = -1):
+    s0 = self.preprocess0(s0)
+    s1 = self.preprocess1(s1)
+
+    X0 = self.ops1[0] (s0)
+    X1 = self.ops1[1] (s1)
+    if self.training and drop_prob > 0.:
+      X0, X1 = drop_path(X0, drop_prob), drop_path(X1, drop_prob)
+
+    X2 = self.ops2[0] (X0+X1)
+    X3 = self.ops2[1] (s1)
+    if self.training and drop_prob > 0.:
+      X2, X3 = drop_path(X2, drop_prob), drop_path(X3, drop_prob)
+    return torch.cat([X0, X1, X2, X3], dim=1)

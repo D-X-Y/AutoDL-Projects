@@ -5,25 +5,24 @@
 ---------
 [![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
-Automated Deep Learning (AutoDL-Projects) is an open source, lightweight, but useful project for everyone.
-This project implemented several neural architecture search (NAS) and hyper-parameter optimization (HPO) algorithms.
-中文介绍见[README_CN.md](README_CN.md)
+自动深度学习库 (AutoDL-Projects) 是一个开源的，轻量级的，功能强大的项目。
+台项目目前实现了多种网络结构搜索(NAS)和超参数优化(HPO)算法。
 
-**Who should consider using AutoDL-Projects**
+**谁应该考虑使用AutoDL-Projects**
 
-- Beginners who want to **try different AutoDL algorithms**
-- Engineers who want to **try AutoDL** to investigate whether AutoDL works on your projects
-- Researchers who want to **easily** implement and experiement **new** AutoDL algorithms.
+- 想尝试不同AutoDL算法的初学者
+- 想调研AutoDL在特定问题上的有效性的工程师
+- 想轻松实现和实验新AutoDL算法的研究员
 
-**Why should we use AutoDL-Projects**
-- Simple library dependencies
-- All algorithms are in the same codebase
-- Active maintenance
+**为什么我们要用AutoDL-Projects**
+- 最简化的python依赖库
+- 所有算法都在一个代码库下
+- 积极地维护
 
 
-## AutoDL-Projects Capabilities
+## AutoDL-Projects 能力简述
 
-At the moment, this project provides the following algorithms and scripts to run them. Please see the details in the link provided in the description column.
+目前，该项目提供了下列算法和以及对应的运行脚本。请点击每个算法对应的链接看他们的细节描述。
 
 
 <table>
@@ -81,14 +80,7 @@ At the moment, this project provides the following algorithms and scripts to run
 </table>
 
 
-## History of this repo
-
-At first, this repo is `GDAS`, which is used to reproduce results in Searching for A Robust Neural Architecture in Four GPU Hours.
-After that, more functions and more NAS algorithms are continuely added in this repo. After it supports more than five algorithms, it is upgraded from `GDAS` to `NAS-Projects`.
-Now, since both HPO and NAS are supported in this repo, it is upgraded from `NAS-Projects` to `AutoDL-Projects`.
-
-
-## Requirements and Preparation
+## 准备工作
 
 Please install `Python>=3.6` and `PyTorch>=1.3.0`. (You could also run this project in lower versions of Python and PyTorch, but may have bugs).
 Some visualization codes may require `opencv`.
@@ -96,9 +88,9 @@ Some visualization codes may require `opencv`.
 CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
 Some methods use knowledge distillation (KD), which require pre-trained models. Please download these models from [Google Drive](https://drive.google.com/open?id=1ANmiYEGX-IQZTfH8w0aSpj-Wypg-0DR-) (or train by yourself) and save into `.latent-data`.
 
-## Citation
+## 引用
 
-If you find that this project helps your research, please consider citing some of the following papers:
+如果您发现该项目对您的科研或工程有帮助，请考虑引用下列的某些文献：
 ```
 @inproceedings{dong2020nasbench201,
   title     = {NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search},
@@ -129,10 +121,10 @@ If you find that this project helps your research, please consider citing some o
 }
 ```
 
-# Others
+# 其他
 
-If you want to contribute to this repo, please see [CONTRIBUTING.md](.github/CONTRIBUTING.md).
-Besides, please follow [CODE-OF-CONDUCT.md](.github/CODE-OF-CONDUCT.md).
+如果你想要给这份代码库做贡献，请看[CONTRIBUTING.md](.github/CONTRIBUTING.md)。
+此外，使用规范请参考[CODE-OF-CONDUCT.md](.github/CODE-OF-CONDUCT.md)。
 
-# License
+# 许可证
 The entire codebase is under [MIT license](LICENSE.md)
