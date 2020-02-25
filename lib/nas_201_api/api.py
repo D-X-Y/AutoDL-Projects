@@ -3,8 +3,8 @@
 ############################################################################################
 # NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search, ICLR 2020 #
 ############################################################################################
-# NAS-Bench-201-v1_0-e61699.pth : 6219 architectures are trained once, 1621 architectures are trained twice, 7785 architectures are trained three times. `LESS` only supports CIFAR10-VALID.
-#
+# [2020.02.25] NAS-Bench-201-v1_0-e61699.pth : 6219 architectures are trained once, 1621 architectures are trained twice, 7785 architectures are trained three times. `LESS` only supports CIFAR10-VALID.
+# [2020.03.08] Next version (coming soon)
 #
 #
 import os, sys, copy, random, torch, numpy as np
