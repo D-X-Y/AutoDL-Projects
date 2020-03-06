@@ -29,7 +29,8 @@ def convert_param(original_lists):
     elif ctype == 'float':
       x = float(x)
     elif ctype == 'none':
-      assert x == 'None', 'for none type, the value must be None instead of {:}'.format(x)
+      if x.lower() != 'none':
+        raise ValueError('For the none type, the value must be none instead of {:}'.format(x))
       x = None
     else:
       raise TypeError('Does not know this type : {:}'.format(ctype))

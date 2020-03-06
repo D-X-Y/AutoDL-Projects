@@ -155,7 +155,7 @@ class NASNetSearchCell(nn.Module):
     self.edges     = nn.ModuleDict()
     for i in range(self._steps):
       for j in range(2+i):
-        node_str = '{:}<-{:}'.format(i, j)
+        node_str = '{:}<-{:}'.format(i, j)  # indicate the edge from node-(j) to node-(i+2)
         stride = 2 if reduction and j < 2 else 1
         op = MixedOp(space, C, stride, affine, track_running_stats)
         self.edges[ node_str ] = op

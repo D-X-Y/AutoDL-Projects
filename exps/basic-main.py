@@ -39,7 +39,9 @@ def main(args):
   if args.model_source == 'normal':
     base_model   = obtain_model(model_config)
   elif args.model_source == 'nas':
-    base_model   = obtain_nas_infer_model(model_config)
+    base_model   = obtain_nas_infer_model(model_config, args.extra_model_path)
+  elif args.model_source == 'autodl-searched':
+    base_model   = obtain_model(model_config, args.extra_model_path)
   else:
     raise ValueError('invalid model-source : {:}'.format(args.model_source))
   flop, param  = get_model_infos(base_model, xshape)

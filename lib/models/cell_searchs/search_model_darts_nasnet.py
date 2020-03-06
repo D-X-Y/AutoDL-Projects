@@ -5,8 +5,7 @@ import torch
 import torch.nn as nn
 from copy import deepcopy
 from typing import List, Text, Dict
-from .search_cells     import NASNetSearchCell as SearchCell
-from .genotypes        import Structure
+from .search_cells import NASNetSearchCell as SearchCell
 
 
 # The macro structure is based on NASNet

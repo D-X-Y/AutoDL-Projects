@@ -12,6 +12,7 @@ def obtain_basic_args():
   parser.add_argument('--optim_config',     type=str,                   help='The path to the optimizer configuration')
   parser.add_argument('--procedure'   ,     type=str,                   help='The procedure basic prefix.')
   parser.add_argument('--model_source',     type=str,  default='normal',help='The source of model defination.')
+  parser.add_argument('--extra_model_path', type=str,  default=None,    help='The extra model ckp file (help to indicate the searched architecture).')
   add_shared_args( parser )
   # Optimization options
   parser.add_argument('--batch_size',       type=int,  default=2,       help='Batch size for training.')

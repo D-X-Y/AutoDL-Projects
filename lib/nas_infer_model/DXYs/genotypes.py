@@ -168,5 +168,15 @@ Networks = {'DARTS_V1': DARTS_V1,
             'SETN'    : SETN,
            }
 
+# This function will return a Genotype from a dict.
 def build_genotype_from_dict(xdict):
-  import pdb; pdb.set_trace()
+  def remove_value(nodes):
+    return [tuple([(x[0], x[1]) for x in node]) for node in nodes]
+  genotype = Genotype(
+      normal=remove_value(xdict['normal']),
+      normal_concat=xdict['normal_concat'],
+      reduce=remove_value(xdict['reduce']),
+      reduce_concat=xdict['reduce_concat'],
+      connectN=None, connects=None
+      )
+  return genotype
