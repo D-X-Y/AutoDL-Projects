@@ -42,7 +42,7 @@ Please use the following scripts to use GDAS to search as in the original paper:
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/GDAS-search-NASNet-space.sh cifar10 1 -1
 ```
 
-**After searching***, if you want to re-train the searched architecture found by the above script, you can use the following script:
+**After searching**, if you want to re-train the searched architecture found by the above script, you can use the following script:
 ```
 CUDA_VISIBLE_DEVICES=0 bash ./scripts/retrain-searched-net.sh cifar10 gdas-searched \
 		     output/search-cell-darts/GDAS-cifar10-BN1/checkpoint/seed-945-basic.pth 96 -1
