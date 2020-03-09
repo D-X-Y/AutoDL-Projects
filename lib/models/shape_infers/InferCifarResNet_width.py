@@ -1,8 +1,9 @@
-import math
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
+#####################################################
 import torch.nn as nn
 import torch.nn.functional as F
 from ..initialization import initialize_resnet
-from ..SharedUtils    import additive_func
 
 
 class ConvBNReLU(nn.Module):

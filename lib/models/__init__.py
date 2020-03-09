@@ -39,6 +39,13 @@ def get_cell_based_tiny_net(config):
       genotype = CellStructure.str2structure(config.arch_str)
     else: raise ValueError('Can not find genotype from this config : {:}'.format(config))
     return TinyNetwork(config.C, config.N, genotype, config.num_classes)
+  elif config.name == 'infer.shape.tiny':
+    from .shape_infers import DynamicShapeTinyNet
+    if isinstance(config.channels, str):
+      channels = tuple([int(x) for x in config.channels.split(':')])
+    else: channels = config.channels
+    genotype = CellStructure.str2structure(config.genotype)
+    return DynamicShapeTinyNet(channels, genotype, config.num_classes)
   elif config.name == 'infer.nasnet-cifar':
     from .cell_infers import NASNetonCIFAR
     raise NotImplementedError

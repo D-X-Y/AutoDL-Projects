@@ -3,11 +3,9 @@
 ###########################################################################
 # Searching for A Robust Neural Architecture in Four GPU Hours, CVPR 2019 #
 ###########################################################################
-import os, sys, time, random, argparse
-import numpy as np
+import sys, time, random, argparse
 from copy import deepcopy
 import torch
-import torch.nn as nn
 from pathlib import Path
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
@@ -107,7 +105,6 @@ def main(xargs):
   logger.log('w-scheduler : {:}'.format(w_scheduler))
   logger.log('criterion   : {:}'.format(criterion))
   flop, param  = get_model_infos(search_model, xshape)
-  #logger.log('{:}'.format(search_model))
   logger.log('FLOP = {:.2f} M, Params = {:.2f} MB'.format(flop, param))
   logger.log('search-space [{:} ops] : {:}'.format(len(search_space), search_space))
   if xargs.arch_nas_dataset is None:

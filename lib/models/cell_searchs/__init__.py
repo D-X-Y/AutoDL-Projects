@@ -14,11 +14,11 @@ from .search_model_darts_nasnet import NASNetworkDARTS
 
 
 nas201_super_nets = {'DARTS-V1': TinyNetworkDarts,
-                  'DARTS-V2': TinyNetworkDarts,
-                  'GDAS'    : TinyNetworkGDAS,
-                  'SETN'    : TinyNetworkSETN,
-                  'ENAS'    : TinyNetworkENAS,
-                  'RANDOM'  : TinyNetworkRANDOM}
+                     "DARTS-V2": TinyNetworkDarts,
+                     "GDAS": TinyNetworkGDAS,
+                     "SETN": TinyNetworkSETN,
+                     "ENAS": TinyNetworkENAS,
+                     "RANDOM": TinyNetworkRANDOM}
 
-nasnet_super_nets = {'GDAS' : NASNetworkGDAS,
-                     'DARTS': NASNetworkDARTS}
+nasnet_super_nets = {"GDAS": NASNetworkGDAS,
+                     "DARTS": NASNetworkDARTS}

@@ -3,10 +3,8 @@
 #####################################################
 # python exps/NAS-Bench-201/check.py --base_save_dir 
 #####################################################
-import os, sys, time, argparse, collections
-from shutil import copyfile
+import sys, time, argparse, collections
 import torch
-import torch.nn as nn
 from pathlib import Path
 from collections import defaultdict
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()

@@ -4,7 +4,7 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 #
-import os, sys, json
+import os, json
 from os import path as osp
 from pathlib import Path
 from collections import namedtuple

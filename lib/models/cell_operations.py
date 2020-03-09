@@ -172,14 +172,19 @@ class FactorizedReduce(nn.Module):
       for i in range(2):
         self.convs.append( nn.Conv2d(C_in, C_outs[i], 1, stride=stride, padding=0, bias=False) )
       self.pad = nn.ConstantPad2d((0, 1, 0, 1), 0)
+    elif stride == 1:
+      self.conv = nn.Conv2d(C_in, C_out, 1, stride=stride, padding=0, bias=False)
     else:
       raise ValueError('Invalid stride : {:}'.format(stride))
     self.bn = nn.BatchNorm2d(C_out, affine=affine, track_running_stats=track_running_stats)
 
   def forward(self, x):
-    x = self.relu(x)
-    y = self.pad(x)
-    out = torch.cat([self.convs[0](x), self.convs[1](y[:,:,1:,1:])], dim=1)
+    if self.stride == 2:
+      x = self.relu(x)
+      y = self.pad(x)
+      out = torch.cat([self.convs[0](x), self.convs[1](y[:,:,1:,1:])], dim=1)
+    else:
+      out = self.conv(x)
     out = self.bn(out)
     return out
 

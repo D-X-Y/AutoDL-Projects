@@ -146,6 +146,10 @@ api.get_more_info(112, 'cifar10', None, False, True)
 api.get_more_info(112, 'ImageNet16-120', None, False, True) # the info of last training epoch for 112-th architecture (use 200-epoch-hyper-parameter and randomly select a trial)
 ```
 
+Please use the following script to show the best architectures on each dataset:
+```show the best architecture
+python exps/NAS-Bench-201/show-best.py
+```
 
 
 ## Instruction to Re-Generate NAS-Bench-201

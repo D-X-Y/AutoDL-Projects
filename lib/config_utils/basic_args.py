@@ -1,7 +1,7 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
 ##################################################
-import os, sys, time, random, argparse
+import random, argparse
 from .share_args import add_shared_args
 
 def obtain_basic_args():

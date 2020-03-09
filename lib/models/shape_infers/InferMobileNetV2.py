@@ -1,7 +1,10 @@
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
+#####################################################
 # MobileNetV2: Inverted Residuals and Linear Bottlenecks, CVPR 2018
 from torch import nn
 from ..initialization import initialize_resnet
-from ..SharedUtils    import additive_func, parse_channel_info
+from ..SharedUtils    import parse_channel_info
 
 
 class ConvBNReLU(nn.Module):

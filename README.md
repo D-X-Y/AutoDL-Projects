@@ -25,7 +25,6 @@ This project implemented several neural architecture search (NAS) and hyper-para
 
 At the moment, this project provides the following algorithms and scripts to run them. Please see the details in the link provided in the description column.
 
-
 <table>
  <tbody>
     <tr align="center" valign="bottom">
