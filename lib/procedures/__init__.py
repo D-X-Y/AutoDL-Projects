@@ -5,6 +5,7 @@ from .starts     import prepare_seed, prepare_logger, get_machine_info, save_che
 from .optimizers import get_optim_scheduler
 from .funcs_nasbench import evaluate_for_seed as bench_evaluate_for_seed
 from .funcs_nasbench import pure_evaluate as bench_pure_evaluate
+from .funcs_nasbench import get_nas_bench_loaders
 
 def get_procedures(procedure):
   from .basic_main     import basic_train, basic_valid

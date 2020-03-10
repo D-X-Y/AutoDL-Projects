@@ -4,4 +4,5 @@
 from .api import NASBench201API
 from .api import ArchResults, ResultsCount
 
-NAS_BENCH_201_API_VERSION="v1.1"  # [2020.02.25]
+# NAS_BENCH_201_API_VERSION="v1.1"  # [2020.02.25]
+NAS_BENCH_201_API_VERSION="v1.2"  # [2020.03.09]
