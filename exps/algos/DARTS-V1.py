@@ -3,11 +3,9 @@
 ########################################################
 # DARTS: Differentiable Architecture Search, ICLR 2019 #
 ########################################################
-import os, sys, time, glob, random, argparse
-import numpy as np
+import sys, time, random, argparse
 from copy import deepcopy
 import torch
-import torch.nn as nn
 from pathlib import Path
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))

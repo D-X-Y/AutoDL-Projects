@@ -1,11 +1,10 @@
 # This file is for experimental usage
-import os, sys, torch, random
+import torch, random
 import numpy as np
 from copy import deepcopy
-from tqdm import tqdm
 import torch.nn as nn
 
-from utils  import obtain_accuracy
+# from utils  import obtain_accuracy
 from models import CellStructure
 from log_utils import time_string
 
