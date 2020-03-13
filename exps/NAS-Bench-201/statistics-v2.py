@@ -16,7 +16,7 @@ from models       import CellStructure, get_cell_based_tiny_net
 from nas_201_api  import NASBench201API, ArchResults, ResultsCount
 from procedures   import bench_pure_evaluate as pure_evaluate, get_nas_bench_loaders
 
-api = NASBench201API('{:}/.torch/NAS-Bench-201-v1_0-e61699.pth'.firmat(os.environ['HOME']))
+api = NASBench201API('{:}/.torch/NAS-Bench-201-v1_0-e61699.pth'.format(os.environ['HOME']))
 
 def create_result_count(used_seed: int, dataset: Text, arch_config: Dict[Text, Any],
                         results: Dict[Text, Any], dataloader_dict: Dict[Text, Any]) -> ResultsCount:
