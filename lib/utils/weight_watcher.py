@@ -304,7 +304,7 @@ def analyze(model: nn.Module, min_size=50, max_size=0,
     if isinstance(module, available_module_types()):
       names.append(name)
       modules.append(module)
-  print('There are {:} layers to be analyzed in this model.'.format(len(modules)))
+  # print('There are {:} layers to be analyzed in this model.'.format(len(modules)))
   all_results = OrderedDict()
   for index, module in enumerate(modules):
     if isinstance(module, nn.Linear):
