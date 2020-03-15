@@ -23,6 +23,8 @@ channel=16
 num_cells=5
 max_nodes=4
 space=nas-bench-201
+#benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth
+benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_1-096897.pth
 
 save_dir=./output/search-cell-${space}/R-EA-${dataset}-SS${sample_size}
 
@@ -30,7 +32,7 @@ OMP_NUM_THREADS=4 python ./exps/algos/R_EA.py \
 	--save_dir ${save_dir} --max_nodes ${max_nodes} --channel ${channel} --num_cells ${num_cells} \
 	--dataset ${dataset} \
 	--search_space_name ${space} \
-	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth \
+	--arch_nas_dataset ${benchmark_file} \
 	--time_budget 12000 \
 	--ea_cycles 200 --ea_population 10 --ea_sample_size ${sample_size} --ea_fast_by_api 1 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}

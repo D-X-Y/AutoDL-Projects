@@ -28,6 +28,8 @@ if [ "$dataset" == "cifar10" ] || [ "$dataset" == "cifar100" ]; then
 else
   data_path="$TORCH_HOME/cifar.python/ImageNet16"
 fi
+#benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth
+benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_1-096897.pth
 
 save_dir=./output/search-cell-${space}/RANDOM-NAS-${dataset}-BN${BN}
 
@@ -36,7 +38,7 @@ OMP_NUM_THREADS=4 python ./exps/algos/RANDOM-NAS.py \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
 	--track_running_stats ${BN} \
-	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth \
+	--arch_nas_dataset ${benchmark_file} \
 	--config_path ./configs/nas-benchmark/algos/RANDOM.config \
 	--select_num 100 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}

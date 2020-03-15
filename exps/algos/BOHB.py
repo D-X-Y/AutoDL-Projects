@@ -50,10 +50,11 @@ def config2structure_func(max_nodes):
 
 class MyWorker(Worker):
 
-  def __init__(self, *args, convert_func=None, nas_bench=None, time_budget=None, **kwargs):
+  def __init__(self, *args, convert_func=None, dataname=None, nas_bench=None, time_budget=None, **kwargs):
     super().__init__(*args, **kwargs)
     self.convert_func   = convert_func
-    self.nas_bench      = nas_bench
+    self._dataname      = dataname
+    self._nas_bench     = nas_bench
     self.time_budget    = time_budget
     self.seen_archs     = []
     self.sim_cost_time  = 0
@@ -64,7 +65,7 @@ class MyWorker(Worker):
     assert len(self.seen_archs) > 0
     best_index, best_acc = -1, None
     for arch_index in self.seen_archs:
-      info = self.nas_bench.get_more_info(arch_index, 'cifar10-valid', None, True)
+      info = self._nas_bench.get_more_info(arch_index, self._dataname, None, True, True)
       vacc = info['valid-accuracy']
       if best_acc is None or best_acc < vacc:
         best_acc = vacc
@@ -75,8 +76,8 @@ class MyWorker(Worker):
   def compute(self, config, budget, **kwargs):
     start_time = time.time()
     structure  = self.convert_func( config )
-    arch_index = self.nas_bench.query_index_by_arch( structure )
-    info       = self.nas_bench.get_more_info(arch_index, 'cifar10-valid', None, True)
+    arch_index = self._nas_bench.query_index_by_arch( structure )
+    info       = self._nas_bench.get_more_info(arch_index, self._dataname, None, True, True)
     cur_time   = info['train-all-time'] + info['valid-per-time']
     cur_vacc   = info['valid-accuracy']
     self.real_cost_time += (time.time() - start_time)
@@ -106,7 +107,10 @@ def main(xargs, nas_bench):
   prepare_seed(xargs.rand_seed)
   logger = prepare_logger(args)
 
-  assert xargs.dataset == 'cifar10', 'currently only support CIFAR-10'
+  if xargs.dataset == 'cifar10':
+    dataname = 'cifar10-valid'
+  else:
+    dataname = xargs.dataset
   if xargs.data_path is not None:
     train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
     split_Fpath = 'configs/nas-benchmark/cifar-split.txt'
@@ -148,7 +152,7 @@ def main(xargs, nas_bench):
   #logger.log('{:} Create NAS-BENCH-API DONE'.format(time_string()))
   workers = []
   for i in range(num_workers):
-    w = MyWorker(nameserver=ns_host, nameserver_port=ns_port, convert_func=config2structure, nas_bench=nas_bench, time_budget=xargs.time_budget, run_id=hb_run_id, id=i)
+    w = MyWorker(nameserver=ns_host, nameserver_port=ns_port, convert_func=config2structure, dataname=dataname, nas_bench=nas_bench, time_budget=xargs.time_budget, run_id=hb_run_id, id=i)
     w.run(background=True)
     workers.append(w)
 

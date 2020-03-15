@@ -27,6 +27,8 @@ if [ "$dataset" == "cifar10" ] || [ "$dataset" == "cifar100" ]; then
 else
   data_path="$TORCH_HOME/cifar.python/ImageNet16"
 fi
+#benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth
+benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_1-096897.pth
 
 save_dir=./output/search-cell-${space}/DARTS-V2-${dataset}-BN${BN}
 
@@ -35,7 +37,7 @@ OMP_NUM_THREADS=4 python ./exps/algos/DARTS-V2.py \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
 	--config_path configs/nas-benchmark/algos/DARTS.config \
-	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth \
+	--arch_nas_dataset ${benchmark_file} \
 	--track_running_stats ${BN} \
 	--arch_learning_rate 0.0003 --arch_weight_decay 0.001 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}

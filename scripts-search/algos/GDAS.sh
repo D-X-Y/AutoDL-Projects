@@ -27,6 +27,8 @@ if [ "$dataset" == "cifar10" ] || [ "$dataset" == "cifar100" ]; then
 else
   data_path="$TORCH_HOME/cifar.python/ImageNet16"
 fi
+#benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth
+benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_1-096897.pth
 
 save_dir=./output/search-cell-${space}/GDAS-${dataset}-BN${BN}
 
@@ -34,7 +36,7 @@ OMP_NUM_THREADS=4 python ./exps/algos/GDAS.py \
 	--save_dir ${save_dir} --max_nodes ${max_nodes} --channel ${channel} --num_cells ${num_cells} \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
-	--arch_nas_dataset ${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth \
+	--arch_nas_dataset ${benchmark_file} \
 	--config_path configs/nas-benchmark/algos/GDAS.config \
 	--tau_max 10 --tau_min 0.1 --track_running_stats ${BN} \
 	--arch_learning_rate 0.0003 --arch_weight_decay 0.001 \

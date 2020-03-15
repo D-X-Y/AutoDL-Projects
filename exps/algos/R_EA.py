@@ -33,19 +33,21 @@ class Model(object):
 
 # This function is to mimic the training and evaluatinig procedure for a single architecture `arch`.
 # The time_cost is calculated as the total training time for a few (e.g., 12 epochs) plus the evaluation time for one epoch.
-# For use_converged_LR = True, the architecture is trained for 12 epochs, with LR being decaded from 0.1 to 0.
+# For use_012_epoch_training = True, the architecture is trained for 12 epochs, with LR being decaded from 0.1 to 0.
 #       In this case, the LR schedular is converged.
-# For use_converged_LR = False, the architecture is planed to be trained for 200 epochs, but we early stop its procedure.
+# For use_012_epoch_training = False, the architecture is planed to be trained for 200 epochs, but we early stop its procedure.
 #       
-def train_and_eval(arch, nas_bench, extra_info, dataname='cifar10-valid', use_converged_LR=True):
-  if use_converged_LR and nas_bench is not None:
+def train_and_eval(arch, nas_bench, extra_info, dataname='cifar10-valid', use_012_epoch_training=True):
+
+  if use_012_epoch_training and nas_bench is not None:
     arch_index = nas_bench.query_index_by_arch( arch )
     assert arch_index >= 0, 'can not find this arch : {:}'.format(arch)
     info = nas_bench.get_more_info(arch_index, dataname, None, True)
     valid_acc, time_cost = info['valid-accuracy'], info['train-all-time'] + info['valid-per-time']
     #_, valid_acc = info.get_metrics('cifar10-valid', 'x-valid' , 25, True) # use the validation accuracy after 25 training epochs
-  elif not use_converged_LR and nas_bench is not None:
-    # Please use `use_converged_LR=False` for cifar10 only.
+  elif not use_012_epoch_training and nas_bench is not None:
+    # Please contact me if you want to use the following logic, because it has some potential issues.
+    # Please use `use_012_epoch_training=False` for cifar10 only.
     # It did return values for cifar100 and ImageNet16-120, but it has some potential issues. (Please email me for more details)
     arch_index, nepoch = nas_bench.query_index_by_arch( arch ), 25
     assert arch_index >= 0, 'can not find this arch : {:}'.format(arch)
@@ -64,7 +66,7 @@ def train_and_eval(arch, nas_bench, extra_info, dataname='cifar10-valid', use_co
     try:
       valid_acc, time_cost = info['valid-accuracy'], estimated_train_cost + estimated_valid_cost
     except:
-      valid_acc, time_cost = info['est-valid-accuracy'], estimated_train_cost + estimated_valid_cost
+      valid_acc, time_cost = info['valtest-accuracy'], estimated_train_cost + estimated_valid_cost
   else:
     # train a model from scratch.
     raise ValueError('NOT IMPLEMENT YET')
@@ -127,7 +129,7 @@ def regularized_evolution(cycles, population_size, sample_size, time_budget, ran
   while len(population) < population_size:
     model = Model()
     model.arch = random_arch()
-    model.accuracy, time_cost = train_and_eval(model.arch, nas_bench, extra_info)
+    model.accuracy, time_cost = train_and_eval(model.arch, nas_bench, extra_info, dataname)
     population.append(model)
     history.append(model)
     total_time_cost += time_cost
@@ -152,7 +154,7 @@ def regularized_evolution(cycles, population_size, sample_size, time_budget, ran
     child = Model()
     child.arch = mutate_arch(parent.arch)
     total_time_cost += time.time() - start_time
-    child.accuracy, time_cost = train_and_eval(child.arch, nas_bench, extra_info)
+    child.accuracy, time_cost = train_and_eval(child.arch, nas_bench, extra_info, dataname)
     if total_time_cost + time_cost > time_budget: # return
       return history, total_time_cost
     else:
@@ -174,7 +176,6 @@ def main(xargs, nas_bench):
   prepare_seed(xargs.rand_seed)
   logger = prepare_logger(args)
 
-  assert xargs.dataset == 'cifar10', 'currently only support CIFAR-10'
   if xargs.dataset == 'cifar10':
     dataname = 'cifar10-valid'
   else:
