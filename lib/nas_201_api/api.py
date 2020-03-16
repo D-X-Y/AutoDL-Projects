@@ -53,7 +53,7 @@ class NASBench201API(object):
       if verbose: print('try to create the NAS-Bench-201 api from {:}'.format(file_path_or_dict))
       assert os.path.isfile(file_path_or_dict), 'invalid path : {:}'.format(file_path_or_dict)
       self.filename = Path(file_path_or_dict).name
-      file_path_or_dict = torch.load(file_path_or_dict)
+      file_path_or_dict = torch.load(file_path_or_dict, map_location='cpu')
     elif isinstance(file_path_or_dict, dict):
       file_path_or_dict = copy.deepcopy( file_path_or_dict )
     else: raise ValueError('invalid type : {:} not in [str, dict]'.format(type(file_path_or_dict)))
@@ -112,7 +112,7 @@ class NASBench201API(object):
     xfile_path = os.path.join(archive_root, '{:06d}-FULL.pth'.format(index))
     assert 0 <= index < len(self.meta_archs), 'invalid index of {:}'.format(index)
     assert os.path.isfile(xfile_path), 'invalid data path : {:}'.format(xfile_path)
-    xdata = torch.load(xfile_path)
+    xdata = torch.load(xfile_path, map_location='cpu')
     assert isinstance(xdata, dict) and 'full' in xdata and 'less' in xdata, 'invalid format of data in {:}'.format(xfile_path)
     self.arch2infos_less[index] = ArchResults.create_from_state_dict( xdata['less'] )
     self.arch2infos_full[index] = ArchResults.create_from_state_dict( xdata['full'] )
@@ -723,7 +723,7 @@ class ArchResults(object):
   def create_from_state_dict(state_dict_or_file):
     x = ArchResults(-1, -1)
     if isinstance(state_dict_or_file, str): # a file path
-      state_dict = torch.load(state_dict_or_file)
+      state_dict = torch.load(state_dict_or_file, map_location='cpu')
     elif isinstance(state_dict_or_file, dict):
       state_dict = state_dict_or_file
     else:
