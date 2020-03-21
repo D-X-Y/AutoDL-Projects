@@ -3,7 +3,7 @@
 #####################################################
 # python exps/NAS-Bench-201/visualize.py --api_path $HOME/.torch/NAS-Bench-201-v1_0-e61699.pth
 #####################################################
-import os, sys, time, argparse, collections
+import sys, argparse
 from tqdm import tqdm
 from collections import OrderedDict
 import numpy as np

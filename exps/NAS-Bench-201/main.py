@@ -28,7 +28,7 @@ def evaluate_all_datasets(arch, datasets, xpaths, splits, use_less, seed, arch_c
   for dataset, xpath, split in zip(datasets, xpaths, splits):
     # train valid data
     train_data, valid_data, xshape, class_num = get_datasets(dataset, xpath, -1)
-    # load the configurature
+    # load the configuration
     if dataset == 'cifar10' or dataset == 'cifar100':
       if use_less: config_path = 'configs/nas-benchmark/LESS.config'
       else       : config_path = 'configs/nas-benchmark/CIFAR.config'

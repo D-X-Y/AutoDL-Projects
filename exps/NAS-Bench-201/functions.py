@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
 #####################################################
-import os, sys, time, torch
+import time, torch
 from procedures   import prepare_seed, get_optim_scheduler
 from utils        import get_model_infos, obtain_accuracy
 from config_utils import dict2config
@@ -9,9 +9,7 @@ from log_utils    import AverageMeter, time_string, convert_secs2time
 from models       import get_cell_based_tiny_net
 
 
-
 __all__ = ['evaluate_for_seed', 'pure_evaluate']
-
 
 
 def pure_evaluate(xloader, network, criterion=torch.nn.CrossEntropyLoss()):

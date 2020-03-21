@@ -121,3 +121,5 @@ lib/NAS-Bench-*-v1_0.pth
 others/TF
 scripts-search/l2s-algos
 TEMP-L.sh
+
+.nfs00*

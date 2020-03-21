@@ -3,7 +3,7 @@
 ################################################################################################
 # python exps/NAS-Bench-201/show-best.py --api_path $HOME/.torch/NAS-Bench-201-v1_0-e61699.pth #
 ################################################################################################
-import os, sys, time, glob, random, argparse
+import sys, argparse
 from pathlib import Path
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
