@@ -735,6 +735,7 @@ class ArchResults(object):
   # This can help reduce the memory footprint.
   def clear_params(self):
     for key, result in self.all_results.items():
+      del result.net_state_dict
       result.net_state_dict = None
     self.clear_net_done = True
 
