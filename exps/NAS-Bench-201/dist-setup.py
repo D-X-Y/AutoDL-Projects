@@ -1,7 +1,9 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
 #####################################################
-# [2020.03.09] Upgrade to v1.2
+# [2020.02.25] Initialize the API as v1.1
+# [2020.03.09] Upgrade the API to v1.2
+# [2020.03.16] Upgrade the API to v1.3
 import os
 from setuptools import setup
 
@@ -13,7 +15,7 @@ def read(fname='README.md'):
 
 setup(
     name = "nas_bench_201",
-    version = "1.2",
+    version = "1.3",
     author = "Xuanyi Dong",
     author_email = "dongxuanyi888@gmail.com",
     description = "API for NAS-Bench-201 (a benchmark for neural architecture search).",
