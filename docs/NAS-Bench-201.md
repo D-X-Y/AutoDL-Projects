@@ -41,8 +41,8 @@ It is recommended to put these data into `$TORCH_HOME` (`~/.torch/` by default).
 ```
 from nas_201_api import NASBench201API as API
 api = API('$path_to_meta_nas_bench_file')
-api = API('NAS-Bench-201-v1_0-e61699.pth')
-api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_0-e61699.pth'))
+api = API('NAS-Bench-201-v1_1-096897.pth')
+api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_1-096897.pth'))
 ```
 
 2. Show the number of architectures `len(api)` and each architecture `api[i]`:
@@ -141,8 +141,8 @@ print(archRes.get_metrics('cifar10-valid', 'x-valid', None,  True)) # print loss
 `NASBench201API` is the topest level api. Please see the following usages:
 ```
 from nas_201_api import NASBench201API as API
-api = API('NAS-Bench-201-v1_0-e61699.pth') # This will load all the information of NAS-Bench-201 except the trained weights
-api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_0-e61699.pth')) # The same as the above line while I usually save NAS-Bench-201-v1_0-e61699.pth in ~/.torch/.
+api = API('NAS-Bench-201-v1_1-096897.pth') # This will load all the information of NAS-Bench-201 except the trained weights
+api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_1-096897.pth')) # The same as the above line while I usually save NAS-Bench-201-v1_1-096897.pth in ~/.torch/.
 api.show(-1)  # show info of all architectures
 api.reload('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-BENCH-201-4-v1.0-archive'), 3) # This code will reload the information 3-th architecture with the trained weights
 
