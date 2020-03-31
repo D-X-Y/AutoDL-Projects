@@ -109,7 +109,7 @@ def get_cifar_models(config, extra_path=None):
 def get_imagenet_models(config):
   super_type = getattr(config, 'super_type', 'basic')
   if super_type == 'basic':
-    from .ImagenetResNet import ResNet
+    from .ImageNet_ResNet import ResNet
     from .ImageNet_MobileNetV2 import MobileNetV2
     if config.arch == 'resnet':
       return ResNet(config.block_name, config.layers, config.deep_stem, config.class_num, config.zero_init_residual, config.groups, config.width_per_group)
