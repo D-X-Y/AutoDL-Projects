@@ -201,7 +201,7 @@ if __name__ == '__main__':
   parser.add_argument('--datasets',    type=str, nargs='+',      help='The applied datasets.')
   parser.add_argument('--xpaths',      type=str, nargs='+',      help='The root path for this dataset.')
   parser.add_argument('--splits',      type=int, nargs='+',      help='The root path for this dataset.')
-  parser.add_argument('--hyper',       type=str, default='12', choices=['12', '90'], help='The tag for hyper-parameters.')
+  parser.add_argument('--hyper',       type=str, default='12', choices=['01', '12', '90'], help='The tag for hyper-parameters.')
   parser.add_argument('--seeds'  ,     type=int, nargs='+',      help='The range of models to be evaluated')
   args = parser.parse_args()
 
