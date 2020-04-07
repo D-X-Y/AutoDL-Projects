@@ -114,7 +114,7 @@ class POOLING(nn.Module):
     if C_in == C_out:
       self.preprocess = None
     else:
-      self.preprocess = ReLUConvBN(C_in, C_out, 1, 1, 0, affine, track_running_stats)
+      self.preprocess = ReLUConvBN(C_in, C_out, 1, 1, 0, 1, affine, track_running_stats)
     if mode == 'avg'  : self.op = nn.AvgPool2d(3, stride=stride, padding=1, count_include_pad=False)
     elif mode == 'max': self.op = nn.MaxPool2d(3, stride=stride, padding=1)
     else              : raise ValueError('Invalid mode={:} in POOLING'.format(mode))
