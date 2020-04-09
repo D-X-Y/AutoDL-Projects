@@ -165,7 +165,7 @@ def filter_indexes(xlist, mode, save_dir, seeds):
         if not temp_path.exists():
           all_indexes.append(index)
           break
-  print('{:} [FILTER-INDEXES] : there are {:} architectures in total'.format(time_string(), len(all_indexes)))
+  print('{:} [FILTER-INDEXES] : there are {:}/{:} architectures in total'.format(time_string(), len(all_indexes), len(xlist)))
 
   SLURM_PROCID, SLURM_NTASKS = 'SLURM_PROCID', 'SLURM_NTASKS'
   if SLURM_PROCID in os.environ and  SLURM_NTASKS in os.environ:  # run on the slurm

@@ -153,7 +153,7 @@ class SimBlock(nn.Module):
     else:
       residual, expected_flop_c = inputs, 0
     out = additive_func(residual, out)
-    return out, expected_next_inC, sum([expected_flop, expected_flop_c])
+    return nn.functional.relu(out, inplace=True), expected_next_inC, sum([expected_flop, expected_flop_c])
 
   def basic_forward(self, inputs):
     basicblock = self.conv(inputs)
