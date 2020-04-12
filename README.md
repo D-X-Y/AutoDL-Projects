@@ -80,12 +80,6 @@ At the moment, this project provides the following algorithms and scripts to run
 </table>
 
 
-## History of this repo
-
-At first, this repo is `GDAS`, which is used to reproduce results in Searching for A Robust Neural Architecture in Four GPU Hours.
-After that, more functions and more NAS algorithms are continuely added in this repo. After it supports more than five algorithms, it is upgraded from `GDAS` to `NAS-Projects`.
-Now, since both HPO and NAS are supported in this repo, it is upgraded from `NAS-Projects` to `AutoDL-Projects`.
-
 
 ## Requirements and Preparation
 
