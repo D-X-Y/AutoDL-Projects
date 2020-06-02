@@ -1,7 +1,8 @@
 #####################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06 #
 #####################################################
-# 
+# python exps/experimental/test-resnest.py
+#####################################################
 import sys, time, torch, random, argparse
 from PIL     import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
