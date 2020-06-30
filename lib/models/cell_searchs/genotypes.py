@@ -112,6 +112,7 @@ class Structure:
 
   @staticmethod
   def str2structure(xstr):
+    if isinstance(xstr, Structure): return xstr
     assert isinstance(xstr, str), 'must take string (not {:}) as input'.format(type(xstr))
     nodestrs = xstr.split('+')
     genotypes = []

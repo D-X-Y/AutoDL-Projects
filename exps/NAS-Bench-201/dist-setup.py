@@ -4,6 +4,7 @@
 # [2020.02.25] Initialize the API as v1.1
 # [2020.03.09] Upgrade the API to v1.2
 # [2020.03.16] Upgrade the API to v1.3
+# [2020.06.30] Upgrade the API to v2.0
 import os
 from setuptools import setup
 
@@ -15,7 +16,7 @@ def read(fname='README.md'):
 
 setup(
     name = "nas_bench_201",
-    version = "1.3",
+    version = "2.0",
     author = "Xuanyi Dong",
     author_email = "dongxuanyi888@gmail.com",
     description = "API for NAS-Bench-201 (a benchmark for neural architecture search).",

@@ -29,7 +29,10 @@ NAS-BENCH-201-4-v1.0-archive.tar](https://drive.google.com/open?id=1X2i-JXaElsnV
 - [2020.02.25] APIv1.0/FILEv1.0: Checkpoints for 3 runs of each baseline NAS algorithm are provided in [Google Drive](https://drive.google.com/open?id=1eAgLZQAViP3r6dA0_ZOOGG9zPLXhGwXi).
 - [2020.03.09] APIv1.2/FILEv1.0: More robust API with more functions and descriptions
 - [2020.03.16] APIv1.3/FILEv1.1: [`NAS-Bench-201-v1_1-096897.pth`](https://drive.google.com/open?id=16Y0UwGisiouVRxW-W5hEtbxmcHw_0hF_) (4.7G), where `096897` is the last six digits for this file. It contains information of more trials compared to `NAS-Bench-201-v1_0-e61699.pth`, especially all models trained by 12 epochs on all datasets are avaliable.
-- [2020.06.01] APIv2.0/FILEv2.0: coming soon!
+- [2020.06.30] APIv2.0: Use abstract class (NASBenchMetaAPI) for APIs of NAS-Bench-x0y.
+- [2020.06.30] FILEv2.0: coming soon!
+
+**We recommend to use `NAS-Bench-201-v1_1-096897.pth`**
 
 
 The training and evaluation data used in NAS-Bench-201 can be downloaded from [Google Drive](https://drive.google.com/open?id=1L0Lzq8rWpZLPfiQGd6QR8q5xLV88emU7) or [Baidu-Wangpan (code:4fg7)](https://pan.baidu.com/s/1XAzavPKq3zcat1yBA1L2tQ).
@@ -42,7 +45,8 @@ It is recommended to put these data into `$TORCH_HOME` (`~/.torch/` by default).
 from nas_201_api import NASBench201API as API
 api = API('$path_to_meta_nas_bench_file')
 api = API('NAS-Bench-201-v1_1-096897.pth')
-api = API('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_1-096897.pth'))
+# The default path for benchmark file is '{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_1-096897.pth')
+api = API(None)
 ```
 
 2. Show the number of architectures `len(api)` and each architecture `api[i]`:
@@ -149,10 +153,12 @@ api.reload('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-BENCH-201-4-v1.0-arch
 weights = api.get_net_param(3, 'cifar10', None) # Obtaining the weights of all trials for the 3-th architecture on cifar10. It will returns a dict, where the key is the seed and the value is the trained weights.
 ```
 
-To obtain the training and evaluation information (please see the comments [here](https://github.com/D-X-Y/AutoDL-Projects/blob/master/lib/nas_201_api/api.py#L172)):
+To obtain the training and evaluation information (please see the comments [here](https://github.com/D-X-Y/AutoDL-Projects/blob/master/lib/nas_201_api/api_201.py#L142)):
 ```
-api.get_more_info(112, 'cifar10', None, False, True)
-api.get_more_info(112, 'ImageNet16-120', None, False, True) # the info of last training epoch for 112-th architecture (use 200-epoch-hyper-parameter and randomly select a trial)
+api.get_more_info(112, 'cifar10', None, hp='200', is_random=True)
+# Query info of last training epoch for 112-th architecture
+# using 200-epoch-hyper-parameter and randomly select a trial.
+api.get_more_info(112, 'ImageNet16-120', None, hp='200', is_random=True)
 ```
 
 Please use the following script to show the best architectures on each dataset:

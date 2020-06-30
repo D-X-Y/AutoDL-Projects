@@ -38,7 +38,6 @@ def evaluate(api, weight_dir, data: str, use_12epochs_result: bool):
   final_test_accs = OrderedDict({'cifar10': [], 'cifar100': [], 'ImageNet16-120': []})
   for idx in range(len(api)):
     # info = api.get_more_info(idx, data, use_12epochs_result=use_12epochs_result, is_random=False)
-    # import pdb; pdb.set_trace()
     for key in ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120']:
       info = api.get_more_info(idx, key, use_12epochs_result=False, is_random=False)
       if key == 'cifar10-valid':

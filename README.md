@@ -37,7 +37,7 @@ At the moment, this project provides the following algorithms and scripts to run
     <td rowspan="6" align="center" valign="middle" halign="middle"> NAS </td>
     <td align="center" valign="middle"> TAS </td>
     <td align="center" valign="middle"> <a href="https://arxiv.org/abs/1905.09717">Network Pruning via Transformable Architecture Search</a> </td>
-    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NIPS-2019-TAS.md">NIPS-2019-TAS.md</a> </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NeurIPS-2019-TAS.md">NeurIPS-2019-TAS.md</a> </td>
     </tr>
     <tr> <!-- (2-nd row) -->
     <td align="center" valign="middle"> DARTS </td>

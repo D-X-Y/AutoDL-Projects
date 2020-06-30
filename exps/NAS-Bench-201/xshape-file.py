@@ -22,7 +22,7 @@ from log_utils    import Logger, AverageMeter, time_string, convert_secs2time
 
 
 def obtain_valid_ckp(save_dir: Text, total: int):
-  possible_seeds = [777, 888]
+  possible_seeds = [777, 888, 999]
   seed2ckps = defaultdict(list)
   miss2ckps = defaultdict(list)
   for i in range(total):
@@ -33,7 +33,7 @@ def obtain_valid_ckp(save_dir: Text, total: int):
       else:
         miss2ckps[seed].append(i)
   for seed, xlist in seed2ckps.items():
-    print('[{:}] [seed={:}] has {:}/{:}'.format(save_dir, seed, len(xlist), total))
+    print('[{:}] [seed={:}] has {:5d}/{:5d} | miss {:5d}/{:5d}'.format(save_dir, seed, len(xlist), total, total-len(xlist), total))
   return dict(seed2ckps), dict(miss2ckps)
     
 
