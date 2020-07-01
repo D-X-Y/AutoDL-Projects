@@ -40,6 +40,8 @@ It is recommended to put these data into `$TORCH_HOME` (`~/.torch/` by default).
 
 ## How to Use NAS-Bench-201
 
+**More usage can be found in [our test codes](https://github.com/D-X-Y/AutoDL-Projects/blob/master/exps/NAS-Bench-201/test-nas-api.py)**.
+
 1. Creating an API instance from a file:
 ```
 from nas_201_api import NASBench201API as API

@@ -184,17 +184,17 @@ class NASBench201API(NASBenchMetaAPI):
     if valid_info is not None:
       xinfo['valid-loss'] = valid_info['loss']
       xinfo['valid-accuracy'] = valid_info['accuracy']
-      xinfo['valid-per-time'] = valid_info['all_time'] / total
+      xinfo['valid-per-time'] = valid_info['all_time'] / total if valid_info['all_time'] is not None else None
       xinfo['valid-all-time'] = valid_info['all_time']
     if test_info is not None:
       xinfo['test-loss'] = test_info['loss']
       xinfo['test-accuracy'] = test_info['accuracy']
-      xinfo['test-per-time'] = test_info['all_time'] / total
+      xinfo['test-per-time'] = test_info['all_time'] / total if test_info['all_time'] is not None else None
       xinfo['test-all-time'] = test_info['all_time']
     if valtest_info is not None:
       xinfo['valtest-loss'] = valtest_info['loss']
       xinfo['valtest-accuracy'] = valtest_info['accuracy']
-      xinfo['valtest-per-time'] = valtest_info['all_time'] / total
+      xinfo['valtest-per-time'] = valtest_info['all_time'] / total if valtest_info['all_time'] is not None else None
       xinfo['valtest-all-time'] = valtest_info['all_time']
     return xinfo
 
