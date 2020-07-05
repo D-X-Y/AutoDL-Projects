@@ -77,6 +77,7 @@ class NASBench201API(NASBenchMetaAPI):
     self.meta_archs = copy.deepcopy( file_path_or_dict['meta_archs'] )
     # This is a dict mapping each architecture to a dict, where the key is #epochs and the value is ArchResults
     self.arch2infos_dict = OrderedDict()
+    self._avaliable_hps = set(['12', '200'])
     for xkey in sorted(list(file_path_or_dict['arch2infos'].keys())):
       all_info = file_path_or_dict['arch2infos'][xkey]
       hp2archres = OrderedDict()

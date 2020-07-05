@@ -57,6 +57,10 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
   def __repr__(self):
     return ('{name}({num}/{total} architectures, file={filename})'.format(name=self.__class__.__name__, num=len(self.evaluated_indexes), total=len(self.meta_archs), filename=self.filename))
 
+  @property
+  def avaliable_hps(self):
+    return list(copy.deepcopy(self._avaliable_hps))
+
   def random(self):
     """Return a random index of all architectures."""
     return random.randint(0, len(self.meta_archs)-1)
