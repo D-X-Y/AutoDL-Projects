@@ -70,7 +70,7 @@ def evaluate(api, weight_dir, data: str):
       ok += 1
       norms.append(cur_norm)
     # query the accuracy
-    info = meta_info.get_metrics(data, 'ori-test', iepoch=None, is_random=777)
+    info = meta_info.get_metrics(data, 'ori-test', iepoch=None, is_random=888 if isinstance(api, NASBench201API) else 777)
     accuracies.append(info['accuracy'])
     del net, meta_info
     # print the information
