@@ -199,14 +199,14 @@ def main(xargs):
     with torch.no_grad():
       #logger.log('arch-parameters :\n{:}'.format( nn.functional.softmax(search_model.arch_parameters, dim=-1).cpu() ))
       logger.log('{:}'.format(search_model.show_alphas()))
-    if api is not None: logger.log('{:}'.format(api.query_by_arch( genotypes[epoch] )))
+    if api is not None: logger.log('{:}'.format(api.query_by_arch(genotypes[epoch], '200')))
     # measure elapsed time
     epoch_time.update(time.time() - start_time)
     start_time = time.time()
 
   logger.log('\n' + '-'*100)
   logger.log('DARTS-V1 : run {:} epochs, cost {:.1f} s, last-geno is {:}.'.format(total_epoch, search_time.sum, genotypes[total_epoch-1]))
-  if api is not None: logger.log('{:}'.format( api.query_by_arch(genotypes[total_epoch-1]) ))
+  if api is not None: logger.log('{:}'.format(api.query_by_arch(genotypes[total_epoch-1], '200')))
   logger.close()
   
 

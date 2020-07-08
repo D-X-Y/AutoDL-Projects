@@ -74,7 +74,7 @@ def main(xargs, nas_bench):
     logger.log('[{:03d}] : {:} : accuracy = {:.2f}%'.format(len(history), arch, accuracy))
   logger.log('{:} best arch is {:}, accuracy = {:.2f}%, visit {:} archs with {:.1f} s (real-cost = {:.3f} s).'.format(time_string(), best_arch, best_acc, len(history), total_time_cost, time.time()-x_start_time))
   
-  info = nas_bench.query_by_arch( best_arch )
+  info = nas_bench.query_by_arch(best_arch, '200')
   if info is None: logger.log('Did not find this architecture : {:}.'.format(best_arch))
   else           : logger.log('{:}'.format(info))
   logger.log('-'*100)

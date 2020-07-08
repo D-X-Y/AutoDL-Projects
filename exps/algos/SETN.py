@@ -235,7 +235,7 @@ def main(xargs):
           }, logger.path('info'), logger)
     with torch.no_grad():
       logger.log('{:}'.format(search_model.show_alphas()))
-    if api is not None: logger.log('{:}'.format(api.query_by_arch( genotypes[epoch] )))
+    if api is not None: logger.log('{:}'.format(api.query_by_arch(genotypes[epoch], '200')))
     # measure elapsed time
     epoch_time.update(time.time() - start_time)
     start_time = time.time()
@@ -251,7 +251,7 @@ def main(xargs):
   logger.log('\n' + '-'*100)
   # check the performance from the architecture dataset
   logger.log('SETN : run {:} epochs, cost {:.1f} s, last-geno is {:}.'.format(total_epoch, search_time.sum, genotype))
-  if api is not None: logger.log('{:}'.format( api.query_by_arch(genotype) ))
+  if api is not None: logger.log('{:}'.format(api.query_by_arch(genotype, '200') ))
   logger.close()
   
 

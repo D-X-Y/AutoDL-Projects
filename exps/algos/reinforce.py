@@ -174,7 +174,7 @@ def main(xargs, nas_bench):
   # best_arch = policy.genotype() # first version
   best_arch = max(trace, key=lambda x: x[0])[1]
   logger.log('REINFORCE finish with {:} steps and {:.1f} s (real cost={:.3f}).'.format(total_steps, total_costs, time.time()-x_start_time))
-  info = nas_bench.query_by_arch( best_arch )
+  info = nas_bench.query_by_arch(best_arch, '200')
   if info is None: logger.log('Did not find this architecture : {:}.'.format(best_arch))
   else           : logger.log('{:}'.format(info))
   logger.log('-'*100)

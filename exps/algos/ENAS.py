@@ -295,7 +295,7 @@ def main(xargs):
     if find_best:
       logger.log('<<<--->>> The {:}-th epoch : find the highest validation accuracy : {:.2f}%.'.format(epoch_str, best_valid_acc))
       copy_checkpoint(model_base_path, model_best_path, logger)
-    if api is not None: logger.log('{:}'.format(api.query_by_arch( genotypes[epoch] )))
+    if api is not None: logger.log('{:}'.format(api.query_by_arch(genotypes[epoch], '200')))
     # measure elapsed time
     epoch_time.update(time.time() - start_time)
     start_time = time.time()

@@ -3,6 +3,8 @@
 ###################################################################
 # BOHB: Robust and Efficient Hyperparameter Optimization at Scale #
 # required to install hpbandster ##################################
+# pip install hpbandster         ##################################
+###################################################################
 # bash ./scripts-search/algos/BOHB.sh -1         ##################
 ###################################################################
 import os, sys, time, random, argparse
@@ -178,7 +180,7 @@ def main(xargs, nas_bench):
   logger.log('Best found configuration: {:} within {:.3f} s'.format(id2config[incumbent]['config'], real_cost_time))
   best_arch = config2structure( id2config[incumbent]['config'] )
 
-  info = nas_bench.query_by_arch( best_arch )
+  info = nas_bench.query_by_arch(best_arch, '200')
   if info is None: logger.log('Did not find this architecture : {:}.'.format(best_arch))
   else           : logger.log('{:}'.format(info))
   logger.log('-'*100)
