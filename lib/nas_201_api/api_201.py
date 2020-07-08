@@ -123,7 +123,7 @@ class NASBench201API(NASBenchMetaAPI):
     """
     if self.verbose:
       print('Call query_info_str_by_arch with arch={:} and hp={:}'.format(arch, hp))
-    self._query_info_str_by_arch(arch, hp, print_information)
+    return self._query_info_str_by_arch(arch, hp, print_information)
 
   # obtain the metric for the `index`-th architecture
   # `dataset` indicates the dataset:

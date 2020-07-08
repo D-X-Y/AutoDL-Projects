@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 
-
 def get_combination(space, num):
   combs = []
   for i in range(num):
@@ -19,7 +18,6 @@ def get_combination(space, num):
           new_combs.append( xstring )
       combs = new_combs
   return combs
-  
 
 
 class Structure:
