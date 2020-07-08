@@ -90,6 +90,10 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
     else: arch_index = -1
     return arch_index
 
+  def query_by_arch(self, arch, hp):
+    # This is to make the current version be compatible with the old version.
+    return self.query_info_str_by_arch(arch, hp)
+
   @abc.abstractmethod
   def reload(self, archive_root: Text = None, index: int = None):
     """Overwrite all information of the 'index'-th architecture in the search space, where the data will be loaded from 'archive_root'.
