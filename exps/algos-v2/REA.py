@@ -3,13 +3,13 @@
 ##################################################################
 # Regularized Evolution for Image Classifier Architecture Search #
 ##################################################################
-# python ./exps/algos-v2/R_EA.py --dataset cifar10 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-# python ./exps/algos-v2/R_EA.py --dataset cifar100 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-# python ./exps/algos-v2/R_EA.py --dataset ImageNet16-120 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-# python ./exps/algos-v2/R_EA.py --dataset cifar10 --search_space sss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-#
-#
-#
+# python ./exps/algos-v2/REA.py --dataset cifar10 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/REA.py --dataset cifar100 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/REA.py --dataset ImageNet16-120 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/REA.py --dataset cifar10 --search_space sss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/REA.py --dataset cifar100 --search_space sss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/REA.py --dataset ImageNet16-120 --search_space sss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+##################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
 from copy import deepcopy
@@ -236,12 +236,12 @@ if __name__ == '__main__':
   parser.add_argument('--ea_population',      type=int,   help='The population size in EA.')
   parser.add_argument('--ea_sample_size',     type=int,   help='The sample size in EA.')
   parser.add_argument('--time_budget',        type=int,   help='The total time cost budge for searching (in seconds).')
+  parser.add_argument('--loops_if_rand',      type=int,   default=500, help='The total runs for evaluation.')
   # log
   parser.add_argument('--workers',            type=int,   default=2,    help='number of data loading workers (default: 2)')
   parser.add_argument('--save_dir',           type=str,   default='./output/search', help='Folder to save checkpoints and log.')
   parser.add_argument('--rand_seed',          type=int,   default=-1,   help='manual seed')
   args = parser.parse_args()
-  #if args.rand_seed is None or args.rand_seed < 0: args.rand_seed = random.randint(1, 100000)
 
   if args.search_space == 'tss':
     api = NASBench201API(verbose=False)
@@ -250,17 +250,19 @@ if __name__ == '__main__':
   else:
     raise ValueError('Invalid search space : {:}'.format(args.search_space))
 
-  args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), 'R-EA-SS{:}'.format(args.ea_sample_size))
+  args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'R-EA-SS{:}'.format(args.ea_sample_size))
   print('save-dir : {:}'.format(args.save_dir))
 
   if args.rand_seed < 0:
-    save_dir, all_info, num = None, {}, 500
-    for i in range(num):
-      print ('{:} : {:03d}/{:03d}'.format(time_string(), i, num))
+    save_dir, all_info = None, {}
+    for i in range(args.loops_if_rand):
+      print ('{:} : {:03d}/{:03d}'.format(time_string(), i, args.loops_if_rand))
       args.rand_seed = random.randint(1, 100000)
       save_dir, all_archs, all_total_times = main(args, api)
       all_info[i] = {'all_archs': all_archs,
                      'all_total_times': all_total_times}
-    torch.save(all_info, save_dir / 'results.pth')
+    save_path = save_dir / 'results.pth'
+    print('save into {:}'.format(save_path))
+    torch.save(all_info, save_path)
   else:
     main(args, api)
