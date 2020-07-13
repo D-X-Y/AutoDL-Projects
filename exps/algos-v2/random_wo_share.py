@@ -4,6 +4,8 @@
 # Random Search for Hyper-Parameter Optimization, JMLR 2012 ##################
 ##############################################################################
 # python ./exps/algos-v2/random_wo_share.py --dataset cifar10 --search_space tss
+# python ./exps/algos-v2/random_wo_share.py --dataset cifar100 --search_space tss
+# python ./exps/algos-v2/random_wo_share.py --dataset ImageNet16-120 --search_space tss
 ##############################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
@@ -20,7 +22,7 @@ from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from models       import get_search_spaces
 from nas_201_api  import NASBench201API, NASBench301API
-from .regularized_ea import random_topology_func, random_size_func
+from regularized_ea import random_topology_func, random_size_func
 
 
 def main(xargs, api):
@@ -28,16 +30,18 @@ def main(xargs, api):
   prepare_seed(xargs.rand_seed)
   logger = prepare_logger(args)
 
+  logger.log('{:} use api : {:}'.format(time_string(), api))
+  api.reset_time()
+
   search_space = get_search_spaces(xargs.search_space, 'nas-bench-301')
   if xargs.search_space == 'tss':
     random_arch = random_topology_func(search_space)
   else:
     random_arch = random_size_func(search_space)
 
-  x_start_time = time.time()
-  logger.log('{:} use nas_bench : {:}'.format(time_string(), nas_bench))
   best_arch, best_acc, total_time_cost, history = None, -1, [], []
-  while total_time_cost[-1] < xargs.time_budget:
+  current_best_index = []
+  while len(total_time_cost) == 0 or total_time_cost[-1] < xargs.time_budget:
     arch = random_arch()
     accuracy, _, _, total_cost = api.simulate_train_eval(arch, xargs.dataset, '12')
     total_time_cost.append(total_cost)
@@ -45,13 +49,14 @@ def main(xargs, api):
     if best_arch is None or best_acc < accuracy:
       best_acc, best_arch = accuracy, arch
     logger.log('[{:03d}] : {:} : accuracy = {:.2f}%'.format(len(history), arch, accuracy))
-  logger.log('{:} best arch is {:}, accuracy = {:.2f}%, visit {:} archs with {:.1f} s (real-cost = {:.3f} s).'.format(time_string(), best_arch, best_acc, len(history), total_time_cost, time.time()-x_start_time))
+    current_best_index.append(api.query_index_by_arch(best_arch))
+  logger.log('{:} best arch is {:}, accuracy = {:.2f}%, visit {:} archs with {:.1f} s.'.format(time_string(), best_arch, best_acc, len(history), total_time_cost[-1]))
   
   info = api.query_info_str_by_arch(best_arch, '200' if xargs.search_space == 'tss' else '90')
   logger.log('{:}'.format(info))
   logger.log('-'*100)
   logger.close()
-  return logger.log_dir, total_time_cost, history
+  return logger.log_dir, current_best_index, total_time_cost
 
 
 if __name__ == '__main__':
@@ -62,7 +67,7 @@ if __name__ == '__main__':
   parser.add_argument('--time_budget',        type=int,   default=20000, help='The total time cost budge for searching (in seconds).')
   parser.add_argument('--loops_if_rand',      type=int,   default=500,   help='The total runs for evaluation.')
   # log
-  parser.add_argument('--save_dir',           type=str,   help='Folder to save checkpoints and log.')
+  parser.add_argument('--save_dir',           type=str,   default='./output/search', help='Folder to save checkpoints and log.')
   parser.add_argument('--rand_seed',          type=int,   default=-1,    help='manual seed')
   args = parser.parse_args()
   
@@ -77,7 +82,7 @@ if __name__ == '__main__':
   print('save-dir : {:}'.format(args.save_dir))
 
   if args.rand_seed < 0:
-    save_dir, all_info = None, {}
+    save_dir, all_info = None, collections.OrderedDict()
     for i in range(args.loops_if_rand):
       print ('{:} : {:03d}/{:03d}'.format(time_string(), i, args.loops_if_rand))
       args.rand_seed = random.randint(1, 100000)
