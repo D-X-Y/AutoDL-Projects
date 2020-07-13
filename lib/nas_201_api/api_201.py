@@ -58,6 +58,7 @@ class NASBench201API(NASBenchMetaAPI):
   def __init__(self, file_path_or_dict: Optional[Union[Text, Dict]]=None,
                verbose: bool=True):
     self.filename = None
+    self.reset_time()
     if file_path_or_dict is None:
       file_path_or_dict = os.path.join(os.environ['TORCH_HOME'], ALL_BENCHMARK_FILES[-1])
       print ('Try to use the default NAS-Bench-201 path from {:}.'.format(file_path_or_dict))
