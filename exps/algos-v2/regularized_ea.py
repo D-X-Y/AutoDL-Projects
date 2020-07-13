@@ -3,12 +3,12 @@
 ##################################################################
 # Regularized Evolution for Image Classifier Architecture Search #
 ##################################################################
-# python ./exps/algos-v2/REA.py --dataset cifar10 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-# python ./exps/algos-v2/REA.py --dataset cifar100 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-# python ./exps/algos-v2/REA.py --dataset ImageNet16-120 --search_space tss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-# python ./exps/algos-v2/REA.py --dataset cifar10 --search_space sss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-# python ./exps/algos-v2/REA.py --dataset cifar100 --search_space sss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
-# python ./exps/algos-v2/REA.py --dataset ImageNet16-120 --search_space sss --time_budget 12000 --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/regularized_ea.py --dataset cifar10 --search_space tss --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/regularized_ea.py --dataset cifar100 --search_space tss --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/regularized_ea.py --dataset ImageNet16-120 --search_space tss --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/regularized_ea.py --dataset cifar10 --search_space sss --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/regularized_ea.py --dataset cifar100 --search_space sss --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
+# python ./exps/algos-v2/regularized_ea.py --dataset ImageNet16-120 --search_space sss --ea_cycles 200 --ea_population 10 --ea_sample_size 3 --rand_seed 1
 ##################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
@@ -160,7 +160,7 @@ def regularized_evolution(cycles, population_size, sample_size, time_budget, ran
   while len(population) < population_size:
     model = Model()
     model.arch = random_arch()
-    model.accuracy, time_cost, total_cost = api.simulate_train_eval(model.arch, dataset, '12')
+    model.accuracy, _, _, total_cost = api.simulate_train_eval(model.arch, dataset, '12')
     # Append the info
     population.append(model)
     history.append(model)
@@ -183,7 +183,7 @@ def regularized_evolution(cycles, population_size, sample_size, time_budget, ran
     # Create the child model and store it.
     child = Model()
     child.arch = mutate_arch(parent.arch)
-    child.accuracy, time_cost, total_cost = api.simulate_train_eval(model.arch, dataset, '12')
+    child.accuracy, _, _, total_cost = api.simulate_train_eval(model.arch, dataset, '12')
     # Append the info
     population.append(child)
     history.append(child)
@@ -195,11 +195,7 @@ def regularized_evolution(cycles, population_size, sample_size, time_budget, ran
 
 
 def main(xargs, api):
-  assert torch.cuda.is_available(), 'CUDA is not available.'
-  torch.backends.cudnn.enabled   = True
-  torch.backends.cudnn.benchmark = False
-  torch.backends.cudnn.deterministic = True
-  torch.set_num_threads(xargs.workers)
+  torch.set_num_threads(4)
   prepare_seed(xargs.rand_seed)
   logger = prepare_logger(args)
 
@@ -235,12 +231,11 @@ if __name__ == '__main__':
   parser.add_argument('--ea_cycles',          type=int,   help='The number of cycles in EA.')
   parser.add_argument('--ea_population',      type=int,   help='The population size in EA.')
   parser.add_argument('--ea_sample_size',     type=int,   help='The sample size in EA.')
-  parser.add_argument('--time_budget',        type=int,   help='The total time cost budge for searching (in seconds).')
-  parser.add_argument('--loops_if_rand',      type=int,   default=500, help='The total runs for evaluation.')
+  parser.add_argument('--time_budget',        type=int,   default=20000, help='The total time cost budge for searching (in seconds).')
+  parser.add_argument('--loops_if_rand',      type=int,   default=500,   help='The total runs for evaluation.')
   # log
-  parser.add_argument('--workers',            type=int,   default=2,    help='number of data loading workers (default: 2)')
   parser.add_argument('--save_dir',           type=str,   default='./output/search', help='Folder to save checkpoints and log.')
-  parser.add_argument('--rand_seed',          type=int,   default=-1,   help='manual seed')
+  parser.add_argument('--rand_seed',          type=int,   default=-1,    help='manual seed')
   args = parser.parse_args()
 
   if args.search_space == 'tss':

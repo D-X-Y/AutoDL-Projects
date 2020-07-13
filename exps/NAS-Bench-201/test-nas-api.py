@@ -72,6 +72,14 @@ def test_api(api, is_301=True):
   print('{:}\n'.format(info))
   print('{:} finish testing the api : {:}'.format(time_string(), api))
 
+  if not is_301:
+    arch_str = '|nor_conv_3x3~0|+|nor_conv_3x3~0|avg_pool_3x3~1|+|skip_connect~0|nor_conv_3x3~1|skip_connect~2|'
+    matrix = api.str2matrix(arch_str)
+    print('Compute the adjacency matrix of {:}'.format(arch_str))
+    print(matrix)
+  info = api.simulate_train_eval(123, 'cifar10')
+  print('simulate_train_eval : {:}'.format(info))
+
 
 def test_issue_81_82(api):
   results = api.query_by_index(0, 'cifar10-valid', hp='12')

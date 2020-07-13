@@ -68,7 +68,7 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
   def reset_time(self):
     self._used_time = 0
 
-  def simulate_train_eval(self, arch, dataset, hp='12'):
+  def simulate_train_eval(self, arch, dataset, hp='12', account_time=True):
     index = self.query_index_by_arch(arch)
     all_names = ('cifar10', 'cifar100', 'ImageNet16-120')
     assert dataset in all_names, 'Invalid dataset name : {:} vs {:}'.format(dataset, all_names)
@@ -77,8 +77,10 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
     else:
       info = self.get_more_info(index, dataset, iepoch=None, hp=hp, is_random=True)
     valid_acc, time_cost = info['valid-accuracy'], info['train-all-time'] + info['valid-per-time']
-    self._used_time += time_cost
-    return valid_acc, time_cost, self._used_time
+    latency = self.get_latency(index, dataset)
+    if account_time:
+      self._used_time += time_cost
+    return valid_acc, latency, time_cost, self._used_time
 
   def random(self):
     """Return a random index of all architectures."""

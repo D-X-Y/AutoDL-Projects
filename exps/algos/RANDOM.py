@@ -84,7 +84,7 @@ def main(xargs, nas_bench):
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser("Regularized Evolution Algorithm")
+  parser = argparse.ArgumentParser("Random NAS")
   parser.add_argument('--data_path',          type=str,   help='Path to dataset')
   parser.add_argument('--dataset',            type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
   # channels and number-of-cells

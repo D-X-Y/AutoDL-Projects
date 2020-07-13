@@ -141,9 +141,12 @@ class NASBench201API(NASBenchMetaAPI):
   # `is_random`
   #   When is_random=True, the performance of a random architecture will be returned
   #   When is_random=False, the performanceo of all trials will be averaged.
-  def get_more_info(self, index: int, dataset, iepoch=None, hp='12', is_random=True):
+  def get_more_info(self, index, dataset, iepoch=None, hp='12', is_random=True):
     if self.verbose:
       print('Call the get_more_info function with index={:}, dataset={:}, iepoch={:}, hp={:}, and is_random={:}.'.format(index, dataset, iepoch, hp, is_random))
+    index = self.query_index_by_arch(index)  # To avoid the input is a string or an instance of a arch object
+    if index not in self.arch2infos_dict:
+      raise ValueError('Did not find {:} from arch2infos_dict.'.format(index))
     archresult = self.arch2infos_dict[index][str(hp)]
     # if randomly select one trial, select the seed at first
     if isinstance(is_random, bool) and is_random:

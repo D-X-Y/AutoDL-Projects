@@ -3,7 +3,7 @@
 ###############################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06           #
 ###############################################################
-# Usage: python exps/NAS-Bench-201/test-nas-api-vis.py
+# Usage: python exps/experimental/visualize-nas-bench-x.py
 ###############################################################
 import os, sys, time, torch, argparse
 import numpy as np
@@ -384,24 +384,25 @@ def visualize_all_rank_info(api, vis_save_dir, indicator):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='NAS-Bench-X', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument('--save_dir',    type=str, default='output/NAS-BENCH-202', help='Folder to save checkpoints and log.')
-  parser.add_argument('--check_N',     type=int, default=32768,  help='For safety.')
+  parser.add_argument('--save_dir',    type=str, default='output/vis-nas-bench', help='Folder to save checkpoints and log.')
   # use for train the model
   args = parser.parse_args()
+
+  to_save_dir = Path(args.save_dir)
 
   datasets = ['cifar10', 'cifar100', 'ImageNet16-120']
   api201 = NASBench201API(None, verbose=True)
   for xdata in datasets:
-    visualize_tss_info(api201, xdata, Path('output/vis-nas-bench'))
+    visualize_tss_info(api201, xdata, to_save_dir)
 
   api301 = NASBench301API(None, verbose=True)
   for xdata in datasets:
-    visualize_sss_info(api301, xdata, Path('output/vis-nas-bench'))
+    visualize_sss_info(api301, xdata, to_save_dir)
 
-  visualize_info(None, Path('output/vis-nas-bench/'), 'tss')
-  visualize_info(None, Path('output/vis-nas-bench/'), 'sss')
-  visualize_rank_info(None, Path('output/vis-nas-bench/'), 'tss')
-  visualize_rank_info(None, Path('output/vis-nas-bench/'), 'sss')
+  visualize_info(None, to_save_dir, 'tss')
+  visualize_info(None, to_save_dir, 'sss')
+  visualize_rank_info(None, to_save_dir, 'tss')
+  visualize_rank_info(None, to_save_dir, 'sss')
 
-  visualize_all_rank_info(None, Path('output/vis-nas-bench/'), 'tss')
-  visualize_all_rank_info(None, Path('output/vis-nas-bench/'), 'sss')
+  visualize_all_rank_info(None, to_save_dir, 'tss')
+  visualize_all_rank_info(None, to_save_dir, 'sss')

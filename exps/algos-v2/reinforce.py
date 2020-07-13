@@ -3,12 +3,12 @@
 #####################################################################################################
 # modified from https://github.com/pytorch/examples/blob/master/reinforcement_learning/reinforce.py #
 #####################################################################################################
-# python ./exps/algos-v2/reinforce.py --dataset cifar10 --search_space tss --time_budget 12000 --learning_rate 0.001 
-# python ./exps/algos-v2/reinforce.py --dataset cifar100 --search_space tss --time_budget 12000 --learning_rate 0.001 
-# python ./exps/algos-v2/reinforce.py --dataset ImageNet16-120 --search_space tss --time_budget 12000 --learning_rate 0.001 
-# python ./exps/algos-v2/reinforce.py --dataset cifar10 --search_space sss --time_budget 12000 --learning_rate 0.001 
-# python ./exps/algos-v2/reinforce.py --dataset cifar100 --search_space sss --time_budget 12000 --learning_rate 0.001 
-# python ./exps/algos-v2/reinforce.py --dataset ImageNet16-120 --search_space sss --time_budget 12000 --learning_rate 0.001 
+# python ./exps/algos-v2/reinforce.py --dataset cifar10 --search_space tss --learning_rate 0.001 
+# python ./exps/algos-v2/reinforce.py --dataset cifar100 --search_space tss --learning_rate 0.001 
+# python ./exps/algos-v2/reinforce.py --dataset ImageNet16-120 --search_space tss --learning_rate 0.001 
+# python ./exps/algos-v2/reinforce.py --dataset cifar10 --search_space sss --learning_rate 0.001 
+# python ./exps/algos-v2/reinforce.py --dataset cifar100 --search_space sss --learning_rate 0.001 
+# python ./exps/algos-v2/reinforce.py --dataset ImageNet16-120 --search_space sss --learning_rate 0.001 
 #####################################################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
@@ -120,14 +120,9 @@ def select_action(policy):
 
 
 def main(xargs, api):
-  assert torch.cuda.is_available(), 'CUDA is not available.'
-  torch.backends.cudnn.enabled   = True
-  torch.backends.cudnn.benchmark = False
-  torch.backends.cudnn.deterministic = True
-  torch.set_num_threads(xargs.workers)
+  torch.set_num_threads(4)
   prepare_seed(xargs.rand_seed)
   logger = prepare_logger(args)
-  
   
   search_space = get_search_spaces(xargs.search_space, 'nas-bench-301')
   if xargs.search_space == 'tss':
@@ -144,6 +139,7 @@ def main(xargs, api):
 
   # nas dataset load
   logger.log('{:} use api : {:}'.format(time_string(), api))
+  api.reset_time()
 
   # REINFORCE
   x_start_time = time.time()
@@ -153,7 +149,7 @@ def main(xargs, api):
     start_time = time.time()
     log_prob, action = select_action( policy )
     arch   = policy.generate_arch( action )
-    reward, _, current_total_cost = api.simulate_train_eval(arch, xargs.dataset, '12')
+    reward, _, _, current_total_cost = api.simulate_train_eval(arch, xargs.dataset, '12')
     trace.append((reward, arch))
     total_costs.append(current_total_cost)
 
@@ -177,7 +173,7 @@ def main(xargs, api):
   logger.log('-'*100)
   logger.close()
 
-  return logger.log_dir, [api.query_index_by_arch(x[0]) for x in trace], total_costs
+  return logger.log_dir, [api.query_index_by_arch(x[1]) for x in trace], total_costs
 
 
 if __name__ == '__main__':
@@ -186,15 +182,14 @@ if __name__ == '__main__':
   parser.add_argument('--dataset',            type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
   parser.add_argument('--search_space',       type=str,   choices=['tss', 'sss'], help='Choose the search space.')
   parser.add_argument('--learning_rate',      type=float, help='The learning rate for REINFORCE.')
-  parser.add_argument('--EMA_momentum',       type=float, default=0.9, help='The momentum value for EMA.')
-  parser.add_argument('--time_budget',        type=int,   help='The total time cost budge for searching (in seconds).')
-  parser.add_argument('--loops_if_rand',      type=int,   default=500, help='The total runs for evaluation.')
+  parser.add_argument('--EMA_momentum',       type=float, default=0.9,   help='The momentum value for EMA.')
+  parser.add_argument('--time_budget',        type=int,   default=20000, help='The total time cost budge for searching (in seconds).')
+  parser.add_argument('--loops_if_rand',      type=int,   default=500,   help='The total runs for evaluation.')
   # log
-  parser.add_argument('--workers',            type=int,   default=2,   help='number of data loading workers (default: 2)')
   parser.add_argument('--save_dir',           type=str,   default='./output/search', help='Folder to save checkpoints and log.')
   parser.add_argument('--arch_nas_dataset',   type=str,   help='The path to load the architecture dataset (tiny-nas-benchmark).')
   parser.add_argument('--print_freq',         type=int,   help='print frequency (default: 200)')
-  parser.add_argument('--rand_seed',          type=int,   default=-1,  help='manual seed')
+  parser.add_argument('--rand_seed',          type=int,   default=-1,    help='manual seed')
   args = parser.parse_args()
 
   if args.search_space == 'tss':

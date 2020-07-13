@@ -8,7 +8,9 @@ import torch.nn as nn
 from models import CellStructure
 from log_utils import time_string
 
+
 def evaluate_one_shot(model, xloader, api, cal_mode, seed=111):
+  print ('This is an old version of codes to use NAS-Bench-API, and should be modified to align with the new version. Please contact me for more details if you use this function.')
   weights = deepcopy(model.state_dict())
   model.train(cal_mode)
   with torch.no_grad():
