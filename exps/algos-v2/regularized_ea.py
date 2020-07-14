@@ -160,7 +160,7 @@ def regularized_evolution(cycles, population_size, sample_size, time_budget, ran
   while len(population) < population_size:
     model = Model()
     model.arch = random_arch()
-    model.accuracy, _, _, total_cost = api.simulate_train_eval(model.arch, dataset, '12')
+    model.accuracy, _, _, total_cost = api.simulate_train_eval(model.arch, dataset, hp='12')
     # Append the info
     population.append(model)
     history.append((model.accuracy, model.arch))
@@ -184,7 +184,7 @@ def regularized_evolution(cycles, population_size, sample_size, time_budget, ran
     # Create the child model and store it.
     child = Model()
     child.arch = mutate_arch(parent.arch)
-    child.accuracy, _, _, total_cost = api.simulate_train_eval(child.arch, dataset, '12')
+    child.accuracy, _, _, total_cost = api.simulate_train_eval(child.arch, dataset, hp='12')
     # Append the info
     population.append(child)
     history.append((child.accuracy, child.arch))

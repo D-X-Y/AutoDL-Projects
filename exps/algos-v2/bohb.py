@@ -5,9 +5,9 @@
 # required to install hpbandster ##################################
 # pip install hpbandster         ##################################
 ###################################################################
-# python exps/algos-v2/bohb.py --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3
+# OMP_NUM_THREADS=4 python exps/algos-v2/bohb.py --search_space tss --dataset cifar10 --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3 --rand_seed 1
 ###################################################################
-import os, sys, time, random, argparse
+import os, sys, time, random, argparse, collections
 from copy import deepcopy
 from pathlib import Path
 import torch
@@ -17,7 +17,7 @@ from config_utils import load_config
 from datasets     import get_datasets, SearchDataset
 from procedures   import prepare_seed, prepare_logger
 from log_utils    import AverageMeter, time_string, convert_secs2time
-from nas_201_api  import NASBench201API as API
+from nas_201_api  import NASBench201API, NASBench301API
 from models       import CellStructure, get_search_spaces
 # BOHB: Robust and Efficient Hyperparameter Optimization at Scale, ICML 2018
 import ConfigSpace
@@ -38,7 +38,7 @@ def get_topology_config_space(search_space, max_nodes=4):
 
 def get_size_config_space(search_space):
   cs = ConfigSpace.ConfigurationSpace()
-	import pdb; pdb.set_trace()
+  import pdb; pdb.set_trace()
   #edge2index   = {}
   for i in range(1, max_nodes):
     for j in range(i):
@@ -63,52 +63,21 @@ def config2topology_func(max_nodes=4):
 
 class MyWorker(Worker):
 
-  def __init__(self, *args, convert_func=None, dataname=None, nas_bench=None, time_budget=None, **kwargs):
+  def __init__(self, *args, convert_func=None, dataset=None, api=None, **kwargs):
     super().__init__(*args, **kwargs)
     self.convert_func   = convert_func
-    self._dataname      = dataname
-    self._nas_bench     = nas_bench
-    self.time_budget    = time_budget
-    self.seen_archs     = []
-    self.sim_cost_time  = 0
-    self.real_cost_time = 0
-    self.is_end         = False
-
-  def get_the_best(self):
-    assert len(self.seen_archs) > 0
-    best_index, best_acc = -1, None
-    for arch_index in self.seen_archs:
-      info = self._nas_bench.get_more_info(arch_index, self._dataname, None, hp='200', is_random=True)
-      vacc = info['valid-accuracy']
-      if best_acc is None or best_acc < vacc:
-        best_acc = vacc
-        best_index = arch_index
-    assert best_index != -1
-    return best_index
+    self._dataset       = dataset
+    self._api           = api
+    self.total_times    = []
+    self.trajectory     = []
 
   def compute(self, config, budget, **kwargs):
-    start_time = time.time()
-    structure  = self.convert_func( config )
-    arch_index = self._nas_bench.query_index_by_arch( structure )
-    info       = self._nas_bench.get_more_info(arch_index, self._dataname, None, hp='200', is_random=True)
-    cur_time   = info['train-all-time'] + info['valid-per-time']
-    cur_vacc   = info['valid-accuracy']
-    self.real_cost_time += (time.time() - start_time)
-    if self.sim_cost_time + cur_time <= self.time_budget and not self.is_end:
-      self.sim_cost_time += cur_time
-      self.seen_archs.append( arch_index )
-      return ({'loss': 100 - float(cur_vacc),
-               'info': {'seen-arch'     : len(self.seen_archs),
-                        'sim-test-time' : self.sim_cost_time,
-                        'current-arch'  : arch_index}
-            })
-    else:
-      self.is_end = True
-      return ({'loss': 100,
-               'info': {'seen-arch'     : len(self.seen_archs),
-                        'sim-test-time' : self.sim_cost_time,
-                        'current-arch'  : None}
-            })
+    arch  = self.convert_func( config )
+    accuracy, latency, time_cost, total_time = self._api.simulate_train_eval(arch, self._dataset, iepoch=int(budget)-1, hp='12')
+    self.trajectory.append((accuracy, arch))
+    self.total_times.append(total_time)
+    return ({'loss': 100 - accuracy,
+             'info': self._api.query_index_by_arch(arch)})
 
 
 def main(xargs, api):
@@ -117,12 +86,13 @@ def main(xargs, api):
   logger = prepare_logger(args)
 
   logger.log('{:} use api : {:}'.format(time_string(), api))
+  api.reset_time()
   search_space = get_search_spaces(xargs.search_space, 'nas-bench-301')
   if xargs.search_space == 'tss':
-  	cs = get_topology_config_space(xargs.max_nodes, search_space)
-  	config2structure = config2topology_func(xargs.max_nodes)
+  	cs = get_topology_config_space(search_space)
+  	config2structure = config2topology_func()
   else:
-  	cs = get_size_config_space(xargs.max_nodes, search_space)
+    cs = get_size_config_space(search_space)
     import pdb; pdb.set_trace()
   
   hb_run_id = '0'
@@ -133,41 +103,41 @@ def main(xargs, api):
 
   workers = []
   for i in range(num_workers):
-    w = MyWorker(nameserver=ns_host, nameserver_port=ns_port, convert_func=config2structure, dataname=dataname, nas_bench=nas_bench, time_budget=xargs.time_budget, run_id=hb_run_id, id=i)
+    w = MyWorker(nameserver=ns_host, nameserver_port=ns_port, convert_func=config2structure, dataset=xargs.dataset, api=api, run_id=hb_run_id, id=i)
     w.run(background=True)
     workers.append(w)
 
   start_time = time.time()
-  bohb = BOHB(configspace=cs,
-            run_id=hb_run_id,
-            eta=3, min_budget=12, max_budget=200,
-            nameserver=ns_host,
-            nameserver_port=ns_port,
-            num_samples=xargs.num_samples,
-            random_fraction=xargs.random_fraction, bandwidth_factor=xargs.bandwidth_factor,
-            ping_interval=10, min_bandwidth=xargs.min_bandwidth)
+  bohb = BOHB(configspace=cs, run_id=hb_run_id,
+      eta=3, min_budget=1, max_budget=12,
+      nameserver=ns_host,
+      nameserver_port=ns_port,
+      num_samples=xargs.num_samples,
+      random_fraction=xargs.random_fraction, bandwidth_factor=xargs.bandwidth_factor,
+      ping_interval=10, min_bandwidth=xargs.min_bandwidth)
   
   results = bohb.run(xargs.n_iters, min_n_workers=num_workers)
 
   bohb.shutdown(shutdown_workers=True)
   NS.shutdown()
 
-  real_cost_time = time.time() - start_time
-
-  id2config = results.get_id2config_mapping()
-  incumbent = results.get_incumbent_id()
-  logger.log('Best found configuration: {:} within {:.3f} s'.format(id2config[incumbent]['config'], real_cost_time))
-  best_arch = config2structure( id2config[incumbent]['config'] )
-
-  info = nas_bench.query_by_arch(best_arch, '200')
-  if info is None: logger.log('Did not find this architecture : {:}.'.format(best_arch))
-  else           : logger.log('{:}'.format(info))
-  logger.log('-'*100)
-
-  logger.log('workers : {:.1f}s with {:} archs'.format(workers[0].time_budget, len(workers[0].seen_archs)))
-  logger.close()
-  return logger.log_dir, nas_bench.query_index_by_arch( best_arch ), real_cost_time
+  # print('There are {:} runs.'.format(len(results.get_all_runs())))
+  # workers[0].total_times
+  # workers[0].trajectory
+  current_best_index = []
+  for idx in range(len(workers[0].trajectory)):
+    trajectory = workers[0].trajectory[:idx+1]
+    arch = max(trajectory, key=lambda x: x[0])[1]
+    current_best_index.append(api.query_index_by_arch(arch))
   
+  best_arch = max(workers[0].trajectory, key=lambda x: x[0])[1]
+  logger.log('Best found configuration: {:} within {:.3f} s'.format(best_arch, workers[0].total_times[-1]))
+  info = api.query_info_str_by_arch(best_arch, '200' if xargs.search_space == 'tss' else '90')
+  logger.log('{:}'.format(info))
+  logger.log('-'*100)
+  logger.close()
+
+  return logger.log_dir, current_best_index, workers[0].total_times
 
 
 if __name__ == '__main__':
@@ -185,8 +155,8 @@ if __name__ == '__main__':
   parser.add_argument('--bandwidth_factor', default=3,   type=int, nargs='?', help='factor multiplied to the bandwidth')
   parser.add_argument('--n_iters',          default=300, type=int, nargs='?', help='number of iterations for optimization method')
   # log
-  parser.add_argument('--save_dir',           type=str,   help='Folder to save checkpoints and log.')
-  parser.add_argument('--rand_seed',          type=int,   help='manual seed')
+  parser.add_argument('--save_dir',           type=str,  default='./output/search', help='Folder to save checkpoints and log.')
+  parser.add_argument('--rand_seed',          type=int,  default=-1, help='manual seed')
   args = parser.parse_args()
   
   if args.search_space == 'tss':

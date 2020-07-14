@@ -43,7 +43,7 @@ def main(xargs, api):
   current_best_index = []
   while len(total_time_cost) == 0 or total_time_cost[-1] < xargs.time_budget:
     arch = random_arch()
-    accuracy, _, _, total_cost = api.simulate_train_eval(arch, xargs.dataset, '12')
+    accuracy, _, _, total_cost = api.simulate_train_eval(arch, xargs.dataset, hp='12')
     total_time_cost.append(total_cost)
     history.append(arch)
     if best_arch is None or best_acc < accuracy:

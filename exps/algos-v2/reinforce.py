@@ -150,7 +150,7 @@ def main(xargs, api):
     start_time = time.time()
     log_prob, action = select_action( policy )
     arch   = policy.generate_arch( action )
-    reward, _, _, current_total_cost = api.simulate_train_eval(arch, xargs.dataset, '12')
+    reward, _, _, current_total_cost = api.simulate_train_eval(arch, xargs.dataset, hp='12')
     trace.append((reward, arch))
     total_costs.append(current_total_cost)
 

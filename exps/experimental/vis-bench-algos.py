@@ -5,7 +5,7 @@
 ###############################################################
 # Usage: python exps/experimental/vis-bench-algos.py          #
 ###############################################################
-import os, sys, time, torch, argparse
+import os, gc, sys, time, torch, argparse
 import numpy as np
 from typing import List, Text, Dict, Any
 from shutil import copyfile
@@ -31,6 +31,7 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   alg2name['REA'] = 'R-EA-SS3'
   alg2name['REINFORCE'] = 'REINFORCE-0.001'
   alg2name['RANDOM'] = 'RANDOM'
+  alg2name['BOHB'] = 'BOHB'
   for alg, name in alg2name.items():
     alg2path[alg] = os.path.join(ss_dir, dataset, name, 'results.pth')
     assert os.path.isfile(alg2path[alg]), 'invalid path : {:}'.format(alg2path[alg])
@@ -58,14 +59,27 @@ def query_performance(api, data, dataset, ticket):
     results.append(interplate)
   return sum(results) / len(results)
 
+y_min_s = {('cifar10', 'tss'): 90,
+           ('cifar10', 'sss'): 92,
+           ('cifar100', 'tss'): 65,
+           ('cifar100', 'sss'): 65,
+           ('ImageNet16-120', 'tss'): 36,
+           ('ImageNet16-120', 'sss'): 40}
+
+y_max_s = {('cifar10', 'tss'): 94.5,
+           ('cifar10', 'sss'): 93.3,
+           ('cifar100', 'tss'): 72,
+           ('cifar100', 'sss'): 70,
+           ('ImageNet16-120', 'tss'): 44,
+           ('ImageNet16-120', 'sss'): 46}
 
 def visualize_curve(api, vis_save_dir, search_space, max_time):
   vis_save_dir = vis_save_dir.resolve()
   vis_save_dir.mkdir(parents=True, exist_ok=True)
 
-  dpi, width, height = 250, 5100, 1500
+  dpi, width, height = 250, 5200, 1400
   figsize = width / float(dpi), height / float(dpi)
-  LabelSize, LegendFontsize = 14, 14
+  LabelSize, LegendFontsize = 16, 16
 
   def sub_plot_fn(ax, dataset):
     alg2data = fetch_data(search_space=search_space, dataset=dataset)
@@ -73,6 +87,8 @@ def visualize_curve(api, vis_save_dir, search_space, max_time):
     total_tickets = 150
     time_tickets = [float(i) / total_tickets * max_time for i in range(total_tickets)]
     colors = ['b', 'g', 'c', 'm', 'y']
+    ax.set_xlim(0, 200)
+    ax.set_ylim(y_min_s[(dataset, search_space)], y_max_s[(dataset, search_space)])
     for idx, (alg, data) in enumerate(alg2data.items()):
       print('plot alg : {:}'.format(alg))
       accuracies = []
@@ -107,5 +123,7 @@ if __name__ == '__main__':
 
   api201 = NASBench201API(verbose=False)
   visualize_curve(api201, save_dir, 'tss', args.max_time)
+  del api201
+  gc.collect()
   api301 = NASBench301API(verbose=False)
   visualize_curve(api301, save_dir, 'sss', args.max_time)
