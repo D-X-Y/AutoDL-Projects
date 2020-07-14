@@ -30,10 +30,10 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   alg2name, alg2path = OrderedDict(), OrderedDict()
   alg2name['REA'] = 'R-EA-SS3'
   alg2name['REINFORCE'] = 'REINFORCE-0.001'
-  # alg2name['RANDOM'] = 'RANDOM'
+  alg2name['RANDOM'] = 'RANDOM'
   for alg, name in alg2name.items():
     alg2path[alg] = os.path.join(ss_dir, dataset, name, 'results.pth')
-    assert os.path.isfile(alg2path[alg])
+    assert os.path.isfile(alg2path[alg]), 'invalid path : {:}'.format(alg2path[alg])
   alg2data = OrderedDict()
   for alg, path in alg2path.items():
     data = torch.load(path)

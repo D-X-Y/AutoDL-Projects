@@ -5,7 +5,7 @@
 # required to install hpbandster ##################################
 # pip install hpbandster         ##################################
 ###################################################################
-# bash ./scripts-search/algos/BOHB.sh -1         ##################
+# python exps/algos-v2/bohb.py --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3
 ###################################################################
 import os, sys, time, random, argparse
 from copy import deepcopy
@@ -26,7 +26,7 @@ import hpbandster.core.nameserver as hpns
 from hpbandster.core.worker import Worker
 
 
-def get_configuration_space(max_nodes, search_space):
+def get_topology_config_space(search_space, max_nodes=4):
   cs = ConfigSpace.ConfigurationSpace()
   #edge2index   = {}
   for i in range(1, max_nodes):
@@ -36,7 +36,18 @@ def get_configuration_space(max_nodes, search_space):
   return cs
 
 
-def config2structure_func(max_nodes):
+def get_size_config_space(search_space):
+  cs = ConfigSpace.ConfigurationSpace()
+	import pdb; pdb.set_trace()
+  #edge2index   = {}
+  for i in range(1, max_nodes):
+    for j in range(i):
+      node_str = '{:}<-{:}'.format(i, j)
+      cs.add_hyperparameter(ConfigSpace.CategoricalHyperparameter(node_str, search_space))
+  return cs
+
+
+def config2topology_func(max_nodes=4):
   def config2structure(config):
     genotypes = []
     for i in range(1, max_nodes):
@@ -100,58 +111,26 @@ class MyWorker(Worker):
             })
 
 
-def main(xargs, nas_bench):
-  assert torch.cuda.is_available(), 'CUDA is not available.'
-  torch.backends.cudnn.enabled   = True
-  torch.backends.cudnn.benchmark = False
-  torch.backends.cudnn.deterministic = True
-  torch.set_num_threads( xargs.workers )
+def main(xargs, api):
+  torch.set_num_threads(4)
   prepare_seed(xargs.rand_seed)
   logger = prepare_logger(args)
 
-  if xargs.dataset == 'cifar10':
-    dataname = 'cifar10-valid'
+  logger.log('{:} use api : {:}'.format(time_string(), api))
+  search_space = get_search_spaces(xargs.search_space, 'nas-bench-301')
+  if xargs.search_space == 'tss':
+  	cs = get_topology_config_space(xargs.max_nodes, search_space)
+  	config2structure = config2topology_func(xargs.max_nodes)
   else:
-    dataname = xargs.dataset
-  if xargs.data_path is not None:
-    train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
-    split_Fpath = 'configs/nas-benchmark/cifar-split.txt'
-    cifar_split = load_config(split_Fpath, None, None)
-    train_split, valid_split = cifar_split.train, cifar_split.valid
-    logger.log('Load split file from {:}'.format(split_Fpath))
-    config_path = 'configs/nas-benchmark/algos/R-EA.config'
-    config = load_config(config_path, {'class_num': class_num, 'xshape': xshape}, logger)
-    # To split data
-    train_data_v2 = deepcopy(train_data)
-    train_data_v2.transform = valid_data.transform
-    valid_data    = train_data_v2
-    search_data   = SearchDataset(xargs.dataset, train_data, train_split, valid_split)
-    # data loader
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=config.batch_size, sampler=torch.utils.data.sampler.SubsetRandomSampler(train_split) , num_workers=xargs.workers, pin_memory=True)
-    valid_loader  = torch.utils.data.DataLoader(valid_data, batch_size=config.batch_size, sampler=torch.utils.data.sampler.SubsetRandomSampler(valid_split), num_workers=xargs.workers, pin_memory=True)
-    logger.log('||||||| {:10s} ||||||| Train-Loader-Num={:}, Valid-Loader-Num={:}, batch size={:}'.format(xargs.dataset, len(train_loader), len(valid_loader), config.batch_size))
-    logger.log('||||||| {:10s} ||||||| Config={:}'.format(xargs.dataset, config))
-    extra_info = {'config': config, 'train_loader': train_loader, 'valid_loader': valid_loader}
-  else:
-    config_path = 'configs/nas-benchmark/algos/R-EA.config'
-    config = load_config(config_path, None, logger)
-    logger.log('||||||| {:10s} ||||||| Config={:}'.format(xargs.dataset, config))
-    extra_info = {'config': config, 'train_loader': None, 'valid_loader': None}
-
-  # nas dataset load
-  assert xargs.arch_nas_dataset is not None and os.path.isfile(xargs.arch_nas_dataset)
-  search_space = get_search_spaces('cell', xargs.search_space_name)
-  cs = get_configuration_space(xargs.max_nodes, search_space)
-
-  config2structure = config2structure_func(xargs.max_nodes)
+  	cs = get_size_config_space(xargs.max_nodes, search_space)
+    import pdb; pdb.set_trace()
+  
   hb_run_id = '0'
 
   NS = hpns.NameServer(run_id=hb_run_id, host='localhost', port=0)
   ns_host, ns_port = NS.start()
   num_workers = 1
 
-  #nas_bench = AANASBenchAPI(xargs.arch_nas_dataset)
-  #logger.log('{:} Create NAS-BENCH-API DONE'.format(time_string()))
   workers = []
   for i in range(num_workers):
     w = MyWorker(nameserver=ns_host, nameserver_port=ns_port, convert_func=config2structure, dataname=dataname, nas_bench=nas_bench, time_budget=xargs.time_budget, run_id=hb_run_id, id=i)
@@ -193,43 +172,43 @@ def main(xargs, nas_bench):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser("BOHB: Robust and Efficient Hyperparameter Optimization at Scale")
-  parser.add_argument('--data_path',          type=str,   help='Path to dataset')
-  parser.add_argument('--dataset',            type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
-  # channels and number-of-cells
-  parser.add_argument('--search_space_name',  type=str,   help='The search space name.')
-  parser.add_argument('--max_nodes',          type=int,   help='The maximum number of nodes.')
-  parser.add_argument('--channel',            type=int,   help='The number of channels.')
-  parser.add_argument('--num_cells',          type=int,   help='The number of cells in one stage.')
-  parser.add_argument('--time_budget',        type=int,   help='The total time cost budge for searching (in seconds).')
+  parser.add_argument('--dataset',            type=str,  choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
+  # general arg
+  parser.add_argument('--search_space',       type=str,  choices=['tss', 'sss'], help='Choose the search space.')
+  parser.add_argument('--time_budget',        type=int,  default=20000, help='The total time cost budge for searching (in seconds).')
+  parser.add_argument('--loops_if_rand',      type=int,  default=500, help='The total runs for evaluation.')
   # BOHB
   parser.add_argument('--strategy', default="sampling",  type=str, nargs='?', help='optimization strategy for the acquisition function')
   parser.add_argument('--min_bandwidth',    default=.3,  type=float, nargs='?', help='minimum bandwidth for KDE')
   parser.add_argument('--num_samples',      default=64,  type=int, nargs='?', help='number of samples for the acquisition function')
   parser.add_argument('--random_fraction',  default=.33, type=float, nargs='?', help='fraction of random configurations')
   parser.add_argument('--bandwidth_factor', default=3,   type=int, nargs='?', help='factor multiplied to the bandwidth')
-  parser.add_argument('--n_iters',          default=100, type=int, nargs='?', help='number of iterations for optimization method')
+  parser.add_argument('--n_iters',          default=300, type=int, nargs='?', help='number of iterations for optimization method')
   # log
-  parser.add_argument('--workers',            type=int,   default=2,    help='number of data loading workers (default: 2)')
   parser.add_argument('--save_dir',           type=str,   help='Folder to save checkpoints and log.')
-  parser.add_argument('--arch_nas_dataset',   type=str,   help='The path to load the architecture dataset (tiny-nas-benchmark).')
-  parser.add_argument('--print_freq',         type=int,   help='print frequency (default: 200)')
   parser.add_argument('--rand_seed',          type=int,   help='manual seed')
   args = parser.parse_args()
-  #if args.rand_seed is None or args.rand_seed < 0: args.rand_seed = random.randint(1, 100000)
-  if args.arch_nas_dataset is None or not os.path.isfile(args.arch_nas_dataset):
-    nas_bench = None
+  
+  if args.search_space == 'tss':
+    api = NASBench201API(verbose=False)
+  elif args.search_space == 'sss':
+    api = NASBench301API(verbose=False)
   else:
-    print ('{:} build NAS-Benchmark-API from {:}'.format(time_string(), args.arch_nas_dataset))
-    nas_bench = API(args.arch_nas_dataset)
+    raise ValueError('Invalid search space : {:}'.format(args.search_space))
+
+  args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'BOHB')
+  print('save-dir : {:}'.format(args.save_dir))
+
   if args.rand_seed < 0:
-    save_dir, all_indexes, num, all_times = None, [], 500, []
-    for i in range(num):
-      print ('{:} : {:03d}/{:03d}'.format(time_string(), i, num))
+    save_dir, all_info = None, collections.OrderedDict()
+    for i in range(args.loops_if_rand):
+      print ('{:} : {:03d}/{:03d}'.format(time_string(), i, args.loops_if_rand))
       args.rand_seed = random.randint(1, 100000)
-      save_dir, index, ctime = main(args, nas_bench)
-      all_indexes.append( index ) 
-      all_times.append( ctime )
-    print ('\n average time : {:.3f} s'.format(sum(all_times)/len(all_times)))
-    torch.save(all_indexes, save_dir / 'results.pth')
+      save_dir, all_archs, all_total_times = main(args, api)
+      all_info[i] = {'all_archs': all_archs,
+                     'all_total_times': all_total_times}
+    save_path = save_dir / 'results.pth'
+    print('save into {:}'.format(save_path))
+    torch.save(all_info, save_path)
   else:
-    main(args, nas_bench)
+    main(args, api)

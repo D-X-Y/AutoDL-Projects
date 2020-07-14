@@ -214,8 +214,7 @@ def main(xargs, api):
   logger.log('-'*30 + ' start searching with the time budget of {:} s'.format(xargs.time_budget))
   history, current_best_index, total_times = regularized_evolution(xargs.ea_cycles, xargs.ea_population, xargs.ea_sample_size, xargs.time_budget, random_arch, mutate_arch, api, xargs.dataset)
   logger.log('{:} regularized_evolution finish with history of {:} arch with {:.1f} s (real-cost={:.2f} s).'.format(time_string(), len(history), total_times[-1], time.time()-x_start_time))
-  best_arch = max(history, key=lambda i: i.accuracy)
-  best_arch = best_arch.arch
+  best_arch = max(history, key=lambda x: x[0])[1]
   logger.log('{:} best arch is {:}'.format(time_string(), best_arch))
   
   info = api.query_info_str_by_arch(best_arch, '200' if xargs.search_space == 'tss' else '90')
@@ -249,6 +248,7 @@ if __name__ == '__main__':
 
   args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'R-EA-SS{:}'.format(args.ea_sample_size))
   print('save-dir : {:}'.format(args.save_dir))
+  print('xargs : {:}'.format(args))
 
   if args.rand_seed < 0:
     save_dir, all_info = None, collections.OrderedDict()
