@@ -17,3 +17,6 @@ do
     python exps/algos-v2/bohb.py --dataset ${dataset} --search_space ${search_space} --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3
   done
 done
+
+python exps/experimental/vis-bench-algos.py --search_space tss
+python exps/experimental/vis-bench-algos.py --search_space sss
