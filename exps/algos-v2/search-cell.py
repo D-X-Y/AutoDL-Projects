@@ -4,6 +4,14 @@
 # python ./exps/algos-v2/search-cell.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo darts-v1 --rand_seed 1
 # python ./exps/algos-v2/search-cell.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo darts-v1
 # python ./exps/algos-v2/search-cell.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo darts-v1
+####
+# python ./exps/algos-v2/search-cell.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo darts-v2 --rand_seed 1
+# python ./exps/algos-v2/search-cell.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo darts-v2
+# python ./exps/algos-v2/search-cell.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo darts-v2
+####
+# python ./exps/algos-v2/search-cell.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo gdas --rand_seed 1
+# python ./exps/algos-v2/search-cell.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo gdas
+# python ./exps/algos-v2/search-cell.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo gdas
 ######################################################################################
 import os, sys, time, random, argparse
 import numpy as np
@@ -22,7 +30,7 @@ from models       import get_cell_based_tiny_net, get_search_spaces
 from nas_201_api  import NASBench201API as API
 
 
-def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, epoch_str, print_freq, logger):
+def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, epoch_str, print_freq, algo, logger):
   data_time, batch_time = AverageMeter(), AverageMeter()
   base_losses, base_top1, base_top5 = AverageMeter(), AverageMeter(), AverageMeter()
   arch_losses, arch_top1, arch_top5 = AverageMeter(), AverageMeter(), AverageMeter()
@@ -30,15 +38,26 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
   network.train()
   for step, (base_inputs, base_targets, arch_inputs, arch_targets) in enumerate(xloader):
     scheduler.update(None, 1.0 * step / len(xloader))
+    base_inputs = base_inputs.cuda(non_blocking=True)
+    arch_inputs = arch_inputs.cuda(non_blocking=True)
     base_targets = base_targets.cuda(non_blocking=True)
     arch_targets = arch_targets.cuda(non_blocking=True)
     # measure data loading time
     data_time.update(time.time() - end)
     
-    # update the weights
-    sampled_arch = network.module.dync_genotype(True)
-    network.module.set_cal_mode('dynamic', sampled_arch)
-    #network.module.set_cal_mode( 'urs' )
+    # Update the weights
+    if algo == 'setn':
+      sampled_arch = network.dync_genotype(True)
+      network.set_cal_mode('dynamic', sampled_arch)
+    elif algo == 'gdas':
+      network.set_cal_mode('gdas', None)
+    elif algo.startswith('darts'):
+      network.set_cal_mode('joint', None)
+    elif algo == 'random':
+      network.set_cal_mode('urs', None)
+    else:
+      raise ValueError('Invalid algo name : {:}'.format(algo))
+      
     network.zero_grad()
     _, logits = network(base_inputs)
     base_loss = criterion(logits, base_targets)
@@ -51,7 +70,16 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
     base_top5.update  (base_prec5.item(), base_inputs.size(0))
 
     # update the architecture-weight
-    network.module.set_cal_mode( 'joint' )
+    if algo == 'setn':
+      network.set_cal_mode('joint')
+    elif algo == 'gdas':
+      network.set_cal_mode('gdas', None)
+    elif algo.startswith('darts'):
+      network.set_cal_mode('joint', None)
+    elif algo == 'random':
+      network.set_cal_mode('urs', None)
+    else:
+      raise ValueError('Invalid algo name : {:}'.format(algo))
     network.zero_grad()
     _, logits = network(arch_inputs)
     arch_loss = criterion(logits, arch_targets)
@@ -73,36 +101,38 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
       Wstr = 'Base [Loss {loss.val:.3f} ({loss.avg:.3f})  Prec@1 {top1.val:.2f} ({top1.avg:.2f}) Prec@5 {top5.val:.2f} ({top5.avg:.2f})]'.format(loss=base_losses, top1=base_top1, top5=base_top5)
       Astr = 'Arch [Loss {loss.val:.3f} ({loss.avg:.3f})  Prec@1 {top1.val:.2f} ({top1.avg:.2f}) Prec@5 {top5.val:.2f} ({top5.avg:.2f})]'.format(loss=arch_losses, top1=arch_top1, top5=arch_top5)
       logger.log(Sstr + ' ' + Tstr + ' ' + Wstr + ' ' + Astr)
-      #print (nn.functional.softmax(network.module.arch_parameters, dim=-1))
-      #print (network.module.arch_parameters)
   return base_losses.avg, base_top1.avg, base_top5.avg, arch_losses.avg, arch_top1.avg, arch_top5.avg
 
 
-def get_best_arch(xloader, network, n_samples):
+def get_best_arch(xloader, network, n_samples, algo):
   with torch.no_grad():
     network.eval()
-    archs, valid_accs = network.module.return_topK(n_samples), []
-    #print ('obtain the top-{:} architectures'.format(n_samples))
+    if algo == 'random':
+      archs, valid_accs = network.return_topK(n_samples, True), []
+    elif algo == 'setn':
+      archs, valid_accs = network.return_topK(n_samples, False), []
+    elif algo.startswith('darts') or algo == 'gdas':
+      arch = network.genotype
+      archs, valid_accs = [arch], []
+    else:
+      raise ValueError('Invalid algorithm name : {:}'.format(algo))
     loader_iter = iter(xloader)
     for i, sampled_arch in enumerate(archs):
-      network.module.set_cal_mode('dynamic', sampled_arch)
+      network.set_cal_mode('dynamic', sampled_arch)
       try:
         inputs, targets = next(loader_iter)
       except:
         loader_iter = iter(xloader)
         inputs, targets = next(loader_iter)
-
-      _, logits = network(inputs)
+      _, logits = network(inputs.cuda(non_blocking=True))
       val_top1, val_top5 = obtain_accuracy(logits.cpu().data, targets.data, topk=(1, 5))
-
       valid_accs.append(val_top1.item())
-
     best_idx = np.argmax(valid_accs)
     best_arch, best_valid_acc = archs[best_idx], valid_accs[best_idx]
     return best_arch, best_valid_acc
 
 
-def valid_func(xloader, network, criterion):
+def valid_func(xloader, network, criterion, algo, logger):
   data_time, batch_time = AverageMeter(), AverageMeter()
   arch_losses, arch_top1, arch_top5 = AverageMeter(), AverageMeter(), AverageMeter()
   end = time.time()
@@ -113,7 +143,7 @@ def valid_func(xloader, network, criterion):
       # measure data loading time
       data_time.update(time.time() - end)
       # prediction
-      _, logits = network(arch_inputs)
+      _, logits = network(arch_inputs.cuda(non_blocking=True))
       arch_loss = criterion(logits, arch_targets)
       # record
       arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
@@ -166,7 +196,6 @@ def main(xargs):
   logger.log('{:} create API = {:} done'.format(time_string(), api))
 
   last_info, model_base_path, model_best_path = logger.path('info'), logger.path('model'), logger.path('best')
-  # network, criterion = torch.nn.DataParallel(search_model).cuda(), criterion.cuda()
   network, criterion = search_model.cuda(), criterion.cuda()  # use a single GPU
 
   last_info, model_base_path, model_best_path = logger.path('info'), logger.path('model'), logger.path('best')
@@ -185,7 +214,7 @@ def main(xargs):
     logger.log("=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(last_info, start_epoch))
   else:
     logger.log("=> do not find the last-info file : {:}".format(last_info))
-    start_epoch, valid_accuracies, genotypes = 0, {'best': -1}, {}
+    start_epoch, valid_accuracies, genotypes = 0, {'best': -1}, {-1: network.return_topK(1, True)[0]}
 
   # start training
   start_time, search_time, epoch_time, total_epoch = time.time(), AverageMeter(), AverageMeter(), config.epochs + config.warmup
@@ -195,28 +224,25 @@ def main(xargs):
     epoch_str = '{:03d}-{:03d}'.format(epoch, total_epoch)
     logger.log('\n[Search the {:}-th epoch] {:}, LR={:}'.format(epoch_str, need_time, min(w_scheduler.get_lr())))
 
-    import pdb; pdb.set_trace()
-  
     search_w_loss, search_w_top1, search_w_top5, search_a_loss, search_a_top1, search_a_top5 \
-                = search_func(search_loader, network, criterion, w_scheduler, w_optimizer, a_optimizer, epoch_str, xargs.print_freq, logger)
+                = search_func(search_loader, network, criterion, w_scheduler, w_optimizer, a_optimizer, epoch_str, xargs.print_freq, xargs.algo, logger)
     search_time.update(time.time() - start_time)
     logger.log('[{:}] search [base] : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%, time-cost={:.1f} s'.format(epoch_str, search_w_loss, search_w_top1, search_w_top5, search_time.sum))
     logger.log('[{:}] search [arch] : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%'.format(epoch_str, search_a_loss, search_a_top1, search_a_top5))
 
-    genotype, temp_accuracy = get_best_arch(valid_loader, network, xargs.select_num)
-    network.module.set_cal_mode('dynamic', genotype)
-    valid_a_loss , valid_a_top1 , valid_a_top5  = valid_func(valid_loader, network, criterion)
+    genotype, temp_accuracy = get_best_arch(valid_loader, network, xargs.eval_candidate_num, xargs.algo)
+    if xargs.algo == 'setn':
+      network.set_cal_mode('dynamic', genotype)
+    elif xargs.algo == 'gdas':
+      network.set_cal_mode('gdas', None)
+    elif xargs.algo.startswith('darts'):
+      network.set_cal_mode('joint', None)
+    elif xargs.algo == 'random':
+      network.set_cal_mode('urs', None)
+    else:
+      raise ValueError('Invalid algorithm name : {:}'.format(xargs.algo))
+    valid_a_loss , valid_a_top1 , valid_a_top5  = valid_func(valid_loader, network, criterion, xargs.algo, logger)
     logger.log('[{:}] evaluate : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}% | {:}'.format(epoch_str, valid_a_loss, valid_a_top1, valid_a_top5, genotype))
-    #search_model.set_cal_mode('urs')
-    #valid_a_loss , valid_a_top1 , valid_a_top5  = valid_func(valid_loader, network, criterion)
-    #logger.log('[{:}] URS---evaluate : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%'.format(epoch_str, valid_a_loss, valid_a_top1, valid_a_top5))
-    #search_model.set_cal_mode('joint')
-    #valid_a_loss , valid_a_top1 , valid_a_top5  = valid_func(valid_loader, network, criterion)
-    #logger.log('[{:}] JOINT-evaluate : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%'.format(epoch_str, valid_a_loss, valid_a_top1, valid_a_top5))
-    #search_model.set_cal_mode('select')
-    #valid_a_loss , valid_a_top1 , valid_a_top5  = valid_func(valid_loader, network, criterion)
-    #logger.log('[{:}] Selec-evaluate : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%'.format(epoch_str, valid_a_loss, valid_a_top1, valid_a_top5))
-    # check the best accuracy
     valid_accuracies[epoch] = valid_a_top1
 
     genotypes[epoch] = genotype
@@ -245,15 +271,25 @@ def main(xargs):
 
   # the final post procedure : count the time
   start_time = time.time()
-  genotype, temp_accuracy = get_best_arch(valid_loader, network, xargs.select_num)
+  genotype, temp_accuracy = get_best_arch(valid_loader, network, xargs.eval_candidate_num, xargs.algo)
+  if xargs.algo == 'setn':
+    network.set_cal_mode('dynamic', genotype)
+  elif xargs.algo == 'gdas':
+    network.set_cal_mode('gdas', None)
+  elif xargs.algo.startswith('darts'):
+    network.set_cal_mode('joint', None)
+  elif xargs.algo == 'random':
+    network.set_cal_mode('urs', None)
+  else:
+    raise ValueError('Invalid algorithm name : {:}'.format(xargs.algo))
   search_time.update(time.time() - start_time)
-  network.module.set_cal_mode('dynamic', genotype)
-  valid_a_loss , valid_a_top1 , valid_a_top5 = valid_func(valid_loader, network, criterion)
+
+  valid_a_loss , valid_a_top1 , valid_a_top5 = valid_func(valid_loader, network, criterion, xargs.algo, logger)
   logger.log('Last : the gentotype is : {:}, with the validation accuracy of {:.3f}%.'.format(genotype, valid_a_top1))
 
   logger.log('\n' + '-'*100)
   # check the performance from the architecture dataset
-  logger.log('SETN : run {:} epochs, cost {:.1f} s, last-geno is {:}.'.format(total_epoch, search_time.sum, genotype))
+  logger.log('[{:}] run {:} epochs, cost {:.1f} s, last-geno is {:}.'.format(xargs.algo, total_epoch, search_time.sum, genotype))
   if api is not None: logger.log('{:}'.format(api.query_by_arch(genotype, '200') ))
   logger.close()
   
@@ -281,7 +317,7 @@ if __name__ == '__main__':
   # log
   parser.add_argument('--workers',            type=int,   default=2,    help='number of data loading workers (default: 2)')
   parser.add_argument('--save_dir',           type=str,   default='./output/search', help='Folder to save checkpoints and log.')
-  parser.add_argument('--print_freq',         type=int,   help='print frequency (default: 200)')
+  parser.add_argument('--print_freq',         type=int,   default=200,  help='print frequency (default: 200)')
   parser.add_argument('--rand_seed',          type=int,   help='manual seed')
   args = parser.parse_args()
   if args.rand_seed is None or args.rand_seed < 0: args.rand_seed = random.randint(1, 100000)

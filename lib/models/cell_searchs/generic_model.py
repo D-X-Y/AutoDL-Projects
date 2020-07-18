@@ -6,7 +6,7 @@ import torch.nn as nn
 from copy import deepcopy
 from typing import Text
 
-from ..cell_operations import ResNetBasicblock
+from ..cell_operations import ResNetBasicblock, drop_path
 from .search_cells     import NAS201SearchCell as SearchCell
 from .genotypes        import Structure
 from .search_model_enas_utils import Controller
@@ -48,6 +48,7 @@ class GenericNAS201Model(nn.Module):
     self.dynamic_cell = None
     self._tau         = None
     self._algo        = None
+    self._drop_path   = None
 
   def set_algo(self, algo: Text):
     # used for searching
@@ -62,13 +63,17 @@ class GenericNAS201Model(nn.Module):
     
   def set_cal_mode(self, mode, dynamic_cell=None):
     assert mode in ['gdas', 'enas', 'urs', 'joint', 'select', 'dynamic']
-    self.mode = mode
+    self._mode = mode
     if mode == 'dynamic': self.dynamic_cell = deepcopy(dynamic_cell)
     else                : self.dynamic_cell = None
 
   @property
   def mode(self):
     return self._mode
+
+  @property
+  def drop_path(self):
+    return self._drop_path
 
   @property
   def weights(self):
@@ -100,6 +105,15 @@ class GenericNAS201Model(nn.Module):
       string += '\n {:02d}/{:02d} :: {:}'.format(i, len(self._cells), cell.extra_repr())
     return string
 
+  def show_alphas(self):
+    with torch.no_grad():
+      if self._algo == 'enas':
+        import pdb; pdb.set_trace()
+        print('-')
+      else:
+        return 'arch-parameters :\n{:}'.format( nn.functional.softmax(self.arch_parameters, dim=-1).cpu() )
+          
+
   def extra_repr(self):
     return ('{name}(C={_C}, Max-Nodes={_max_nodes}, N={_layerN}, L={_Layer}, alg={_algo})'.format(name=self.__class__.__name__, **self.__dict__))
 
@@ -112,7 +126,7 @@ class GenericNAS201Model(nn.Module):
         node_str = '{:}<-{:}'.format(i, j)
         with torch.no_grad():
           weights = self.arch_parameters[ self.edge2index[node_str] ]
-          op_name = self.op_names[ weights.argmax().item() ]
+          op_name = self._op_names[ weights.argmax().item() ]
         xlist.append((op_name, j))
       genotypes.append(tuple(xlist))
     return Structure(genotypes)
@@ -126,11 +140,11 @@ class GenericNAS201Model(nn.Module):
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
         if use_random:
-          op_name  = random.choice(self.op_names)
+          op_name  = random.choice(self._op_names)
         else:
           weights  = alphas_cpu[ self.edge2index[node_str] ]
           op_index = torch.multinomial(weights, 1).item()
-          op_name  = self.op_names[ op_index ]
+          op_name  = self._op_names[ op_index ]
         xlist.append((op_name, j))
       genotypes.append(tuple(xlist))
     return Structure(genotypes)
@@ -142,17 +156,20 @@ class GenericNAS201Model(nn.Module):
     for i, node_info in enumerate(arch.nodes):
       for op, xin in node_info:
         node_str = '{:}<-{:}'.format(i+1, xin)
-        op_index = self.op_names.index(op)
+        op_index = self._op_names.index(op)
         select_logits.append( logits[self.edge2index[node_str], op_index] )
     return sum(select_logits).item()
 
-  def return_topK(self, K):
-    archs = Structure.gen_all(self.op_names, self._max_nodes, False)
+  def return_topK(self, K, use_random=False):
+    archs = Structure.gen_all(self._op_names, self._max_nodes, False)
     pairs = [(self.get_log_prob(arch), arch) for arch in archs]
     if K < 0 or K >= len(archs): K = len(archs)
-    sorted_pairs = sorted(pairs, key=lambda x: -x[0])
-    return_pairs = [sorted_pairs[_][1] for _ in range(K)]
-    return return_pairs
+    if use_random:
+      return random.sample(archs, K)
+    else:
+      sorted_pairs = sorted(pairs, key=lambda x: -x[0])
+      return_pairs = [sorted_pairs[_][1] for _ in range(K)]
+      return return_pairs
 
   def normalize_archp(self):
     if self.mode == 'gdas':
