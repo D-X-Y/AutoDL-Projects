@@ -36,7 +36,7 @@ class ReLUConvBN(nn.Module):
     super(ReLUConvBN, self).__init__()
     self.op = nn.Sequential(
       nn.ReLU(inplace=False),
-      nn.Conv2d(C_in, C_out, kernel_size, stride=stride, padding=padding, dilation=dilation, bias=False),
+      nn.Conv2d(C_in, C_out, kernel_size, stride=stride, padding=padding, dilation=dilation, bias=not affine),
       nn.BatchNorm2d(C_out, affine=affine, track_running_stats=track_running_stats)
     )
 
@@ -51,7 +51,7 @@ class SepConv(nn.Module):
     self.op = nn.Sequential(
       nn.ReLU(inplace=False),
       nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation, groups=C_in, bias=False),
-      nn.Conv2d(C_in, C_out, kernel_size=1, padding=0, bias=False),
+      nn.Conv2d(C_in, C_out, kernel_size=1, padding=0, bias=not affine),
       nn.BatchNorm2d(C_out, affine=affine, track_running_stats=track_running_stats),
       )
 
@@ -171,7 +171,7 @@ class FactorizedReduce(nn.Module):
       C_outs = [C_out // 2, C_out - C_out // 2]
       self.convs = nn.ModuleList()
       for i in range(2):
-        self.convs.append( nn.Conv2d(C_in, C_outs[i], 1, stride=stride, padding=0, bias=False) )
+        self.convs.append(nn.Conv2d(C_in, C_outs[i], 1, stride=stride, padding=0, bias=not affine))
       self.pad = nn.ConstantPad2d((0, 1, 0, 1), 0)
     elif stride == 1:
       self.conv = nn.Conv2d(C_in, C_out, 1, stride=stride, padding=0, bias=False)
