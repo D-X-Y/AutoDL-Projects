@@ -3,8 +3,8 @@
 ###############################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06           #
 ###############################################################
-# Usage: python exps/experimental/vis-bench-algos.py --search_space tss
-# Usage: python exps/experimental/vis-bench-algos.py --search_space sss
+# Usage: python exps/experimental/vis-bench-ws.py --search_space tss
+# Usage: python exps/experimental/vis-bench-ws.py --search_space sss
 ###############################################################
 import os, gc, sys, time, torch, argparse
 import numpy as np
@@ -29,36 +29,27 @@ from log_utils import time_string
 def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   ss_dir = '{:}-{:}'.format(root_dir, search_space)
   alg2name, alg2path = OrderedDict(), OrderedDict()
-  alg2name['REA'] = 'R-EA-SS3'
-  alg2name['REINFORCE'] = 'REINFORCE-0.01'
-  alg2name['RANDOM'] = 'RANDOM'
-  alg2name['BOHB'] = 'BOHB'
+  seeds = [777]
+  alg2name['GDAS'] = 'gdas-affine1_BN0-None'
+  """
+  alg2name['DARTS (1st)'] = 'darts-v1-affine1_BN0-None'
+  alg2name['DARTS (2nd)'] = 'darts-v2-affine1_BN0-None'
+  alg2name['SETN'] = 'setn-affine1_BN0-None'
+  alg2name['RSPS'] = 'random-affine1_BN0-None'
+  """
   for alg, name in alg2name.items():
-    alg2path[alg] = os.path.join(ss_dir, dataset, name, 'results.pth')
-    assert os.path.isfile(alg2path[alg]), 'invalid path : {:}'.format(alg2path[alg])
+    alg2path[alg] = os.path.join(ss_dir, dataset, name, 'seed-{:}-last-info.pth')
   alg2data = OrderedDict()
   for alg, path in alg2path.items():
-    data = torch.load(path)
-    for index, info in data.items():
-      info['time_w_arch'] = [(x, y) for x, y in zip(info['all_total_times'], info['all_archs'])]
-      for j, arch in enumerate(info['all_archs']):
-        assert arch != -1, 'invalid arch from {:} {:} {:} ({:}, {:})'.format(alg, search_space, dataset, index, j)
-    alg2data[alg] = data
+    alg2data[alg] = []
+    for seed in seeds:
+      xpath = path.format(seed)
+      assert os.path.isfile(xpath), 'invalid path : {:}'.format(xpath)
+      data = torch.load(xpath, map_location=torch.device('cpu'))
+      data = torch.load(data['last_checkpoint'], map_location=torch.device('cpu'))
+      alg2data[alg].append(data['genotypes'])
   return alg2data
 
-
-def query_performance(api, data, dataset, ticket):
-  results, is_301 = [], isinstance(api, NASBench301API)
-  for i, info in data.items():
-    time_w_arch = sorted(info['time_w_arch'], key=lambda x: abs(x[0]-ticket))
-    time_a, arch_a = time_w_arch[0]
-    time_b, arch_b = time_w_arch[1]
-    info_a = api.get_more_info(arch_a, dataset=dataset, hp=90 if is_301 else 200, is_random=False)
-    info_b = api.get_more_info(arch_b, dataset=dataset, hp=90 if is_301 else 200, is_random=False)
-    accuracy_a, accuracy_b = info_a['test-accuracy'], info_b['test-accuracy']
-    interplate = (time_b-ticket) / (time_b-time_a) * accuracy_a + (ticket-time_a) / (time_b-time_a) * accuracy_b
-    results.append(interplate)
-  return sum(results) / len(results)
 
 y_min_s = {('cifar10', 'tss'): 90,
            ('cifar10', 'sss'): 92,
@@ -74,7 +65,7 @@ y_max_s = {('cifar10', 'tss'): 94.5,
            ('ImageNet16-120', 'tss'): 44,
            ('ImageNet16-120', 'sss'): 46}
 
-def visualize_curve(api, vis_save_dir, search_space, max_time):
+def visualize_curve(api, vis_save_dir, search_space):
   vis_save_dir = vis_save_dir.resolve()
   vis_save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -85,20 +76,23 @@ def visualize_curve(api, vis_save_dir, search_space, max_time):
   def sub_plot_fn(ax, dataset):
     alg2data = fetch_data(search_space=search_space, dataset=dataset)
     alg2accuracies = OrderedDict()
-    total_tickets = 150
-    time_tickets = [float(i) / total_tickets * max_time for i in range(total_tickets)]
+    epochs = 20
     colors = ['b', 'g', 'c', 'm', 'y']
-    ax.set_xlim(0, 200)
-    ax.set_ylim(y_min_s[(dataset, search_space)], y_max_s[(dataset, search_space)])
+    ax.set_xlim(0, epochs)
+    # ax.set_ylim(y_min_s[(dataset, search_space)], y_max_s[(dataset, search_space)])
     for idx, (alg, data) in enumerate(alg2data.items()):
       print('plot alg : {:}'.format(alg))
-      accuracies = []
-      for ticket in time_tickets:
-        accuracy = query_performance(api, data, dataset, ticket)
-        accuracies.append(accuracy)
+      xs, accuracies = [], []
+      for iepoch in range(epochs+1):
+        structures, accs = [_[iepoch-1] for _ in data], []
+        for structure in structures:
+          info = api.get_more_info(structure, dataset=dataset, hp=90 if isinstance(api, NASBench301API) else 200, is_random=False)
+          accs.append(info['test-accuracy'])
+        accuracies.append(sum(accs)/len(accs))
+        xs.append(iepoch)
       alg2accuracies[alg] = accuracies
-      ax.plot([x/100 for x in time_tickets], accuracies, c=colors[idx], label='{:}'.format(alg))
-      ax.set_xlabel('Estimated wall-clock time (1e2 seconds)', fontsize=LabelSize)
+      ax.plot(xs, accuracies, c=colors[idx], label='{:}'.format(alg))
+      ax.set_xlabel('The searching epoch', fontsize=LabelSize)
       ax.set_ylabel('Test accuracy on {:}'.format(dataset), fontsize=LabelSize)
       ax.set_title('Searching results on {:}'.format(dataset), fontsize=LabelSize+4)
     ax.legend(loc=4, fontsize=LegendFontsize)
@@ -108,7 +102,7 @@ def visualize_curve(api, vis_save_dir, search_space, max_time):
   for dataset, ax in zip(datasets, axs):
     sub_plot_fn(ax, dataset)
     print('sub-plot {:} on {:} done.'.format(dataset, search_space))
-  save_path = (vis_save_dir / '{:}-curve.png'.format(search_space)).resolve()
+  save_path = (vis_save_dir / '{:}-ws-curve.png'.format(search_space)).resolve()
   fig.savefig(save_path, dpi=dpi, bbox_inches='tight', format='png')
   print ('{:} save into {:}'.format(time_string(), save_path))
   plt.close('all')
@@ -117,11 +111,11 @@ def visualize_curve(api, vis_save_dir, search_space, max_time):
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='NAS-Bench-X', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--save_dir',     type=str,   default='output/vis-nas-bench/nas-algos', help='Folder to save checkpoints and log.')
-  parser.add_argument('--search_space', type=str,   choices=['tss', 'sss'], help='Choose the search space.')
-  parser.add_argument('--max_time',     type=float, default=20000, help='The maximum time budget.')
+  parser.add_argument('--search_space', type=str,   default='tss', choices=['tss', 'sss'], help='Choose the search space.')
   args = parser.parse_args()
 
   save_dir = Path(args.save_dir)
+  alg2data = fetch_data(search_space='tss', dataset='cifar10')
 
   if args.search_space == 'tss':
     api = NASBench201API(verbose=False)
@@ -129,4 +123,4 @@ if __name__ == '__main__':
     api = NASBench301API(verbose=False)
   else:
     raise ValueError('Invalid search space : {:}'.format(args.search_space))
-  visualize_curve(api, save_dir, args.search_space, args.max_time)
+  visualize_curve(api, save_dir, args.search_space)

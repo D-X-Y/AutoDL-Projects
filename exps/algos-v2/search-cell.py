@@ -399,6 +399,9 @@ def main(xargs):
     logger.log('\n[Search the {:}-th epoch] {:}, LR={:}'.format(epoch_str, need_time, min(w_scheduler.get_lr())))
 
     network.set_drop_path(float(epoch+1) / total_epoch, xargs.drop_path_rate)
+    if xargs.algo == 'gdas':
+      network.set_tau( xargs.tau_max - (xargs.tau_max-xargs.tau_min) * epoch / (total_epoch-1) )
+      logger.log('[Reset tau as : {:}'.format(network.tau))
     search_w_loss, search_w_top1, search_w_top5, search_a_loss, search_a_top1, search_a_top5 \
                 = search_func(search_loader, network, criterion, w_scheduler, w_optimizer, a_optimizer, epoch_str, xargs.print_freq, xargs.algo, logger)
     search_time.update(time.time() - start_time)
@@ -480,6 +483,9 @@ if __name__ == '__main__':
   parser.add_argument('--dataset'     ,       type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
   parser.add_argument('--search_space',       type=str,   default='tss', choices=['tss'], help='The search space name.')
   parser.add_argument('--algo'        ,       type=str,   choices=['darts-v1', 'darts-v2', 'gdas', 'setn', 'random', 'enas'], help='The search space name.')
+  # FOR GDAS
+  parser.add_argument('--tau_min',            type=float, default=0.1,  help='The minimum tau for Gumbel Softmax.')
+  parser.add_argument('--tau_max',            type=float, default=10,   help='The maximum tau for Gumbel Softmax.')
   # channels and number-of-cells
   parser.add_argument('--max_nodes'   ,       type=int,   default=4,  help='The maximum number of nodes.')
   parser.add_argument('--channel'     ,       type=int,   default=16, help='The number of channels.')
