@@ -32,14 +32,15 @@ if [ "$alg_type" == "mul" ]; then
   python exps/experimental/vis-bench-algos.py --search_space sss
 else
   seeds="777 888 999"
+  algos="darts-v1 darts-v2 gdas setn random enas"
   epoch=200
   for seed in ${seeds}
   do
-    for alg in "darts-v1 darts-v2 gdas setn random enas"
+    for alg in ${algos}
     do
-    python ./exps/algos-v2/search-cell.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo ${alg} --rand_seed ${seed} --overwite_epochs ${epoch}
-    python ./exps/algos-v2/search-cell.py --dataset cifar100  --data_path $TORCH_HOME/cifar.python --algo ${alg} --rand_seed ${seed} --overwite_epochs ${epoch}
-    python ./exps/algos-v2/search-cell.py --dataset ImageNet16-120  --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo ${alg} --rand_seed ${seed} --overwite_epochs ${epoch}
+      python ./exps/algos-v2/search-cell.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo ${alg} --rand_seed ${seed} --overwite_epochs ${epoch}
+      python ./exps/algos-v2/search-cell.py --dataset cifar100  --data_path $TORCH_HOME/cifar.python --algo ${alg} --rand_seed ${seed} --overwite_epochs ${epoch}
+      python ./exps/algos-v2/search-cell.py --dataset ImageNet16-120  --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo ${alg} --rand_seed ${seed} --overwite_epochs ${epoch}
     done
   done
 fi
