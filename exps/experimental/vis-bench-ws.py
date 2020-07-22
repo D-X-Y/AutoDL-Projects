@@ -30,12 +30,12 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   ss_dir = '{:}-{:}'.format(root_dir, search_space)
   alg2name, alg2path = OrderedDict(), OrderedDict()
   seeds = [777]
-  alg2name['GDAS'] = 'gdas-affine1_BN0-None'
+  alg2name['GDAS'] = 'gdas-affine0_BN0-None'
+  alg2name['RSPS'] = 'random-affine0_BN0-None'
   """
   alg2name['DARTS (1st)'] = 'darts-v1-affine1_BN0-None'
   alg2name['DARTS (2nd)'] = 'darts-v2-affine1_BN0-None'
   alg2name['SETN'] = 'setn-affine1_BN0-None'
-  alg2name['RSPS'] = 'random-affine1_BN0-None'
   """
   for alg, name in alg2name.items():
     alg2path[alg] = os.path.join(ss_dir, dataset, name, 'seed-{:}-last-info.pth')
@@ -76,7 +76,7 @@ def visualize_curve(api, vis_save_dir, search_space):
   def sub_plot_fn(ax, dataset):
     alg2data = fetch_data(search_space=search_space, dataset=dataset)
     alg2accuracies = OrderedDict()
-    epochs = 20
+    epochs = 100
     colors = ['b', 'g', 'c', 'm', 'y']
     ax.set_xlim(0, epochs)
     # ax.set_ylim(y_min_s[(dataset, search_space)], y_max_s[(dataset, search_space)])
