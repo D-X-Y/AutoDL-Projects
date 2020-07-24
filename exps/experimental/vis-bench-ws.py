@@ -33,6 +33,7 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   alg2name['GDAS'] = 'gdas-affine0_BN0-None'
   alg2name['RSPS'] = 'random-affine0_BN0-None'
   alg2name['DARTS (1st)'] = 'darts-v1-affine0_BN0-None'
+  alg2name['ENAS'] = 'enas-affine0_BN0-None'
   """
   alg2name['DARTS (2nd)'] = 'darts-v2-affine1_BN0-None'
   alg2name['SETN'] = 'setn-affine1_BN0-None'

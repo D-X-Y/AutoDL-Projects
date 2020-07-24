@@ -6,3 +6,4 @@ from .SearchCifarResNet_depth import SearchDepthCifarResNet
 from .SearchCifarResNet       import SearchShapeCifarResNet
 from .SearchSimResNet_width   import SearchWidthSimResNet
 from .SearchImagenetResNet    import SearchShapeImagenetResNet
+from .generic_size_tiny_cell_model import GenericNAS301Model
