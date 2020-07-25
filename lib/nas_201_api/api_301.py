@@ -60,6 +60,7 @@ class NASBench301API(NASBenchMetaAPI):
     self.reset_time()
     if file_path_or_dict is None:
       file_path_or_dict = os.path.join(os.environ['TORCH_HOME'], ALL_BENCHMARK_FILES[-1])
+      print ('Try to use the default NAS-Bench-301 path from {:}.'.format(file_path_or_dict))
     if isinstance(file_path_or_dict, str) or isinstance(file_path_or_dict, Path):
       file_path_or_dict = str(file_path_or_dict)
       if verbose: print('try to create the NAS-Bench-201 api from {:}'.format(file_path_or_dict))

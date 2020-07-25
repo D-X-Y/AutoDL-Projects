@@ -8,6 +8,10 @@
 # python ./exps/algos-v2/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo fbv2 --rand_seed 777
 # python ./exps/algos-v2/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo fbv2 --rand_seed 777
 # python ./exps/algos-v2/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo fbv2 --rand_seed 777
+####
+# python ./exps/algos-v2/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777 --use_api 0
+# python ./exps/algos-v2/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777
+# python ./exps/algos-v2/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo tunas --arch_weight_decay 0 --rand_seed 777
 ######################################################################################
 import os, sys, time, random, argparse
 import numpy as np
@@ -26,7 +30,28 @@ from models       import get_cell_based_tiny_net, get_search_spaces
 from nas_201_api  import NASBench301API as API
 
 
-def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, epoch_str, print_freq, logger):
+# Ad-hoc for TuNAS
+class ExponentialMovingAverage(object):
+  """Class that maintains an exponential moving average."""
+
+  def __init__(self, momentum):
+    self._numerator   = 0
+    self._denominator = 0
+    self._momentum    = momentum
+
+  def update(self, value):
+    self._numerator = self._momentum * self._numerator + (1 - self._momentum) * value
+    self._denominator = self._momentum * self._denominator + (1 - self._momentum)
+
+  @property
+  def value(self):
+    """Return the current value of the moving average"""
+    return self._numerator / self._denominator
+
+RL_BASELINE_EMA = ExponentialMovingAverage(0.95)
+
+
+def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, algo, epoch_str, print_freq, logger):
   data_time, batch_time = AverageMeter(), AverageMeter()
   base_losses, base_top1, base_top5 = AverageMeter(), AverageMeter(), AverageMeter()
   arch_losses, arch_top1, arch_top5 = AverageMeter(), AverageMeter(), AverageMeter()
@@ -43,7 +68,7 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
     
     # Update the weights
     network.zero_grad()
-    _, logits = network(base_inputs)
+    _, logits, _ = network(base_inputs)
     base_loss = criterion(logits, base_targets)
     base_loss.backward()
     w_optimizer.step()
@@ -55,12 +80,21 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
 
     # update the architecture-weight
     network.zero_grad()
-    _, logits = network(arch_inputs)
-    arch_loss = criterion(logits, arch_targets)
+    _, logits, log_probs = network(arch_inputs)
+    arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
+    if algo == 'tunas':
+      with torch.no_grad():
+        RL_BASELINE_EMA.update(arch_prec1.item())
+        rl_advantage = arch_prec1 - RL_BASELINE_EMA.value
+      rl_log_prob = sum(log_probs)
+      arch_loss = - rl_advantage * rl_log_prob
+    elif algo == 'tas' or algo == 'fbv2':
+      arch_loss = criterion(logits, arch_targets)
+    else:
+      raise ValueError('invalid algorightm name: {:}'.format(algo))
     arch_loss.backward()
     a_optimizer.step()
     # record
-    arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
     arch_losses.update(arch_loss.item(),  arch_inputs.size(0))
     arch_top1.update  (arch_prec1.item(), arch_inputs.size(0))
     arch_top5.update  (arch_prec5.item(), arch_inputs.size(0))
@@ -78,76 +112,6 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
   return base_losses.avg, base_top1.avg, base_top5.avg, arch_losses.avg, arch_top1.avg, arch_top5.avg
 
 
-def train_controller(xloader, network, criterion, optimizer, prev_baseline, epoch_str, print_freq, logger):
-  # config. (containing some necessary arg)
-  #   baseline: The baseline score (i.e. average val_acc) from the previous epoch
-  data_time, batch_time = AverageMeter(), AverageMeter()
-  GradnormMeter, LossMeter, ValAccMeter, EntropyMeter, BaselineMeter, RewardMeter, xend = AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter(), time.time()
-  
-  controller_num_aggregate = 20
-  controller_train_steps = 50
-  controller_bl_dec = 0.99
-  controller_entropy_weight = 0.0001
-
-  network.eval()
-  network.controller.train()
-  network.controller.zero_grad()
-  loader_iter = iter(xloader)
-  for step in range(controller_train_steps * controller_num_aggregate):
-    try:
-      inputs, targets = next(loader_iter)
-    except:
-      loader_iter = iter(xloader)
-      inputs, targets = next(loader_iter)
-    inputs  = inputs.cuda(non_blocking=True)
-    targets = targets.cuda(non_blocking=True)
-    # measure data loading time
-    data_time.update(time.time() - xend)
-    
-    log_prob, entropy, sampled_arch = network.controller()
-    with torch.no_grad():
-      network.set_cal_mode('dynamic', sampled_arch)
-      _, logits = network(inputs)
-      val_top1, val_top5 = obtain_accuracy(logits.data, targets.data, topk=(1, 5))
-      val_top1  = val_top1.view(-1) / 100
-    reward = val_top1 + controller_entropy_weight * entropy
-    if prev_baseline is None:
-      baseline = val_top1
-    else:
-      baseline = prev_baseline - (1 - controller_bl_dec) * (prev_baseline - reward)
-   
-    loss = -1 * log_prob * (reward - baseline)
-    
-    # account
-    RewardMeter.update(reward.item())
-    BaselineMeter.update(baseline.item())
-    ValAccMeter.update(val_top1.item()*100)
-    LossMeter.update(loss.item())
-    EntropyMeter.update(entropy.item())
-  
-    # Average gradient over controller_num_aggregate samples
-    loss = loss / controller_num_aggregate
-    loss.backward(retain_graph=True)
-
-    # measure elapsed time
-    batch_time.update(time.time() - xend)
-    xend = time.time()
-    if (step+1) % controller_num_aggregate == 0:
-      grad_norm = torch.nn.utils.clip_grad_norm_(network.controller.parameters(), 5.0)
-      GradnormMeter.update(grad_norm)
-      optimizer.step()
-      network.controller.zero_grad()
-
-    if step % print_freq == 0:
-      Sstr = '*Train-Controller* ' + time_string() + ' [{:}][{:03d}/{:03d}]'.format(epoch_str, step, controller_train_steps * controller_num_aggregate)
-      Tstr = 'Time {batch_time.val:.2f} ({batch_time.avg:.2f}) Data {data_time.val:.2f} ({data_time.avg:.2f})'.format(batch_time=batch_time, data_time=data_time)
-      Wstr = '[Loss {loss.val:.3f} ({loss.avg:.3f})  Prec@1 {top1.val:.2f} ({top1.avg:.2f}) Reward {reward.val:.2f} ({reward.avg:.2f})] Baseline {basel.val:.2f} ({basel.avg:.2f})'.format(loss=LossMeter, top1=ValAccMeter, reward=RewardMeter, basel=BaselineMeter)
-      Estr = 'Entropy={:.4f} ({:.4f})'.format(EntropyMeter.val, EntropyMeter.avg)
-      logger.log(Sstr + ' ' + Tstr + ' ' + Wstr + ' ' + Estr)
-
-  return LossMeter.avg, ValAccMeter.avg, BaselineMeter.avg, RewardMeter.avg
-
-
 def valid_func(xloader, network, criterion, logger):
   data_time, batch_time = AverageMeter(), AverageMeter()
   arch_losses, arch_top1, arch_top5 = AverageMeter(), AverageMeter(), AverageMeter()
@@ -159,7 +123,7 @@ def valid_func(xloader, network, criterion, logger):
       # measure data loading time
       data_time.update(time.time() - end)
       # prediction
-      _, logits = network(arch_inputs.cuda(non_blocking=True))
+      _, logits, _ = network(arch_inputs.cuda(non_blocking=True))
       arch_loss = criterion(logits, arch_targets)
       # record
       arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
@@ -211,9 +175,9 @@ def main(xargs):
   params = count_parameters_in_MB(search_model)
   logger.log('The parameters of the search model = {:.2f} MB'.format(params))
   logger.log('search-space : {:}'.format(search_space))
-  try:
+  if bool(xargs.use_api):
     api = API(verbose=False)
-  except:
+  else:
     api = None
   logger.log('{:} create API = {:} done'.format(time_string(), api))
 
@@ -250,7 +214,7 @@ def main(xargs):
       network.set_tau( xargs.tau_max - (xargs.tau_max-xargs.tau_min) * epoch / (total_epoch-1) )
       logger.log('[RESET tau as : {:}]'.format(network.tau))
     search_w_loss, search_w_top1, search_w_top5, search_a_loss, search_a_top1, search_a_top5 \
-                = search_func(search_loader, network, criterion, w_scheduler, w_optimizer, a_optimizer, epoch_str, xargs.print_freq, logger)
+                = search_func(search_loader, network, criterion, w_scheduler, w_optimizer, a_optimizer, xargs.algo, epoch_str, xargs.print_freq, logger)
     search_time.update(time.time() - start_time)
     logger.log('[{:}] search [base] : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%, time-cost={:.1f} s'.format(epoch_str, search_w_loss, search_w_top1, search_w_top5, search_time.sum))
     logger.log('[{:}] search [arch] : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%'.format(epoch_str, search_a_loss, search_a_top1, search_a_top5))
@@ -305,8 +269,9 @@ if __name__ == '__main__':
   parser.add_argument('--data_path'   ,       type=str,   help='Path to dataset')
   parser.add_argument('--dataset'     ,       type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
   parser.add_argument('--search_space',       type=str,   default='sss', choices=['sss'], help='The search space name.')
-  parser.add_argument('--algo'        ,       type=str,   choices=['tas', 'fbv2', 'enas'], help='The search space name.')
+  parser.add_argument('--algo'        ,       type=str,   choices=['tas', 'fbv2', 'tunas'], help='The search space name.')
   parser.add_argument('--genotype'    ,       type=str,   default='|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|nor_conv_3x3~1|nor_conv_3x3~2|', help='The genotype.')
+  parser.add_argument('--use_api'     ,       type=int,   default=1, choices=[0,1], help='Whether use API or not (which will cost much memory).')
   # FOR GDAS
   parser.add_argument('--tau_min',            type=float, default=0.1,  help='The minimum tau for Gumbel Softmax.')
   parser.add_argument('--tau_max',            type=float, default=10,   help='The maximum tau for Gumbel Softmax.')

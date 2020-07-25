@@ -29,8 +29,8 @@ from log_utils import time_string
 def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   ss_dir = '{:}-{:}'.format(root_dir, search_space)
   alg2name, alg2path = OrderedDict(), OrderedDict()
-  seeds = [777]
   if search_space == 'tss':
+    seeds = [777]
     alg2name['GDAS'] = 'gdas-affine0_BN0-None'
     alg2name['RSPS'] = 'random-affine0_BN0-None'
     alg2name['DARTS (1st)'] = 'darts-v1-affine0_BN0-None'
@@ -38,8 +38,10 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
     alg2name['ENAS'] = 'enas-affine0_BN0-None'
     alg2name['SETN'] = 'setn-affine0_BN0-None'
   else:
+    seeds = [777, 888, 999]
     alg2name['TAS'] = 'tas-affine0_BN0'
     alg2name['FBNetV2'] = 'fbv2-affine0_BN0'
+    alg2name['TuNAS'] = 'tunas-affine0_BN0'
   for alg, name in alg2name.items():
     alg2path[alg] = os.path.join(ss_dir, dataset, name, 'seed-{:}-last-info.pth')
   alg2data = OrderedDict()
@@ -84,7 +86,7 @@ def visualize_curve(api, vis_save_dir, search_space):
     alg2data = fetch_data(search_space=search_space, dataset=dataset)
     alg2accuracies = OrderedDict()
     epochs = 100
-    colors = ['b', 'g', 'c', 'm', 'y']
+    colors = ['b', 'g', 'c', 'm', 'y', 'r']
     ax.set_xlim(0, epochs)
     # ax.set_ylim(y_min_s[(dataset, search_space)], y_max_s[(dataset, search_space)])
     for idx, (alg, data) in enumerate(alg2data.items()):
