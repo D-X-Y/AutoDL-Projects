@@ -363,9 +363,9 @@ def main(xargs):
   params = count_parameters_in_MB(search_model)
   logger.log('The parameters of the search model = {:.2f} MB'.format(params))
   logger.log('search-space : {:}'.format(search_space))
-  try:
+  if bool(xargs.use_api):
     api = API(verbose=False)
-  except:
+  else:
     api = None
   logger.log('{:} create API = {:} done'.format(time_string(), api))
 
@@ -486,6 +486,7 @@ if __name__ == '__main__':
   parser.add_argument('--dataset'     ,       type=str,   choices=['cifar10', 'cifar100', 'ImageNet16-120'], help='Choose between Cifar10/100 and ImageNet-16.')
   parser.add_argument('--search_space',       type=str,   default='tss', choices=['tss'], help='The search space name.')
   parser.add_argument('--algo'        ,       type=str,   choices=['darts-v1', 'darts-v2', 'gdas', 'setn', 'random', 'enas'], help='The search space name.')
+  parser.add_argument('--use_api'     ,       type=int,   default=1, choices=[0,1], help='Whether use API or not (which will cost much memory).')
   # FOR GDAS
   parser.add_argument('--tau_min',            type=float, default=0.1,  help='The minimum tau for Gumbel Softmax.')
   parser.add_argument('--tau_max',            type=float, default=10,   help='The maximum tau for Gumbel Softmax.')

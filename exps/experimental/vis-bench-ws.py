@@ -30,14 +30,16 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   ss_dir = '{:}-{:}'.format(root_dir, search_space)
   alg2name, alg2path = OrderedDict(), OrderedDict()
   seeds = [777]
-  alg2name['GDAS'] = 'gdas-affine0_BN0-None'
-  alg2name['RSPS'] = 'random-affine0_BN0-None'
-  alg2name['DARTS (1st)'] = 'darts-v1-affine0_BN0-None'
-  alg2name['ENAS'] = 'enas-affine0_BN0-None'
-  """
-  alg2name['DARTS (2nd)'] = 'darts-v2-affine1_BN0-None'
-  alg2name['SETN'] = 'setn-affine1_BN0-None'
-  """
+  if search_space == 'tss':
+    alg2name['GDAS'] = 'gdas-affine0_BN0-None'
+    alg2name['RSPS'] = 'random-affine0_BN0-None'
+    alg2name['DARTS (1st)'] = 'darts-v1-affine0_BN0-None'
+    alg2name['DARTS (2nd)'] = 'darts-v2-affine0_BN0-None'
+    alg2name['ENAS'] = 'enas-affine0_BN0-None'
+    alg2name['SETN'] = 'setn-affine0_BN0-None'
+  else:
+    alg2name['TAS'] = 'tas-affine0_BN0'
+    alg2name['FBNetV2'] = 'fbv2-affine0_BN0'
   for alg, name in alg2name.items():
     alg2path[alg] = os.path.join(ss_dir, dataset, name, 'seed-{:}-last-info.pth')
   alg2data = OrderedDict()
@@ -65,6 +67,10 @@ y_max_s = {('cifar10', 'tss'): 94.5,
            ('cifar100', 'sss'): 70,
            ('ImageNet16-120', 'tss'): 44,
            ('ImageNet16-120', 'sss'): 46}
+
+name2label = {'cifar10': 'CIFAR-10',
+              'cifar100': 'CIFAR-100',
+              'ImageNet16-120': 'ImageNet-16-120'}
 
 def visualize_curve(api, vis_save_dir, search_space):
   vis_save_dir = vis_save_dir.resolve()
@@ -94,8 +100,8 @@ def visualize_curve(api, vis_save_dir, search_space):
       alg2accuracies[alg] = accuracies
       ax.plot(xs, accuracies, c=colors[idx], label='{:}'.format(alg))
       ax.set_xlabel('The searching epoch', fontsize=LabelSize)
-      ax.set_ylabel('Test accuracy on {:}'.format(dataset), fontsize=LabelSize)
-      ax.set_title('Searching results on {:}'.format(dataset), fontsize=LabelSize+4)
+      ax.set_ylabel('Test accuracy on {:}'.format(name2label[dataset]), fontsize=LabelSize)
+      ax.set_title('Searching results on {:}'.format(name2label[dataset]), fontsize=LabelSize+4)
     ax.legend(loc=4, fontsize=LegendFontsize)
 
   fig, axs = plt.subplots(1, 3, figsize=figsize)
