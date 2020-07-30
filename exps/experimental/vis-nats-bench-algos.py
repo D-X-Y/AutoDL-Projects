@@ -3,8 +3,8 @@
 ###############################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06           #
 ###############################################################
-# Usage: python exps/experimental/vis-bench-algos.py --search_space tss
-# Usage: python exps/experimental/vis-bench-algos.py --search_space sss
+# Usage: python exps/experimental/vis-nats-bench-algos.py --search_space tss
+# Usage: python exps/experimental/vis-nats-bench-algos.py --search_space sss
 ###############################################################
 import os, gc, sys, time, torch, argparse
 import numpy as np
@@ -22,7 +22,7 @@ import matplotlib.ticker as ticker
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from config_utils import dict2config, load_config
-from nas_201_api import NASBench201API, NASBench301API
+from nats_bench import create
 from log_utils import time_string
 
 
@@ -48,17 +48,18 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
 
 
 def query_performance(api, data, dataset, ticket):
-  results, is_301 = [], isinstance(api, NASBench301API)
+  results, is_size_space = [], api.search_space_name == 'size'
   for i, info in data.items():
     time_w_arch = sorted(info['time_w_arch'], key=lambda x: abs(x[0]-ticket))
     time_a, arch_a = time_w_arch[0]
     time_b, arch_b = time_w_arch[1]
-    info_a = api.get_more_info(arch_a, dataset=dataset, hp=90 if is_301 else 200, is_random=False)
-    info_b = api.get_more_info(arch_b, dataset=dataset, hp=90 if is_301 else 200, is_random=False)
+    info_a = api.get_more_info(arch_a, dataset=dataset, hp=90 if is_size_space else 200, is_random=False)
+    info_b = api.get_more_info(arch_b, dataset=dataset, hp=90 if is_size_space else 200, is_random=False)
     accuracy_a, accuracy_b = info_a['test-accuracy'], info_b['test-accuracy']
     interplate = (time_b-ticket) / (time_b-time_a) * accuracy_a + (ticket-time_a) / (time_b-time_a) * accuracy_b
     results.append(interplate)
   return sum(results) / len(results)
+
 
 y_min_s = {('cifar10', 'tss'): 90,
            ('cifar10', 'sss'): 92,
@@ -73,6 +74,10 @@ y_max_s = {('cifar10', 'tss'): 94.5,
            ('cifar100', 'sss'): 70,
            ('ImageNet16-120', 'tss'): 44,
            ('ImageNet16-120', 'sss'): 46}
+
+name2label = {'cifar10': 'CIFAR-10',
+              'cifar100': 'CIFAR-100',
+              'ImageNet16-120': 'ImageNet-16-120'}
 
 def visualize_curve(api, vis_save_dir, search_space, max_time):
   vis_save_dir = vis_save_dir.resolve()
@@ -99,8 +104,8 @@ def visualize_curve(api, vis_save_dir, search_space, max_time):
       alg2accuracies[alg] = accuracies
       ax.plot([x/100 for x in time_tickets], accuracies, c=colors[idx], label='{:}'.format(alg))
       ax.set_xlabel('Estimated wall-clock time (1e2 seconds)', fontsize=LabelSize)
-      ax.set_ylabel('Test accuracy on {:}'.format(dataset), fontsize=LabelSize)
-      ax.set_title('Searching results on {:}'.format(dataset), fontsize=LabelSize+4)
+      ax.set_ylabel('Test accuracy on {:}'.format(name2label[dataset]), fontsize=LabelSize)
+      ax.set_title('Searching results on {:}'.format(name2label[dataset]), fontsize=LabelSize+4)
     ax.legend(loc=4, fontsize=LegendFontsize)
 
   fig, axs = plt.subplots(1, 3, figsize=figsize)
@@ -123,10 +128,5 @@ if __name__ == '__main__':
 
   save_dir = Path(args.save_dir)
 
-  if args.search_space == 'tss':
-    api = NASBench201API(verbose=False)
-  elif args.search_space == 'sss':
-    api = NASBench301API(verbose=False)
-  else:
-    raise ValueError('Invalid search space : {:}'.format(args.search_space))
+  api = create(None, args.search_space, verbose=False)
   visualize_curve(api, save_dir, args.search_space, args.max_time)

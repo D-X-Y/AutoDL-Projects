@@ -16,7 +16,7 @@ from log_utils    import AverageMeter, time_string, convert_secs2time
 from config_utils import dict2config
 # NAS-Bench-201 related module or function
 from models       import CellStructure, get_cell_based_tiny_net
-from nas_201_api  import NASBench301API, ArchResults, ResultsCount
+from nas_201_api  import ArchResults, ResultsCount
 from procedures   import bench_pure_evaluate as pure_evaluate, get_nas_bench_loaders
 
 

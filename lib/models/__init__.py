@@ -64,7 +64,7 @@ def get_search_spaces(xtype, name) -> List[Text]:
     assert name in SearchSpaceNames, 'invalid name [{:}] in {:}'.format(name, SearchSpaceNames.keys())
     return SearchSpaceNames[name]
   elif xtype == 'sss':  # The size search space.
-    if name == 'nas-bench-301':
+    if name == 'nas-bench-301' or name == 'nats-bench' or name == 'nats-bench-size':
       return {'candidates': [8, 16, 24, 32, 40, 48, 56, 64],
               'numbers': 5}
     else:

@@ -21,7 +21,7 @@ from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_che
 from utils        import get_model_infos, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from models       import get_search_spaces
-from nas_201_api  import NASBench201API, NASBench301API
+from nats_bench   import create
 from regularized_ea import random_topology_func, random_size_func
 
 
@@ -71,12 +71,7 @@ if __name__ == '__main__':
   parser.add_argument('--rand_seed',          type=int,   default=-1,    help='manual seed')
   args = parser.parse_args()
   
-  if args.search_space == 'tss':
-    api = NASBench201API(verbose=False)
-  elif args.search_space == 'sss':
-    api = NASBench301API(verbose=False)
-  else:
-    raise ValueError('Invalid search space : {:}'.format(args.search_space))
+  api = create(None, args.search_space, verbose=False)
 
   args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'RANDOM')
   print('save-dir : {:}'.format(args.save_dir))

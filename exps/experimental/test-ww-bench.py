@@ -3,9 +3,6 @@
 ###########################################################################################################################################################
 # Before run these commands, the files must be properly put.
 #
-# python exps/experimental/test-ww-bench.py --base_path $HOME/.torch/NAS-Bench-201-v1_0-e61699
-# python exps/experimental/test-ww-bench.py --base_path $HOME/.torch/NAS-Bench-201-v1_1-096897 --dataset cifar10-valid --use_12 1 --use_valid 1
-# CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 python exps/experimental/test-ww-bench.py --base_path $HOME/.torch/NAS-Bench-201-v1_1-096897 --dataset cifar10
 # CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 python exps/experimental/test-ww-bench.py --search_space sss --base_path $HOME/.torch/NAS-Bench-301-v1_0 --dataset cifar10
 # CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 python exps/experimental/test-ww-bench.py --search_space sss --base_path $HOME/.torch/NAS-Bench-301-v1_0 --dataset cifar100
 # CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 python exps/experimental/test-ww-bench.py --search_space sss --base_path $HOME/.torch/NAS-Bench-301-v1_0 --dataset ImageNet16-120
@@ -22,8 +19,8 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
-from nas_201_api import NASBench201API, NASBench301API
 from log_utils import time_string
+from nats_bench import create
 from models import get_cell_based_tiny_net
 from utils import weight_watcher
 
@@ -52,8 +49,8 @@ def evaluate(api, weight_dir, data: str):
     # compute the weight watcher results
     config = api.get_net_config(arch_index, data)
     net = get_cell_based_tiny_net(config)
-    meta_info = api.query_meta_info_by_index(arch_index, hp='200' if isinstance(api, NASBench201API) else '90')
-    params = meta_info.get_net_param(data, 888 if isinstance(api, NASBench201API) else 777)
+    meta_info = api.query_meta_info_by_index(arch_index, hp='200' if api.search_space_name == 'topology' else '90')
+    params = meta_info.get_net_param(data, 888 if api.search_space_name == 'topology' else 777)
     with torch.no_grad():
       net.load_state_dict(params)
       _, summary = weight_watcher.analyze(net, alphas=False)
@@ -70,7 +67,7 @@ def evaluate(api, weight_dir, data: str):
       ok += 1
       norms.append(cur_norm)
     # query the accuracy
-    info = meta_info.get_metrics(data, 'ori-test', iepoch=None, is_random=888 if isinstance(api, NASBench201API) else 777)
+    info = meta_info.get_metrics(data, 'ori-test', iepoch=None, is_random=888 if api.search_space_name == 'topology' else 777)
     accuracies.append(info['accuracy'])
     del net, meta_info
     # print the information
@@ -81,9 +78,8 @@ def evaluate(api, weight_dir, data: str):
 
 
 def main(search_space, meta_file: str, weight_dir, save_dir, xdata):
-  API = NASBench201API if search_space == 'tss' else NASBench301API
   save_dir.mkdir(parents=True, exist_ok=True)
-  api = API(meta_file, verbose=False)
+  api = create(meta_file, search_space, verbose=False)
   datasets = ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120']
   print(time_string() + ' ' + '='*50)
   for data in datasets:

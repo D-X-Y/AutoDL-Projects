@@ -3,8 +3,8 @@
 ###############################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06           #
 ###############################################################
-# Usage: python exps/experimental/vis-bench-ws.py --search_space tss
-# Usage: python exps/experimental/vis-bench-ws.py --search_space sss
+# Usage: python exps/experimental/vis-nats-bench-ws.py --search_space tss
+# Usage: python exps/experimental/vis-nats-bench-ws.py --search_space sss
 ###############################################################
 import os, gc, sys, time, torch, argparse
 import numpy as np
@@ -22,15 +22,16 @@ import matplotlib.ticker as ticker
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from config_utils import dict2config, load_config
-from nas_201_api import NASBench201API, NASBench301API
+from nats_bench import create
 from log_utils import time_string
 
 
 def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   ss_dir = '{:}-{:}'.format(root_dir, search_space)
   alg2name, alg2path = OrderedDict(), OrderedDict()
+  seeds = [777, 888, 999]
+  print('\n[fetch data] from {:} on {:}'.format(search_space, dataset))
   if search_space == 'tss':
-    seeds = [777]
     alg2name['GDAS'] = 'gdas-affine0_BN0-None'
     alg2name['RSPS'] = 'random-affine0_BN0-None'
     alg2name['DARTS (1st)'] = 'darts-v1-affine0_BN0-None'
@@ -38,7 +39,6 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
     alg2name['ENAS'] = 'enas-affine0_BN0-None'
     alg2name['SETN'] = 'setn-affine0_BN0-None'
   else:
-    seeds = [777, 888, 999]
     alg2name['TAS'] = 'tas-affine0_BN0'
     alg2name['FBNetV2'] = 'fbv2-affine0_BN0'
     alg2name['TuNAS'] = 'tunas-affine0_BN0'
@@ -46,13 +46,19 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
     alg2path[alg] = os.path.join(ss_dir, dataset, name, 'seed-{:}-last-info.pth')
   alg2data = OrderedDict()
   for alg, path in alg2path.items():
-    alg2data[alg] = []
+    alg2data[alg], ok_num = [], 0
     for seed in seeds:
       xpath = path.format(seed)
-      assert os.path.isfile(xpath), 'invalid path : {:}'.format(xpath)
+      if os.path.isfile(xpath):
+        ok_num += 1
+      else:
+        print('This is an invalid path : {:}'.format(xpath))
+        continue
       data = torch.load(xpath, map_location=torch.device('cpu'))
       data = torch.load(data['last_checkpoint'], map_location=torch.device('cpu'))
       alg2data[alg].append(data['genotypes'])
+    print('This algorithm : {:} has {:} valid ckps.'.format(alg, ok_num))
+    assert ok_num > 0, 'Must have at least 1 valid ckps.'
   return alg2data
 
 
@@ -95,7 +101,7 @@ def visualize_curve(api, vis_save_dir, search_space):
       for iepoch in range(epochs+1):
         structures, accs = [_[iepoch-1] for _ in data], []
         for structure in structures:
-          info = api.get_more_info(structure, dataset=dataset, hp=90 if isinstance(api, NASBench301API) else 200, is_random=False)
+          info = api.get_more_info(structure, dataset=dataset, hp=90 if api.search_space_name == 'size' else 200, is_random=False)
           accs.append(info['test-accuracy'])
         accuracies.append(sum(accs)/len(accs))
         xs.append(iepoch)
@@ -124,12 +130,6 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   save_dir = Path(args.save_dir)
-  alg2data = fetch_data(search_space='tss', dataset='cifar10')
 
-  if args.search_space == 'tss':
-    api = NASBench201API(verbose=False)
-  elif args.search_space == 'sss':
-    api = NASBench301API(verbose=False)
-  else:
-    raise ValueError('Invalid search space : {:}'.format(args.search_space))
+  api = create(None, args.search_space, verbose=False)
   visualize_curve(api, save_dir, args.search_space)

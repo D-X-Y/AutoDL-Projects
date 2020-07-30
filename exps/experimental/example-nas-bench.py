@@ -16,7 +16,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
-from nas_201_api import NASBench201API, NASBench301API
+from nas_201_api import NASBench201API
 from log_utils import time_string
 from models import get_cell_based_tiny_net
 from utils import weight_watcher

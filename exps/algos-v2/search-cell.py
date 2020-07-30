@@ -39,7 +39,7 @@ from procedures   import prepare_seed, prepare_logger, save_checkpoint, copy_che
 from utils        import count_parameters_in_MB, obtain_accuracy
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from models       import get_cell_based_tiny_net, get_search_spaces
-from nas_201_api  import NASBench201API as API
+from nats_bench   import create
 
 
 # The following three functions are used for DARTS-V2
@@ -364,7 +364,7 @@ def main(xargs):
   logger.log('The parameters of the search model = {:.2f} MB'.format(params))
   logger.log('search-space : {:}'.format(search_space))
   if bool(xargs.use_api):
-    api = API(verbose=False)
+    api = create(None, 'topology', verbose=False)
   else:
     api = None
   logger.log('{:} create API = {:} done'.format(time_string(), api))
