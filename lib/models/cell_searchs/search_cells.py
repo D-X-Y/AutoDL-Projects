@@ -163,6 +163,10 @@ class NASNetSearchCell(nn.Module):
     self.edge2index = {key:i for i, key in enumerate(self.edge_keys)}
     self.num_edges  = len(self.edges)
 
+  @property
+  def multiplier(self):
+    return self._multiplier
+
   def forward_gdas(self, s0, s1, weightss, indexs):
     s0 = self.preprocess0(s0)
     s1 = self.preprocess1(s1)

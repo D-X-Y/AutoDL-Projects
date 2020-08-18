@@ -37,9 +37,14 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 bash ./scripts/nas-infer-train.sh imagenet-1k GDAS_
 If you are interested in the configs of each NAS-searched architecture, they are defined at [genotypes.py](https://github.com/D-X-Y/AutoDL-Projects/blob/master/lib/nas_infer_model/DXYs/genotypes.py).
 
 ### Searching on the NASNet search space
+
 Please use the following scripts to use GDAS to search as in the original paper:
 ```
+# search for both normal and reduction cells
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NASNet-space-search-by-GDAS.sh cifar10 1 -1
+
+# search for the normal cell while use a fixed reduction cell
+CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NASNet-space-search-by-GDAS-FRC.sh cifar10 1 -1
 ```
 
 **After searching**, if you want to re-train the searched architecture found by the above script, you can use the following script:
@@ -52,7 +57,9 @@ Note that `gdas-searched` is a string to indicate the name of the saved dir and 
 The above script does not apply heavy augmentation to train the model, so the accuracy will be lower than the original paper.
 If you want to change the default hyper-parameter for re-training, please have a look at `./scripts/retrain-searched-net.sh` and `configs/archs/NAS-*-none.config`.
 
+
 ### Searching on a small search space (NAS-Bench-201)
+
 The GDAS searching codes on a small search space:
 ```
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh cifar10 1 -1

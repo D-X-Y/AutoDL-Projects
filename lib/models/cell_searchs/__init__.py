@@ -11,6 +11,7 @@ from .generic_model         import GenericNAS201Model
 from .genotypes             import Structure as CellStructure, architectures as CellArchitectures
 # NASNet-based macro structure
 from .search_model_gdas_nasnet import NASNetworkGDAS
+from .search_model_gdas_frc_nasnet import NASNetworkGDAS_FRC
 from .search_model_darts_nasnet import NASNetworkDARTS
 
 
@@ -23,4 +24,5 @@ nas201_super_nets = {'DARTS-V1': TinyNetworkDarts,
                      "generic": GenericNAS201Model}
 
 nasnet_super_nets = {"GDAS": NASNetworkGDAS,
+                     "GDAS_FRC": NASNetworkGDAS_FRC,
                      "DARTS": NASNetworkDARTS}
