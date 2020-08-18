@@ -25,7 +25,7 @@ else
   data_path="$TORCH_HOME/cifar.python/ImageNet16"
 fi
 
-save_dir=./output/search-cell-${space}/GDAS-${dataset}-BN${track_running_stats}
+save_dir=./output/search-cell-${space}/GDAS-FRC-${dataset}-BN${track_running_stats}
 
 OMP_NUM_THREADS=4 python ./exps/algos/GDAS.py \
 	--save_dir ${save_dir} \

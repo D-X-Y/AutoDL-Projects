@@ -7,9 +7,21 @@ We analyze the validity of our benchmark in terms of various criteria and perfor
 We also show the versatility of NATS-Bench by benchmarking 13 recent state-of-the-art NAS algorithms on it. All logs and diagnostic information trained using the same setup for each candidate are provided.
 This facilitates a much larger community of researchers to focus on developing better NAS algorithms in a more comparable and computationally effective environment.
 
+
 **coming soon!**
 
+
 ## How to Use NATS-Bench
+
+
+## The Procedure of Creating NATS-Bench
+
+1, train all architecture candidate in the size search space with 90 epochs and use the random seed of `777`.
+```
+bash ./scripts/NATS-Bench/train-shapes.sh 00000-32767 90 777
+```
+The checkpoint of all candidates are located at `output/NATS-Bench-size` by default
+
 
 
 ## To Reproduce 13 Baseline NAS Algorithms in NAS-Bench-201
@@ -49,6 +61,7 @@ python ./exps/algos-v2/search-cell.py --dataset ImageNet16-120 --data_path $TORC
 ```
 
 ### Reproduce NAS methods on the size search space
+
 
 ### Final Discovered Architectures for Each Algorithm
 

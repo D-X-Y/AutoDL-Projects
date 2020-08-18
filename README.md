@@ -67,7 +67,8 @@ At the moment, this project provides the following algorithms and scripts to run
     <tr> <!-- (7-th row) -->
     <td align="center" valign="middle"> ... </td>
     <td align="center" valign="middle"> ENAS / REA / REINFORCE / BOHB </td>
-    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NAS-Bench-201.md">NAS-Bench-201.md</a> </td>
+    <td align="center" valign="middle"> Please check the original papers </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NAS-Bench-201.md">NAS-Bench-201.md</a>  <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NATS-Bench.md">NATS-Bench.md</a> </td>
     </tr>
     <tr> <!-- (start second block) -->
     <td rowspan="1" align="center" valign="middle" halign="middle"> HPO </td>

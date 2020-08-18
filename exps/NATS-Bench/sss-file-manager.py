@@ -1,10 +1,10 @@
-###############################################################
-# NAS-Bench-201, ICLR 2020 (https://arxiv.org/abs/2001.00326) #
-###############################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.01           #
-###############################################################
-# Usage: python exps/NAS-Bench-201/xshape-file.py --mode check
-###############################################################
+##############################################################################
+# NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size #
+##############################################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.01                          #
+##############################################################################
+# Usage: python exps/NATS-Bench/sss-file-manager.py --mode check             #
+##############################################################################
 import os, sys, time, torch, argparse
 from typing import List, Text, Dict, Any
 from shutil import copyfile
@@ -55,9 +55,9 @@ def copy_data(source_dir, target_dir, meta_path):
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='NAS-Bench-X', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(description='NATS-Bench (size search space) file manager.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--mode',        type=str, required=True, choices=['check', 'copy'], help='The script mode.')
-  parser.add_argument('--save_dir',    type=str, default='output/NAS-BENCH-202', help='Folder to save checkpoints and log.')
+  parser.add_argument('--save_dir',    type=str, default='output/NATS-Bench-size', help='Folder to save checkpoints and log.')
   parser.add_argument('--check_N',     type=int, default=32768,  help='For safety.')
   # use for train the model
   args = parser.parse_args()
