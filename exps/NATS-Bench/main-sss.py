@@ -3,6 +3,16 @@
 ##############################################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.07                          #
 ##############################################################################
+# This file is used to train (all) architecture candidate in the size search #
+# space in NATS-Bench (sss) with different hyper-parameters.                 #
+# When use mode=new, it will automatically detect whether the checkpoint of  #
+# a trial exists, if so, it will skip this trial. When use mode=cover, it    #
+# will ignore the (possible) existing checkpoint, run each trial, and save.  #
+# (NOTE): the topology for all candidates in sss is fixed as:                ######################
+# |nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|nor_conv_3x3~1|nor_conv_3x3~2| #
+###################################################################################################
+# Please use the script of scripts/NATS-Bench/train-shapes.sh to run.        #
+##############################################################################
 import os, sys, time, torch, argparse
 from typing import List, Text, Dict, Any
 from PIL     import ImageFile

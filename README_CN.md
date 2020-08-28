@@ -64,8 +64,7 @@
     <td align="center" valign="middle"> <a href="https://xuanyidong.com/assets/projects/NATS-Bench"> NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size</a> </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NATS-Bench.md">NATS-Bench.md</a> </td>
     </tr>
-
-    <tr> <!-- (6-th row) -->
+    <tr> <!-- (7-th row) -->
     <td align="center" valign="middle"> ... </td>
     <td align="center" valign="middle"> ENAS / REA / REINFORCE / BOHB </td>
     <td align="center" valign="middle"> Please check the original papers. </td>
@@ -111,6 +110,7 @@ Some methods use knowledge distillation (KD), which require pre-trained models. 
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {Neural Information Processing Systems (NeurIPS)},
   year      = {2019}
+  pages     = {760--771},
 }
 @inproceedings{dong2019one,
   title     = {One-Shot Neural Architecture Search via Self-Evaluated Template Network},

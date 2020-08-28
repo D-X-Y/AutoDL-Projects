@@ -110,6 +110,7 @@ If you find that this project helps your research, please consider citing some o
   title     = {Network Pruning via Transformable Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {Neural Information Processing Systems (NeurIPS)},
+  pages     = {760--771},
   year      = {2019}
 }
 @inproceedings{dong2019one,

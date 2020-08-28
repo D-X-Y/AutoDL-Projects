@@ -16,11 +16,17 @@ This facilitates a much larger community of researchers to focus on developing b
 
 ## The Procedure of Creating NATS-Bench
 
-1, train all architecture candidate in the size search space with 90 epochs and use the random seed of `777`.
+### The Size Search Space
+
+The following command will train all architecture candidate in the size search space with 90 epochs and use the random seed of `777`. If you want to use a different number of training epochs, please replace `90` with it, such as `01` or `12`. If you want to use a different 
 ```
 bash ./scripts/NATS-Bench/train-shapes.sh 00000-32767 90 777
 ```
-The checkpoint of all candidates are located at `output/NATS-Bench-size` by default
+The checkpoint of all candidates are located at `output/NATS-Bench-size` by default.
+
+
+### The Topology Search Space
+
 
 
 

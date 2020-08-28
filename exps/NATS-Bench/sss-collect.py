@@ -1,8 +1,15 @@
-#####################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
-#####################################################
-# python exps/NAS-Bench-201/xshape-collect.py
-#####################################################
+##############################################################################
+# NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size #
+##############################################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.07                          #
+##############################################################################
+# This file is used to re-orangize all checkpoints (created by main-sss.py)  #
+# into a single benchmark file. Besides, for each trial, we will merge the   #
+# information of all its trials into a single file.                          #
+#                                                                            #
+# Usage:                                                                     #
+# python exps/NATS-Bench/sss-collect.py                                      #
+##############################################################################
 import os, re, sys, time, argparse, collections
 import numpy as np
 import torch
@@ -14,10 +21,10 @@ lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
 if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from config_utils import dict2config
-# NAS-Bench-201 related module or function
 from models       import CellStructure, get_cell_based_tiny_net
 from nas_201_api  import ArchResults, ResultsCount
 from procedures   import bench_pure_evaluate as pure_evaluate, get_nas_bench_loaders
+from utils        import get_md5_file
 
 
 def account_one_arch(arch_index: int, arch_str: Text, checkpoints: List[Text], datasets: List[Text]) -> ArchResults:
@@ -163,41 +170,54 @@ def simplify(save_dir, save_name, nets, total):
     for seed, xlist in seed2names.items():
       seeds.add(seed)
       nums.append(len(xlist))
-      print('  seed={:}, num={:}'.format(seed, len(xlist)))
-    # assert len(nets) == total == max(nums), 'there are some missed files : {:} vs {:}'.format(max(nums), total)
+      print('  [seed={:}] there are {:} checkpoints.'.format(seed, len(xlist)))
+    assert len(nets) == total == max(nums), 'there are some missed files : {:} vs {:}'.format(max(nums), total)
   print('{:} start simplify the checkpoint.'.format(time_string()))
 
   datasets = ('cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120')
 
-  simplify_save_dir, arch2infos, evaluated_indexes = save_dir / save_name, {}, set()
-  simplify_save_dir.mkdir(parents=True, exist_ok=True)
+  # Create the directory to save the processed data
+  # full_save_dir contains all benchmark files with trained weights.
+  # simplify_save_dir contains all benchmark files without trained weights.
+  full_save_dir = save_dir / (save_name + '-FULL')
+  simple_save_dir = save_dir / (save_name + '-SIMPLIFY')
+  full_save_dir.mkdir(parents=True, exist_ok=True)
+  simple_save_dir.mkdir(parents=True, exist_ok=True)
+  # all data in memory
+  arch2infos, evaluated_indexes = dict(), set()
   end_time, arch_time = time.time(), AverageMeter()
-  # for index, arch_str in enumerate(nets):
+
   for index in tqdm(range(total)):
     arch_str = nets[index]
     hp2info = OrderedDict()
+
+    full_save_path = full_save_dir / '{:06d}.npy'.format(index)
+    simple_save_path = simple_save_dir / '{:06d}.npy'.format(index)
+
     for hp in hps:
       sub_save_dir = save_dir / 'raw-data-{:}'.format(hp)
       ckps = [sub_save_dir / 'arch-{:06d}-seed-{:}.pth'.format(index, seed) for seed in seeds]
       ckps = [x for x in ckps if x.exists()]
-      if len(ckps) == 0: raise ValueError('Invalid data : index={:}, hp={:}'.format(index, hp))
-      
+      if len(ckps) == 0:
+        raise ValueError('Invalid data : index={:}, hp={:}'.format(index, hp))
+
       arch_info = account_one_arch(index, arch_str, ckps, datasets)
       hp2info[hp] = arch_info
     
     hp2info = correct_time_related_info(hp2info)
     evaluated_indexes.add(index)
 
+    hp2info['01'].clear_params()  # to save some spaces...
     to_save_data = OrderedDict({'01': hp2info['01'].state_dict(),
                                 '12': hp2info['12'].state_dict(),
                                 '90': hp2info['90'].state_dict()})
-    torch.save(to_save_data, simplify_save_dir / '{:}-FULL.pth'.format(index))
+    np.save(str(full_save_path), to_save_data)
     
     for hp in hps: hp2info[hp].clear_params()
     to_save_data = OrderedDict({'01': hp2info['01'].state_dict(),
                                 '12': hp2info['12'].state_dict(),
                                 '90': hp2info['90'].state_dict()})
-    torch.save(to_save_data, simplify_save_dir / '{:}-SIMPLE.pth'.format(index))
+    np.save(str(simple_save_path), to_save_data)
     arch2infos[index] = to_save_data
     # measure elapsed time
     arch_time.update(time.time() - end_time)
@@ -209,8 +229,9 @@ def simplify(save_dir, save_name, nets, total):
                  'total_archs': total,
                  'arch2infos' : arch2infos,
                  'evaluated_indexes': evaluated_indexes}
-  save_file_name = save_dir / '{:}.pth'.format(save_name)
-  torch.save(final_infos, save_file_name)
+  save_file_name = save_dir / '{:}.npy'.format(save_name)
+  np.save(str(save_file_name), final_infos)
+  import pdb; pdb.set_trace()
   print ('Save {:} / {:} architecture results into {:}.'.format(len(evaluated_indexes), total, save_file_name))
 
 
@@ -226,17 +247,17 @@ def traverse_net(candidates: List[int], N: int):
 
 
 if __name__ == '__main__':
-
-  parser = argparse.ArgumentParser(description='NAS-BENCH-201', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument('--base_save_dir',  type=str, default='./output/NAS-BENCH-202',    help='The base-name of folder to save checkpoints and log.')
+  parser = argparse.ArgumentParser(description='NATS-Bench (size search space)', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('--base_save_dir',  type=str, default='./output/NATS-Bench-size',    help='The base-name of folder to save checkpoints and log.')
   parser.add_argument('--candidateC'   ,  type=int, nargs='+', default=[8, 16, 24, 32, 40, 48, 56, 64], help='.')
   parser.add_argument('--num_layers'   ,  type=int, default=5,      help='The number of layers in a network.')
   parser.add_argument('--check_N'      ,  type=int, default=32768,  help='For safety.')
-  parser.add_argument('--save_name'    ,  type=str, default='simplify',                  help='The save directory.')
+  parser.add_argument('--save_name'    ,  type=str, default='process',                  help='The save directory.')
   args = parser.parse_args()
   
   nets = traverse_net(args.candidateC, args.num_layers)
-  if len(nets) != args.check_N: raise ValueError('Pre-num-check failed : {:} vs {:}'.format(len(nets), args.check_N))
+  if len(nets) != args.check_N:
+    raise ValueError('Pre-num-check failed : {:} vs {:}'.format(len(nets), args.check_N))
 
   save_dir  = Path(args.base_save_dir)
   simplify(save_dir, args.save_name, nets, args.check_N)
