@@ -1,5 +1,5 @@
 ##############################################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.07 ##########################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.08 ##########################
 ##############################################################################
 # NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size #
 ##############################################################################
@@ -11,7 +11,7 @@ from .api_topology import NATStopology
 from .api_size import NATSsize
 
 
-NATS_BENCH_API_VERSIONs = ['v1.0']    # [2020.08.28]
+NATS_BENCH_API_VERSIONs = ['v1.0']    # [2020.08.31]
 
 
 def version():

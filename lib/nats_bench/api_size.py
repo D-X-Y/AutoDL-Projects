@@ -1,10 +1,10 @@
 #####################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06 #
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.08 #
 ##############################################################################
 # NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size # 
 #####################################################################################
-# The history of benchmark files (the name is NATS-tss-[version]-[md5].pickle.pbz2) #
-# [2020.08.28] NATS-tss-v1_0-50262.pickle.pbz2                                      #
+# The history of benchmark files (the name is NATS-sss-[version]-[md5].pickle.pbz2) #
+# [2020.08.31] NATS-sss-v1_0-50262.pickle.pbz2                                      #
 #####################################################################################
 import os, copy, random, numpy as np
 from pathlib import Path
@@ -17,7 +17,7 @@ from .api_utils import remap_dataset_set_names
 
 
 PICKLE_EXT = 'pickle.pbz2'
-ALL_BASE_NAMES = ['NATS-tss-v1_0-50262']
+ALL_BASE_NAMES = ['NATS-sss-v1_0-50262']
 
 
 def print_information(information, extra_info=None, show=False):

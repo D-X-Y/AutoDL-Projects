@@ -10,11 +10,28 @@ This facilitates a much larger community of researchers to focus on developing b
 
 **coming soon!**
 
+The structure of this Markdown file:
+- [How to use NATS-Bench?](#How-to-Use-NATS-Bench)
+- [How to re-create NATS-Bench from scratch?](#how-to-re-create-nats-bench-from-scratch)
+- [How to reproduce benchmarked results?](#to-reproduce-13-baseline-nas-algorithms-in-nas-bench-201)
+
 
 ## How to Use NATS-Bench
 
 ### Preparation and Download
 The **latest** benchmark file of NATS-Bench can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1zjB6wMANiKwB2A1yil2hQ8H_qyeSe2yt?usp=sharing).
+We highly recommend to put the downloaded benchmark file (`NATS-sss-v1_0-50262.pickle.pbz2`) or uncompressed archive (`NATS-sss-v1_0-50262-simple`) into `$TORCH_HOME`.
+In this way, our api will automatically find the path for these benchmarkfiles, which is convenient for the users. Otherwise, you need to manually indicate the file when creating the benchmark instance.
+
+The history of benchmark files are as follows, `tss` indicates the topology search space and `sss` indicates the size search space.
+The benchmark file is used when create the NATS-Bench instance with `fast_mode=False`.
+The archive is used when `fast_mode=True`, where `archive` is a directory contains 15,625 files for tss or contains 32,768 files for sss. Each file contains all the information for a specific architecture candidate.
+The `full archive` is similar to `archive`, while each file in `full archive` contains **the trained weights**.
+
+|   Date     |  benchmark file (tss) | archive (tss) | full archive (tss) |       benchmark file (sss)      |       archive (sss)        | full archive (sss) |
+|:-----------|:---------------------:|:-------------:|:------------------:|:-------------------------------:|:--------------------------:|:------------------:|
+| 2020.08.31 |                       |               |                    | NATS-sss-v1_0-50262.pickle.pbz2 | NATS-sss-v1_0-50262-simple | [xx]-full          |
+
 
 1, create the benchmark instance:
 ```
@@ -22,11 +39,12 @@ api = create(None, 'sss', fast_mode=True, verbose=True)
 ```
 
 
-## The Procedure of Creating NATS-Bench
+## How to Re-create NATS-Bench from Scratch
 
 ### The Size Search Space
 
-The following command will train all architecture candidate in the size search space with 90 epochs and use the random seed of `777`. If you want to use a different number of training epochs, please replace `90` with it, such as `01` or `12`. If you want to use a different 
+The following command will train all architecture candidate in the size search space with 90 epochs and use the random seed of `777`.
+If you want to use a different number of training epochs, please replace `90` with it, such as `01` or `12`.
 ```
 bash ./scripts/NATS-Bench/train-shapes.sh 00000-32767 90 777
 ```
@@ -35,6 +53,13 @@ The checkpoint of all candidates are located at `output/NATS-Bench-size` by defa
 
 ### The Topology Search Space
 
+The following command will train all architecture candidate in the topology search space with 200 epochs and use the random seed of `777`/`888`/`999`.
+If you want to use a different number of training epochs, please replace `200` with it, such as `12`.
+```
+bash scripts/NATS-Bench/train-topology.sh 00000-15624 200 '777 888 999'
+```
+The checkpoint of all candidates are located at `output/NATS-Bench-topology` by default.
+
 
 
 
@@ -42,13 +67,20 @@ The checkpoint of all candidates are located at `output/NATS-Bench-size` by defa
 
 ### Reproduce NAS methods on the topology search space
 
+Please use the following commands to run different NAS methods on the topology search space:
 ```
-DARTS (V1):
+Four multi-trial based methods:
+python ./exps/NATS-algos/reinforce.py       --dataset cifar100 --search_space tss --learning_rate 0.01
+python ./exps/NATS-algos/regularized_ea.py  --dataset cifar100 --search_space tss --ea_cycles 200 --ea_population 10 --ea_sample_size 3
+python ./exps/NATS-algos/random_wo_share.py --dataset cifar100 --search_space tss
+python ./exps/NATS-algos/bohb.py            --dataset cifar100 --search_space tss --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3
+
+DARTS (first order):
 python ./exps/NATS-algos/search-cell.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo darts-v1
 python ./exps/NATS-algos/search-cell.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo darts-v1
 python ./exps/NATS-algos/search-cell.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo darts-v1
 
-DARTS (V2):
+DARTS (second order):
 python ./exps/NATS-algos/search-cell.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo darts-v2
 python ./exps/NATS-algos/search-cell.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo darts-v2
 python ./exps/NATS-algos/search-cell.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo darts-v2
@@ -76,6 +108,34 @@ python ./exps/NATS-algos/search-cell.py --dataset ImageNet16-120 --data_path $TO
 
 ### Reproduce NAS methods on the size search space
 
+Please use the following commands to run different NAS methods on the size search space:
+```
+Four multi-trial based methods:
+python ./exps/NATS-algos/reinforce.py       --dataset cifar100 --search_space sss --learning_rate 0.01
+python ./exps/NATS-algos/regularized_ea.py  --dataset cifar100 --search_space sss --ea_cycles 200 --ea_population 10 --ea_sample_size 3
+python ./exps/NATS-algos/random_wo_share.py --dataset cifar100 --search_space sss
+
+
+Run Transformable Architecture Search (TAS), proposed in Network Pruning via Transformable Architecture Search, NeurIPS 2019
+
+python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tas --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo tas --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo tas --rand_seed 777
+
+
+Run the search strategy in FBNet-V2
+
+python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo fbv2 --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo fbv2 --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo fbv2 --rand_seed 777
+
+
+Run the search strategy in TuNAS:
+
+python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777 --use_api 0
+python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo tunas --arch_weight_decay 0 --rand_seed 777
+```
 
 ### Final Discovered Architectures for Each Algorithm
 
@@ -83,12 +143,12 @@ The architecture index can be found by use `api.query_index_by_arch(architecture
 
 The final discovered architecture ID on CIFAR-10:
 ```
-DARTS (V1):
+DARTS (first order):
 |skip_connect~0|+|skip_connect~0|skip_connect~1|+|skip_connect~0|skip_connect~1|skip_connect~2|
 |skip_connect~0|+|skip_connect~0|skip_connect~1|+|skip_connect~0|skip_connect~1|skip_connect~2|
 |skip_connect~0|+|skip_connect~0|skip_connect~1|+|skip_connect~0|skip_connect~1|skip_connect~2|
 
-DARTS (V2):
+DARTS (second order):
 |skip_connect~0|+|skip_connect~0|skip_connect~1|+|skip_connect~0|skip_connect~1|skip_connect~2|
 |skip_connect~0|+|skip_connect~0|skip_connect~1|+|skip_connect~0|skip_connect~1|skip_connect~2|
 |skip_connect~0|+|skip_connect~0|skip_connect~1|+|skip_connect~0|skip_connect~1|skip_connect~2|
