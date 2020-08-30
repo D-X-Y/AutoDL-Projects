@@ -5,8 +5,8 @@
 # required to install hpbandster ##################################
 # pip install hpbandster         ##################################
 ###################################################################
-# OMP_NUM_THREADS=4 python exps/algos-v2/bohb.py --search_space tss --dataset cifar10 --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3 --rand_seed 1
-# OMP_NUM_THREADS=4 python exps/algos-v2/bohb.py --search_space sss --dataset cifar10 --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3 --rand_seed 1
+# OMP_NUM_THREADS=4 python exps/NATS-algos/bohb.py --search_space tss --dataset cifar10 --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3 --rand_seed 1
+# OMP_NUM_THREADS=4 python exps/NATS-algos/bohb.py --search_space sss --dataset cifar10 --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3 --rand_seed 1
 ###################################################################
 import os, sys, time, random, argparse, collections
 from copy import deepcopy
@@ -167,7 +167,7 @@ if __name__ == '__main__':
   parser.add_argument('--rand_seed',          type=int,  default=-1, help='manual seed')
   args = parser.parse_args()
   
-  api = create(None, args.search_space, verbose=False)
+  api = create(None, args.search_space, fast_mode=True, verbose=False)
 
   args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'BOHB')
   print('save-dir : {:}'.format(args.save_dir))

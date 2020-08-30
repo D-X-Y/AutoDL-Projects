@@ -1,12 +1,10 @@
-###############################################################
-# NAS-Bench-201, ICLR 2020 (https://arxiv.org/abs/2001.00326) #
-###############################################################
-# NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size
-###############################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06           #
-###############################################################
-# Usage: python exps/NAS-Bench-201/test-nas-api.py            #
-###############################################################
+##############################################################################
+# NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size #
+##############################################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.08                          #
+##############################################################################
+# Usage: python exps/NATS-Bench/test-nats-api.py                             #
+##############################################################################
 import os, sys, time, torch, argparse
 import numpy as np
 from typing import List, Text, Dict, Any
@@ -61,10 +59,12 @@ def test_api(api, is_301=True):
   print('{:}\n'.format(info))
   info = api.get_latency(12, 'cifar10')
   print('{:}\n'.format(info))
+  for index in [13, 15, 19, 200]:
+    info = api.get_latency(index, 'cifar10')
 
   # Count the number of architectures
   info = api.statistics('cifar100', '12')
-  print('{:}\n'.format(info))
+  print('{:} statistics results : {:}\n'.format(time_string(), info))
 
   # Show the information of the 123-th architecture
   api.show(123)
@@ -80,33 +80,18 @@ def test_api(api, is_301=True):
     print('Compute the adjacency matrix of {:}'.format(arch_str))
     print(matrix)
   info = api.simulate_train_eval(123, 'cifar10')
-  print('simulate_train_eval : {:}'.format(info))
-
-
-def test_issue_81_82(api):
-  results = api.query_by_index(0, 'cifar10-valid', hp='12')
-  results = api.query_by_index(0, 'cifar10-valid', hp='200')
-  print(list(results.keys()))
-  print(results[888].get_eval('valid'))
-  print(results[888].get_eval('x-valid'))
-  result_dict = api.get_more_info(index=0, dataset='cifar10-valid', iepoch=11, hp='200', is_random=False)
-  info = api.query_by_arch('|nor_conv_3x3~0|+|skip_connect~0|nor_conv_3x3~1|+|skip_connect~0|none~1|nor_conv_3x3~2|', '200')
-  print(info)
-  structure = CellStructure.str2structure('|nor_conv_3x3~0|+|skip_connect~0|nor_conv_3x3~1|+|skip_connect~0|none~1|nor_conv_3x3~2|')
-  info = api.query_by_arch(structure, '200')
-  print(info)
+  print('simulate_train_eval : {:}\n\n'.format(info))
 
 
 if __name__ == '__main__':
 
-  api201 = create(os.path.join(os.environ['TORCH_HOME'], 'NAS-Bench-201-v1_0-e61699.pth'), 'topology', True)
-  test_issue_81_82(api201)
-  print ('Test {:} done'.format(api201))
+  for fast_mode in [True, False]:
+    for verbose in [True, False]:
+      print('{:} create with fast_mode={:} and verbose={:}'.format(time_string(), fast_mode, verbose))
+      api301 = create(None, 'size', fast_mode=fast_mode, verbose=True)
+      print('{:} --->>> {:}'.format(time_string(), api301))
+      test_api(api301, True)
 
-  api201 = create(None, 'topology', True)  # use the default file path
-  test_issue_81_82(api201)
-  test_api(api201, False)
-  print ('Test {:} done'.format(api201))
-
-  api301 = create(None, 'size', True)
-  test_api(api301, True)
+  # api201 = create(None, 'topology', True)  # use the default file path
+  # test_api(api201, False)
+  # print ('Test {:} done'.format(api201))

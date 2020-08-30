@@ -11,7 +11,6 @@
 # python exps/NATS-Bench/sss-collect.py                                      #
 ##############################################################################
 import os, re, sys, time, shutil, argparse, collections
-import numpy as np
 import torch
 from tqdm import tqdm
 from pathlib import Path
@@ -22,7 +21,7 @@ if str(lib_dir) not in sys.path: sys.path.insert(0, str(lib_dir))
 from log_utils    import AverageMeter, time_string, convert_secs2time
 from config_utils import dict2config
 from models       import CellStructure, get_cell_based_tiny_net
-from nas_201_api  import ArchResults, ResultsCount
+from nats_bench   import pickle_save, pickle_load, ArchResults, ResultsCount
 from procedures   import bench_pure_evaluate as pure_evaluate, get_nas_bench_loaders
 from utils        import get_md5_file
 
@@ -193,8 +192,8 @@ def simplify(save_dir, save_name, nets, total):
     arch_str = nets[index]
     hp2info = OrderedDict()
 
-    full_save_path = full_save_dir / '{:06d}.npy'.format(index)
-    simple_save_path = simple_save_dir / '{:06d}.npy'.format(index)
+    full_save_path = full_save_dir / '{:06d}.pickle'.format(index)
+    simple_save_path = simple_save_dir / '{:06d}.pickle'.format(index)
 
     for hp in hps:
       sub_save_dir = save_dir / 'raw-data-{:}'.format(hp)
@@ -213,13 +212,13 @@ def simplify(save_dir, save_name, nets, total):
     to_save_data = OrderedDict({'01': hp2info['01'].state_dict(),
                                 '12': hp2info['12'].state_dict(),
                                 '90': hp2info['90'].state_dict()})
-    np.save(str(full_save_path), to_save_data)
+    pickle_save(to_save_data, str(full_save_path))
     
     for hp in hps: hp2info[hp].clear_params()
     to_save_data = OrderedDict({'01': hp2info['01'].state_dict(),
                                 '12': hp2info['12'].state_dict(),
                                 '90': hp2info['90'].state_dict()})
-    np.save(str(simple_save_path), to_save_data)
+    pickle_save(to_save_data, str(simple_save_path))
     arch2infos[index] = to_save_data
     # measure elapsed time
     arch_time.update(time.time() - end_time)
@@ -231,18 +230,23 @@ def simplify(save_dir, save_name, nets, total):
                  'total_archs': total,
                  'arch2infos' : arch2infos,
                  'evaluated_indexes': evaluated_indexes}
-  save_file_name = save_dir / '{:}.npy'.format(save_name)
-  np.save(str(save_file_name), final_infos)
+  save_file_name = save_dir / '{:}.pickle'.format(save_name)
+  pickle_save(final_infos, str(save_file_name))
   # move the benchmark file to a new path
-  hd5sum = get_md5_file(save_file_name)
-  hd5_file_name = save_dir / '{:}-{:}.npy'.format(NATS_TSS_BASE_NAME, hd5sum)
-  shutil.move(save_file_name, hd5_file_name)
+  hd5sum = get_md5_file(str(save_file_name) + '.pbz2')
+  hd5_file_name = save_dir / '{:}-{:}.pickle.pbz2'.format(NATS_TSS_BASE_NAME, hd5sum)
+  shutil.move(str(save_file_name) + '.pbz2', hd5_file_name)
   print('Save {:} / {:} architecture results into {:} -> {:}.'.format(len(evaluated_indexes), total, save_file_name, hd5_file_name))
   # move the directory to a new path
   hd5_full_save_dir = save_dir / '{:}-{:}-full'.format(NATS_TSS_BASE_NAME, hd5sum)
   hd5_simple_save_dir = save_dir / '{:}-{:}-simple'.format(NATS_TSS_BASE_NAME, hd5sum)
   shutil.move(full_save_dir, hd5_full_save_dir)
   shutil.move(simple_save_dir, hd5_simple_save_dir)
+  # save the meta information for simple and full
+  final_infos['arch2infos'] = None
+  final_infos['evaluated_indexes'] = set()
+  pickle_save(final_infos, str(hd5_full_save_dir / 'meta.pickle'))
+  pickle_save(final_infos, str(hd5_simple_save_dir / 'meta.pickle'))
 
 
 def traverse_net(candidates: List[int], N: int):

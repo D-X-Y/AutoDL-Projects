@@ -3,9 +3,9 @@
 ##############################################################################
 # Random Search for Hyper-Parameter Optimization, JMLR 2012 ##################
 ##############################################################################
-# python ./exps/algos-v2/random_wo_share.py --dataset cifar10 --search_space tss
-# python ./exps/algos-v2/random_wo_share.py --dataset cifar100 --search_space tss
-# python ./exps/algos-v2/random_wo_share.py --dataset ImageNet16-120 --search_space tss
+# python ./exps/NATS-algos/random_wo_share.py --dataset cifar10 --search_space tss
+# python ./exps/NATS-algos/random_wo_share.py --dataset cifar100 --search_space tss
+# python ./exps/NATS-algos/random_wo_share.py --dataset ImageNet16-120 --search_space tss
 ##############################################################################
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
@@ -71,7 +71,7 @@ if __name__ == '__main__':
   parser.add_argument('--rand_seed',          type=int,   default=-1,    help='manual seed')
   args = parser.parse_args()
   
-  api = create(None, args.search_space, verbose=False)
+  api = create(None, args.search_space, fast_mode=True, verbose=False)
 
   args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'RANDOM')
   print('save-dir : {:}'.format(args.save_dir))

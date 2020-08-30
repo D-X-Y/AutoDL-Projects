@@ -1,21 +1,23 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06 #
-############################################################################################
-# NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size
-############################################################################################
-# The history of benchmark files:
-# 
-import os, copy, random, torch, numpy as np
+##############################################################################
+# NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size # 
+#####################################################################################
+# The history of benchmark files (the name is NATS-tss-[version]-[md5].pickle.pbz2) #
+# [2020.08.28] NATS-tss-v1_0-50262.pickle.pbz2                                      #
+#####################################################################################
+import os, copy, random, numpy as np
 from pathlib import Path
 from typing import List, Text, Union, Dict, Optional
 from collections import OrderedDict, defaultdict
+from .api_utils import pickle_load
 from .api_utils import ArchResults
 from .api_utils import NASBenchMetaAPI
 from .api_utils import remap_dataset_set_names
 
 
-ALL_BENCHMARK_FILES = ['NAS-Bench-301-v1_0-363be7.pth']
-ALL_ARCHIVE_DIRS = ['NAS-Bench-301-v1_0-archive']
+PICKLE_EXT = 'pickle.pbz2'
+ALL_BASE_NAMES = ['NATS-tss-v1_0-50262']
 
 
 def print_information(information, extra_info=None, show=False):
@@ -54,42 +56,65 @@ This is the class for the API of size search space in NATS-Bench.
 class NATSsize(NASBenchMetaAPI):
 
   """ The initialization function that takes the dataset file path (or a dict loaded from that path) as input. """
-  def __init__(self, file_path_or_dict: Optional[Union[Text, Dict]]=None, verbose: bool=True):
+  def __init__(self, file_path_or_dict: Optional[Union[Text, Dict]]=None, fast_mode: bool=False, verbose: bool=True):
     self.filename = None
     self._search_space_name = 'size'
+    self._fast_mode = fast_mode
+    self._archive_dir = None
     self.reset_time()
     if file_path_or_dict is None:
-      file_path_or_dict = os.path.join(os.environ['TORCH_HOME'], ALL_BENCHMARK_FILES[-1])
-      print ('Try to use the default NATS-Bench (size) path from {:}.'.format(file_path_or_dict))
+      if self._fast_mode:
+        self._archive_dir = os.path.join(os.environ['TORCH_HOME'], '{:}-simple'.format(ALL_BASE_NAMES[-1]))
+      else:
+        file_path_or_dict = os.path.join(os.environ['TORCH_HOME'], '{:}.{:}'.format(ALL_BASE_NAMES[-1], PICKLE_EXT))
+      print ('Try to use the default NATS-Bench (size) path from fast_mode={:} and path={:}.'.format(self._fast_mode, file_path_or_dict))
     if isinstance(file_path_or_dict, str) or isinstance(file_path_or_dict, Path):
       file_path_or_dict = str(file_path_or_dict)
-      if verbose: print('try to create the NATS-Bench (size) api from {:}'.format(file_path_or_dict))
-      assert os.path.isfile(file_path_or_dict), 'invalid path : {:}'.format(file_path_or_dict)
+      if verbose:
+        print('Try to create the NATS-Bench (size) api from {:} with fast_mode={:}'.format(file_path_or_dict, fast_mode))
+      if not os.path.isfile(file_path_or_dict) and not os.path.isdir(file_path_or_dict):
+        raise ValueError('{:} is neither a file or a dir.'.format(file_path_or_dict))
       self.filename = Path(file_path_or_dict).name
-      file_path_or_dict = torch.load(file_path_or_dict, map_location='cpu')
+      if fast_mode:
+        if os.path.isfile(file_path_or_dict):
+          raise ValueError('fast_mode={:} must feed the path for directory : {:}'.format(fast_mode, file_path_or_dict))
+        else:
+          self._archive_dir = file_path_or_dict
+      else:
+        if os.path.isdir(file_path_or_dict):
+          raise ValueError('fast_mode={:} must feed the path for file : {:}'.format(fast_mode, file_path_or_dict))
+        else:
+          file_path_or_dict = pickle_load(file_path_or_dict)
     elif isinstance(file_path_or_dict, dict):
-      file_path_or_dict = copy.deepcopy( file_path_or_dict )
-    else: raise ValueError('invalid type : {:} not in [str, dict]'.format(type(file_path_or_dict)))
-    assert isinstance(file_path_or_dict, dict), 'It should be a dict instead of {:}'.format(type(file_path_or_dict))
-    self.verbose = verbose # [TODO] a flag indicating whether to print more logs
-    keys = ('meta_archs', 'arch2infos', 'evaluated_indexes')
-    for key in keys: assert key in file_path_or_dict, 'Can not find key[{:}] in the dict'.format(key)
-    self.meta_archs = copy.deepcopy( file_path_or_dict['meta_archs'] )
-    # This is a dict mapping each architecture to a dict, where the key is #epochs and the value is ArchResults
-    self.arch2infos_dict = OrderedDict()
-    self._avaliable_hps = set()
-    for xkey in sorted(list(file_path_or_dict['arch2infos'].keys())):
-      all_infos = file_path_or_dict['arch2infos'][xkey]
-      hp2archres = OrderedDict()
-      for hp_key, results in all_infos.items():
-        hp2archres[hp_key] = ArchResults.create_from_state_dict(results)
-        self._avaliable_hps.add(hp_key)  # save the avaliable hyper-parameter
-      self.arch2infos_dict[xkey] = hp2archres
-    self.evaluated_indexes = sorted(list(file_path_or_dict['evaluated_indexes']))
+      file_path_or_dict = copy.deepcopy(file_path_or_dict)
+    self.verbose = verbose
+    if isinstance(file_path_or_dict, dict):
+      keys = ('meta_archs', 'arch2infos', 'evaluated_indexes')
+      for key in keys: assert key in file_path_or_dict, 'Can not find key[{:}] in the dict'.format(key)
+      self.meta_archs = copy.deepcopy(file_path_or_dict['meta_archs'])
+      # This is a dict mapping each architecture to a dict, where the key is #epochs and the value is ArchResults
+      self.arch2infos_dict = OrderedDict()
+      self._avaliable_hps = set()
+      for xkey in sorted(list(file_path_or_dict['arch2infos'].keys())):
+        all_infos = file_path_or_dict['arch2infos'][xkey]
+        hp2archres = OrderedDict()
+        for hp_key, results in all_infos.items():
+          hp2archres[hp_key] = ArchResults.create_from_state_dict(results)
+          self._avaliable_hps.add(hp_key)  # save the avaliable hyper-parameter
+        self.arch2infos_dict[xkey] = hp2archres
+      self.evaluated_indexes = set(file_path_or_dict['evaluated_indexes'])
+    elif self.archive_dir is not None:
+      benchmark_meta = pickle_load('{:}/meta.{:}'.format(self.archive_dir, PICKLE_EXT))
+      self.meta_archs = copy.deepcopy(benchmark_meta['meta_archs'])
+      self.arch2infos_dict = OrderedDict()
+      self._avaliable_hps = set()
+      self.evaluated_indexes = set()
+    else:
+      raise ValueError('file_path_or_dict [{:}] must be a dict or archive_dir must be set'.format(type(file_path_or_dict)))
     self.archstr2index = {}
     for idx, arch in enumerate(self.meta_archs):
       assert arch not in self.archstr2index, 'This [{:}]-th arch {:} already in the dict ({:}).'.format(idx, arch, self.archstr2index[arch])
-      self.archstr2index[ arch ] = idx
+      self.archstr2index[arch] = idx
     if self.verbose:
       print('Create NATS-Bench (size) done with {:}/{:} architectures avaliable.'.format(len(self.evaluated_indexes), len(self.meta_archs)))
 
@@ -100,7 +125,7 @@ class NATSsize(NASBenchMetaAPI):
     if self.verbose:
       print('Call clear_params with archive_root={:} and index={:}'.format(archive_root, index))
     if archive_root is None:
-      archive_root = os.path.join(os.environ['TORCH_HOME'], ALL_ARCHIVE_DIRS[-1])
+      archive_root = os.path.join(os.environ['TORCH_HOME'], '{:}-full'.format(ALL_BASE_NAMES[-1]))
     assert os.path.isdir(archive_root), 'invalid directory : {:}'.format(archive_root)
     if index is None:
       indexes = list(range(len(self)))
@@ -108,16 +133,17 @@ class NATSsize(NASBenchMetaAPI):
       indexes = [index]
     for idx in indexes:
       assert 0 <= idx < len(self.meta_archs), 'invalid index of {:}'.format(idx)
-      xfile_path = os.path.join(archive_root, '{:06d}-FULL.pth'.format(idx))
+      xfile_path = os.path.join(archive_root, '{:06d}.{:}'.format(idx, PICKLE_EXT))
       if not os.path.isfile(xfile_path):
-        xfile_path = os.path.join(archive_root, '{:d}-FULL.pth'.format(idx))
+        xfile_path = os.path.join(archive_root, '{:d}.{:}'.format(idx, PICKLE_EXT))
       assert os.path.isfile(xfile_path), 'invalid data path : {:}'.format(xfile_path)
-      xdata = torch.load(xfile_path, map_location='cpu')
+      xdata = pickle_load(xfile_path)
       assert isinstance(xdata, dict), 'invalid format of data in {:}'.format(xfile_path)
-
+      self.evaluated_indexes.add(idx)
       hp2archres = OrderedDict()
       for hp_key, results in xdata.items():
         hp2archres[hp_key] = ArchResults.create_from_state_dict(results)
+        self._avaliable_hps.add(hp_key)
       self.arch2infos_dict[idx] = hp2archres
 
   def query_info_str_by_arch(self, arch, hp: Text='12'):
@@ -153,6 +179,7 @@ class NATSsize(NASBenchMetaAPI):
     if self.verbose:
       print('Call the get_more_info function with index={:}, dataset={:}, iepoch={:}, hp={:}, and is_random={:}.'.format(index, dataset, iepoch, hp, is_random))
     index = self.query_index_by_arch(index)  # To avoid the input is a string or an instance of a arch object
+    self._prepare_info(index)
     if index not in self.arch2infos_dict:
       raise ValueError('Did not find {:} from arch2infos_dict.'.format(index))
     archresult = self.arch2infos_dict[index][str(hp)]
