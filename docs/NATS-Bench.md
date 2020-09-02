@@ -20,6 +20,7 @@ The structure of this Markdown file:
 
 ### Preparation and Download
 The **latest** benchmark file of NATS-Bench can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1zjB6wMANiKwB2A1yil2hQ8H_qyeSe2yt?usp=sharing).
+After download `NATS-[tss/sss]-[version]-[md5sum]-simple.tar`, please uncompress it by using `tar xvf [file_name]`.
 We highly recommend to put the downloaded benchmark file (`NATS-sss-v1_0-50262.pickle.pbz2`) or uncompressed archive (`NATS-sss-v1_0-50262-simple`) into `$TORCH_HOME`.
 In this way, our api will automatically find the path for these benchmarkfiles, which is convenient for the users. Otherwise, you need to manually indicate the file when creating the benchmark instance.
 
@@ -27,10 +28,12 @@ The history of benchmark files are as follows, `tss` indicates the topology sear
 The benchmark file is used when create the NATS-Bench instance with `fast_mode=False`.
 The archive is used when `fast_mode=True`, where `archive` is a directory contains 15,625 files for tss or contains 32,768 files for sss. Each file contains all the information for a specific architecture candidate.
 The `full archive` is similar to `archive`, while each file in `full archive` contains **the trained weights**.
+Since the full archive is too large, we use `split -b 30G file_name file_name` to split it into multiple 30G chunks.
+To merge the chunks into the original full archive, you can use `cat file_name* > file_name`.
 
 |   Date     |  benchmark file (tss) | archive (tss) | full archive (tss) |       benchmark file (sss)      |       archive (sss)        | full archive (sss) |
 |:-----------|:---------------------:|:-------------:|:------------------:|:-------------------------------:|:--------------------------:|:------------------:|
-| 2020.08.31 |                       |               |                    | NATS-sss-v1_0-50262.pickle.pbz2 | NATS-sss-v1_0-50262-simple | [xx]-full          |
+| 2020.08.31 |                       |               |                    | [NATS-sss-v1_0-50262.pickle.pbz2](https://drive.google.com/file/d/1IabIvzWeDdDAWICBzFtTCMXxYWPIOIOX/view?usp=sharing) | [NATS-sss-v1_0-50262-simple.tar](https://drive.google.com/file/d/1scOMTUwcQhAMa_IMedp9lTzwmgqHLGgA/view?usp=sharing) | NATS-sss-v1_0-50262-full |
 
 
 1, create the benchmark instance:
@@ -114,6 +117,7 @@ Four multi-trial based methods:
 python ./exps/NATS-algos/reinforce.py       --dataset cifar100 --search_space sss --learning_rate 0.01
 python ./exps/NATS-algos/regularized_ea.py  --dataset cifar100 --search_space sss --ea_cycles 200 --ea_population 10 --ea_sample_size 3
 python ./exps/NATS-algos/random_wo_share.py --dataset cifar100 --search_space sss
+python ./exps/NATS-algos/bohb.py            --dataset cifar100 --search_space sss --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3
 
 
 Run Transformable Architecture Search (TAS), proposed in Network Pruning via Transformable Architecture Search, NeurIPS 2019

@@ -192,7 +192,7 @@ if __name__ == '__main__':
   parser.add_argument('--rand_seed',          type=int,   default=-1,    help='manual seed')
   args = parser.parse_args()
 
-  api = create(None, args.search_space, verbose=False)
+  api = create(None, args.search_space, fast_mode=True, verbose=False)
 
   args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'REINFORCE-{:}'.format(args.learning_rate))
   print('save-dir : {:}'.format(args.save_dir))

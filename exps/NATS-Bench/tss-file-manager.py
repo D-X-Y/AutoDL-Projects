@@ -3,7 +3,7 @@
 ##############################################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.08                          #
 ##############################################################################
-# Usage: python exps/NATS-Bench/sss-file-manager.py --mode check             #
+# Usage: python exps/NATS-Bench/tss-file-manager.py --mode check             #
 ##############################################################################
 import os, sys, time, torch, argparse
 from typing import List, Text, Dict, Any
@@ -21,8 +21,7 @@ from datasets     import get_datasets
 from log_utils    import Logger, AverageMeter, time_string, convert_secs2time
 
 
-def obtain_valid_ckp(save_dir: Text, total: int):
-  possible_seeds = [777, 888, 999]
+def obtain_valid_ckp(save_dir: Text, total: int, possible_seeds: List[int]):
   seed2ckps = defaultdict(list)
   miss2ckps = defaultdict(list)
   for i in range(total):
@@ -55,17 +54,18 @@ def copy_data(source_dir, target_dir, meta_path):
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='NATS-Bench (size search space) file manager.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(description='NATS-Bench (topology search space) file manager.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--mode',        type=str, required=True, choices=['check', 'copy'], help='The script mode.')
-  parser.add_argument('--save_dir',    type=str, default='output/NATS-Bench-size', help='Folder to save checkpoints and log.')
-  parser.add_argument('--check_N',     type=int, default=32768,  help='For safety.')
+  parser.add_argument('--save_dir',    type=str, default='output/NATS-Bench-topology', help='Folder to save checkpoints and log.')
+  parser.add_argument('--check_N',     type=int, default=15625,  help='For safety.')
   # use for train the model
   args = parser.parse_args()
-  possible_configs = ['01', '12', '90']
+  possible_configs = ['12', '200']
+  possible_seedss = [[111, 777], [777, 888, 999]]
   if args.mode == 'check':
-    for config in possible_configs:
+    for config, possible_seeds in zip(possible_configs, possible_seedss):
       cur_save_dir = '{:}/raw-data-{:}'.format(args.save_dir, config)
-      seed2ckps, miss2ckps = obtain_valid_ckp(cur_save_dir, args.check_N)
+      seed2ckps, miss2ckps = obtain_valid_ckp(cur_save_dir, args.check_N, possible_seeds)
       torch.save(dict(seed2ckps=seed2ckps, miss2ckps=miss2ckps), '{:}/meta-{:}.pth'.format(args.save_dir, config))
   elif args.mode == 'copy':
     for config in possible_configs:
