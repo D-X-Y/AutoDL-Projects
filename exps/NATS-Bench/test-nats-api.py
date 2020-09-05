@@ -85,13 +85,16 @@ def test_api(api, is_301=True):
 
 if __name__ == '__main__':
 
+  # api201 = create('./output/NATS-Bench-topology/process-FULL', 'topology', fast_mode=True, verbose=True)
+  for fast_mode in [True, False]:
+    for verbose in [True, False]:
+      api201 = create(None, 'tss', fast_mode=fast_mode, verbose=True)
+      print('{:} create with fast_mode={:} and verbose={:}'.format(time_string(), fast_mode, verbose))
+      test_api(api201, False)
+
   for fast_mode in [True, False]:
     for verbose in [True, False]:
       print('{:} create with fast_mode={:} and verbose={:}'.format(time_string(), fast_mode, verbose))
       api301 = create(None, 'size', fast_mode=fast_mode, verbose=True)
       print('{:} --->>> {:}'.format(time_string(), api301))
       test_api(api301, True)
-
-  # api201 = create(None, 'topology', True)  # use the default file path
-  # test_api(api201, False)
-  # print ('Test {:} done'.format(api201))

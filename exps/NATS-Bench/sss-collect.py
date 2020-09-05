@@ -1,7 +1,7 @@
 ##############################################################################
 # NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size #
 ##############################################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.07                          #
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.08                          #
 ##############################################################################
 # This file is used to re-orangize all checkpoints (created by main-sss.py)  #
 # into a single benchmark file. Besides, for each trial, we will merge the   #
@@ -24,6 +24,7 @@ from models       import CellStructure, get_cell_based_tiny_net
 from nats_bench   import pickle_save, pickle_load, ArchResults, ResultsCount
 from procedures   import bench_pure_evaluate as pure_evaluate, get_nas_bench_loaders
 from utils        import get_md5_file
+
 
 NATS_SSS_BASE_NAME = 'NATS-sss-v1_0'  # 2020.08.28
 

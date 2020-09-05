@@ -10,6 +10,8 @@ import os, copy, random, numpy as np
 from pathlib import Path
 from typing import List, Text, Union, Dict, Optional
 from collections import OrderedDict, defaultdict
+import warnings
+from .api_utils import time_string
 from .api_utils import pickle_load
 from .api_utils import ArchResults
 from .api_utils import NASBenchMetaAPI
@@ -60,58 +62,89 @@ class NATStopology(NASBenchMetaAPI):
     self.reset_time()
     if file_path_or_dict is None:
       file_path_or_dict = os.path.join(os.environ['TORCH_HOME'], ALL_BENCHMARK_FILES[-1])
-      print ('Try to use the default NATS-Bench (topology) path from {:}.'.format(file_path_or_dict))
+      print ('{:} Try to use the default NATS-Bench (topology) path from {:}.'.format(time_string(), file_path_or_dict))
     if isinstance(file_path_or_dict, str) or isinstance(file_path_or_dict, Path):
       file_path_or_dict = str(file_path_or_dict)
-      if verbose: print('try to create the NATS-Bench (topology) api from {:}'.format(file_path_or_dict))
-      assert os.path.isfile(file_path_or_dict), 'invalid path : {:}'.format(file_path_or_dict)
+      if verbose:
+        print('{:} Try to create the NATS-Bench (topology) api from {:}'.format(time_string(), file_path_or_dict))
+      if not os.path.isfile(file_path_or_dict) and not os.path.isdir(file_path_or_dict):
+        raise ValueError('{:} is neither a file or a dir.'.format(file_path_or_dict))
       self.filename = Path(file_path_or_dict).name
-      file_path_or_dict = np.load(file_path_or_dict)
+      if fast_mode:
+        if os.path.isfile(file_path_or_dict):
+          raise ValueError('fast_mode={:} must feed the path for directory : {:}'.format(fast_mode, file_path_or_dict))
+        else:
+          self._archive_dir = file_path_or_dict
+      else:
+        if os.path.isdir(file_path_or_dict):
+          raise ValueError('fast_mode={:} must feed the path for file : {:}'.format(fast_mode, file_path_or_dict))
+        else:
+          file_path_or_dict = pickle_load(file_path_or_dict)
     elif isinstance(file_path_or_dict, dict):
       file_path_or_dict = copy.deepcopy(file_path_or_dict)
-    else: raise ValueError('invalid type : {:} not in [str, dict]'.format(type(file_path_or_dict)))
-    assert isinstance(file_path_or_dict, dict), 'It should be a dict instead of {:}'.format(type(file_path_or_dict))
     self.verbose = verbose # [TODO] a flag indicating whether to print more logs
-    keys = ('meta_archs', 'arch2infos', 'evaluated_indexes')
-    for key in keys: assert key in file_path_or_dict, 'Can not find key[{:}] in the dict'.format(key)
-    self.meta_archs = copy.deepcopy( file_path_or_dict['meta_archs'] )
-    # This is a dict mapping each architecture to a dict, where the key is #epochs and the value is ArchResults
-    self.arch2infos_dict = OrderedDict()
-    self._avaliable_hps = set(['12', '200'])
-    for xkey in sorted(list(file_path_or_dict['arch2infos'].keys())):
-      all_info = file_path_or_dict['arch2infos'][xkey]
-      hp2archres = OrderedDict()
-      # self.arch2infos_less[xkey] = ArchResults.create_from_state_dict( all_info['less'] )
-      # self.arch2infos_full[xkey] = ArchResults.create_from_state_dict( all_info['full'] )
-      hp2archres['12'] = ArchResults.create_from_state_dict(all_info['less'])
-      hp2archres['200'] = ArchResults.create_from_state_dict(all_info['full'])
-      self.arch2infos_dict[xkey] = hp2archres
-    self.evaluated_indexes = sorted(list(file_path_or_dict['evaluated_indexes']))
+    if isinstance(file_path_or_dict, dict):
+      keys = ('meta_archs', 'arch2infos', 'evaluated_indexes')
+      for key in keys: assert key in file_path_or_dict, 'Can not find key[{:}] in the dict'.format(key)
+      self.meta_archs = copy.deepcopy(file_path_or_dict['meta_archs'])
+      # This is a dict mapping each architecture to a dict, where the key is #epochs and the value is ArchResults
+      self.arch2infos_dict = OrderedDict()
+      self._avaliable_hps = set()
+      for xkey in sorted(list(file_path_or_dict['arch2infos'].keys())):
+        all_info = file_path_or_dict['arch2infos'][xkey]
+        hp2archres = OrderedDict()
+        for hp_key, results in all_infos.items():
+          hp2archres[hp_key] = ArchResults.create_from_state_dict(results)
+          self._avaliable_hps.add(hp_key)  # save the avaliable hyper-parameter
+        self.arch2infos_dict[xkey] = hp2archres
+      self.evaluated_indexes = list(file_path_or_dict['evaluated_indexes'])
+    elif self.archive_dir is not None:
+      benchmark_meta = pickle_load('{:}/meta.{:}'.format(self.archive_dir, PICKLE_EXT))
+      self.meta_archs = copy.deepcopy(benchmark_meta['meta_archs'])
+      self.arch2infos_dict = OrderedDict()
+      self._avaliable_hps = set()
+      self.evaluated_indexes = set()
+    else:
+      raise ValueError('file_path_or_dict [{:}] must be a dict or archive_dir must be set'.format(type(file_path_or_dict)))
     self.archstr2index = {}
     for idx, arch in enumerate(self.meta_archs):
       assert arch not in self.archstr2index, 'This [{:}]-th arch {:} already in the dict ({:}).'.format(idx, arch, self.archstr2index[arch])
-      self.archstr2index[ arch ] = idx
+      self.archstr2index[arch] = idx
+    if self.verbose:
+      print('{:} Create NATS-Bench (topology) done with {:}/{:} architectures avaliable.'.format(
+            time_string(), len(self.evaluated_indexes), len(self.meta_archs)))
 
   def reload(self, archive_root: Text = None, index: int = None):
     """Overwrite all information of the 'index'-th architecture in the search space.
          It will load its data from 'archive_root'.
     """
+    if self.verbose:
+      print('{:} Call clear_params with archive_root={:} and index={:}'.format(
+            time_string(), archive_root, index))
     if archive_root is None:
-      archive_root = os.path.join(os.environ['TORCH_HOME'], ALL_ARCHIVE_DIRS[-1])
-    assert os.path.isdir(archive_root), 'invalid directory : {:}'.format(archive_root)
+      archive_root = os.path.join(os.environ['TORCH_HOME'], '{:}-full'.format(ALL_BASE_NAMES[-1]))
+      if not os.path.isdir(archive_root):
+        warnings.warn('The input archive_root is None and the default archive_root path ({:}) does not exist, try to use self.archive_dir.'.format(archive_root))
+      archive_root = self.archive_dir
+    if archive_root is None or not os.path.isdir(archive_root):
+      raise ValueError('Invalid archive_root : {:}'.format(archive_root))
     if index is None:
       indexes = list(range(len(self)))
     else:
       indexes = [index]
     for idx in indexes:
       assert 0 <= idx < len(self.meta_archs), 'invalid index of {:}'.format(idx)
-      xfile_path = os.path.join(archive_root, '{:06d}-FULL.pth'.format(idx))
+      xfile_path = os.path.join(archive_root, '{:06d}.{:}'.format(idx, PICKLE_EXT))
+      if not os.path.isfile(xfile_path):
+        xfile_path = os.path.join(archive_root, '{:d}.{:}'.format(idx, PICKLE_EXT))
       assert os.path.isfile(xfile_path), 'invalid data path : {:}'.format(xfile_path)
-      xdata = torch.load(xfile_path, map_location='cpu')
-      assert isinstance(xdata, dict) and 'full' in xdata and 'less' in xdata, 'invalid format of data in {:}'.format(xfile_path)
+      xdata = pickle_load(xfile_path)
+      assert isinstance(xdata, dict), 'invalid format of data in {:}'.format(xfile_path)
+      self.evaluated_indexes.add(idx)
       hp2archres = OrderedDict()
-      hp2archres['12'] = ArchResults.create_from_state_dict(xdata['less'])
-      hp2archres['200'] = ArchResults.create_from_state_dict(xdata['full'])
+      for hp_key, results in xdata.items():
+        hp2archres[hp_key] = ArchResults.create_from_state_dict(results)
+        self._avaliable_hps.add(hp_key)
       self.arch2infos_dict[idx] = hp2archres
 
   def query_info_str_by_arch(self, arch, hp: Text='12'):
@@ -122,7 +155,7 @@ class NATStopology(NASBenchMetaAPI):
         The difference between these three configurations are the number of training epochs.
     """
     if self.verbose:
-      print('Call query_info_str_by_arch with arch={:} and hp={:}'.format(arch, hp))
+      print('{:} Call query_info_str_by_arch with arch={:} and hp={:}'.format(time_string(), arch, hp))
     return self._query_info_str_by_arch(arch, hp, print_information)
 
   # obtain the metric for the `index`-th architecture
@@ -142,8 +175,10 @@ class NATStopology(NASBenchMetaAPI):
   #   When is_random=False, the performanceo of all trials will be averaged.
   def get_more_info(self, index, dataset, iepoch=None, hp='12', is_random=True):
     if self.verbose:
-      print('Call the get_more_info function with index={:}, dataset={:}, iepoch={:}, hp={:}, and is_random={:}.'.format(index, dataset, iepoch, hp, is_random))
+      print('{:} Call the get_more_info function with index={:}, dataset={:}, iepoch={:}, hp={:}, and is_random={:}.'.format(
+            time_string(), index, dataset, iepoch, hp, is_random))
     index = self.query_index_by_arch(index)  # To avoid the input is a string or an instance of a arch object
+    self._prepare_info(index)
     if index not in self.arch2infos_dict:
       raise ValueError('Did not find {:} from arch2infos_dict.'.format(index))
     archresult = self.arch2infos_dict[index][str(hp)]

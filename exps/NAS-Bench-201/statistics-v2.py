@@ -77,17 +77,17 @@ def account_one_arch(arch_index: int, arch_str: Text, checkpoints: List[Text],
 
 def correct_time_related_info(arch_index: int, arch_info_full: ArchResults, arch_info_less: ArchResults):
   # calibrate the latency based on NAS-Bench-201-v1_0-e61699.pth
-  cifar010_latency = (api.get_latency(arch_index, 'cifar10-valid', False) + api.get_latency(arch_index, 'cifar10', False)) / 2
+  cifar010_latency = (api.get_latency(arch_index, 'cifar10-valid', hp='200') + api.get_latency(arch_index, 'cifar10', hp='200')) / 2
   arch_info_full.reset_latency('cifar10-valid', None, cifar010_latency)
   arch_info_full.reset_latency('cifar10', None, cifar010_latency)
   arch_info_less.reset_latency('cifar10-valid', None, cifar010_latency)
   arch_info_less.reset_latency('cifar10', None, cifar010_latency)
 
-  cifar100_latency = api.get_latency(arch_index, 'cifar100', False)
+  cifar100_latency = api.get_latency(arch_index, 'cifar100', hp='200')
   arch_info_full.reset_latency('cifar100', None, cifar100_latency)
   arch_info_less.reset_latency('cifar100', None, cifar100_latency)
 
-  image_latency = api.get_latency(arch_index, 'ImageNet16-120', False)
+  image_latency = api.get_latency(arch_index, 'ImageNet16-120', hp='200')
   arch_info_full.reset_latency('ImageNet16-120', None, image_latency)
   arch_info_less.reset_latency('ImageNet16-120', None, image_latency)
 
