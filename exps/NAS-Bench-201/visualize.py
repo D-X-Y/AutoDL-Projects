@@ -801,7 +801,6 @@ if __name__ == '__main__':
 
   show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'BN0', 'BN0-XX-CIFAR010-VALID.pdf', (0, 100,10), 250)
   show_nas_sharing_w(api, 'cifar10'       , 'ori-test', vis_save_dir, 'BN0', 'BN0-XX-CIFAR010-TEST.pdf' , (0, 100,10), 250)
-  import pdb; pdb.set_trace()
   """
   for x_maxs in [50, 250]:
     show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)

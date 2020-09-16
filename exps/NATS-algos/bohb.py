@@ -95,7 +95,7 @@ def main(xargs, api):
 
   logger.log('{:} use api : {:}'.format(time_string(), api))
   api.reset_time()
-  search_space = get_search_spaces(xargs.search_space, 'nas-bench-301')
+  search_space = get_search_spaces(xargs.search_space, 'nats-bench')
   if xargs.search_space == 'tss':
     cs = get_topology_config_space(search_space)
     config2structure = config2topology_func()

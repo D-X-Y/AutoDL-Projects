@@ -48,7 +48,6 @@ def test_api(api, sss_or_tss=True):
     print('')
   params = api.get_net_param(12, 'cifar10', None)
 
-  import pdb; pdb.set_trace()
   # Obtain the config and create the network
   config = api.get_net_config(12, 'cifar10')
   print('{:}\n'.format(config))

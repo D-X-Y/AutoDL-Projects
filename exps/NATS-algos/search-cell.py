@@ -342,9 +342,8 @@ def main(xargs):
   logger.log('||||||| {:10s} ||||||| Search-Loader-Num={:}, Valid-Loader-Num={:}, batch size={:}'.format(xargs.dataset, len(search_loader), len(valid_loader), config.batch_size))
   logger.log('||||||| {:10s} ||||||| Config={:}'.format(xargs.dataset, config))
 
-  search_space = get_search_spaces(xargs.search_space, 'nas-bench-301')
+  search_space = get_search_spaces(xargs.search_space, 'nats-bench')
 
-  
   model_config = dict2config(
       dict(name='generic', C=xargs.channel, N=xargs.num_cells, max_nodes=xargs.max_nodes, num_classes=class_num,
            space=search_space, affine=bool(xargs.affine), track_running_stats=bool(xargs.track_running_stats)), None)

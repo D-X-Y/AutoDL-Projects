@@ -160,7 +160,7 @@ def main(xargs, api):
   prepare_seed(xargs.rand_seed)
   logger = prepare_logger(args)
 
-  search_space = get_search_spaces(xargs.search_space, 'nas-bench-301')
+  search_space = get_search_spaces(xargs.search_space, 'nats-bench')
   if xargs.search_space == 'tss':
     random_arch = random_topology_func(search_space)
     mutate_arch = mutate_topology_func(search_space)

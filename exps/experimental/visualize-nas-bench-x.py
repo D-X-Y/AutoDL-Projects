@@ -395,9 +395,9 @@ if __name__ == '__main__':
   for xdata in datasets:
     visualize_tss_info(api201, xdata, to_save_dir)
 
-  api301 = create(None, 'size', verbose=True)
+  api_sss = create(None, 'size', verbose=True)
   for xdata in datasets:
-    visualize_sss_info(api301, xdata, to_save_dir)
+    visualize_sss_info(api_sss, xdata, to_save_dir)
 
   visualize_info(None, to_save_dir, 'tss')
   visualize_info(None, to_save_dir, 'sss')

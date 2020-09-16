@@ -8,8 +8,6 @@ We also show the versatility of NATS-Bench by benchmarking 13 recent state-of-th
 This facilitates a much larger community of researchers to focus on developing better NAS algorithms in a more comparable and computationally effective environment.
 
 
-**coming soon!**
-
 The structure of this Markdown file:
 - [How to use NATS-Bench?](#How-to-Use-NATS-Bench)
 - [How to re-create NATS-Bench from scratch?](#how-to-re-create-nats-bench-from-scratch)
@@ -33,14 +31,48 @@ To merge the chunks into the original full archive, you can use `cat file_name* 
 
 |   Date     |  benchmark file (tss) | archive (tss) | full archive (tss) |       benchmark file (sss)      |       archive (sss)        | full archive (sss) |
 |:-----------|:---------------------:|:-------------:|:------------------:|:-------------------------------:|:--------------------------:|:------------------:|
-| 2020.08.31 |                       |               |                    | [NATS-sss-v1_0-50262.pickle.pbz2](https://drive.google.com/file/d/1IabIvzWeDdDAWICBzFtTCMXxYWPIOIOX/view?usp=sharing) | [NATS-sss-v1_0-50262-simple.tar](https://drive.google.com/file/d/1scOMTUwcQhAMa_IMedp9lTzwmgqHLGgA/view?usp=sharing) | NATS-sss-v1_0-50262-full |
+| 2020.08.31 | [NATS-tss-v1_0-3ffb9.pickle.pbz2](https://drive.google.com/file/d/1vzyK0UVH2D3fTpa1_dSWnp1gvGpAxRul/view?usp=sharing) | [NATS-tss-v1_0-3ffb9-simple.tar](https://drive.google.com/file/d/17_saCsj_krKjlCBLOJEpNtzPXArMCqxU/view?usp=sharing) |  NATS-tss-v1_0-3ffb9-full              | [NATS-sss-v1_0-50262.pickle.pbz2](https://drive.google.com/file/d/1IabIvzWeDdDAWICBzFtTCMXxYWPIOIOX/view?usp=sharing) | [NATS-sss-v1_0-50262-simple.tar](https://drive.google.com/file/d/1scOMTUwcQhAMa_IMedp9lTzwmgqHLGgA/view?usp=sharing) | [NATS-sss-v1_0-50262-full](api.reload(index=12)) |
 
 
 1, create the benchmark instance:
 ```
+# Create the API instance for the size search space in NATS
 api = create(None, 'sss', fast_mode=True, verbose=True)
+
+# Create the API instance for the topology search space in NATS
+api = create(None, 'tss', fast_mode=True, verbose=True)
 ```
 
+2, query the performance:
+```
+# Query the loss / accuracy / time for 1234-th candidate architecture on CIFAR-10
+# info is a dict, where you can easily figure out the meaning by key
+info = api.get_more_info(1234, 'cifar10')
+
+# Query the flops, params, latency. info is a dict.
+info = api.get_cost_info(12, 'cifar10')
+
+# Simulate the training of the 1224-th candidate:
+validation_accuracy, latency, time_cost, current_total_time_cost = api.simulate_train_eval(1224, dataset='cifar10', hp='12')
+```
+
+3, others:
+```
+# Clear the parameters of the 12-th candidate.
+api.clear_params(12)
+
+# Reload all information of the 12-th candidate.
+api.reload(index=12)
+
+# Create the instance of th 12-th candidate for CIFAR-10.
+from models import get_cell_based_tiny_net
+config = api.get_net_config(12, 'cifar10')
+network = get_cell_based_tiny_net(config)
+
+# Load the pre-trained weights: params is a dict, where the key is the seed and value is the weights.
+params = api.get_net_param(12, 'cifar10', None)
+network.load_state_dict(next(iter(params.values())))
+```
 
 ## How to Re-create NATS-Bench from Scratch
 
@@ -53,6 +85,10 @@ bash ./scripts/NATS-Bench/train-shapes.sh 00000-32767 90 777
 ```
 The checkpoint of all candidates are located at `output/NATS-Bench-size` by default.
 
+After training these candidate architectures, please use the following command to re-organize all checkpoints into the official benchmark file.
+```
+python exps/NATS-Bench/sss-collect.py
+```
 
 ### The Topology Search Space
 
@@ -63,7 +99,10 @@ bash scripts/NATS-Bench/train-topology.sh 00000-15624 200 '777 888 999'
 ```
 The checkpoint of all candidates are located at `output/NATS-Bench-topology` by default.
 
-
+After training these candidate architectures, please use the following command to re-organize all checkpoints into the official benchmark file.
+```
+python exps/NATS-Bench/tss-collect.py
+```
 
 
 ## To Reproduce 13 Baseline NAS Algorithms in NAS-Bench-201

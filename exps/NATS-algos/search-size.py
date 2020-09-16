@@ -155,8 +155,8 @@ def main(xargs):
   logger.log('||||||| {:10s} ||||||| Search-Loader-Num={:}, Valid-Loader-Num={:}, batch size={:}'.format(xargs.dataset, len(search_loader), len(valid_loader), config.batch_size))
   logger.log('||||||| {:10s} ||||||| Config={:}'.format(xargs.dataset, config))
 
-  search_space = get_search_spaces(xargs.search_space, 'nas-bench-301')
-  
+  search_space = get_search_spaces(xargs.search_space, 'nats-bench')
+
   model_config = dict2config(
       dict(name='generic', super_type='search-shape', candidate_Cs=search_space['candidates'], max_num_Cs=search_space['numbers'], num_classes=class_num,
            genotype=args.genotype, affine=bool(xargs.affine), track_running_stats=bool(xargs.track_running_stats)), None)
