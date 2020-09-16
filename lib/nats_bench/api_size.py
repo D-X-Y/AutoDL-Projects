@@ -68,7 +68,7 @@ class NATSsize(NASBenchMetaAPI):
         self._archive_dir = os.path.join(os.environ['TORCH_HOME'], '{:}-simple'.format(ALL_BASE_NAMES[-1]))
       else:
         file_path_or_dict = os.path.join(os.environ['TORCH_HOME'], '{:}.{:}'.format(ALL_BASE_NAMES[-1], PICKLE_EXT))
-      print ('Try to use the default NATS-Bench (size) path from fast_mode={:} and path={:}.'.format(self._fast_mode, file_path_or_dict))
+      print ('{:} Try to use the default NATS-Bench (size) path from fast_mode={:} and path={:}.'.format(time_string(), self._fast_mode, file_path_or_dict))
     if isinstance(file_path_or_dict, str) or isinstance(file_path_or_dict, Path):
       file_path_or_dict = str(file_path_or_dict)
       if verbose:
@@ -125,10 +125,15 @@ class NATSsize(NASBenchMetaAPI):
        If index is None, overwrite all ckps.
     """
     if self.verbose:
-      print('{:} Call clear_params with archive_root={:} and index={:}'.format(time_string(), archive_root, index))
+      print('{:} Call clear_params with archive_root={:} and index={:}'.format(
+            time_string(), archive_root, index))
     if archive_root is None:
       archive_root = os.path.join(os.environ['TORCH_HOME'], '{:}-full'.format(ALL_BASE_NAMES[-1]))
-    assert os.path.isdir(archive_root), 'invalid directory : {:}'.format(archive_root)
+      if not os.path.isdir(archive_root):
+        warnings.warn('The input archive_root is None and the default archive_root path ({:}) does not exist, try to use self.archive_dir.'.format(archive_root))
+      archive_root = self.archive_dir
+    if archive_root is None or not os.path.isdir(archive_root):
+      raise ValueError('Invalid archive_root : {:}'.format(archive_root))
     if index is None:
       indexes = list(range(len(self)))
     else:

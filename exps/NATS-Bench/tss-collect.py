@@ -10,7 +10,7 @@
 # Usage:                                                                     #
 # python exps/NATS-Bench/tss-collect.py                                      #
 ##############################################################################
-import os, re, sys, time, random, argparse, collections
+import os, re, sys, time, shutil, random, argparse, collections
 import numpy as np
 from copy import deepcopy
 import torch
@@ -26,6 +26,7 @@ from datasets     import get_datasets
 from models       import CellStructure, get_cell_based_tiny_net, get_search_spaces
 from nats_bench   import pickle_save, pickle_load, ArchResults, ResultsCount
 from procedures   import bench_pure_evaluate as pure_evaluate, get_nas_bench_loaders
+from utils        import get_md5_file
 from nas_201_api  import NASBench201API
 
 

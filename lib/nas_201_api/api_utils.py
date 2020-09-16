@@ -716,7 +716,7 @@ class ResultsCount(object):
   def get_config(self, str2structure):
     """This function is used to obtain the config dict for this architecture."""
     if str2structure is None:
-      # In this case, this is NAS-Bench-301
+      # In this case, this is to handle the size search space.
       if 'name' in self.arch_config and self.arch_config['name'] == 'infer.shape.tiny':
         return {'name': 'infer.shape.tiny', 'channels': self.arch_config['channels'],
                 'genotype': self.arch_config['genotype'], 'num_classes': self.arch_config['class_num']}
@@ -726,7 +726,7 @@ class ResultsCount(object):
                 'N'   : self.arch_config['num_cells'],
                 'arch_str': self.arch_config['arch_str'], 'num_classes': self.arch_config['class_num']}
     else:
-      # In this case, this is NAS-Bench-301
+      # In this case, this is to handle the size search space.
       if 'name' in self.arch_config and self.arch_config['name'] == 'infer.shape.tiny':
         return {'name': 'infer.shape.tiny', 'channels': self.arch_config['channels'],
                 'genotype': str2structure(self.arch_config['genotype']), 'num_classes': self.arch_config['class_num']}

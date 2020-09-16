@@ -27,7 +27,6 @@ DARTS_SPACE           = ['none', 'skip_connect', 'dua_sepc_3x3', 'dua_sepc_5x5',
 SearchSpaceNames = {'connect-nas'  : CONNECT_NAS_BENCHMARK,
                     'nats-bench'   : NAS_BENCH_201,
                     'nas-bench-201': NAS_BENCH_201,
-                    'nas-bench-301': NAS_BENCH_201,
                     'darts'        : DARTS_SPACE}
 
 
