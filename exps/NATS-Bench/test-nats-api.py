@@ -5,7 +5,7 @@
 ##############################################################################
 # Usage: python exps/NATS-Bench/test-nats-api.py                             #
 ##############################################################################
-import os, sys, time, torch, argparse
+import os, gc, sys, time, torch, argparse
 import numpy as np
 from typing import List, Text, Dict, Any
 from shutil import copyfile
@@ -91,6 +91,8 @@ if __name__ == '__main__':
       api_nats_tss = create(None, 'tss', fast_mode=fast_mode, verbose=True)
       print('{:} create with fast_mode={:} and verbose={:}'.format(time_string(), fast_mode, verbose))
       test_api(api_nats_tss, False)
+      del api_nats_tss
+      gc.collect()
 
   for fast_mode in [True, False]:
     for verbose in [True, False]:
@@ -98,3 +100,5 @@ if __name__ == '__main__':
       api_nats_sss = create(None, 'size', fast_mode=fast_mode, verbose=True)
       print('{:} --->>> {:}'.format(time_string(), api_nats_sss))
       test_api(api_nats_sss, True)
+      del api_nats_sss
+      gc.collect()
