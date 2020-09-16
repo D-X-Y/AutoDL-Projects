@@ -5,4 +5,4 @@
 - [2019.09.28] [f8f3f38] TAS and SETN codes were publicly released.
 - [2019.01.31] [13e908f] GDAS codes were publicly released.
 - [2020.07.01] [a45808b] Upgrade NAS-API to the 2.0 version.
-- [2020.08.30] [       ] Create NATS-BENCH.
+- [2020.09.16] [7052265] Create NATS-BENCH.
