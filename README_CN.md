@@ -98,13 +98,13 @@ Some methods use knowledge distillation (KD), which require pre-trained models. 
 
 如果您发现该项目对您的科研或工程有帮助，请考虑引用下列的某些文献：
 ```
-@inproceedings{dong2020nasbench201,
 @article{dong2020nats,
   title={NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size},
   author={Dong, Xuanyi and Liu, Lu and Musial, Katarzyna and Gabrys, Bogdan},
   journal={arXiv preprint arXiv:2009.00437},
   year={2020}
 }
+@inproceedings{dong2020nasbench201,
   title     = {NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {International Conference on Learning Representations (ICLR)},
