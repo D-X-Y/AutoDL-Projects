@@ -1,4 +1,4 @@
-# NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size
+# [NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size](https://arxiv.org/pdf/2009.00437.pdf)
 
 Neural architecture search (NAS) has attracted a lot of attention and has been illustrated to bring tangible benefits in a large number of applications in the past few years. Network topology and network size have been regarded as two of the most important aspects for the performance of deep learning models and the community has spawned lots of searching algorithms for both of those aspects of the neural architectures. However, the performance gain from these searching algorithms is achieved under different search spaces and training setups. This makes the overall performance of the algorithms incomparable and the improvement from a sub-module of the searching model unclear.
 In this paper, we propose NATS-Bench, a unified benchmark on searching for both topology and size, for (almost) any up-to-date NAS algorithm.
@@ -14,17 +14,19 @@ The structure of this Markdown file:
 - [How to reproduce benchmarked results?](#to-reproduce-13-baseline-nas-algorithms-in-nas-bench-201)
 
 
-## How to Use NATS-Bench
+## How to Use [NATS-Bench](https://arxiv.org/pdf/2009.00437.pdf)
 
 ### Preparation and Download
+
 The **latest** benchmark file of NATS-Bench can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1zjB6wMANiKwB2A1yil2hQ8H_qyeSe2yt?usp=sharing).
 After download `NATS-[tss/sss]-[version]-[md5sum]-simple.tar`, please uncompress it by using `tar xvf [file_name]`.
 We highly recommend to put the downloaded benchmark file (`NATS-sss-v1_0-50262.pickle.pbz2` / `NATS-tss-v1_0-3ffb9.pickle.pbz2`) or uncompressed archive (`NATS-sss-v1_0-50262-simple` / `NATS-tss-v1_0-3ffb9-simple`) into `$TORCH_HOME`.
-In this way, our api will automatically find the path for these benchmarkfiles, which is convenient for the users. Otherwise, you need to manually indicate the file when creating the benchmark instance.
+In this way, our api will automatically find the path for these benchmark files, which are convenient for the users. Otherwise, you need to indicate the file when creating the benchmark instance manually.
 
-The history of benchmark files are as follows, `tss` indicates the topology search space and `sss` indicates the size search space.
-The benchmark file is used when create the NATS-Bench instance with `fast_mode=False`.
-The archive is used when `fast_mode=True`, where `archive` is a directory contains 15,625 files for tss or contains 32,768 files for sss. Each file contains all the information for a specific architecture candidate.
+The history of benchmark files is as follows, `tss` indicates the topology search space and `sss` indicates the size search space.
+The benchmark file is used when creating the NATS-Bench instance with `fast_mode=False`.
+The archive is used when `fast_mode=True`, where `archive` is a directory containing 15,625 files for tss or contains 32,768 files for sss.
+Each file contains all the information for a specific architecture candidate.
 The `full archive` is similar to `archive`, while each file in `full archive` contains **the trained weights**.
 Since the full archive is too large, we use `split -b 30G file_name file_name` to split it into multiple 30G chunks.
 To merge the chunks into the original full archive, you can use `cat file_name* > file_name`.
@@ -235,4 +237,16 @@ GDAS:
 |none~0|+|none~0|none~1|+|nor_conv_3x3~0|none~1|none~2|
 |none~0|+|none~0|none~1|+|nor_conv_3x3~0|none~1|none~2|
 |none~0|+|none~0|none~1|+|nor_conv_3x3~0|none~1|none~2|
+```
+
+## Citation
+
+If you find that NATS-Bench helps your research, please consider citing it:
+```
+@article{dong2020nats,
+  title={NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size},
+  author={Dong, Xuanyi and Liu, Lu and Musial, Katarzyna and Gabrys, Bogdan},
+  journal={arXiv preprint arXiv:2009.00437},
+  year={2020}
+}
 ```
