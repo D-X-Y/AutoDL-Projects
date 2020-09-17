@@ -7,8 +7,6 @@
 # We also define the class ArchResults, which contains all information of a single architecture trained by one kind of hyper-parameters on three datasets.
 # We also define the class ResultsCount, which contains all information of a single trial for a single architecture.
 ############################################################################################
-# History:
-# [2020.06.30] The first version.
 #
 import os, abc, copy, random, torch, numpy as np
 from pathlib import Path

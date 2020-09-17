@@ -1,8 +1,8 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.08 #
 #####################################################################
-# This API will be updated after 2020.09.16.                        #
-# Please use our new API for NATS-Bench, which is                   #
+# This API will not be updated after 2020.09.16.                    #
+# Please use our new API in NATS-Bench, which is                    #
 # more efficient and contains info of more architecture candidates. #
 #####################################################################
 from .api_utils import ArchResults, ResultsCount

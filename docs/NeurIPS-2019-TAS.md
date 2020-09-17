@@ -25,7 +25,7 @@ We provide some logs at [Google Drive](https://drive.google.com/open?id=1_qUY4DT
 ## Usage
 
 Use `bash ./scripts/prepare.sh` to prepare data splits for `CIFAR-10`, `CIFARR-100`, and `ILSVRC2012`.
-If you do not have `ILSVRC2012` data, pleasee comment L12 in `./scripts/prepare.sh`.
+If you do not have `ILSVRC2012` data, please comment L12 in `./scripts/prepare.sh`.
 
 args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel name, `CIFARX` indicates the searching hyper-parameters, `0.47/0.57` indicates the expected FLOP ratio, `-1` indicates the random seed.
 
