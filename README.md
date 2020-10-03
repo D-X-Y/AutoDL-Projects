@@ -5,7 +5,7 @@
 ---------
 [![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
-Automated Deep Learning (AutoDL-Projects) is an open source, lightweight, but useful project for everyone.
+Automated Deep Learning Projects (AutoDL-Projects) is an open source, lightweight, but useful project for everyone.
 This project implemented several neural architecture search (NAS) and hyper-parameter optimization (HPO) algorithms.
 中文介绍见[README_CN.md](README_CN.md)
 
@@ -23,7 +23,7 @@ This project implemented several neural architecture search (NAS) and hyper-para
 
 ## AutoDL-Projects Capabilities
 
-At the moment, this project provides the following algorithms and scripts to run them. Please see the details in the link provided in the description column.
+At this moment, this project provides the following algorithms and scripts to run them. Please see the details in the link provided in the description column.
 
 <table>
  <tbody>
