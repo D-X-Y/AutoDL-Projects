@@ -26,7 +26,7 @@ from nats_bench import create
 from log_utils import time_string
 
 
-def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
+def fetch_data(root_dir='./output/search', search_space='tss', dataset=None, suffix='-AWD0.0-WARMNone'):
   ss_dir = '{:}-{:}'.format(root_dir, search_space)
   alg2name, alg2path = OrderedDict(), OrderedDict()
   seeds = [777, 888, 999]
@@ -39,9 +39,9 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
     alg2name['ENAS'] = 'enas-affine0_BN0-None'
     alg2name['SETN'] = 'setn-affine0_BN0-None'
   else:
-    alg2name['TAS'] = 'tas-affine0_BN0'
-    alg2name['FBNetV2'] = 'fbv2-affine0_BN0'
-    alg2name['TuNAS'] = 'tunas-affine0_BN0'
+    alg2name['TAS'] = 'tas-affine0_BN0{:}'.format(suffix)
+    alg2name['FBNetV2'] = 'fbv2-affine0_BN0{:}'.format(suffix)
+    alg2name['TuNAS'] = 'tunas-affine0_BN0{:}'.format(suffix)
   for alg, name in alg2name.items():
     alg2path[alg] = os.path.join(ss_dir, dataset, name, 'seed-{:}-last-info.pth')
   alg2data = OrderedDict()

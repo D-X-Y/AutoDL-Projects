@@ -1,6 +1,11 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
 ######################################################################################
+# In this file, we aims to evaluate three kinds of channel searching strategies:
+# - 
+####
+# python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --warmup_ratio 0.25
+####
 # python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tas --rand_seed 777
 # python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo tas --rand_seed 777
 # python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo tas --rand_seed 777
@@ -51,7 +56,7 @@ class ExponentialMovingAverage(object):
 RL_BASELINE_EMA = ExponentialMovingAverage(0.95)
 
 
-def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, algo, epoch_str, print_freq, logger):
+def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, enable_controller, algo, epoch_str, print_freq, logger):
   data_time, batch_time = AverageMeter(), AverageMeter()
   base_losses, base_top1, base_top5 = AverageMeter(), AverageMeter(), AverageMeter()
   arch_losses, arch_top1, arch_top5 = AverageMeter(), AverageMeter(), AverageMeter()
@@ -80,6 +85,7 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
 
     # update the architecture-weight
     network.zero_grad()
+    a_optimizer.zero_grad()
     _, logits, log_probs = network(arch_inputs)
     arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
     if algo == 'tunas':
@@ -92,8 +98,9 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
       arch_loss = criterion(logits, arch_targets)
     else:
       raise ValueError('invalid algorightm name: {:}'.format(algo))
-    arch_loss.backward()
-    a_optimizer.step()
+    if enable_controller:
+      arch_loss.backward()
+      a_optimizer.step()
     # record
     arch_losses.update(arch_loss.item(),  arch_inputs.size(0))
     arch_top1.update  (arch_prec1.item(), arch_inputs.size(0))
@@ -208,13 +215,22 @@ def main(xargs):
     w_scheduler.update(epoch, 0.0)
     need_time = 'Time Left: {:}'.format(convert_secs2time(epoch_time.val * (total_epoch-epoch), True))
     epoch_str = '{:03d}-{:03d}'.format(epoch, total_epoch)
-    logger.log('\n[Search the {:}-th epoch] {:}, LR={:}'.format(epoch_str, need_time, min(w_scheduler.get_lr())))
+
+    if xargs.warmup_ratio is None or xargs.warmup_ratio <= float(epoch) / total_epoch:
+      enable_controller = True
+      network.set_warmup_ratio(None)
+    else:
+      enable_controller = False
+      network.set_warmup_ratio(1.0 - float(epoch) / total_epoch / xargs.warmup_ratio)
+
+    logger.log('\n[Search the {:}-th epoch] {:}, LR={:}, controller-warmup={:}, enable_controller={:}'.format(epoch_str, need_time, min(w_scheduler.get_lr()), network.warmup_ratio, enable_controller))
 
     if xargs.algo == 'fbv2' or xargs.algo == 'tas':
-      network.set_tau( xargs.tau_max - (xargs.tau_max-xargs.tau_min) * epoch / (total_epoch-1) )
+      network.set_tau(xargs.tau_max - (xargs.tau_max-xargs.tau_min) * epoch / (total_epoch-1))
       logger.log('[RESET tau as : {:}]'.format(network.tau))
     search_w_loss, search_w_top1, search_w_top5, search_a_loss, search_a_top1, search_a_top5 \
-                = search_func(search_loader, network, criterion, w_scheduler, w_optimizer, a_optimizer, xargs.algo, epoch_str, xargs.print_freq, logger)
+                = search_func(search_loader, network, criterion, w_scheduler,
+                              w_optimizer, a_optimizer, enable_controller, xargs.algo, epoch_str, xargs.print_freq, logger)
     search_time.update(time.time() - start_time)
     logger.log('[{:}] search [base] : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%, time-cost={:.1f} s'.format(epoch_str, search_w_loss, search_w_top1, search_w_top5, search_time.sum))
     logger.log('[{:}] search [arch] : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}%'.format(epoch_str, search_a_loss, search_a_top1, search_a_top5))
@@ -275,6 +291,8 @@ if __name__ == '__main__':
   # FOR GDAS
   parser.add_argument('--tau_min',            type=float, default=0.1,  help='The minimum tau for Gumbel Softmax.')
   parser.add_argument('--tau_max',            type=float, default=10,   help='The maximum tau for Gumbel Softmax.')
+  # FOR ALL
+  parser.add_argument('--warmup_ratio',       type=float,               help='The warmup ratio, if None, not use warmup.')
   #
   parser.add_argument('--track_running_stats',type=int,   default=0, choices=[0,1],help='Whether use track_running_stats or not in the BN layer.')
   parser.add_argument('--affine'      ,       type=int,   default=0, choices=[0,1],help='Whether use affine=True or False in the BN layer.')
@@ -291,7 +309,7 @@ if __name__ == '__main__':
   parser.add_argument('--rand_seed',          type=int,   help='manual seed')
   args = parser.parse_args()
   if args.rand_seed is None or args.rand_seed < 0: args.rand_seed = random.randint(1, 100000)
-  dirname = '{:}-affine{:}_BN{:}-AWD{:}'.format(args.algo, args.affine, args.track_running_stats, args.arch_weight_decay)
+  dirname = '{:}-affine{:}_BN{:}-AWD{:}-WARM{:}'.format(args.algo, args.affine, args.track_running_stats, args.arch_weight_decay, args.warmup_ratio)
   if args.overwite_epochs is not None:
     dirname = dirname + '-E{:}'.format(args.overwite_epochs)
   args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, dirname)

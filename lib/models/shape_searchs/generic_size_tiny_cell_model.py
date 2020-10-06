@@ -1,6 +1,10 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
 #####################################################
+# Here, we utilized three techniques to search for the number of channels:
+# - feature interpaltion from "Network Pruning via Transformable Architecture Search, NeurIPS 2019"
+# - masking + GumbelSoftmax from "FBNetV2: Differentiable Neural Architecture Search for Spatial and Channel Dimensions, CVPR 2020"
+# - masking + sampling from "Can Weight Sharing Outperform Random Architecture Search? An Investigation With TuNAS, CVPR 2020"
 from typing import List, Text, Any
 import random, torch
 import torch.nn as nn
@@ -43,6 +47,7 @@ class GenericNAS301Model(nn.Module):
     # algorithm related
     self.register_buffer('_tau', torch.zeros(1))
     self._algo        = None
+    self._warmup_ratio = None
 
   def set_algo(self, algo: Text):
     # used for searching
@@ -61,6 +66,13 @@ class GenericNAS301Model(nn.Module):
 
   def set_tau(self, tau):
     self._tau.data[:] = tau
+
+  @property
+  def warmup_ratio(self):
+    return self._warmup_ratio
+
+  def set_warmup_ratio(self, ratio: float):
+    self._warmup_ratio = ratio
 
   @property
   def weights(self):
@@ -112,7 +124,13 @@ class GenericNAS301Model(nn.Module):
       feature = cell(feature)
       # apply different searching algorithms
       idx = max(0, i-1)
-      if self._algo == 'fbv2':
+      if self._warmup_ratio is not None:
+        if random.random() < self._warmup_ratio:
+          mask = self._masks[-1]
+        else:
+          mask = self._masks[random.randint(0, len(self._masks)-1)]
+        feature = feature * mask.view(1, -1, 1, 1)
+      elif self._algo == 'fbv2':
         weights = nn.functional.gumbel_softmax(self._arch_parameters[idx:idx+1], tau=self.tau, dim=-1)
         mask = torch.matmul(weights, self._masks).view(1, -1, 1, 1)
         feature = feature * mask
