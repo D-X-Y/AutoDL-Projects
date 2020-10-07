@@ -17,6 +17,7 @@ from typing import List, Text, Union, Dict, Optional
 from collections import OrderedDict, defaultdict
 
 
+_FILE_SYSTEM = 'default'
 PICKLE_EXT = 'pickle.pbz2'
 
 
@@ -43,6 +44,34 @@ def time_string():
   ISOTIMEFORMAT='%Y-%m-%d %X'
   string = '[{:}]'.format(time.strftime( ISOTIMEFORMAT, time.gmtime(time.time()) ))
   return string
+
+
+def reset_file_system(lib: Text='default'):
+  _FILE_SYSTEM = lib
+
+
+def get_file_system(lib: Text='default'):
+  return _FILE_SYSTEM
+
+
+def nats_is_dir(file_path):
+  if _FILE_SYSTEM == 'default':
+    return os.path.isdir(file_path)
+  elif _FILE_SYSTEM == 'google':
+    import tensorflow as tf
+    return tf.gfile.isdir(file_path)
+  else:
+    raise ValueError('Unknown file system lib: {:}'.format(_FILE_SYSTEM))
+
+
+def nats_is_file(file_path):
+  if _FILE_SYSTEM == 'default':
+    return os.path.isfile(file_path)
+  elif _FILE_SYSTEM == 'google':
+    import tensorflow as tf
+    return tf.gfile.exists(file_path) and not tf.gfile.isdir(file_path)
+  else:
+    raise ValueError('Unknown file system lib: {:}'.format(_FILE_SYSTEM))
 
 
 def remap_dataset_set_names(dataset, metric_on_set, verbose=False):
@@ -146,10 +175,10 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
             time_string(), archive_root, index))
     if archive_root is None:
       archive_root = os.path.join(os.environ['TORCH_HOME'], '{:}-full'.format(self.ALL_BASE_NAMES[-1]))
-      if not os.path.isdir(archive_root):
+      if not nats_is_dir(archive_root):
         warnings.warn('The input archive_root is None and the default archive_root path ({:}) does not exist, try to use self.archive_dir.'.format(archive_root))
         archive_root = self.archive_dir
-    if archive_root is None or not os.path.isdir(archive_root):
+    if archive_root is None or not nats_is_dir(archive_root):
       raise ValueError('Invalid archive_root : {:}'.format(archive_root))
     if index is None:
       indexes = list(range(len(self)))
@@ -158,9 +187,9 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
     for idx in indexes:
       assert 0 <= idx < len(self.meta_archs), 'invalid index of {:}'.format(idx)
       xfile_path = os.path.join(archive_root, '{:06d}.{:}'.format(idx, PICKLE_EXT))
-      if not os.path.isfile(xfile_path):
+      if not nats_is_file(xfile_path):
         xfile_path = os.path.join(archive_root, '{:d}.{:}'.format(idx, PICKLE_EXT))
-      assert os.path.isfile(xfile_path), 'invalid data path : {:}'.format(xfile_path)
+      assert nats_is_file(xfile_path), 'invalid data path : {:}'.format(xfile_path)
       xdata = pickle_load(xfile_path)
       assert isinstance(xdata, dict), 'invalid format of data in {:}'.format(xfile_path)
       self.evaluated_indexes.add(idx)

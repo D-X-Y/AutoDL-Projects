@@ -7,7 +7,6 @@
 # [2020.08.31] NATS-sss-v1_0-50262.pickle.pbz2                                      #
 #####################################################################################
 import os, copy, random, numpy as np
-from pathlib import Path
 from typing import List, Text, Union, Dict, Optional
 from collections import OrderedDict, defaultdict
 from .api_utils import time_string
@@ -15,6 +14,8 @@ from .api_utils import pickle_load
 from .api_utils import ArchResults
 from .api_utils import NASBenchMetaAPI
 from .api_utils import remap_dataset_set_names
+from .api_utils import nats_is_dir
+from .api_utils import nats_is_file
 from .api_utils import PICKLE_EXT
 
 
@@ -70,20 +71,20 @@ class NATSsize(NASBenchMetaAPI):
       else:
         file_path_or_dict = os.path.join(os.environ['TORCH_HOME'], '{:}.{:}'.format(ALL_BASE_NAMES[-1], PICKLE_EXT))
       print ('{:} Try to use the default NATS-Bench (size) path from fast_mode={:} and path={:}.'.format(time_string(), self._fast_mode, file_path_or_dict))
-    if isinstance(file_path_or_dict, str) or isinstance(file_path_or_dict, Path):
+    if isinstance(file_path_or_dict, str):
       file_path_or_dict = str(file_path_or_dict)
       if verbose:
         print('{:} Try to create the NATS-Bench (size) api from {:} with fast_mode={:}'.format(time_string(), file_path_or_dict, fast_mode))
-      if not os.path.isfile(file_path_or_dict) and not os.path.isdir(file_path_or_dict):
+      if not nats_is_file(file_path_or_dict) and not nats_is_dir(file_path_or_dict):
         raise ValueError('{:} is neither a file or a dir.'.format(file_path_or_dict))
-      self.filename = Path(file_path_or_dict).name
+      self.filename = os.path.basename(file_path_or_dict)
       if fast_mode:
-        if os.path.isfile(file_path_or_dict):
+        if nats_is_file(file_path_or_dict):
           raise ValueError('fast_mode={:} must feed the path for directory : {:}'.format(fast_mode, file_path_or_dict))
         else:
           self._archive_dir = file_path_or_dict
       else:
-        if os.path.isdir(file_path_or_dict):
+        if nats_is_dir(file_path_or_dict):
           raise ValueError('fast_mode={:} must feed the path for file : {:}'.format(fast_mode, file_path_or_dict))
         else:
           file_path_or_dict = pickle_load(file_path_or_dict)

@@ -2,8 +2,8 @@
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
 #####################################################
 # Here, we utilized three techniques to search for the number of channels:
-# - feature interpaltion from "Network Pruning via Transformable Architecture Search, NeurIPS 2019"
-# - masking + GumbelSoftmax from "FBNetV2: Differentiable Neural Architecture Search for Spatial and Channel Dimensions, CVPR 2020"
+# - channel-wise interpaltion from "Network Pruning via Transformable Architecture Search, NeurIPS 2019"
+# - masking + Gumbel-Softmax from "FBNetV2: Differentiable Neural Architecture Search for Spatial and Channel Dimensions, CVPR 2020"
 # - masking + sampling from "Can Weight Sharing Outperform Random Architecture Search? An Investigation With TuNAS, CVPR 2020"
 from typing import List, Text, Any
 import random, torch
@@ -55,10 +55,10 @@ class GenericNAS301Model(nn.Module):
     assert algo in ['fbv2', 'tunas', 'tas'], 'invalid algo : {:}'.format(algo)
     self._algo = algo
     self._arch_parameters = nn.Parameter(1e-3*torch.randn(self._max_num_Cs, len(self._candidate_Cs)))
-    if algo == 'fbv2' or algo == 'tunas':
-      self.register_buffer('_masks', torch.zeros(len(self._candidate_Cs), max(self._candidate_Cs)))
-      for i in range(len(self._candidate_Cs)):
-        self._masks.data[i, :self._candidate_Cs[i]] = 1
+    # if algo == 'fbv2' or algo == 'tunas':
+    self.register_buffer('_masks', torch.zeros(len(self._candidate_Cs), max(self._candidate_Cs)))
+    for i in range(len(self._candidate_Cs)):
+      self._masks.data[i, :self._candidate_Cs[i]] = 1
   
   @property
   def tau(self):
