@@ -1,13 +1,13 @@
 ##################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020 #
-######################################################################################
+###########################################################################################################################################
 # In this file, we aims to evaluate three kinds of channel searching strategies:
-# - channel-wise interpaltion from "Network Pruning via Transformable Architecture Search, NeurIPS 2019"
+# - channel-wise interpolation from "Network Pruning via Transformable Architecture Search, NeurIPS 2019"
 # - masking + Gumbel-Softmax from "FBNetV2: Differentiable Neural Architecture Search for Spatial and Channel Dimensions, CVPR 2020"
 # - masking + sampling from "Can Weight Sharing Outperform Random Architecture Search? An Investigation With TuNAS, CVPR 2020"
 # For simplicity, we use tas, fbv2, and tunas to refer these three strategies. Their official implementations are at the following links:
 # - TAS: https://github.com/D-X-Y/AutoDL-Projects/blob/master/docs/NeurIPS-2019-TAS.md
-# - FBV2: https://github.com/facebookresearch/mobile-vision
+# - FBNetV2: https://github.com/facebookresearch/mobile-vision
 # - TuNAS: https://github.com/google-research/google-research/tree/master/tunas
 ####
 # python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --warmup_ratio 0.25
@@ -23,7 +23,7 @@
 # python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777 --use_api 0
 # python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777
 # python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo tunas --arch_weight_decay 0 --rand_seed 777
-######################################################################################
+###########################################################################################################################################
 import os, sys, time, random, argparse
 import numpy as np
 from copy import deepcopy

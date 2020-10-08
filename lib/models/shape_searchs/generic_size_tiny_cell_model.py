@@ -2,7 +2,7 @@
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019.01 #
 #####################################################
 # Here, we utilized three techniques to search for the number of channels:
-# - channel-wise interpaltion from "Network Pruning via Transformable Architecture Search, NeurIPS 2019"
+# - channel-wise interpolation from "Network Pruning via Transformable Architecture Search, NeurIPS 2019"
 # - masking + Gumbel-Softmax from "FBNetV2: Differentiable Neural Architecture Search for Spatial and Channel Dimensions, CVPR 2020"
 # - masking + sampling from "Can Weight Sharing Outperform Random Architecture Search? An Investigation With TuNAS, CVPR 2020"
 from typing import List, Text, Any
