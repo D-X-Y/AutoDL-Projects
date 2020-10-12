@@ -11,7 +11,7 @@ This facilitates a much larger community of researchers to focus on developing b
 The structure of this Markdown file:
 - [How to use NATS-Bench?](#How-to-Use-NATS-Bench)
 - [How to re-create NATS-Bench from scratch?](#how-to-re-create-nats-bench-from-scratch)
-- [How to reproduce benchmarked results?](#to-reproduce-13-baseline-nas-algorithms-in-nas-bench-201)
+- [How to reproduce benchmarked results?](#to-reproduce-13-baseline-nas-algorithms-in-nats-bench)
 
 
 ## How to Use [NATS-Bench](https://arxiv.org/pdf/2009.00437.pdf)
@@ -77,7 +77,11 @@ params = api.get_net_param(12, 'cifar10', None)
 network.load_state_dict(next(iter(params.values())))
 ```
 
+
+
 ## How to Re-create NATS-Bench from Scratch
+
+You need to use the [AutoDL-Projects](https://github.com/D-X-Y/AutoDL-Projects) repo to re-create NATS-Bench from scratch.
 
 ### The Size Search Space
 
@@ -108,7 +112,9 @@ python exps/NATS-Bench/tss-collect.py
 ```
 
 
-## To Reproduce 13 Baseline NAS Algorithms in NAS-Bench-201
+## To Reproduce 13 Baseline NAS Algorithms in NATS-Bench
+
+You need to use the [AutoDL-Projects](https://github.com/D-X-Y/AutoDL-Projects) repo to run 13 baseline NAS methods.
 
 ### Reproduce NAS methods on the topology search space
 
@@ -169,14 +175,14 @@ python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HO
 python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo tas --rand_seed 777
 
 
-Run the search strategy in FBNet-V2
+Run the channel search strategy in FBNet-V2
 
 python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo fbv2 --rand_seed 777
 python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo fbv2 --rand_seed 777
 python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo fbv2 --rand_seed 777
 
 
-Run the search strategy in TuNAS:
+Run the channel search strategy in TuNAS:
 
 python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777 --use_api 0
 python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777
