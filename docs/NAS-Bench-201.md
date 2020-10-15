@@ -1,5 +1,7 @@
 # [NAS-BENCH-201: Extending the Scope of Reproducible Neural Architecture Search](https://openreview.net/forum?id=HJxyZkBKDr)
 
+**Since our NAS-BENCH-201 has been extended to NATS-Bench, this README is deprecated and not maintained. Please use [NATS-Bench](https://github.com/D-X-Y/AutoDL-Projects/blob/master/docs/NATS-Bench.md), which has 5x more architecture information and faster API than NAS-BENCH-201.**
+
 We propose an algorithm-agnostic NAS benchmark (NAS-Bench-201) with a fixed search space, which provides a unified benchmark for almost any up-to-date NAS algorithms.
 The design of our search space is inspired by that used in the most popular cell-based searching algorithms, where a cell is represented as a directed acyclic graph.
 Each edge here is associated with an operation selected from a predefined operation set.
@@ -243,7 +245,7 @@ In commands [1-6], the first args `cifar10` indicates the dataset name, the seco
 If you find that NAS-Bench-201 helps your research, please consider citing it:
 ```
 @inproceedings{dong2020nasbench201,
-  title     = {NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search},
+  title     = {{NAS-Bench-201}: Extending the Scope of Reproducible Neural Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {International Conference on Learning Representations (ICLR)},
   url       = {https://openreview.net/forum?id=HJxyZkBKDr},
