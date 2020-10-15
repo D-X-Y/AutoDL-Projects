@@ -1,4 +1,4 @@
-# [NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size](https://arxiv.org/pdf/2009.00437.pdf)
+# [NATS-Bench: Benchmarking NAS Algorithms for Architecture Topology and Size](https://arxiv.org/pdf/2009.00437.pdf)
 
 Neural architecture search (NAS) has attracted a lot of attention and has been illustrated to bring tangible benefits in a large number of applications in the past few years. Network topology and network size have been regarded as two of the most important aspects for the performance of deep learning models and the community has spawned lots of searching algorithms for both of those aspects of the neural architectures. However, the performance gain from these searching algorithms is achieved under different search spaces and training setups. This makes the overall performance of the algorithms incomparable and the improvement from a sub-module of the searching model unclear.
 In this paper, we propose NATS-Bench, a unified benchmark on searching for both topology and size, for (almost) any up-to-date NAS algorithm.
@@ -251,7 +251,7 @@ GDAS:
 If you find that NATS-Bench helps your research, please consider citing it:
 ```
 @article{dong2020nats,
-  title={{NATS-Bench}: Benchmarking NAS algorithms for Architecture Topology and Size},
+  title={{NATS-Bench}: Benchmarking NAS Algorithms for Architecture Topology and Size},
   author={Dong, Xuanyi and Liu, Lu and Musial, Katarzyna and Gabrys, Bogdan},
   journal={arXiv preprint arXiv:2009.00437},
   year={2020}

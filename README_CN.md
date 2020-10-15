@@ -61,7 +61,7 @@
     </tr>
     <tr> <!-- (6-th row) -->
     <td align="center" valign="middle"> NATS-Bench </td>
-    <td align="center" valign="middle"> <a href="https://xuanyidong.com/assets/projects/NATS-Bench"> NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size</a> </td>
+    <td align="center" valign="middle"> <a href="https://xuanyidong.com/assets/projects/NATS-Bench"> NATS-Bench: Benchmarking NAS Algorithms for Architecture Topology and Size</a> </td>
     <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/master/docs/NATS-Bench.md">NATS-Bench.md</a> </td>
     </tr>
     <tr> <!-- (7-th row) -->
@@ -99,7 +99,7 @@ Some methods use knowledge distillation (KD), which require pre-trained models. 
 如果您发现该项目对您的科研或工程有帮助，请考虑引用下列的某些文献：
 ```
 @article{dong2020nats,
-  title={NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size},
+  title={{NATS-Bench}: Benchmarking NAS Algorithms for Architecture Topology and Size},
   author={Dong, Xuanyi and Liu, Lu and Musial, Katarzyna and Gabrys, Bogdan},
   journal={arXiv preprint arXiv:2009.00437},
   year={2020}
