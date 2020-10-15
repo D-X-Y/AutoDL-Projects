@@ -939,9 +939,9 @@ class ArchResults(object):
     x.load_state_dict(state_dict)
     return x
 
-  # This function is used to clear the weights saved in each 'result'
-  # This can help reduce the memory footprint.
   def clear_params(self):
+    """Clear the weights saved in each 'result'."""
+    # NOTE(xuanyidong): This can help reduce the memory footprint.
     for unused_key, result in self.all_results.items():
       del result.net_state_dict
       result.net_state_dict = None

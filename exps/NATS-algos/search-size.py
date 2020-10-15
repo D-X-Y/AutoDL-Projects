@@ -43,7 +43,7 @@ from models       import get_cell_based_tiny_net, get_search_spaces
 from nats_bench   import create
 
 
-# Ad-hoc for TuNAS
+# Ad-hoc for RL algorithms.
 class ExponentialMovingAverage(object):
   """Class that maintains an exponential moving average."""
 
