@@ -6,3 +6,4 @@
 - [2019.01.31] [13e908f] GDAS codes were publicly released.
 - [2020.07.01] [a45808b] Upgrade NAS-API to the 2.0 version.
 - [2020.09.16] [7052265] Create NATS-BENCH.
+- [2020.10.15] [446262a] Update NATS-BENCH to version 1.0

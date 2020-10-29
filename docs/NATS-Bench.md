@@ -1,4 +1,4 @@
-# [NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size](https://arxiv.org/pdf/2009.00437.pdf)
+# [NATS-Bench: Benchmarking NAS Algorithms for Architecture Topology and Size](https://arxiv.org/pdf/2009.00437.pdf)
 
 Neural architecture search (NAS) has attracted a lot of attention and has been illustrated to bring tangible benefits in a large number of applications in the past few years. Network topology and network size have been regarded as two of the most important aspects for the performance of deep learning models and the community has spawned lots of searching algorithms for both of those aspects of the neural architectures. However, the performance gain from these searching algorithms is achieved under different search spaces and training setups. This makes the overall performance of the algorithms incomparable and the improvement from a sub-module of the searching model unclear.
 In this paper, we propose NATS-Bench, a unified benchmark on searching for both topology and size, for (almost) any up-to-date NAS algorithm.
@@ -7,11 +7,12 @@ We analyze the validity of our benchmark in terms of various criteria and perfor
 We also show the versatility of NATS-Bench by benchmarking 13 recent state-of-the-art NAS algorithms on it. All logs and diagnostic information trained using the same setup for each candidate are provided.
 This facilitates a much larger community of researchers to focus on developing better NAS algorithms in a more comparable and computationally effective environment.
 
+**You can use `pip install nats_bench` to install the library of NATS-Bench.**
 
 The structure of this Markdown file:
 - [How to use NATS-Bench?](#How-to-Use-NATS-Bench)
 - [How to re-create NATS-Bench from scratch?](#how-to-re-create-nats-bench-from-scratch)
-- [How to reproduce benchmarked results?](#to-reproduce-13-baseline-nas-algorithms-in-nas-bench-201)
+- [How to reproduce benchmarked results?](#to-reproduce-13-baseline-nas-algorithms-in-nats-bench)
 
 
 ## How to Use [NATS-Bench](https://arxiv.org/pdf/2009.00437.pdf)
@@ -79,7 +80,11 @@ params = api.get_net_param(12, 'cifar10', None)
 network.load_state_dict(next(iter(params.values())))
 ```
 
+
+
 ## How to Re-create NATS-Bench from Scratch
+
+You need to use the [AutoDL-Projects](https://github.com/D-X-Y/AutoDL-Projects) repo to re-create NATS-Bench from scratch.
 
 ### The Size Search Space
 
@@ -110,7 +115,9 @@ python exps/NATS-Bench/tss-collect.py
 ```
 
 
-## To Reproduce 13 Baseline NAS Algorithms in NAS-Bench-201
+## To Reproduce 13 Baseline NAS Algorithms in NATS-Bench
+
+You need to use the [AutoDL-Projects](https://github.com/D-X-Y/AutoDL-Projects) repo to run 13 baseline NAS methods.
 
 ### Reproduce NAS methods on the topology search space
 
@@ -171,18 +178,18 @@ python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HO
 python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo tas --rand_seed 777
 
 
-Run the search strategy in FBNet-V2
+Run the channel search strategy in FBNet-V2 -- masking + Gumbel-Softmax :
 
-python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo fbv2 --rand_seed 777
-python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo fbv2 --rand_seed 777
-python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo fbv2 --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo mask_gumbel --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo mask_gumbel --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo mask_gumbel --rand_seed 777
 
 
-Run the search strategy in TuNAS:
+Run the channel search strategy in TuNAS -- masking + sampling :
 
-python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777 --use_api 0
-python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo tunas --arch_weight_decay 0 --rand_seed 777
-python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo tunas --arch_weight_decay 0 --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset cifar10  --data_path $TORCH_HOME/cifar.python --algo mask_rl --arch_weight_decay 0 --rand_seed 777 --use_api 0
+python ./exps/NATS-algos/search-size.py --dataset cifar100 --data_path $TORCH_HOME/cifar.python --algo mask_rl --arch_weight_decay 0 --rand_seed 777
+python ./exps/NATS-algos/search-size.py --dataset ImageNet16-120 --data_path $TORCH_HOME/cifar.python/ImageNet16 --algo mask_rl --arch_weight_decay 0 --rand_seed 777
 ```
 
 ### Final Discovered Architectures for Each Algorithm
@@ -246,7 +253,7 @@ GDAS:
 If you find that NATS-Bench helps your research, please consider citing it:
 ```
 @article{dong2020nats,
-  title={NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size},
+  title={{NATS-Bench}: Benchmarking NAS Algorithms for Architecture Topology and Size},
   author={Dong, Xuanyi and Liu, Lu and Musial, Katarzyna and Gabrys, Bogdan},
   journal={arXiv preprint arXiv:2009.00437},
   year={2020}

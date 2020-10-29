@@ -3,8 +3,8 @@
 #####################################################
 # Here, we utilized three techniques to search for the number of channels:
 # - channel-wise interpolation from "Network Pruning via Transformable Architecture Search, NeurIPS 2019"
-# - masking + Gumbel-Softmax from "FBNetV2: Differentiable Neural Architecture Search for Spatial and Channel Dimensions, CVPR 2020"
-# - masking + sampling from "Can Weight Sharing Outperform Random Architecture Search? An Investigation With TuNAS, CVPR 2020"
+# - masking + Gumbel-Softmax (mask_gumbel) from "FBNetV2: Differentiable Neural Architecture Search for Spatial and Channel Dimensions, CVPR 2020"
+# - masking + sampling (mask_rl) from "Can Weight Sharing Outperform Random Architecture Search? An Investigation With TuNAS, CVPR 2020"
 from typing import List, Text, Any
 import random, torch
 import torch.nn as nn
@@ -52,10 +52,10 @@ class GenericNAS301Model(nn.Module):
   def set_algo(self, algo: Text):
     # used for searching
     assert self._algo is None, 'This functioin can only be called once.'
-    assert algo in ['fbv2', 'tunas', 'tas'], 'invalid algo : {:}'.format(algo)
+    assert algo in ['mask_gumbel', 'mask_rl', 'tas'], 'invalid algo : {:}'.format(algo)
     self._algo = algo
     self._arch_parameters = nn.Parameter(1e-3*torch.randn(self._max_num_Cs, len(self._candidate_Cs)))
-    # if algo == 'fbv2' or algo == 'tunas':
+    # if algo == 'mask_gumbel' or algo == 'mask_rl':
     self.register_buffer('_masks', torch.zeros(len(self._candidate_Cs), max(self._candidate_Cs)))
     for i in range(len(self._candidate_Cs)):
       self._masks.data[i, :self._candidate_Cs[i]] = 1
@@ -130,7 +130,7 @@ class GenericNAS301Model(nn.Module):
         else:
           mask = self._masks[random.randint(0, len(self._masks)-1)]
         feature = feature * mask.view(1, -1, 1, 1)
-      elif self._algo == 'fbv2':
+      elif self._algo == 'mask_gumbel':
         weights = nn.functional.gumbel_softmax(self._arch_parameters[idx:idx+1], tau=self.tau, dim=-1)
         mask = torch.matmul(weights, self._masks).view(1, -1, 1, 1)
         feature = feature * mask
@@ -148,7 +148,7 @@ class GenericNAS301Model(nn.Module):
         else:
           miss = torch.zeros(feature.shape[0], feature.shape[1]-out.shape[1], feature.shape[2], feature.shape[3], device=feature.device)
           feature = torch.cat((out, miss), dim=1)
-      elif self._algo == 'tunas':
+      elif self._algo == 'mask_rl':
         prob = nn.functional.softmax(self._arch_parameters[idx:idx+1], dim=-1)
         dist = torch.distributions.Categorical(prob)
         action = dist.sample()

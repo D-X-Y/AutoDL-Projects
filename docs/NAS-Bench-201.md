@@ -1,5 +1,7 @@
 # [NAS-BENCH-201: Extending the Scope of Reproducible Neural Architecture Search](https://openreview.net/forum?id=HJxyZkBKDr)
 
+**Since our NAS-BENCH-201 has been extended to NATS-Bench, this README is deprecated and not maintained. Please use [NATS-Bench](https://github.com/D-X-Y/AutoDL-Projects/blob/master/docs/NATS-Bench.md), which has 5x more architecture information and faster API than NAS-BENCH-201.**
+
 We propose an algorithm-agnostic NAS benchmark (NAS-Bench-201) with a fixed search space, which provides a unified benchmark for almost any up-to-date NAS algorithms.
 The design of our search space is inspired by that used in the most popular cell-based searching algorithms, where a cell is represented as a directed acyclic graph.
 Each edge here is associated with an operation selected from a predefined operation set.
@@ -68,17 +70,18 @@ api.show(2)
 # show the mean loss and accuracy of an architecture
 info = api.query_meta_info_by_index(1)  # This is an instance of `ArchResults`
 res_metrics = info.get_metrics('cifar10', 'train') # This is a dict with metric names as keys
-cost_metrics = info.get_comput_costs('cifar100') # This is a dict with metric names as keys, e.g., flops, params, latency
+cost_metrics = info.get_compute_costs('cifar100') # This is a dict with metric names as keys, e.g., flops, params, latency
 
 # get the detailed information
 results = api.query_by_index(1, 'cifar100') # a dict of all trials for 1st net on cifar100, where the key is the seed
 print ('There are {:} trials for this architecture [{:}] on cifar100'.format(len(results), api[1]))
-print ('Latency : {:}'.format(results[0].get_latency()))
-print ('Train Info : {:}'.format(results[0].get_train()))
-print ('Valid Info : {:}'.format(results[0].get_eval('x-valid')))
-print ('Test  Info : {:}'.format(results[0].get_eval('x-test')))
-# for the metric after a specific epoch
-print ('Train Info [10-th epoch] : {:}'.format(results[0].get_train(10)))
+for seed, result in results.items():
+  print ('Latency : {:}'.format(result.get_latency()))
+  print ('Train Info : {:}'.format(result.get_train()))
+  print ('Valid Info : {:}'.format(result.get_eval('x-valid')))
+  print ('Test  Info : {:}'.format(result.get_eval('x-test')))
+  # for the metric after a specific epoch
+  print ('Train Info [10-th epoch] : {:}'.format(result.get_train(10)))
 ```
 
 4. Query the index of an architecture by string
@@ -242,7 +245,7 @@ In commands [1-6], the first args `cifar10` indicates the dataset name, the seco
 If you find that NAS-Bench-201 helps your research, please consider citing it:
 ```
 @inproceedings{dong2020nasbench201,
-  title     = {NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search},
+  title     = {{NAS-Bench-201}: Extending the Scope of Reproducible Neural Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {International Conference on Learning Representations (ICLR)},
   url       = {https://openreview.net/forum?id=HJxyZkBKDr},
