@@ -80,6 +80,10 @@ class NASNetworkDARTS(nn.Module):
           for k, op_name in enumerate(self.op_names):
             if op_name == 'none': continue
             edges.append( (op_name, j, ws[k]) )
+        # (TODO) xuanyidong:
+        # Here the selected two edges might come from the same input node.
+        # And this case could be a problem that two edges will collapse into a single one
+        # due to our assumption -- at most one edge from an input node during evaluation.
         edges = sorted(edges, key=lambda x: -x[-1])
         selected_edges = edges[:2]
         gene.append( tuple(selected_edges) )
