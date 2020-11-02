@@ -97,8 +97,14 @@ Some methods use knowledge distillation (KD), which require pre-trained models. 
 
 ## Citation
 
-If you find that this project helps your research, please consider citing some of the following papers:
+If you find that this project helps your research, please consider citing the related paper:
 ```
+@article{dong2020autohas,
+  title={{AutoHAS}: Efficient Hyperparameter and Architecture Search},
+  author={Dong, Xuanyi and Tan, Mingxing and Yu, Adams Wei and Peng, Daiyi and Gabrys, Bogdan and Le, Quoc V},
+  journal={arXiv preprint arXiv:2006.03656},
+  year={2020}
+}
 @article{dong2020nats,
   title={{NATS-Bench}: Benchmarking NAS Algorithms for Architecture Topology and Size},
   author={Dong, Xuanyi and Liu, Lu and Musial, Katarzyna and Gabrys, Bogdan},
