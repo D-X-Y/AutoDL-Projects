@@ -41,7 +41,7 @@ if __name__ == '__main__':
   test_acc_200e = []
   for index in range(10000):
     info = api_nats_tss.get_more_info(index, 'ImageNet16-120', hp='12')
-    valid_acc_12e.append(info['valid-accuracy'])
-    test_acc_12e.append(info['test-accuracy'])
+    valid_acc_12e.append(info['valid-accuracy'])  # the validation accuracy after training the model by 12 epochs
+    test_acc_12e.append(info['test-accuracy'])    # the test accuracy after training the model by 12 epochs
     info = api_nats_tss.get_more_info(index, 'ImageNet16-120', hp='200')
-    test_acc_200e.append(info['test-accuracy'])  # which I reported.
+    test_acc_200e.append(info['test-accuracy'])   # the test accuracy after training the model by 200 epochs (which I reported in the paper)
