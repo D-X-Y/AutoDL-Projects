@@ -482,6 +482,7 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
     best_index, highest_accuracy = -1, None
     evaluated_indexes = sorted(list(self.evaluated_indexes))
     for arch_index in evaluated_indexes:
+      self._prepare_info(arch_index)
       arch_info = self.arch2infos_dict[arch_index][hp]
       info = arch_info.get_compute_costs(dataset)  # the information of costs
       flop, param, latency = info['flops'], info['params'], info['latency']
@@ -622,6 +623,8 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
         print('<' * 40 + '------------' + '<' * 40)
     else:
       if 0 <= index < len(self.meta_archs):
+        if index not in self.evaluated_indexes:
+          self._prepare_info(index)
         if index not in self.evaluated_indexes:
           print('The {:}-th architecture has not been evaluated '
                 'or not saved.'.format(index))
