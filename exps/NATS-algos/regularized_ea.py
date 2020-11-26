@@ -200,7 +200,8 @@ if __name__ == '__main__':
 
   api = create(None, args.search_space, fast_mode=True, verbose=False)
 
-  args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'R-EA-SS{:}'.format(args.ea_sample_size))
+  args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space),
+                               '{:}-T{:}'.format(args.dataset, args.time_budget), 'R-EA-SS{:}'.format(args.ea_sample_size))
   print('save-dir : {:}'.format(args.save_dir))
   print('xargs : {:}'.format(args))
 

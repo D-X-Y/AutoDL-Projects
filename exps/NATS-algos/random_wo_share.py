@@ -73,7 +73,8 @@ if __name__ == '__main__':
   
   api = create(None, args.search_space, fast_mode=True, verbose=False)
 
-  args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space), args.dataset, 'RANDOM')
+  args.save_dir = os.path.join('{:}-{:}'.format(args.save_dir, args.search_space),
+                               '{:}-T{:}'.format(args.dataset, args.time_budget), 'RANDOM')
   print('save-dir : {:}'.format(args.save_dir))
 
   if args.rand_seed < 0:
