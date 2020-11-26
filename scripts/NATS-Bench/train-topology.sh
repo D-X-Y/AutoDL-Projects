@@ -4,6 +4,11 @@
 ##############################################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.01                          #
 ##############################################################################
+# [saturn1] CUDA_VISIBLE_DEVICES=0 bash scripts/NATS-Bench/train-topology.sh 00000-02000 200 "777 888 999"
+# [saturn1] CUDA_VISIBLE_DEVICES=0 bash scripts/NATS-Bench/train-topology.sh 02000-04000 200 "777 888 999"
+# [saturn1] CUDA_VISIBLE_DEVICES=1 bash scripts/NATS-Bench/train-topology.sh 04000-06000 200 "777 888 999"
+# [saturn1] CUDA_VISIBLE_DEVICES=1 bash scripts/NATS-Bench/train-topology.sh 06000-08000 200 "777 888 999"
+#
 # CUDA_VISIBLE_DEVICES=0 bash scripts/NATS-Bench/train-topology.sh 00000-05000 12 777
 # bash ./scripts/NATS-Bench/train-topology.sh 05001-10000 12 777
 # bash ./scripts/NATS-Bench/train-topology.sh 10001-14500 12 777

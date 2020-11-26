@@ -1,5 +1,5 @@
 #!/bin/bash
-# bash ./scripts-search/NASNet-space-search-by-GDAS-FRC.sh cifar10 1 -1
+# bash ./scripts-search/NASNet-space-search-by-GDAS-FRC.sh cifar10 0 -1
 echo script name: $0
 echo $# arguments
 if [ "$#" -ne 3 ] ;then
