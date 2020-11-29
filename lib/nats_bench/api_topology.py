@@ -92,8 +92,8 @@ class NATStopology(NASBenchMetaAPI):
         file_path_or_dict = os.path.join(
             os.environ['TORCH_HOME'], '{:}.{:}'.format(
                 ALL_BASE_NAMES[-1], PICKLE_EXT))
-      print('{:} Try to use the default NATS-Bench (topology) path '
-            'from {:}.'.format(time_string(), file_path_or_dict))
+      print('{:} Try to use the default NATS-Bench (topology) path from '
+            'fast_mode={:} and path={:}.'.format(time_string(), self._fast_mode, file_path_or_dict))
     if isinstance(file_path_or_dict, str):
       file_path_or_dict = str(file_path_or_dict)
       if verbose:
