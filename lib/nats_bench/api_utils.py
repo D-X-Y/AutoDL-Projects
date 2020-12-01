@@ -45,6 +45,17 @@ def get_file_system():
   return _FILE_SYSTEM
 
 
+def get_torch_home():
+  if 'TORCH_HOME' in os.environ:
+    return os.environ['TORCH_HOME']
+  elif 'HOME' in os.environ:
+    return os.path.join(os.environ['HOME'], '.torch')
+  else:
+    raise ValueError('Did not find HOME in os.environ. '
+      'Please at least setup the path of HOME or TORCH_HOME '
+      'in the environment.')
+
+
 def nats_is_dir(file_path):
   if _FILE_SYSTEM == 'default':
     return os.path.isdir(file_path)

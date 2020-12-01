@@ -385,7 +385,7 @@ def visualize_all_rank_info(api, vis_save_dir, indicator):
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='NAS-Bench-X', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(description='NATS-Bench', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--save_dir',    type=str, default='output/vis-nas-bench', help='Folder to save checkpoints and log.')
   # use for train the model
   args = parser.parse_args()
