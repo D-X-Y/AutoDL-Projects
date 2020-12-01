@@ -190,6 +190,10 @@ class NASBenchMetaAPI(metaclass=abc.ABCMeta):
   def archive_dir(self):
     return self._archive_dir
 
+  @property
+  def full_train_epochs(self):
+    return self._full_train_epochs
+
   def reset_archive_dir(self, archive_dir):
     self._archive_dir = archive_dir
 

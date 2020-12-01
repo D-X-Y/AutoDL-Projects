@@ -83,6 +83,7 @@ class NATSsize(NASBenchMetaAPI):
     self._search_space_name = 'size'
     self._fast_mode = fast_mode
     self._archive_dir = None
+    self._full_train_epochs = 90
     self.reset_time()
     if file_path_or_dict is None:
       if self._fast_mode:
