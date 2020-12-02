@@ -43,20 +43,14 @@ def fetch_data(root_dir='./output/search', search_space='tss', dataset=None):
   # alg2name['REINFORCE'] = 'REINFORCE-0.01'
   # alg2name['RANDOM'] = 'RANDOM'
   # alg2name['BOHB'] = 'BOHB'
-  if dataset == 'cifar10':
-    suffixes = ['-T200000', '-T200000-FULL']
-  elif dataset == 'cifar100':
-    suffixes = ['-T40000', '-T40000-FULL']
-  elif search_space == 'tss':
-    suffixes = ['-T120000', '-T120000-FULL']
-  elif search_space == 'sss':
-    suffixes = ['-T60000', '-T60000-FULL']
-  else:
-    raise ValueError('Unkonwn dataset : {:}'.format(dataset))
   if search_space == 'tss':
     hp = '$\mathcal{H}^{1}$'
+    if dataset == 'cifar10':
+      suffixes = ['-T800000', '-T800000-FULL']
   elif search_space == 'sss':
     hp = '$\mathcal{H}^{2}$'
+    if dataset == 'cifar10':
+      suffixes = ['-T200000', '-T200000-FULL']
   else:
     raise ValueError('Unkonwn search space: {:}'.format(search_space))
 
@@ -92,21 +86,21 @@ def query_performance(api, data, dataset, ticket):
   return np.mean(results), np.std(results)
 
 
-y_min_s = {('cifar10', 'tss'): 90,
-           ('cifar10', 'sss'): 90,
+y_min_s = {('cifar10', 'tss'): 91,
+           ('cifar10', 'sss'): 91,
            ('cifar100', 'tss'): 65,
            ('cifar100', 'sss'): 65,
            ('ImageNet16-120', 'tss'): 36,
            ('ImageNet16-120', 'sss'): 40}
 
 y_max_s = {('cifar10', 'tss'): 94.5,
-           ('cifar10', 'sss'): 94.5,
+           ('cifar10', 'sss'): 93.5,
            ('cifar100', 'tss'): 72.5,
            ('cifar100', 'sss'): 70.5,
            ('ImageNet16-120', 'tss'): 46,
            ('ImageNet16-120', 'sss'): 46}
 
-x_axis_s = {('cifar10', 'tss'): 200000,
+x_axis_s = {('cifar10', 'tss'): 800000,
             ('cifar10', 'sss'): 200000,
             ('cifar100', 'tss'): 400,
             ('cifar100', 'sss'): 400,
@@ -124,9 +118,9 @@ def visualize_curve(api_dict, vis_save_dir):
   vis_save_dir = vis_save_dir.resolve()
   vis_save_dir.mkdir(parents=True, exist_ok=True)
 
-  dpi, width, height = 250, 4000, 2400
+  dpi, width, height = 250, 5000, 2000
   figsize = width / float(dpi), height / float(dpi)
-  LabelSize, LegendFontsize = 16, 16
+  LabelSize, LegendFontsize = 28, 28
 
   def sub_plot_fn(ax, search_space, dataset):
     max_time = x_axis_s[(dataset, search_space)]
@@ -137,6 +131,11 @@ def visualize_curve(api_dict, vis_save_dir):
     ax.set_xlim(0, x_axis_s[(dataset, search_space)])
     ax.set_ylim(y_min_s[(dataset, search_space)],
                 y_max_s[(dataset, search_space)])
+    for tick in ax.get_xticklabels():
+      tick.set_rotation(25)
+      tick.set_fontsize(LabelSize - 6)
+    for tick in ax.get_yticklabels():
+      tick.set_fontsize(LabelSize - 6)
     for idx, (alg, xdata) in enumerate(alg2data.items()):
       accuracies = []
       for ticket in time_tickets:
@@ -150,8 +149,8 @@ def visualize_curve(api_dict, vis_save_dir):
       ax.plot(time_tickets, accuracies, c=xdata['color'], linestyle=xdata['linestyle'], label='{:}'.format(alg))
       ax.set_xlabel('Estimated wall-clock time', fontsize=LabelSize)
       ax.set_ylabel('Test accuracy', fontsize=LabelSize)
-      ax.set_title(r'Searching results on {:} for {:}'.format(name2label[dataset], spaces2latex[search_space]),
-        fontsize=LabelSize+4)
+      ax.set_title(r'Results on {:} over {:}'.format(name2label[dataset], spaces2latex[search_space]),
+        fontsize=LabelSize)
     ax.legend(loc=4, fontsize=LegendFontsize)
 
   fig, axs = plt.subplots(1, 2, figsize=figsize)
@@ -165,7 +164,7 @@ def visualize_curve(api_dict, vis_save_dir):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument('--save_dir',     type=str,   default='output/vis-nas-bench/nas-algos-vs-h', help='Folder to save checkpoints and log.')
+  parser.add_argument('--save_dir', type=str, default='output/vis-nas-bench/nas-algos-vs-h', help='Folder to save checkpoints and log.')
   args = parser.parse_args()
 
   save_dir = Path(args.save_dir)
