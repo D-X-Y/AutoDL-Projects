@@ -32,26 +32,46 @@ class TestNATSBench(object):
       benchmark_dir = os.path.join(get_fake_torch_home_dir(), tss_base_names[-1] + '-simple')
     return _test_nats_bench(benchmark_dir, False, fake_random)
 
+  def prepare_fake_tss(self):
+    print('')
+    tss_benchmark_dir = os.path.join(get_fake_torch_home_dir(), tss_base_names[-1] + '-simple')
+    api = NATStopology(tss_benchmark_dir, True, False)
+    return api
+
   def test_01_th_issue(self):
     # Link: https://github.com/D-X-Y/NATS-Bench/issues/1
-    print('')
-    tss_benchmark_dir = os.path.join(get_fake_torch_home_dir(), sss_base_names[-1] + '-simple')
-    api = NATStopology(tss_benchmark_dir, True, False)
+    api = self.prepare_fake_tss()
     # The performance of 0-th architecture on CIFAR-10 (trained by 12 epochs)
     info = api.get_more_info(0, 'cifar10', hp=12)
-    print('The loss on the training set of CIFAR-10: {:}'.format(info['train-loss']))
-    print('The total training time for 12 epochs on CIFAR-10: {:}'.format(info['train-all-time']))
+    # First of all, the data split in NATS-Bench is different from that in the official CIFAR paper.
+    # In NATS-Bench, we split the original CIFAR-10 training set into two parts, i.e., a training set and a validation set.
+    # In the following, we will use the splits of NATS-Bench to explain.
+    print(info['comment'])
+    print('The loss on the training + validation sets of CIFAR-10: {:}'.format(info['train-loss']))
+    print('The total training time for 12 epochs on the training + validation sets of CIFAR-10: {:}'.format(info['train-all-time']))
     print('The per-epoch training time on CIFAR-10: {:}'.format(info['train-per-time']))
     print('The total evaluation time on the test set of CIFAR-10 for 12 times: {:}'.format(info['test-all-time']))
     print('The evaluation time on the test set of CIFAR-10: {:}'.format(info['test-per-time']))
-    # Please note that the splits of train/validation/test on CIFAR-10 in our NATS-Bench paper is different from the original CIFAR paper.
     cost_info = api.get_cost_info(0, 'cifar10')
-    xkeys = ['T-train@epoch',     # The per epoch training cost for CIFAR-10. Note that the training set of CIFAR-10 in NATS-Bench is a subset of the original training set in CIFAR paper.
+    xkeys = ['T-train@epoch',     # The per epoch training time on the training + validation sets of CIFAR-10.
              'T-train@total',
-             'T-ori-test@epoch',  # The time cost for the evaluation on the original test split of CIFAR-10, which is the validation + test sets of CIFAR-10 on NATS-Bench.
+             'T-ori-test@epoch',  # The time cost for the evaluation on CIFAR-10 test set.
              'T-ori-test@total']  # T-ori-test@epoch * 12 times.
     for xkey in xkeys:
       print('The cost info [{:}] for 0-th architecture on CIFAR-10 is {:}'.format(xkey, cost_info[xkey]))
+    
+  def test_02_th_issue(self):
+    # https://github.com/D-X-Y/NATS-Bench/issues/2
+    api = self.prepare_fake_tss()
+    data = api.query_by_index(284, dataname='cifar10', hp=200)
+    for xkey, xvalue in data.items():
+      print('{:} : {:}'.format(xkey, xvalue))
+    xinfo = data[777].get_train()
+    print(xinfo)
+    print(data[777].train_acc1es)
+
+    info_012_epochs = api.get_more_info(284, 'cifar10', hp=200)
+    print(info_012_epochs['train-accuracy'])
  
 
 def _test_nats_bench(benchmark_dir, is_tss, fake_random, verbose=False):
@@ -62,7 +82,7 @@ def _test_nats_bench(benchmark_dir, is_tss, fake_random, verbose=False):
     api = NATSsize(benchmark_dir, True, verbose)
 
   if fake_random:
-    test_indexes = [0, 11, 241]
+    test_indexes = [0, 11, 284]
   else:
     test_indexes = [random.randint(0, len(api) - 1) for _ in range(10)]
 
