@@ -12,7 +12,8 @@ from nats_bench.api_utils import pickle_save
 from nats_bench.api_utils import ResultsCount
 
 
-NATS_BENCH_API_VERSIONs = ['v1.0']    # [2020.08.31]
+NATS_BENCH_API_VERSIONs = ['v1.0',    # [2020.08.31]
+                           'v1.1']    # [2020.12.20] adding unit tests
 NATS_BENCH_SSS_NAMEs = ('sss', 'size')
 NATS_BENCH_TSS_NAMEs = ('tss', 'topology')
 
