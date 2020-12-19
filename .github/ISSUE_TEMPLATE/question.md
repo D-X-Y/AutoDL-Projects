@@ -1,5 +1,6 @@
 ---
 name: Questions w.r.t. an AutoDL algorithm
+about: Ask questions about or discuss on some algorithms
 title: ''
 labels: ''
 assignees: ''
