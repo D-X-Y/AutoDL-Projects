@@ -1,5 +1,5 @@
 ###############################################################
-# NATS-Bench (https://arxiv.org/pdf/2009.00437.pdf)           #
+# NATS-Bench (arxiv.org/pdf/2009.00437.pdf), IEEE TPAMI 2021  #
 # The code to draw Figure 2 / 3 / 4 / 5 in our paper.         #
 ###############################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06           #

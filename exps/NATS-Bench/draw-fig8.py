@@ -1,5 +1,5 @@
 ###############################################################
-# NATS-Bench (https://arxiv.org/pdf/2009.00437.pdf)           #
+# NATS-Bench (arxiv.org/pdf/2009.00437.pdf), IEEE TPAMI 2021  #
 # The code to draw Figure 6 in our paper.                     #
 ###############################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06           #
@@ -175,7 +175,7 @@ def visualize_curve(api_dict, vis_save_dir):
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='NATS-Bench: Benchmarking NAS algorithms for Architecture Topology and Size', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser = argparse.ArgumentParser(description='NATS-Bench: Benchmarking NAS Algorithms for Architecture Topology and Size', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--save_dir', type=str, default='output/vis-nas-bench/nas-algos-vs-h', help='Folder to save checkpoints and log.')
   args = parser.parse_args()
 

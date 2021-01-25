@@ -105,11 +105,13 @@ If you find that this project helps your research, please consider citing the re
   journal={arXiv preprint arXiv:2006.03656},
   year={2020}
 }
-@article{dong2020nats,
-  title={{NATS-Bench}: Benchmarking NAS Algorithms for Architecture Topology and Size},
-  author={Dong, Xuanyi and Liu, Lu and Musial, Katarzyna and Gabrys, Bogdan},
-  journal={arXiv preprint arXiv:2009.00437},
-  year={2020}
+@article{dong2021nats,
+  title   = {{NATS-Bench}: Benchmarking NAS Algorithms for Architecture Topology and Size},
+  author  = {Dong, Xuanyi and Liu, Lu and Musial, Katarzyna and Gabrys, Bogdan},
+  doi     = {10.1109/TPAMI.2021.3054824},
+  journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)},
+  year    = {2021},
+  note    = {\mbox{doi}:\url{10.1109/TPAMI.2021.3054824}}
 }
 @inproceedings{dong2020nasbench201,
   title     = {NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search},
