@@ -5,11 +5,7 @@
 ##############################################################################
 # python ./exps/NATS-Bench/Analyze-time.py                                   #
 ##############################################################################
-import os, sys, time, tqdm, torch, random, argparse
-from typing import List, Text, Dict, Any
-from PIL     import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-from copy    import deepcopy
+import os, sys, time, tqdm, argparse
 from pathlib import Path
 
 lib_dir = (Path(__file__).parent / '..' / '..' / 'lib').resolve()
