@@ -1,0 +1,3 @@
+[submodule "qlib-git"]
+	path = qlib-git
+	url = git@github.com:microsoft/qlib.git
