@@ -21,6 +21,8 @@ This project implemented several neural architecture search (NAS) and hyper-para
 - Active maintenance
 
 
+`git clone --recursive git@github.com:D-X-Y/Auto-Qlib.git`
+
 ## AutoDL-Projects Capabilities
 
 At this moment, this project provides the following algorithms and scripts to run them. Please see the details in the link provided in the description column.
