@@ -1,4 +1,4 @@
-color desert 
+color desert
 "设置背景色，每种配色有两种方案，一个light、一个dark 
 "set background=light 
 ""打开语法高亮 
@@ -16,7 +16,7 @@ endif
 "显示行号 
 "set number 
 ""设置缩进有三个取值cindent(c风格)、smartindent(智能模式，其实不觉得有什么智能)、autoindent(简单的与上一行保持一致) 
-set cindent 
+set autoindent 
 "在windows版本中vim的退格键模式默认与vi兼容，与我们的使用习惯不太符合，下边这条可以改过来
 "set backspace=indent,eol,start 
 ""用空格键替换制表符 
