@@ -244,7 +244,7 @@ class NASBench201API(NASBenchMetaAPI):
       arch_str: the input is a string indicates the architecture topology, such as
                     |nor_conv_1x1~0|+|none~0|none~1|+|none~0|none~1|skip_connect~2|
       search_space: a list of operation string, the default list is the search space for NAS-Bench-201
-        the default value should be be consistent with this line https://github.com/D-X-Y/AutoDL-Projects/blob/master/lib/models/cell_operations.py#L24
+        the default value should be be consistent with this line https://github.com/D-X-Y/AutoDL-Projects/blob/main/lib/models/cell_operations.py#L24
     :return
       the numpy matrix (2-D np.ndarray) representing the DAG of this architecture topology
     :usage

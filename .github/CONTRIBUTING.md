@@ -19,7 +19,7 @@ This section guides you through submitting a bug report for AutoDL-Projects.
 Following these guidelines helps maintainers and the community understand your report :pencil:, reproduce the behavior :computer: :computer:, and find related reports :mag_right:.
 
 When you are creating a bug report, please include as many details as possible.
-Fill out [the required template](https://github.com/D-X-Y/AutoDL-Projects/blob/master/.github/ISSUE_TEMPLATE/bug-report.md). The information it asks for helps us resolve issues faster.
+Fill out [the required template](https://github.com/D-X-Y/AutoDL-Projects/blob/main/.github/ISSUE_TEMPLATE/bug-report.md). The information it asks for helps us resolve issues faster.
 
 > **Note:** If you find a **Closed** issue that seems like it is the same thing that you're experiencing, open a new issue and include a link to the original issue in the body of your new one.
 

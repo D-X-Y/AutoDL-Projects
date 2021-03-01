@@ -31,7 +31,7 @@ args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel n
 
 **Model Configuration**
 
-The searched shapes for ResNet-20/32/56/110/164 and ResNet-18/50 in Table 3/4 in the original paper are listed in [`configs/NeurIPS-2019`](https://github.com/D-X-Y/AutoDL-Projects/tree/master/configs/NeurIPS-2019).
+The searched shapes for ResNet-20/32/56/110/164 and ResNet-18/50 in Table 3/4 in the original paper are listed in [`configs/NeurIPS-2019`](https://github.com/D-X-Y/AutoDL-Projects/tree/main/configs/NeurIPS-2019).
 
 **Search for the depth configuration of ResNet**
 ```

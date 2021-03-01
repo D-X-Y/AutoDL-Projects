@@ -8,7 +8,7 @@
 # - masking + sampling (mask_rl) from "Can Weight Sharing Outperform Random Architecture Search? An Investigation With TuNAS, CVPR 2020"
 #
 # For simplicity, we use tas, mask_gumbel, and mask_rl to refer these three strategies. Their official implementations are at the following links:
-# - TAS: https://github.com/D-X-Y/AutoDL-Projects/blob/master/docs/NeurIPS-2019-TAS.md
+# - TAS: https://github.com/D-X-Y/AutoDL-Projects/blob/main/docs/NeurIPS-2019-TAS.md
 # - FBNetV2: https://github.com/facebookresearch/mobile-vision
 # - TuNAS: https://github.com/google-research/google-research/tree/master/tunas
 ####

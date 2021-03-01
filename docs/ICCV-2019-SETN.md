@@ -18,7 +18,7 @@ from utils import get_model_infos
 flop, param  = get_model_infos(net, (1,3,32,32))
 ```
 
-2. Different NAS-searched architectures are defined [here](https://github.com/D-X-Y/AutoDL-Projects/blob/master/lib/nas_infer_model/DXYs/genotypes.py).
+2. Different NAS-searched architectures are defined [here](https://github.com/D-X-Y/AutoDL-Projects/blob/main/lib/nas_infer_model/DXYs/genotypes.py).
 
 
 ## Usage

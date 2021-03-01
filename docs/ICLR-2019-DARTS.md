@@ -16,7 +16,7 @@ This command will start to use the first-order DARTS to search architectures on 
 CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/DARTS1V-search-NASNet-space.sh cifar10 -1
 ```
 
-After searching, if you want to train the searched architecture found by the above scripts, you need to add the config of that architecture (will be printed in log) in [genotypes.py](https://github.com/D-X-Y/AutoDL-Projects/blob/master/lib/nas_infer_model/DXYs/genotypes.py).
+After searching, if you want to train the searched architecture found by the above scripts, you need to add the config of that architecture (will be printed in log) in [genotypes.py](https://github.com/D-X-Y/AutoDL-Projects/blob/main/lib/nas_infer_model/DXYs/genotypes.py).
 In future, I will add a more eligent way to train the searched architecture from the DARTS search space.
 
 

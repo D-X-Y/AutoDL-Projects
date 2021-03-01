@@ -1,6 +1,6 @@
 # [NAS-BENCH-201: Extending the Scope of Reproducible Neural Architecture Search](https://openreview.net/forum?id=HJxyZkBKDr)
 
-**Since our NAS-BENCH-201 has been extended to NATS-Bench, this README is deprecated and not maintained. Please use [NATS-Bench](https://github.com/D-X-Y/AutoDL-Projects/blob/master/docs/NATS-Bench.md), which has 5x more architecture information and faster API than NAS-BENCH-201.**
+**Since our NAS-BENCH-201 has been extended to NATS-Bench, this README is deprecated and not maintained. Please use [NATS-Bench](https://github.com/D-X-Y/AutoDL-Projects/blob/main/docs/NATS-Bench.md), which has 5x more architecture information and faster API than NAS-BENCH-201.**
 
 We propose an algorithm-agnostic NAS benchmark (NAS-Bench-201) with a fixed search space, which provides a unified benchmark for almost any up-to-date NAS algorithms.
 The design of our search space is inspired by that used in the most popular cell-based searching algorithms, where a cell is represented as a directed acyclic graph.
@@ -42,7 +42,7 @@ It is recommended to put these data into `$TORCH_HOME` (`~/.torch/` by default).
 
 ## How to Use NAS-Bench-201
 
-**More usage can be found in [our test codes](https://github.com/D-X-Y/AutoDL-Projects/blob/master/exps/NAS-Bench-201/test-nas-api.py)**.
+**More usage can be found in [our test codes](https://github.com/D-X-Y/AutoDL-Projects/blob/main/exps/NAS-Bench-201/test-nas-api.py)**.
 
 1. Creating an API instance from a file:
 ```
@@ -159,7 +159,7 @@ api.reload('{:}/{:}'.format(os.environ['TORCH_HOME'], 'NAS-BENCH-201-4-v1.0-arch
 weights = api.get_net_param(3, 'cifar10', None) # Obtaining the weights of all trials for the 3-th architecture on cifar10. It will returns a dict, where the key is the seed and the value is the trained weights.
 ```
 
-To obtain the training and evaluation information (please see the comments [here](https://github.com/D-X-Y/AutoDL-Projects/blob/master/lib/nas_201_api/api_201.py#L142)):
+To obtain the training and evaluation information (please see the comments [here](https://github.com/D-X-Y/AutoDL-Projects/blob/main/lib/nas_201_api/api_201.py#L142)):
 ```
 api.get_more_info(112, 'cifar10', None, hp='200', is_random=True)
 # Query info of last training epoch for 112-th architecture
