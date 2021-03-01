@@ -113,7 +113,7 @@ If you find that this project helps your research, please consider citing the re
   note    = {\mbox{doi}:\url{10.1109/TPAMI.2021.3054824}}
 }
 @inproceedings{dong2020nasbench201,
-  title     = {NAS-Bench-201: Extending the Scope of Reproducible Neural Architecture Search},
+  title     = {{NAS-Bench-201}: Extending the Scope of Reproducible Neural Architecture Search},
   author    = {Dong, Xuanyi and Yang, Yi},
   booktitle = {International Conference on Learning Representations (ICLR)},
   url       = {https://openreview.net/forum?id=HJxyZkBKDr},

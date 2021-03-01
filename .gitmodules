@@ -1,3 +1,6 @@
 [submodule "qlib-git"]
 	path = .latent-data/qlib
 	url = git@github.com:microsoft/qlib.git
+[submodule ".latent-data/qlib"]
+	path = .latent-data/qlib
+	url = git@github.com:microsoft/qlib.git
