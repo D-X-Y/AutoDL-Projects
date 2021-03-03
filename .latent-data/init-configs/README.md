@@ -7,3 +7,8 @@ git submodule init
 git submodule update
 git pull orign main
 ```
+
+Pylint check for Q-lib:
+```
+python -m black __init__.py -l 120
+```
