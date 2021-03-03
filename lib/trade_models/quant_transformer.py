@@ -1,7 +1,6 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
-
-
+##################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021 #
+##################################################
 from __future__ import division
 from __future__ import print_function
 
@@ -26,7 +25,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from layers import DropPath, trunc_normal_
+import layers as xlayers
 
 from qlib.model.base import Model
 from qlib.data.dataset import DatasetH
@@ -182,7 +181,6 @@ class QuantTransformer(Model):
     losses = []
 
     indices = np.arange(len(x_values))
-    import pdb; pdb.set_trace()
 
     for i in range(len(indices))[:: self.batch_size]:
 
@@ -261,6 +259,7 @@ class QuantTransformer(Model):
       torch.cuda.empty_cache()
 
   def predict(self, dataset):
+
     if not self.fitted:
       raise ValueError("model is not fitted yet!")
 
@@ -294,9 +293,9 @@ class QuantTransformer(Model):
 # Real Model
 
 
-class Mlp(nn.Module):
+class MLP(nn.Module):
   def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
-    super().__init__()
+    super(MLP, self).__init__()
     out_features = out_features or in_features
     hidden_features = hidden_features or in_features
     self.fc1 = nn.Linear(in_features, hidden_features)
@@ -314,8 +313,9 @@ class Mlp(nn.Module):
 
 
 class Attention(nn.Module):
+
   def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
-    super().__init__()
+    super(Attention, self).__init__()
     self.num_heads = num_heads
     head_dim = dim // num_heads
     # NOTE scale factor was wrong in my original version, can set manually to be compat with prev weights
@@ -345,15 +345,15 @@ class Block(nn.Module):
 
   def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
          drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm):
-    super().__init__()
+    super(Block, self).__init__()
     self.norm1 = norm_layer(dim)
     self.attn = Attention(
       dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
     # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
-    self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+    self.drop_path = xlayers.DropPath(drop_path) if drop_path > 0. else nn.Identity()
     self.norm2 = norm_layer(dim)
     mlp_hidden_dim = int(dim * mlp_ratio)
-    self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
+    self.mlp = MLP(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
 
   def forward(self, x):
     x = x + self.drop_path(self.attn(self.norm1(x)))
@@ -365,19 +365,18 @@ class SimpleEmbed(nn.Module):
 
   def __init__(self, d_feat, embed_dim):
     super(SimpleEmbed, self).__init__()
+    self.d_feat = d_feat
     self.proj = nn.Linear(d_feat, embed_dim)
 
   def forward(self, x):
-    import pdb; pdb.set_trace()
-    B, C, H, W = x.shape
-    # FIXME look at relaxing size constraints
-    assert H == self.img_size[0] and W == self.img_size[1], \
-      f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
-    x = self.proj(x).flatten(2).transpose(1, 2)
-    return x
+    x = x.reshape(len(x), self.d_feat, -1)  # [N, F*T] -> [N, F, T]
+    x = x.permute(0, 2, 1)                  # [N, F, T] -> [N, T, F]
+    out = self.proj(x)
+    return out
 
 
 class TransformerModel(nn.Module):
+
   def __init__(self,
          d_feat: int,
          embed_dim: int = 64,
@@ -408,11 +407,9 @@ class TransformerModel(nn.Module):
 
     self.input_embed = SimpleEmbed(d_feat, embed_dim=embed_dim)
 
-    """
     self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
-    self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim))
+    self.pos_embed = xlayers.PositionalEncoder(d_model=embed_dim, max_seq_len=65)
     self.pos_drop = nn.Dropout(p=drop_rate)
-    """
 
     dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
     self.blocks = nn.ModuleList([
@@ -425,15 +422,12 @@ class TransformerModel(nn.Module):
     # regression head
     self.head = nn.Linear(self.num_features, 1)
 
-    """
-    trunc_normal_(self.pos_embed, std=.02)
-    trunc_normal_(self.cls_token, std=.02)
-    """
+    xlayers.trunc_normal_(self.cls_token, std=.02)
     self.apply(self._init_weights)
 
   def _init_weights(self, m):
     if isinstance(m, nn.Linear):
-      trunc_normal_(m.weight, std=.02)
+      xlayers.trunc_normal_(m.weight, std=.02)
       if isinstance(m, nn.Linear) and m.bias is not None:
         nn.init.constant_(m.bias, 0)
     elif isinstance(m, nn.LayerNorm):
@@ -441,21 +435,22 @@ class TransformerModel(nn.Module):
       nn.init.constant_(m.weight, 1.0)
 
   def forward_features(self, x):
-    B = x.shape[0]
-    x = self.input_embed(x)
+    batch, flatten_size = x.shape
+    feats = self.input_embed(x)  # batch * 60 * 64
 
-    cls_tokens = self.cls_token.expand(B, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks
-    x = torch.cat((cls_tokens, x), dim=1)
-    x = x + self.pos_embed
-    x = self.pos_drop(x)
+    cls_tokens = self.cls_token.expand(batch, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks
+    feats_w_ct = torch.cat((cls_tokens, feats), dim=1)
+    feats_w_tp = self.pos_embed(feats_w_ct)
+    feats_w_tp = self.pos_drop(feats_w_tp)
 
-    for blk in self.blocks:
-      x = blk(x)
+    xfeats = feats_w_tp
+    for block in self.blocks:
+      xfeats = block(xfeats)
 
-    x = self.norm(x)[:, 0]
-    return x
+    xfeats = self.norm(xfeats)[:, 0]
+    return xfeats
 
   def forward(self, x):
-    x = self.forward_features(x)
-    x = self.head(x)
-    return x
+    feats = self.forward_features(x)
+    predicts = self.head(feats).squeeze(-1)
+    return predicts

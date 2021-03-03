@@ -129,3 +129,4 @@ TEMP-L.sh
 # Visual Studio Code
 .vscode
 mlruns
+outputs
