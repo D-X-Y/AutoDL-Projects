@@ -26,6 +26,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 import layers as xlayers
+from utils import count_parameters_in_MB
 
 from qlib.model.base import Model
 from qlib.data.dataset import DatasetH
@@ -75,7 +76,7 @@ class QuantTransformer(Model):
     self.seed = seed
 
     self.logger.info(
-      "GRU parameters setting:"
+      "Transformer parameters setting:"
       "\nd_feat : {}"
       "\nhidden_size : {}"
       "\nnum_layers : {}"
@@ -112,6 +113,10 @@ class QuantTransformer(Model):
       torch.manual_seed(self.seed)
 
     self.model = TransformerModel(d_feat=self.d_feat)
+    self.logger.info('model: {:}'.format(self.model))
+    self.logger.info('model size: {:.3f} MB'.format(count_parameters_in_MB(self.model)))
+  
+    
     if optimizer.lower() == "adam":
       self.train_optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
     elif optimizer.lower() == "gd":
@@ -293,25 +298,6 @@ class QuantTransformer(Model):
 # Real Model
 
 
-class MLP(nn.Module):
-  def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
-    super(MLP, self).__init__()
-    out_features = out_features or in_features
-    hidden_features = hidden_features or in_features
-    self.fc1 = nn.Linear(in_features, hidden_features)
-    self.act = act_layer()
-    self.fc2 = nn.Linear(hidden_features, out_features)
-    self.drop = nn.Dropout(drop)
-
-  def forward(self, x):
-    x = self.fc1(x)
-    x = self.act(x)
-    x = self.drop(x)
-    x = self.fc2(x)
-    x = self.drop(x)
-    return x
-
-
 class Attention(nn.Module):
 
   def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
@@ -353,7 +339,7 @@ class Block(nn.Module):
     self.drop_path = xlayers.DropPath(drop_path) if drop_path > 0. else nn.Identity()
     self.norm2 = norm_layer(dim)
     mlp_hidden_dim = int(dim * mlp_ratio)
-    self.mlp = MLP(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
+    self.mlp = xlayers.MLP(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
 
   def forward(self, x):
     x = x + self.drop_path(self.attn(self.norm1(x)))

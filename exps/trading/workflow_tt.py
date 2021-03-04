@@ -83,7 +83,18 @@ def main(xargs):
         R.log_params(**flatten_dict(task))
         model.fit(dataset)
         R.save_objects(trained_model=model)
-        rid = R.get_recorder().id
+
+        # prediction
+        recorder = R.get_recorder()
+        print(recorder)
+        sr = SignalRecord(model, dataset, recorder)
+        sr.generate()
+
+        # backtest. If users want to use backtest based on their own prediction,
+        # please refer to https://qlib.readthedocs.io/en/latest/component/recorder.html#record-template.
+        par = PortAnaRecord(recorder, port_analysis_config)
+        par.generate()
+    
 
 
 if __name__ == "__main__":
