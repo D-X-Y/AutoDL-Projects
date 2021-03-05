@@ -104,7 +104,7 @@ def main(xargs):
 
 
     # start exp to train model
-    with R.start(experiment_name="train_tt_model"):
+    with R.start(experiment_name="tt_model", uri=xargs.save_dir):
         set_log_basic_config(R.get_recorder().root_uri / 'log.log')
 
         model = init_instance_by_config(model_config)
@@ -139,8 +139,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     provider_uri = "~/.qlib/qlib_data/cn_data"  # target_dir
-    exp_manager = C.exp_manager
-    exp_manager["kwargs"]["uri"] = "file:{:}".format(Path(args.save_dir).resolve())
-    qlib.init(provider_uri=provider_uri, region=REG_CN, exp_manager=exp_manager)
+    qlib.init(provider_uri=provider_uri, region=REG_CN)
 
     main(args)
