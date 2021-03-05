@@ -65,6 +65,10 @@ def update_market(config, market):
 def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
 
     # model initiaiton
+    print('')
+    print('[{:}] - [{:}]: {:}'.format(experiment_name, recorder_name, uri))
+    print('dataset={:}'.format(dataset))
+
     model = init_instance_by_config(task_config["model"])
 
     # start exp
