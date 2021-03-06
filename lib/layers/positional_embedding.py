@@ -24,12 +24,12 @@ class PositionalEncoder(nn.Module):
         else:
           pe[pos, i] = math.cos(value)
     pe = pe.unsqueeze(0)
+    self.dropout = nn.Dropout(p=dropout)
     self.register_buffer('pe', pe)
  
   
   def forward(self, x):
     batch, seq, fdim = x.shape[:3]
     embeddings = self.pe[:, :seq, :fdim]
-    import pdb; pdb.set_trace()
     outs = self.dropout(x + embeddings)
-    return x + embeddings
+    return outs

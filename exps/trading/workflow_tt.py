@@ -4,7 +4,7 @@
 # Refer to:
 # - https://github.com/microsoft/qlib/blob/main/examples/workflow_by_code.ipynb
 # - https://github.com/microsoft/qlib/blob/main/examples/workflow_by_code.py
-# python exps/trading/workflow_tt.py
+# python exps/trading/workflow_tt.py --market all
 #####################################################
 import sys, argparse
 from pathlib import Path
@@ -102,10 +102,9 @@ def main(xargs):
 
     task = dict(model=model_config, dataset=dataset_config, record=record_config)
 
-
     # start exp to train model
-    with R.start(experiment_name="tt_model", uri=xargs.save_dir):
-        set_log_basic_config(R.get_recorder().root_uri / 'log.log')
+    with R.start(experiment_name="tt_model", uri=xargs.save_dir + "-" + xargs.market):
+        set_log_basic_config(R.get_recorder().root_uri / "log.log")
 
         model = init_instance_by_config(model_config)
         dataset = init_instance_by_config(dataset_config)
@@ -138,7 +137,7 @@ if __name__ == "__main__":
     parser.add_argument("--market", type=str, default="csi300", help="The market indicator.")
     args = parser.parse_args()
 
-    provider_uri = "~/.qlib/qlib_data/cn_data"  # target_dir
+    provider_uri = "~/.qlib/qlib_data/cn_data"
     qlib.init(provider_uri=provider_uri, region=REG_CN)
 
     main(args)

@@ -65,16 +65,16 @@ def update_market(config, market):
 def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
 
     # model initiaiton
-    print('')
-    print('[{:}] - [{:}]: {:}'.format(experiment_name, recorder_name, uri))
-    print('dataset={:}'.format(dataset))
+    print("")
+    print("[{:}] - [{:}]: {:}".format(experiment_name, recorder_name, uri))
+    print("dataset={:}".format(dataset))
 
     model = init_instance_by_config(task_config["model"])
 
     # start exp
     with R.start(experiment_name=experiment_name, recorder_name=recorder_name, uri=uri):
 
-        log_file = R.get_recorder().root_uri / '{:}.log'.format(experiment_name)
+        log_file = R.get_recorder().root_uri / "{:}.log".format(experiment_name)
         set_log_basic_config(log_file)
 
         # train model
@@ -109,12 +109,14 @@ def main(xargs, exp_yaml):
     qlib.init(**config.get("qlib_init"))
     dataset_config = config.get("task").get("dataset")
     dataset = init_instance_by_config(dataset_config)
-    pprint('args: {:}'.format(xargs))
+    pprint("args: {:}".format(xargs))
     pprint(dataset_config)
     pprint(dataset)
 
     for irun in range(xargs.times):
-        run_exp(config.get("task"), dataset, xargs.alg, "recorder-{:02d}-{:02d}".format(irun, xargs.times), xargs.save_dir)
+        run_exp(
+            config.get("task"), dataset, xargs.alg, "recorder-{:02d}-{:02d}".format(irun, xargs.times), xargs.save_dir
+        )
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import math
 import numpy as np
 import pandas as pd
 import copy
@@ -43,7 +44,7 @@ class QuantTransformer(Model):
     d_feat=6,
     hidden_size=48,
     depth=5,
-    dropout=0.0,
+    pos_dropout=0.1,
     n_epochs=200,
     lr=0.001,
     metric="",
@@ -63,7 +64,7 @@ class QuantTransformer(Model):
     self.d_feat = d_feat
     self.hidden_size = hidden_size
     self.depth = depth
-    self.dropout = dropout
+    self.pos_dropout = pos_dropout
     self.n_epochs = n_epochs
     self.lr = lr
     self.metric = metric
@@ -94,7 +95,7 @@ class QuantTransformer(Model):
         d_feat,
         hidden_size,
         depth,
-        dropout,
+        pos_dropout,
         n_epochs,
         lr,
         metric,
@@ -114,9 +115,10 @@ class QuantTransformer(Model):
 
     self.model = TransformerModel(d_feat=self.d_feat,
                                   embed_dim=self.hidden_size,
-                                  depth=self.depth)
+                                  depth=self.depth,
+                                  pos_dropout=pos_dropout)
     self.logger.info('model: {:}'.format(self.model))
-    self.logger.info('model size: {:.3f} MB'.format(count_parameters_in_MB(self.model)))
+    self.logger.info('model size: {:.3f} MB'.format(count_parameters(self.model)))
   
     
     if optimizer.lower() == "adam":
@@ -129,17 +131,10 @@ class QuantTransformer(Model):
     self.fitted = False
     self.model.to(self.device)
 
-  def mse(self, pred, label):
-    loss = (pred - label) ** 2
-    return torch.mean(loss)
-
   def loss_fn(self, pred, label):
     mask = ~torch.isnan(label)
-
     if self.loss == "mse":
-      import pdb; pdb.set_trace()
-      print('--')
-      return self.mse(pred[mask], label[mask])
+      return F.mse_loss(pred[mask], label[mask])
     else:
       raise ValueError("unknown loss `{:}`".format(self.loss))
 
@@ -309,7 +304,7 @@ class Attention(nn.Module):
     self.num_heads = num_heads
     head_dim = dim // num_heads
     # NOTE scale factor was wrong in my original version, can set manually to be compat with prev weights
-    self.scale = qk_scale or head_dim ** -0.5
+    self.scale = qk_scale or math.sqrt(head_dim)
 
     self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
     self.attn_drop = nn.Dropout(attn_drop)
@@ -333,17 +328,18 @@ class Attention(nn.Module):
 
 class Block(nn.Module):
 
-  def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
-         drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm):
+  def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, qk_scale=None,
+               attn_drop=0., mlp_drop=0., drop_path=0.,
+               act_layer=nn.GELU, norm_layer=nn.LayerNorm):
     super(Block, self).__init__()
     self.norm1 = norm_layer(dim)
     self.attn = Attention(
-      dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
+      dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=mlp_drop)
     # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
     self.drop_path = xlayers.DropPath(drop_path) if drop_path > 0. else nn.Identity()
     self.norm2 = norm_layer(dim)
     mlp_hidden_dim = int(dim * mlp_ratio)
-    self.mlp = xlayers.MLP(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
+    self.mlp = xlayers.MLP(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=mlp_drop)
 
   def forward(self, x):
     x = x + self.drop_path(self.attn(self.norm1(x)))
@@ -356,12 +352,13 @@ class SimpleEmbed(nn.Module):
   def __init__(self, d_feat, embed_dim):
     super(SimpleEmbed, self).__init__()
     self.d_feat = d_feat
+    self.embed_dim = embed_dim
     self.proj = nn.Linear(d_feat, embed_dim)
 
   def forward(self, x):
     x = x.reshape(len(x), self.d_feat, -1)  # [N, F*T] -> [N, F, T]
     x = x.permute(0, 2, 1)                  # [N, F, T] -> [N, T, F]
-    out = self.proj(x)
+    out = self.proj(x) * math.sqrt(self.embed_dim)
     return out
 
 
@@ -375,7 +372,7 @@ class TransformerModel(nn.Module):
          mlp_ratio: float = 4.,
          qkv_bias: bool = True,
          qk_scale: Optional[float] = None,
-         drop_rate=0., attn_drop_rate=0., drop_path_rate=0., norm_layer=None):
+         pos_dropout=0., mlp_drop_rate=0., attn_drop_rate=0., drop_path_rate=0., norm_layer=None):
     """
     Args:
       d_feat (int, tuple): input image size
@@ -385,7 +382,8 @@ class TransformerModel(nn.Module):
       mlp_ratio (int): ratio of mlp hidden dim to embedding dim
       qkv_bias (bool): enable bias for qkv if True
       qk_scale (float): override default qk scale of head_dim ** -0.5 if set
-      drop_rate (float): dropout rate
+      pos_dropout (float): dropout rate for the positional embedding
+      mlp_drop_rate (float): the dropout rate for MLP layers in a block
       attn_drop_rate (float): attention dropout rate
       drop_path_rate (float): stochastic depth rate
       norm_layer: (nn.Module): normalization layer
@@ -398,14 +396,13 @@ class TransformerModel(nn.Module):
     self.input_embed = SimpleEmbed(d_feat, embed_dim=embed_dim)
 
     self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
-    self.pos_embed = xlayers.PositionalEncoder(d_model=embed_dim, max_seq_len=65)
-    self.pos_drop = nn.Dropout(p=drop_rate)
+    self.pos_embed = xlayers.PositionalEncoder(d_model=embed_dim, max_seq_len=65, dropout=pos_dropout)
 
     dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
     self.blocks = nn.ModuleList([
       Block(
         dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
-        drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_layer)
+        attn_drop=attn_drop_rate, mlp_drop=mlp_drop_rate, drop_path=dpr[i], norm_layer=norm_layer)
       for i in range(depth)])
     self.norm = norm_layer(embed_dim)
 
@@ -431,7 +428,6 @@ class TransformerModel(nn.Module):
     cls_tokens = self.cls_token.expand(batch, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks
     feats_w_ct = torch.cat((cls_tokens, feats), dim=1)
     feats_w_tp = self.pos_embed(feats_w_ct)
-    feats_w_tp = self.pos_drop(feats_w_tp)
 
     xfeats = feats_w_tp
     for block in self.blocks:
