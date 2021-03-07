@@ -2,6 +2,8 @@
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.02 #
 #####################################################
 
+import inspect
+
 import qlib
 from qlib.utils import init_instance_by_config
 from qlib.workflow import R
@@ -39,24 +41,29 @@ def update_market(config, market):
 def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
 
     model = init_instance_by_config(task_config["model"])
+    model_fit_kwargs = dict(dataset=dataset)
 
-    # start exp
+    # Let's start the experiment.
     with R.start(experiment_name=experiment_name, recorder_name=recorder_name, uri=uri):
-
-        log_file = R.get_recorder().root_uri / "{:}.log".format(experiment_name)
+        # Setup log
+        recorder_root_dir = R.get_recorder().root_uri
+        log_file = recorder_root_dir / "{:}.log".format(experiment_name)
         set_log_basic_config(log_file)
         logger = get_module_logger("q.run_exp")
         logger.info("task_config={:}".format(task_config))
         logger.info("[{:}] - [{:}]: {:}".format(experiment_name, recorder_name, uri))
         logger.info("dataset={:}".format(dataset))
 
-        # train model
+        # Train model
         R.log_params(**flatten_dict(task_config))
-        model.fit(dataset)
+        if 'save_path' in inspect.getfullargspec(model.fit).args:
+          model_fit_kwargs['save_path'] = str(recorder_root_dir / 'model-ckps')
+        model.fit(**model_fit_kwargs)
+        # Get the recorder
         recorder = R.get_recorder()
         R.save_objects(**{"model.pkl": model})
 
-        # generate records: prediction, backtest, and analysis
+        # Generate records: prediction, backtest, and analysis
         for record in task_config["record"]:
             record = record.copy()
             if record["class"] == "SignalRecord":

@@ -147,7 +147,7 @@ If you find that this project helps your research, please consider citing the re
 If you want to contribute to this repo, please see [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 Besides, please follow [CODE-OF-CONDUCT.md](.github/CODE-OF-CONDUCT.md).
 
-We use `[black](https://github.com/psf/black)` for Python code formatter.
+We use [`black`](https://github.com/psf/black) for Python code formatter.
 Please use `black . -l 120`.
 
 # License
