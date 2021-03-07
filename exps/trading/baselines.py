@@ -1,15 +1,16 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.02 #
 #####################################################
-# python exps/trading/baselines.py --alg GRU
-# python exps/trading/baselines.py --alg LSTM
-# python exps/trading/baselines.py --alg ALSTM
-# python exps/trading/baselines.py --alg MLP
-# python exps/trading/baselines.py --alg SFM
-# python exps/trading/baselines.py --alg XGBoost
-# python exps/trading/baselines.py --alg LightGBM
+# python exps/trading/baselines.py --alg GRU        #
+# python exps/trading/baselines.py --alg LSTM       #
+# python exps/trading/baselines.py --alg ALSTM      #
+# python exps/trading/baselines.py --alg MLP        #
+# python exps/trading/baselines.py --alg SFM        #
+# python exps/trading/baselines.py --alg XGBoost    #
+# python exps/trading/baselines.py --alg LightGBM   #
 #####################################################
-import sys, argparse
+import sys
+import argparse
 from collections import OrderedDict
 from pathlib import Path
 from pprint import pprint
@@ -20,7 +21,6 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
 from procedures.q_exps import update_gpu
-from procedures.q_exps import update_market
 from procedures.q_exps import run_exp
 
 import qlib
@@ -64,7 +64,6 @@ def main(xargs, exp_yaml):
     with open(exp_yaml) as fp:
         config = yaml.safe_load(fp)
     config = update_gpu(config, xargs.gpu)
-    # config = update_market(config, 'csi300')
 
     qlib.init(**config.get("qlib_init"))
     dataset_config = config.get("task").get("dataset")
