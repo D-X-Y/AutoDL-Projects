@@ -7,11 +7,12 @@ from qlib.utils import init_instance_by_config
 from qlib.workflow import R
 from qlib.utils import flatten_dict
 from qlib.log import set_log_basic_config
+from qlib.log import get_module_logger
 
 
 def update_gpu(config, gpu):
     config = config.copy()
-    if "task" in config and "GPU" in config["task"]["model"]:
+    if "task" in config and "moodel" in config["task"] and "GPU" in config["task"]["model"]:
         config["task"]["model"]["GPU"] = gpu
     elif "model" in config and "GPU" in config["model"]:
         config["model"]["GPU"] = gpu
@@ -29,11 +30,6 @@ def update_market(config, market):
 
 def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
 
-    # model initiaiton
-    print("")
-    print("[{:}] - [{:}]: {:}".format(experiment_name, recorder_name, uri))
-    print("dataset={:}".format(dataset))
-
     model = init_instance_by_config(task_config["model"])
 
     # start exp
@@ -41,6 +37,10 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
 
         log_file = R.get_recorder().root_uri / "{:}.log".format(experiment_name)
         set_log_basic_config(log_file)
+        logger = get_module_logger("q.run_exp")
+        logger.info("task_config={:}".format(task_config))
+        logger.info("[{:}] - [{:}]: {:}".format(experiment_name, recorder_name, uri))
+        logger.info("dataset={:}".format(dataset))
 
         # train model
         R.log_params(**flatten_dict(task_config))
