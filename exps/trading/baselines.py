@@ -8,6 +8,7 @@
 # python exps/trading/baselines.py --alg SFM        #
 # python exps/trading/baselines.py --alg XGBoost    #
 # python exps/trading/baselines.py --alg LightGBM   #
+# python exps/trading/baselines.py --alg DoubleE    #
 #####################################################
 import sys
 import argparse
@@ -46,6 +47,8 @@ def retrieve_configs():
     alg2names["LightGBM"] = "workflow_config_lightgbm_Alpha360.yaml"
     # State Frequency Memory (SFM): Stock Price Prediction via Discovering Multi-Frequency Trading Patterns, KDD-2017
     alg2names["SFM"] = "workflow_config_sfm_Alpha360.yaml"
+    # DoubleEnsemble: A New Ensemble Method Based on Sample Reweighting and Feature Selection for Financial Data Analysis, https://arxiv.org/pdf/2010.01265.pdf
+    alg2names["DoubleE"] = "workflow_config_doubleensemble_Alpha360.yaml"
 
     # find the yaml paths
     alg2paths = OrderedDict()
