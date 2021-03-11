@@ -105,7 +105,7 @@ def filter_finished(recorders):
 
 
 def query_info(save_dir, verbose):
-    R.reset_default_uri(save_dir)
+    R.set_uri(save_dir)
     experiments = R.list_experiments()
 
     key_map = {
