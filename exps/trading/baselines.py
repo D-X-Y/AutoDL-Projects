@@ -1,10 +1,11 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.02 #
 #####################################################
+# python exps/trading/baselines.py --alg MLP        #
 # python exps/trading/baselines.py --alg GRU        #
 # python exps/trading/baselines.py --alg LSTM       #
 # python exps/trading/baselines.py --alg ALSTM      #
-# python exps/trading/baselines.py --alg MLP        #
+#                                                   #
 # python exps/trading/baselines.py --alg SFM        #
 # python exps/trading/baselines.py --alg XGBoost    #
 # python exps/trading/baselines.py --alg LightGBM   #

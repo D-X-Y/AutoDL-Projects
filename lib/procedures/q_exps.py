@@ -80,7 +80,7 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
         # Train model
         R.log_params(**flatten_dict(task_config))
         if "save_path" in inspect.getfullargspec(model.fit).args:
-            model_fit_kwargs["save_path"] = os.path.join(recorder_root_dir, "model-ckps")
+            model_fit_kwargs["save_path"] = os.path.join(recorder_root_dir, "model.ckps")
         model.fit(**model_fit_kwargs)
         # Get the recorder
         recorder = R.get_recorder()

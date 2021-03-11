@@ -17,7 +17,7 @@ import logging
 from qlib.utils import (
     unpack_archive_with_buffer,
     save_multiple_parts_file,
-    create_save_path,
+    get_or_create_path,
     drop_nan_by_y_index,
 )
 from qlib.log import get_module_logger, TimeInspector
@@ -176,7 +176,7 @@ class QuantTransformer(Model):
             _prepare_loader(test_dataset, False),
         )
 
-        save_path = create_save_path(save_path)
+        save_path = get_or_create_path(save_path)
         self.logger.info("Fit procedure for [{:}] with save path={:}".format(self.__class__.__name__, save_path))
 
         def _internal_test(ckp_epoch=None, results_dict=None):
