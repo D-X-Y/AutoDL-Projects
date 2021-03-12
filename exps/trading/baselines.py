@@ -10,6 +10,7 @@
 # python exps/trading/baselines.py --alg XGBoost    #
 # python exps/trading/baselines.py --alg LightGBM   #
 # python exps/trading/baselines.py --alg DoubleE    #
+# python exps/trading/baselines.py --alg TabNet     #
 #####################################################
 import sys
 import argparse
@@ -66,6 +67,7 @@ def retrieve_configs():
 def main(xargs, exp_yaml):
     assert Path(exp_yaml).exists(), "{:} does not exist.".format(exp_yaml)
 
+    pprint('Run {:}'.format(xargs.alg))
     with open(exp_yaml) as fp:
         config = yaml.safe_load(fp)
     config = update_market(config, xargs.market)

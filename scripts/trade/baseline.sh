@@ -1,5 +1,6 @@
 #!/bin/bash
 # bash scripts/trade/baseline.sh 0 csi300
+# bash scripts/trade/baseline.sh 1 csi100
 set -e
 echo script name: $0
 echo $# arguments
@@ -12,7 +13,8 @@ fi
 gpu=$1
 market=$2
 
-algorithms="MLP GRU LSTM ALSTM XGBoost LightGBM"
+# algorithms="MLP GRU LSTM ALSTM XGBoost LightGBM SFM"
+algorithms="SFM"
 
 for alg in ${algorithms}
 do
