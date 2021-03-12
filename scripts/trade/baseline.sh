@@ -13,8 +13,7 @@ fi
 gpu=$1
 market=$2
 
-# algorithms="MLP GRU LSTM ALSTM XGBoost LightGBM SFM"
-algorithms="SFM"
+algorithms="MLP GRU LSTM ALSTM XGBoost LightGBM SFM TabNet DoubleE"
 
 for alg in ${algorithms}
 do
