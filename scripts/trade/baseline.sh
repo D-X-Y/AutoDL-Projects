@@ -1,6 +1,9 @@
 #!/bin/bash
+#
 # bash scripts/trade/baseline.sh 0 csi300
 # bash scripts/trade/baseline.sh 1 csi100
+# bash scripts/trade/baseline.sh 1 all
+#
 set -e
 echo script name: $0
 echo $# arguments
