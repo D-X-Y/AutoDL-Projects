@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.02 #
 #####################################################
-# python exps/trading/organize_results.py
+# python exps/trading/organize_results.py           #
 #####################################################
 import sys, argparse
 import numpy as np
@@ -52,7 +52,7 @@ class QResult:
             new_dict[xkey] = values
         return new_dict
 
-    def info(self, keys: List[Text], separate: Text = "", space: int = 25, verbose: bool = True):
+    def info(self, keys: List[Text], separate: Text = "& ", space: int = 25, verbose: bool = True):
         avaliable_keys = []
         for key in keys:
             if key not in self.result:
@@ -62,10 +62,12 @@ class QResult:
         head_str = separate.join([self.full_str(x, space) for x in avaliable_keys])
         values = []
         for key in avaliable_keys:
-            current_values = self._result[key]
+            # current_values = self._result[key]
+            current_values = [x * 100 for x in self._result[key]]
             mean = np.mean(current_values)
             std = np.std(current_values)
-            values.append("{:.4f} $\pm$ {:.4f}".format(mean, std))
+            # values.append("{:.4f} $\pm$ {:.4f}".format(mean, std))
+            values.append("{:.2f} $\pm$ {:.2f}".format(mean, std))
         value_str = separate.join([self.full_str(x, space) for x in values])
         if verbose:
             print(head_str)
@@ -114,7 +116,7 @@ def query_info(save_dir, verbose):
         "Rank IC": "Rank_IC",
         "Rank ICIR": "Rank_ICIR",
         "excess_return_with_cost.annualized_return": "Annualized_Return",
-        "excess_return_with_cost.information_ratio": "Information_Ratio",
+        # "excess_return_with_cost.information_ratio": "Information_Ratio",
         "excess_return_with_cost.max_drawdown": "Max_Drawdown",
     }
     all_keys = list(key_map.values())
@@ -162,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir", type=str, nargs="+", default=["./outputs/qlib-baselines"], help="The checkpoint directory."
     )
-    parser.add_argument("--verbose", type=str2bool, default=False, help="Print detailed log information or not")
+    parser.add_argument("--verbose", type=str2bool, default=False, help="Print detailed log information or not.")
     args = parser.parse_args()
 
     print("Show results of {:}".format(args.save_dir))
@@ -176,3 +178,4 @@ if __name__ == "__main__":
         all_info_dict.append(info_dict)
     info_dict = QResult.merge_dict(all_info_dict)
     compare_results(info_dict["heads"], info_dict["values"], info_dict["names"], space=15, verbose=True, sort_key=True)
+
