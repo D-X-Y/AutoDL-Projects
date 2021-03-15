@@ -4,6 +4,7 @@
 
 import inspect
 import os
+import pprint
 import logging
 
 import qlib
@@ -73,7 +74,7 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
         log_file = os.path.join(recorder_root_dir, "{:}.log".format(experiment_name))
         set_log_basic_config(log_file)
         logger = get_module_logger("q.run_exp")
-        logger.info("task_config={:}".format(task_config))
+        logger.info("task_config::\n{:}".format(pprint.pformat(task_config, indent=2)))
         logger.info("[{:}] - [{:}]: {:}".format(experiment_name, recorder_name, uri))
         logger.info("dataset={:}".format(dataset))
 
