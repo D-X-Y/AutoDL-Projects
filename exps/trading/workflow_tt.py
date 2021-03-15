@@ -22,8 +22,6 @@ from qlib.config import C
 from qlib.config import REG_CN
 from qlib.utils import init_instance_by_config
 from qlib.workflow import R
-from qlib.utils import flatten_dict
-from qlib.log import set_log_basic_config
 
 
 def main(xargs):
