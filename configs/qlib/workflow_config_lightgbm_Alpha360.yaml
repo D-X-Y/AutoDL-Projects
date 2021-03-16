@@ -9,7 +9,14 @@ data_handler_config: &data_handler_config
     fit_start_time: 2008-01-01
     fit_end_time: 2014-12-31
     instruments: *market
-    infer_processors: []
+    infer_processors:
+	- class: RobustZScoreNorm
+          kwargs:
+              fields_group: feature
+              clip_outlier: true
+        - class: Fillna
+          kwargs:
+              fields_group: feature
     learn_processors:
         - class: DropnaLabel
         - class: CSRankNorm
