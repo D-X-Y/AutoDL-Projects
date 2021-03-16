@@ -60,6 +60,9 @@ task:
         - class: SignalRecord
           module_path: qlib.workflow.record_temp
           kwargs: {}
+        - class: SignalMseRecord
+          module_path: qlib.contrib.workflow.record_temp
+          kwargs: {}
         - class: SigAnaRecord
           module_path: qlib.workflow.record_temp
           kwargs: 
