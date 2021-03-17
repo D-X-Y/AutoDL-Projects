@@ -41,16 +41,13 @@ port_analysis_config: &port_analysis_config
         min_cost: 5
 task:
     model:
-        class: XGBModel
-        module_path: qlib.contrib.model.xgboost
+        class: QuantTransformer
+        module_path: trade_models.quant_transformer
         kwargs:
-            eval_metric: rmse
-            colsample_bytree: 0.8879
-            eta: 0.0421
-            max_depth: 8
-            n_estimators: 647
-            subsample: 0.8789
-            nthread: 20
+            net_config:
+            opt_config:
+            loss: mse
+            GPU: 0
     dataset:
         class: DatasetH
         module_path: qlib.data.dataset

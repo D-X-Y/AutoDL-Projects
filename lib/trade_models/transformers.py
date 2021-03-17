@@ -17,15 +17,15 @@ import layers as xlayers
 
 DEFAULT_NET_CONFIG = dict(
     d_feat=6,
-    embed_dim=48,
+    embed_dim=64,
     depth=5,
     num_heads=4,
     mlp_ratio=4.0,
     qkv_bias=True,
-    pos_drop=0.1,
-    mlp_drop_rate=0.1,
-    attn_drop_rate=0.1,
-    drop_path_rate=0.1,
+    pos_drop=0.0,
+    mlp_drop_rate=0.0,
+    attn_drop_rate=0.0,
+    drop_path_rate=0.0,
 )
 
 
