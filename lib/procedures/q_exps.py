@@ -68,7 +68,7 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
     model_fit_kwargs = dict(dataset=dataset)
 
     # Let's start the experiment.
-    with R.start(experiment_name=experiment_name, recorder_name=recorder_name, uri=uri):
+    with R.start(experiment_name=experiment_name, recorder_name=recorder_name, uri=uri, resume=True):
         # Setup log
         recorder_root_dir = R.get_recorder().get_local_dir()
         log_file = os.path.join(recorder_root_dir, "{:}.log".format(experiment_name))
@@ -81,7 +81,9 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
         # Train model
         R.log_params(**flatten_dict(task_config))
         if "save_path" in inspect.getfullargspec(model.fit).args:
-            model_fit_kwargs["save_path"] = os.path.join(recorder_root_dir, "model.ckps")
+            model_fit_kwargs["save_path"] = os.path.join(recorder_root_dir, "model.ckp")
+        elif "save_dir" in inspect.getfullargspec(model.fit).args:
+            model_fit_kwargs["save_dir"] = os.path.join(recorder_root_dir, "model-ckps")
         model.fit(**model_fit_kwargs)
         # Get the recorder
         recorder = R.get_recorder()

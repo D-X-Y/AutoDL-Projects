@@ -111,6 +111,7 @@ def query_info(save_dir, verbose):
     experiments = R.list_experiments()
 
     key_map = {
+        "RMSE": "RMSE",
         "IC": "IC",
         "ICIR": "ICIR",
         "Rank IC": "Rank_IC",
