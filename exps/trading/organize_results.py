@@ -31,6 +31,9 @@ class QResult:
     def result(self):
         return self._result
 
+    def __len__(self):
+        return len(self._result)
+
     def update(self, metrics, filter_keys=None):
         for key, value in metrics.items():
             if filter_keys is not None and key in filter_keys:
@@ -75,9 +78,9 @@ class QResult:
         return head_str, value_str
 
 
-def compare_results(heads, values, names, space=15, verbose=True, sort_key=False):
+def compare_results(heads, values, names, space=10, verbose=True, sort_key=False):
     for idx, x in enumerate(heads):
-        assert x == heads[0], "[{:}] {:} vs {:}".format(idx, x, heads[0])
+        assert x == heads[0], "[{:}] \n{:}\nvs\n{:}".format(idx, x, heads[0])
     new_head = QResult.full_str("Name", space) + heads[0]
     info_str_dict = dict(head=new_head, lines=[])
     for name, value in zip(names, values):
@@ -133,12 +136,15 @@ def query_info(save_dir, verbose):
         if verbose:
             print(
                 "====>>>> {:02d}/{:02d}-th experiment {:9s} has {:02d}/{:02d} finished recorders.".format(
-                    idx, len(experiments), experiment.name, len(recorders), len(recorders) + not_finished
+                    idx + 1, len(experiments), experiment.name, len(recorders), len(recorders) + not_finished
                 )
             )
         result = QResult()
         for recorder_id, recorder in recorders.items():
             result.update(recorder.list_metrics(), key_map)
+        if not len(result):
+            print("There are no valid recorders for {:}".format(experiment))
+            continue
         head_str, value_str = result.info(all_keys, verbose=verbose)
         head_strs.append(head_str)
         value_strs.append(value_str)
@@ -178,4 +184,4 @@ if __name__ == "__main__":
         _, info_dict = query_info(save_dir, args.verbose)
         all_info_dict.append(info_dict)
     info_dict = QResult.merge_dict(all_info_dict)
-    compare_results(info_dict["heads"], info_dict["values"], info_dict["names"], space=15, verbose=True, sort_key=True)
+    compare_results(info_dict["heads"], info_dict["values"], info_dict["names"], space=10, verbose=True, sort_key=True)
