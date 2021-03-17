@@ -2,4 +2,4 @@
 
 The Python files in this folder are used to re-produce the results in our NAS-Bench-201 paper.
 
-We will upgrade the codes to be more general and extendable. The new codes are at [coming soon].
+We have upgraded the codes to be more general and extendable at [NATS-algos](https://github.com/D-X-Y/AutoDL-Projects/tree/main/exps/NATS-algos).
