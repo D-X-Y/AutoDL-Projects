@@ -25,10 +25,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Test Search Space
-	run: |
+        run: |
           python -m pip install pytest
           echo $PWD
-	  ls
+          ls
           python --version
           python -m pytest AutoDL-Projects/tests --durations=0
-	
+        shell: bash
