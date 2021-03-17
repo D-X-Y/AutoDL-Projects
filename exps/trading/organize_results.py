@@ -179,4 +179,3 @@ if __name__ == "__main__":
         all_info_dict.append(info_dict)
     info_dict = QResult.merge_dict(all_info_dict)
     compare_results(info_dict["heads"], info_dict["values"], info_dict["names"], space=15, verbose=True, sort_key=True)
-

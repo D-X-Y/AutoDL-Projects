@@ -9,23 +9,23 @@ import os
 from setuptools import setup
 
 
-def read(fname='README.md'):
-  with open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8') as cfile:
-    return cfile.read()
+def read(fname="README.md"):
+    with open(os.path.join(os.path.dirname(__file__), fname), encoding="utf-8") as cfile:
+        return cfile.read()
 
 
 setup(
-    name = "nas_bench_201",
-    version = "2.0",
-    author = "Xuanyi Dong",
-    author_email = "dongxuanyi888@gmail.com",
-    description = "API for NAS-Bench-201 (a benchmark for neural architecture search).",
-    license = "MIT",
-    keywords = "NAS Dataset API DeepLearning",
-    url = "https://github.com/D-X-Y/NAS-Bench-201",
-    packages=['nas_201_api'],
-    long_description=read('README.md'),
-    long_description_content_type='text/markdown',
+    name="nas_bench_201",
+    version="2.0",
+    author="Xuanyi Dong",
+    author_email="dongxuanyi888@gmail.com",
+    description="API for NAS-Bench-201 (a benchmark for neural architecture search).",
+    license="MIT",
+    keywords="NAS Dataset API DeepLearning",
+    url="https://github.com/D-X-Y/NAS-Bench-201",
+    packages=["nas_201_api"],
+    long_description=read("README.md"),
+    long_description_content_type="text/markdown",
     classifiers=[
         "Programming Language :: Python",
         "Topic :: Database",
