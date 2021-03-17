@@ -28,7 +28,8 @@ jobs:
         run: |
           python -m pip install pytest
           echo $PWD
+          echo "Show what we have here:"
           ls
           python --version
-          python -m pytest AutoDL-Projects/tests --durations=0
+          python -m pytest ./tests --durations=0
         shell: bash
