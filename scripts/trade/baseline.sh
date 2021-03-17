@@ -16,7 +16,7 @@ fi
 gpu=$1
 market=$2
 
-algorithms="NAIVE MLP GRU LSTM ALSTM XGBoost LightGBM SFM TabNet DoubleE"
+algorithms="NAIVE-V1 NAIVE-V2 MLP GRU LSTM ALSTM XGBoost LightGBM SFM TabNet DoubleE"
 
 for alg in ${algorithms}
 do

@@ -30,8 +30,8 @@ port_analysis_config: &port_analysis_config
         min_cost: 5
 task:
     model:
-        class: NAIVE
-        module_path: trade_models.naive_model
+        class: NAIVE_V1
+        module_path: trade_models.naive_v1_model
         kwargs:
             d_feat: 6
     dataset:

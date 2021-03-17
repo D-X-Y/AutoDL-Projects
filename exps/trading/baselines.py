@@ -5,7 +5,8 @@
 # python exps/trading/baselines.py --alg GRU        #
 # python exps/trading/baselines.py --alg LSTM       #
 # python exps/trading/baselines.py --alg ALSTM      #
-# python exps/trading/baselines.py --alg NAIVE      #
+# python exps/trading/baselines.py --alg NAIVE-V1   #
+# python exps/trading/baselines.py --alg NAIVE-V2   #
 #                                                   #
 # python exps/trading/baselines.py --alg SFM        #
 # python exps/trading/baselines.py --alg XGBoost    #
@@ -53,7 +54,8 @@ def retrieve_configs():
     # DoubleEnsemble: A New Ensemble Method Based on Sample Reweighting and Feature Selection for Financial Data Analysis, https://arxiv.org/pdf/2010.01265.pdf
     alg2names["DoubleE"] = "workflow_config_doubleensemble_Alpha360.yaml"
     alg2names["TabNet"] = "workflow_config_TabNet_Alpha360.yaml"
-    alg2names["NAIVE"] = "workflow_config_naive_Alpha360.yaml"
+    alg2names["NAIVE-V1"] = "workflow_config_naive_v1_Alpha360.yaml"
+    alg2names["NAIVE-V2"] = "workflow_config_naive_v2_Alpha360.yaml"
 
     # find the yaml paths
     alg2paths = OrderedDict()
