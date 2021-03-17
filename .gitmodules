@@ -1,3 +1,6 @@
 [submodule ".latent-data/qlib"]
 	path = .latent-data/qlib
 	url = git@github.com:D-X-Y/qlib.git
+[submodule ".latent-data/NATS-Bench"]
+	path = .latent-data/NATS-Bench
+	url = git@github.com:D-X-Y/NATS-Bench.git

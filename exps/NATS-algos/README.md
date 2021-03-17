@@ -9,6 +9,11 @@ The Python files in this folder are used to re-produce the results in ``NATS-Ben
 - [`regularized_ea.py`](https://github.com/D-X-Y/AutoDL-Projects/blob/main/exps/NATS-algos/regularized_ea.py) contains the REA algorithm for both search spaces.
 - [`reinforce.py`](https://github.com/D-X-Y/AutoDL-Projects/blob/main/exps/NATS-algos/reinforce.py) contains the REINFORCE algorithm for both search spaces.
 
+## Requirements
+
+- `nats_bench`>=v1.1 : you can use `pip install nats_bench` to install or from [sources](https://github.com/D-X-Y/NATS-Bench)
+- `hpbandster` : if you want to run BOHB
+
 ## Citation
 
 If you find that this project helps your research, please consider citing the related paper:

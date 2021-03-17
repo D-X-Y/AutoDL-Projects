@@ -94,6 +94,12 @@ Some visualization codes may require `opencv`.
 CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
 Some methods use knowledge distillation (KD), which require pre-trained models. Please download these models from [Google Drive](https://drive.google.com/open?id=1ANmiYEGX-IQZTfH8w0aSpj-Wypg-0DR-) (or train by yourself) and save into `.latent-data`.
 
+Please use
+```
+git clone --recurse-submodules git@github.com:D-X-Y/AutoDL-Projects.git
+```
+to download this repo with submodules.
+
 ## Citation
 
 If you find that this project helps your research, please consider citing the related paper:
