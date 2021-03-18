@@ -29,7 +29,11 @@ class NAIVE_V2(Model):
         self.d_feat = d_feat
         self.seed = seed
 
-        self.logger.info("NAIVE parameters setting: d_feat={:}, seed={:}".format(self.d_feat, self.seed))
+        self.logger.info(
+            "NAIVE parameters setting: d_feat={:}, seed={:}".format(
+                self.d_feat, self.seed
+            )
+        )
 
         if self.seed is not None:
             random.seed(self.seed)
@@ -79,8 +83,12 @@ class NAIVE_V2(Model):
         )
         # df_train['feature']['CLOSE1'].values
         # train_dataset['features'][:, -1]
-        train_mse_loss = self.mse(self.model(train_dataset["features"]), train_dataset["labels"])
-        valid_mse_loss = self.mse(self.model(valid_dataset["features"]), valid_dataset["labels"])
+        train_mse_loss = self.mse(
+            self.model(train_dataset["features"]), train_dataset["labels"]
+        )
+        valid_mse_loss = self.mse(
+            self.model(valid_dataset["features"]), valid_dataset["labels"]
+        )
         self.logger.info("Training MSE loss: {:}".format(train_mse_loss))
         self.logger.info("Validation MSE loss: {:}".format(valid_mse_loss))
         self.fitted = True

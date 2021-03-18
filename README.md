@@ -154,7 +154,7 @@ If you want to contribute to this repo, please see [CONTRIBUTING.md](.github/CON
 Besides, please follow [CODE-OF-CONDUCT.md](.github/CODE-OF-CONDUCT.md).
 
 We use [`black`](https://github.com/psf/black) for Python code formatter.
-Please use `black . -l 120`.
+Please use `black . -l 88`.
 
 # License
 The entire codebase is under the [MIT license](LICENSE.md).

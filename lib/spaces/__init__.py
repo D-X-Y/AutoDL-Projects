@@ -6,3 +6,5 @@
 
 from .basic_space import Categorical
 from .basic_space import Continuous
+from .basic_op import has_categorical
+from .basic_op import has_continuous

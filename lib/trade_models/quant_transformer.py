@@ -37,14 +37,22 @@ from qlib.data.dataset.handler import DataHandlerLP
 
 
 DEFAULT_OPT_CONFIG = dict(
-    epochs=200, lr=0.001, batch_size=2000, early_stop=20, loss="mse", optimizer="adam", num_workers=4
+    epochs=200,
+    lr=0.001,
+    batch_size=2000,
+    early_stop=20,
+    loss="mse",
+    optimizer="adam",
+    num_workers=4,
 )
 
 
 class QuantTransformer(Model):
     """Transformer-based Quant Model"""
 
-    def __init__(self, net_config=None, opt_config=None, metric="", GPU=0, seed=None, **kwargs):
+    def __init__(
+        self, net_config=None, opt_config=None, metric="", GPU=0, seed=None, **kwargs
+    ):
         # Set logger.
         self.logger = get_module_logger("QuantTransformer")
         self.logger.info("QuantTransformer PyTorch version...")
@@ -53,7 +61,9 @@ class QuantTransformer(Model):
         self.net_config = net_config or DEFAULT_NET_CONFIG
         self.opt_config = opt_config or DEFAULT_OPT_CONFIG
         self.metric = metric
-        self.device = torch.device("cuda:{:}".format(GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:{:}".format(GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -84,11 +94,17 @@ class QuantTransformer(Model):
         self.logger.info("model size: {:.3f} MB".format(count_parameters(self.model)))
 
         if self.opt_config["optimizer"] == "adam":
-            self.train_optimizer = optim.Adam(self.model.parameters(), lr=self.opt_config["lr"])
+            self.train_optimizer = optim.Adam(
+                self.model.parameters(), lr=self.opt_config["lr"]
+            )
         elif self.opt_config["optimizer"] == "adam":
-            self.train_optimizer = optim.SGD(self.model.parameters(), lr=self.opt_config["lr"])
+            self.train_optimizer = optim.SGD(
+                self.model.parameters(), lr=self.opt_config["lr"]
+            )
         else:
-            raise NotImplementedError("optimizer {:} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {:} is not supported!".format(optimizer)
+            )
 
         self.fitted = False
         self.model.to(self.device)
@@ -111,7 +127,9 @@ class QuantTransformer(Model):
         else:
             raise ValueError("unknown metric `{:}`".format(self.metric))
 
-    def train_or_test_epoch(self, xloader, model, loss_fn, metric_fn, is_train, optimizer=None):
+    def train_or_test_epoch(
+        self, xloader, model, loss_fn, metric_fn, is_train, optimizer=None
+    ):
         if is_train:
             model.train()
         else:
@@ -173,7 +191,11 @@ class QuantTransformer(Model):
         )
 
         save_dir = get_or_create_path(save_dir, return_dir=True)
-        self.logger.info("Fit procedure for [{:}] with save path={:}".format(self.__class__.__name__, save_dir))
+        self.logger.info(
+            "Fit procedure for [{:}] with save path={:}".format(
+                self.__class__.__name__, save_dir
+            )
+        )
 
         def _internal_test(ckp_epoch=None, results_dict=None):
             with torch.no_grad():
@@ -186,8 +208,10 @@ class QuantTransformer(Model):
                 test_loss, test_score = self.train_or_test_epoch(
                     test_loader, self.model, self.loss_fn, self.metric_fn, False, None
                 )
-                xstr = "train-score={:.6f}, valid-score={:.6f}, test-score={:.6f}".format(
-                    train_score, valid_score, test_score
+                xstr = (
+                    "train-score={:.6f}, valid-score={:.6f}, test-score={:.6f}".format(
+                        train_score, valid_score, test_score
+                    )
                 )
                 if ckp_epoch is not None and isinstance(results_dict, dict):
                     results_dict["train"][ckp_epoch] = train_score
@@ -199,18 +223,26 @@ class QuantTransformer(Model):
         ckp_path = os.path.join(save_dir, "{:}.pth".format(self.__class__.__name__))
         if os.path.exists(ckp_path):
             ckp_data = torch.load(ckp_path)
-            stop_steps, best_score, best_epoch = ckp_data['stop_steps'], ckp_data['best_score'], ckp_data['best_epoch']
-            start_epoch, best_param = ckp_data['start_epoch'], ckp_data['best_param']
-            results_dict = ckp_data['results_dict']
-            self.model.load_state_dict(ckp_data['net_state_dict'])
-            self.train_optimizer.load_state_dict(ckp_data['opt_state_dict'])
+            stop_steps, best_score, best_epoch = (
+                ckp_data["stop_steps"],
+                ckp_data["best_score"],
+                ckp_data["best_epoch"],
+            )
+            start_epoch, best_param = ckp_data["start_epoch"], ckp_data["best_param"]
+            results_dict = ckp_data["results_dict"]
+            self.model.load_state_dict(ckp_data["net_state_dict"])
+            self.train_optimizer.load_state_dict(ckp_data["opt_state_dict"])
             self.logger.info("Resume from existing checkpoint: {:}".format(ckp_path))
         else:
             stop_steps, best_score, best_epoch = 0, -np.inf, -1
             start_epoch, best_param = 0, None
-            results_dict = dict(train=OrderedDict(), valid=OrderedDict(), test=OrderedDict())
+            results_dict = dict(
+                train=OrderedDict(), valid=OrderedDict(), test=OrderedDict()
+            )
             _, eval_str = _internal_test(-1, results_dict)
-            self.logger.info("Training from scratch, metrics@start: {:}".format(eval_str))
+            self.logger.info(
+                "Training from scratch, metrics@start: {:}".format(eval_str)
+            )
 
         for iepoch in range(start_epoch, self.opt_config["epochs"]):
             self.logger.info(
@@ -219,20 +251,35 @@ class QuantTransformer(Model):
                 )
             )
             train_loss, train_score = self.train_or_test_epoch(
-                train_loader, self.model, self.loss_fn, self.metric_fn, True, self.train_optimizer
+                train_loader,
+                self.model,
+                self.loss_fn,
+                self.metric_fn,
+                True,
+                self.train_optimizer,
             )
-            self.logger.info("Training :: loss={:.6f}, score={:.6f}".format(train_loss, train_score))
+            self.logger.info(
+                "Training :: loss={:.6f}, score={:.6f}".format(train_loss, train_score)
+            )
 
             current_eval_scores, eval_str = _internal_test(iepoch, results_dict)
             self.logger.info("Evaluating :: {:}".format(eval_str))
 
             if current_eval_scores["valid"] > best_score:
-                stop_steps, best_epoch, best_score = 0, iepoch, current_eval_scores["valid"]
+                stop_steps, best_epoch, best_score = (
+                    0,
+                    iepoch,
+                    current_eval_scores["valid"],
+                )
                 best_param = copy.deepcopy(self.model.state_dict())
             else:
                 stop_steps += 1
                 if stop_steps >= self.opt_config["early_stop"]:
-                    self.logger.info("early stop at {:}-th epoch, where the best is @{:}".format(iepoch, best_epoch))
+                    self.logger.info(
+                        "early stop at {:}-th epoch, where the best is @{:}".format(
+                            iepoch, best_epoch
+                        )
+                    )
                     break
             save_info = dict(
                 net_config=self.net_config,
@@ -247,9 +294,11 @@ class QuantTransformer(Model):
                 start_epoch=iepoch + 1,
             )
             torch.save(save_info, ckp_path)
-        self.logger.info("The best score: {:.6f} @ {:02d}-th epoch".format(best_score, best_epoch))
+        self.logger.info(
+            "The best score: {:.6f} @ {:02d}-th epoch".format(best_score, best_epoch)
+        )
         self.model.load_state_dict(best_param)
-        _, eval_str = _internal_test('final', results_dict)
+        _, eval_str = _internal_test("final", results_dict)
         self.logger.info("Reload the best parameter :: {:}".format(eval_str))
 
         if self.use_gpu:
