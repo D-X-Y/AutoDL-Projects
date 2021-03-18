@@ -65,7 +65,11 @@ def retrieve_configs():
         path = config_dir / name
         assert path.exists(), "{:} does not exist.".format(path)
         alg2paths[alg] = str(path)
-        print("The {:02d}/{:02d}-th baseline algorithm is {:9s} ({:}).".format(idx, len(alg2names), alg, path))
+        print(
+            "The {:02d}/{:02d}-th baseline algorithm is {:9s} ({:}).".format(
+                idx, len(alg2names), alg, path
+            )
+        )
     return alg2paths
 
 
@@ -100,13 +104,30 @@ if __name__ == "__main__":
     alg2paths = retrieve_configs()
 
     parser = argparse.ArgumentParser("Baselines")
-    parser.add_argument("--save_dir", type=str, default="./outputs/qlib-baselines", help="The checkpoint directory.")
     parser.add_argument(
-        "--market", type=str, default="all", choices=["csi100", "csi300", "all"], help="The market indicator."
+        "--save_dir",
+        type=str,
+        default="./outputs/qlib-baselines",
+        help="The checkpoint directory.",
+    )
+    parser.add_argument(
+        "--market",
+        type=str,
+        default="all",
+        choices=["csi100", "csi300", "all"],
+        help="The market indicator.",
     )
     parser.add_argument("--times", type=int, default=10, help="The repeated run times.")
-    parser.add_argument("--gpu", type=int, default=0, help="The GPU ID used for train / test.")
-    parser.add_argument("--alg", type=str, choices=list(alg2paths.keys()), required=True, help="The algorithm name.")
+    parser.add_argument(
+        "--gpu", type=int, default=0, help="The GPU ID used for train / test."
+    )
+    parser.add_argument(
+        "--alg",
+        type=str,
+        choices=list(alg2paths.keys()),
+        required=True,
+        help="The algorithm name.",
+    )
     args = parser.parse_args()
 
     main(args, alg2paths[args.alg])

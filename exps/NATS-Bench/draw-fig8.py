@@ -28,7 +28,9 @@ from nats_bench import create
 from log_utils import time_string
 
 
-plt.rcParams.update({"text.usetex": True, "font.family": "sans-serif", "font.sans-serif": ["Helvetica"]})
+plt.rcParams.update(
+    {"text.usetex": True, "font.family": "sans-serif", "font.sans-serif": ["Helvetica"]}
+)
 ## for Palatino and other serif fonts use:
 plt.rcParams.update(
     {
@@ -57,16 +59,22 @@ def fetch_data(root_dir="./output/search", search_space="tss", dataset=None):
         raise ValueError("Unkonwn search space: {:}".format(search_space))
 
     alg2all[r"REA ($\mathcal{H}^{0}$)"] = dict(
-        path=os.path.join(ss_dir, dataset + suffixes[0], "R-EA-SS3", "results.pth"), color="b", linestyle="-"
+        path=os.path.join(ss_dir, dataset + suffixes[0], "R-EA-SS3", "results.pth"),
+        color="b",
+        linestyle="-",
     )
     alg2all[r"REA ({:})".format(hp)] = dict(
-        path=os.path.join(ss_dir, dataset + suffixes[1], "R-EA-SS3", "results.pth"), color="b", linestyle="--"
+        path=os.path.join(ss_dir, dataset + suffixes[1], "R-EA-SS3", "results.pth"),
+        color="b",
+        linestyle="--",
     )
 
     for alg, xdata in alg2all.items():
         data = torch.load(xdata["path"])
         for index, info in data.items():
-            info["time_w_arch"] = [(x, y) for x, y in zip(info["all_total_times"], info["all_archs"])]
+            info["time_w_arch"] = [
+                (x, y) for x, y in zip(info["all_total_times"], info["all_archs"])
+            ]
             for j, arch in enumerate(info["all_archs"]):
                 assert arch != -1, "invalid arch from {:} {:} {:} ({:}, {:})".format(
                     alg, search_space, dataset, index, j
@@ -81,12 +89,16 @@ def query_performance(api, data, dataset, ticket):
         time_w_arch = sorted(info["time_w_arch"], key=lambda x: abs(x[0] - ticket))
         time_a, arch_a = time_w_arch[0]
         time_b, arch_b = time_w_arch[1]
-        info_a = api.get_more_info(arch_a, dataset=dataset, hp=90 if is_size_space else 200, is_random=False)
-        info_b = api.get_more_info(arch_b, dataset=dataset, hp=90 if is_size_space else 200, is_random=False)
+        info_a = api.get_more_info(
+            arch_a, dataset=dataset, hp=90 if is_size_space else 200, is_random=False
+        )
+        info_b = api.get_more_info(
+            arch_b, dataset=dataset, hp=90 if is_size_space else 200, is_random=False
+        )
         accuracy_a, accuracy_b = info_a["test-accuracy"], info_b["test-accuracy"]
-        interplate = (time_b - ticket) / (time_b - time_a) * accuracy_a + (ticket - time_a) / (
-            time_b - time_a
-        ) * accuracy_b
+        interplate = (time_b - ticket) / (time_b - time_a) * accuracy_a + (
+            ticket - time_a
+        ) / (time_b - time_a) * accuracy_b
         results.append(interplate)
     # return sum(results) / len(results)
     return np.mean(results), np.std(results)
@@ -119,7 +131,11 @@ x_axis_s = {
     ("ImageNet16-120", "sss"): 600,
 }
 
-name2label = {"cifar10": "CIFAR-10", "cifar100": "CIFAR-100", "ImageNet16-120": "ImageNet-16-120"}
+name2label = {
+    "cifar10": "CIFAR-10",
+    "cifar100": "CIFAR-100",
+    "ImageNet16-120": "ImageNet-16-120",
+}
 
 spaces2latex = {
     "tss": r"$\mathcal{S}_{t}$",
@@ -149,7 +165,9 @@ def visualize_curve(api_dict, vis_save_dir):
         alg2data = fetch_data(search_space=search_space, dataset=dataset)
         alg2accuracies = OrderedDict()
         total_tickets = 200
-        time_tickets = [float(i) / total_tickets * int(max_time) for i in range(total_tickets)]
+        time_tickets = [
+            float(i) / total_tickets * int(max_time) for i in range(total_tickets)
+        ]
         ax.set_xlim(0, x_axis_s[(dataset, search_space)])
         ax.set_ylim(y_min_s[(dataset, search_space)], y_max_s[(dataset, search_space)])
         for tick in ax.get_xticklabels():
@@ -162,16 +180,29 @@ def visualize_curve(api_dict, vis_save_dir):
             accuracies = []
             for ticket in time_tickets:
                 # import pdb; pdb.set_trace()
-                accuracy, accuracy_std = query_performance(api_dict[search_space], xdata["data"], dataset, ticket)
+                accuracy, accuracy_std = query_performance(
+                    api_dict[search_space], xdata["data"], dataset, ticket
+                )
                 accuracies.append(accuracy)
             # print('{:} plot alg : {:10s}, final accuracy = {:.2f}$\pm${:.2f}'.format(time_string(), alg, accuracy, accuracy_std))
-            print("{:} plot alg : {:10s} on {:}".format(time_string(), alg, search_space))
+            print(
+                "{:} plot alg : {:10s} on {:}".format(time_string(), alg, search_space)
+            )
             alg2accuracies[alg] = accuracies
-            ax.plot(time_tickets, accuracies, c=xdata["color"], linestyle=xdata["linestyle"], label="{:}".format(alg))
+            ax.plot(
+                time_tickets,
+                accuracies,
+                c=xdata["color"],
+                linestyle=xdata["linestyle"],
+                label="{:}".format(alg),
+            )
             ax.set_xlabel("Estimated wall-clock time", fontsize=LabelSize)
             ax.set_ylabel("Test accuracy", fontsize=LabelSize)
             ax.set_title(
-                r"Results on {:} over {:}".format(name2label[dataset], spaces2latex[search_space]), fontsize=LabelSize
+                r"Results on {:} over {:}".format(
+                    name2label[dataset], spaces2latex[search_space]
+                ),
+                fontsize=LabelSize,
             )
         ax.legend(loc=4, fontsize=LegendFontsize)
 

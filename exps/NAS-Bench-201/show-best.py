@@ -13,7 +13,12 @@ from nas_201_api import NASBench201API as API
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Analysis of NAS-Bench-201")
-    parser.add_argument("--api_path", type=str, default=None, help="The path to the NAS-Bench-201 benchmark file.")
+    parser.add_argument(
+        "--api_path",
+        type=str,
+        default=None,
+        help="The path to the NAS-Bench-201 benchmark file.",
+    )
     args = parser.parse_args()
 
     meta_file = Path(args.api_path)

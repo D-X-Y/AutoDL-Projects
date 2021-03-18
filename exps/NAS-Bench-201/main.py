@@ -22,7 +22,9 @@ from models import CellStructure, CellArchitectures, get_search_spaces
 from functions import evaluate_for_seed
 
 
-def evaluate_all_datasets(arch, datasets, xpaths, splits, use_less, seed, arch_config, workers, logger):
+def evaluate_all_datasets(
+    arch, datasets, xpaths, splits, use_less, seed, arch_config, workers, logger
+):
     machine_info, arch_config = get_machine_info(), deepcopy(arch_config)
     all_infos = {"info": machine_info}
     all_dataset_keys = []
@@ -36,27 +38,39 @@ def evaluate_all_datasets(arch, datasets, xpaths, splits, use_less, seed, arch_c
                 config_path = "configs/nas-benchmark/LESS.config"
             else:
                 config_path = "configs/nas-benchmark/CIFAR.config"
-            split_info = load_config("configs/nas-benchmark/cifar-split.txt", None, None)
+            split_info = load_config(
+                "configs/nas-benchmark/cifar-split.txt", None, None
+            )
         elif dataset.startswith("ImageNet16"):
             if use_less:
                 config_path = "configs/nas-benchmark/LESS.config"
             else:
                 config_path = "configs/nas-benchmark/ImageNet-16.config"
-            split_info = load_config("configs/nas-benchmark/{:}-split.txt".format(dataset), None, None)
+            split_info = load_config(
+                "configs/nas-benchmark/{:}-split.txt".format(dataset), None, None
+            )
         else:
             raise ValueError("invalid dataset : {:}".format(dataset))
-        config = load_config(config_path, {"class_num": class_num, "xshape": xshape}, logger)
+        config = load_config(
+            config_path, {"class_num": class_num, "xshape": xshape}, logger
+        )
         # check whether use splited validation set
         if bool(split):
             assert dataset == "cifar10"
             ValLoaders = {
                 "ori-test": torch.utils.data.DataLoader(
-                    valid_data, batch_size=config.batch_size, shuffle=False, num_workers=workers, pin_memory=True
+                    valid_data,
+                    batch_size=config.batch_size,
+                    shuffle=False,
+                    num_workers=workers,
+                    pin_memory=True,
                 )
             }
             assert len(train_data) == len(split_info.train) + len(
                 split_info.valid
-            ), "invalid length : {:} vs {:} + {:}".format(len(train_data), len(split_info.train), len(split_info.valid))
+            ), "invalid length : {:} vs {:} + {:}".format(
+                len(train_data), len(split_info.train), len(split_info.valid)
+            )
             train_data_v2 = deepcopy(train_data)
             train_data_v2.transform = valid_data.transform
             valid_data = train_data_v2
@@ -79,47 +93,67 @@ def evaluate_all_datasets(arch, datasets, xpaths, splits, use_less, seed, arch_c
         else:
             # data loader
             train_loader = torch.utils.data.DataLoader(
-                train_data, batch_size=config.batch_size, shuffle=True, num_workers=workers, pin_memory=True
+                train_data,
+                batch_size=config.batch_size,
+                shuffle=True,
+                num_workers=workers,
+                pin_memory=True,
             )
             valid_loader = torch.utils.data.DataLoader(
-                valid_data, batch_size=config.batch_size, shuffle=False, num_workers=workers, pin_memory=True
+                valid_data,
+                batch_size=config.batch_size,
+                shuffle=False,
+                num_workers=workers,
+                pin_memory=True,
             )
             if dataset == "cifar10":
                 ValLoaders = {"ori-test": valid_loader}
             elif dataset == "cifar100":
-                cifar100_splits = load_config("configs/nas-benchmark/cifar100-test-split.txt", None, None)
+                cifar100_splits = load_config(
+                    "configs/nas-benchmark/cifar100-test-split.txt", None, None
+                )
                 ValLoaders = {
                     "ori-test": valid_loader,
                     "x-valid": torch.utils.data.DataLoader(
                         valid_data,
                         batch_size=config.batch_size,
-                        sampler=torch.utils.data.sampler.SubsetRandomSampler(cifar100_splits.xvalid),
+                        sampler=torch.utils.data.sampler.SubsetRandomSampler(
+                            cifar100_splits.xvalid
+                        ),
                         num_workers=workers,
                         pin_memory=True,
                     ),
                     "x-test": torch.utils.data.DataLoader(
                         valid_data,
                         batch_size=config.batch_size,
-                        sampler=torch.utils.data.sampler.SubsetRandomSampler(cifar100_splits.xtest),
+                        sampler=torch.utils.data.sampler.SubsetRandomSampler(
+                            cifar100_splits.xtest
+                        ),
                         num_workers=workers,
                         pin_memory=True,
                     ),
                 }
             elif dataset == "ImageNet16-120":
-                imagenet16_splits = load_config("configs/nas-benchmark/imagenet-16-120-test-split.txt", None, None)
+                imagenet16_splits = load_config(
+                    "configs/nas-benchmark/imagenet-16-120-test-split.txt", None, None
+                )
                 ValLoaders = {
                     "ori-test": valid_loader,
                     "x-valid": torch.utils.data.DataLoader(
                         valid_data,
                         batch_size=config.batch_size,
-                        sampler=torch.utils.data.sampler.SubsetRandomSampler(imagenet16_splits.xvalid),
+                        sampler=torch.utils.data.sampler.SubsetRandomSampler(
+                            imagenet16_splits.xvalid
+                        ),
                         num_workers=workers,
                         pin_memory=True,
                     ),
                     "x-test": torch.utils.data.DataLoader(
                         valid_data,
                         batch_size=config.batch_size,
-                        sampler=torch.utils.data.sampler.SubsetRandomSampler(imagenet16_splits.xtest),
+                        sampler=torch.utils.data.sampler.SubsetRandomSampler(
+                            imagenet16_splits.xtest
+                        ),
                         num_workers=workers,
                         pin_memory=True,
                     ),
@@ -132,13 +166,24 @@ def evaluate_all_datasets(arch, datasets, xpaths, splits, use_less, seed, arch_c
             dataset_key = dataset_key + "-valid"
         logger.log(
             "Evaluate ||||||| {:10s} ||||||| Train-Num={:}, Valid-Num={:}, Train-Loader-Num={:}, Valid-Loader-Num={:}, batch size={:}".format(
-                dataset_key, len(train_data), len(valid_data), len(train_loader), len(valid_loader), config.batch_size
+                dataset_key,
+                len(train_data),
+                len(valid_data),
+                len(train_loader),
+                len(valid_loader),
+                config.batch_size,
             )
         )
-        logger.log("Evaluate ||||||| {:10s} ||||||| Config={:}".format(dataset_key, config))
+        logger.log(
+            "Evaluate ||||||| {:10s} ||||||| Config={:}".format(dataset_key, config)
+        )
         for key, value in ValLoaders.items():
-            logger.log("Evaluate ---->>>> {:10s} with {:} batchs".format(key, len(value)))
-        results = evaluate_for_seed(arch_config, config, arch, train_loader, ValLoaders, seed, logger)
+            logger.log(
+                "Evaluate ---->>>> {:10s} with {:} batchs".format(key, len(value))
+            )
+        results = evaluate_for_seed(
+            arch_config, config, arch, train_loader, ValLoaders, seed, logger
+        )
         all_infos[dataset_key] = results
         all_dataset_keys.append(dataset_key)
     all_infos["all_dataset_keys"] = all_dataset_keys
@@ -146,7 +191,18 @@ def evaluate_all_datasets(arch, datasets, xpaths, splits, use_less, seed, arch_c
 
 
 def main(
-    save_dir, workers, datasets, xpaths, splits, use_less, srange, arch_index, seeds, cover_mode, meta_info, arch_config
+    save_dir,
+    workers,
+    datasets,
+    xpaths,
+    splits,
+    use_less,
+    srange,
+    arch_index,
+    seeds,
+    cover_mode,
+    meta_info,
+    arch_config,
 ):
     assert torch.cuda.is_available(), "CUDA is not available."
     torch.backends.cudnn.enabled = True
@@ -154,7 +210,9 @@ def main(
     torch.backends.cudnn.deterministic = True
     torch.set_num_threads(workers)
 
-    assert len(srange) == 2 and 0 <= srange[0] <= srange[1], "invalid srange : {:}".format(srange)
+    assert (
+        len(srange) == 2 and 0 <= srange[0] <= srange[1]
+    ), "invalid srange : {:}".format(srange)
 
     if use_less:
         sub_dir = Path(save_dir) / "{:06d}-{:06d}-C{:}-N{:}-LESS".format(
@@ -170,9 +228,9 @@ def main(
     assert srange[1] < meta_info["total"], "invalid range : {:}-{:} vs. {:}".format(
         srange[0], srange[1], meta_info["total"]
     )
-    assert arch_index == -1 or srange[0] <= arch_index <= srange[1], "invalid range : {:} vs. {:} vs. {:}".format(
-        srange[0], arch_index, srange[1]
-    )
+    assert (
+        arch_index == -1 or srange[0] <= arch_index <= srange[1]
+    ), "invalid range : {:} vs. {:} vs. {:}".format(srange[0], arch_index, srange[1])
     if arch_index == -1:
         to_evaluate_indexes = list(range(srange[0], srange[1] + 1))
     else:
@@ -200,7 +258,13 @@ def main(
         arch = all_archs[index]
         logger.log(
             "\n{:} evaluate {:06d}/{:06d} ({:06d}/{:06d})-th architecture [seeds={:}] {:}".format(
-                "-" * 15, i, len(to_evaluate_indexes), index, meta_info["total"], seeds, "-" * 15
+                "-" * 15,
+                i,
+                len(to_evaluate_indexes),
+                index,
+                meta_info["total"],
+                seeds,
+                "-" * 15,
             )
         )
         # logger.log('{:} {:} {:}'.format('-'*15, arch.tostr(), '-'*15))
@@ -212,10 +276,18 @@ def main(
             to_save_name = sub_dir / "arch-{:06d}-seed-{:04d}.pth".format(index, seed)
             if to_save_name.exists():
                 if cover_mode:
-                    logger.log("Find existing file : {:}, remove it before evaluation".format(to_save_name))
+                    logger.log(
+                        "Find existing file : {:}, remove it before evaluation".format(
+                            to_save_name
+                        )
+                    )
                     os.remove(str(to_save_name))
                 else:
-                    logger.log("Find existing file : {:}, skip this evaluation".format(to_save_name))
+                    logger.log(
+                        "Find existing file : {:}, skip this evaluation".format(
+                            to_save_name
+                        )
+                    )
                     has_continue = True
                     continue
             results = evaluate_all_datasets(
@@ -232,7 +304,13 @@ def main(
             torch.save(results, to_save_name)
             logger.log(
                 "{:} --evaluate-- {:06d}/{:06d} ({:06d}/{:06d})-th seed={:} done, save into {:}".format(
-                    "-" * 15, i, len(to_evaluate_indexes), index, meta_info["total"], seed, to_save_name
+                    "-" * 15,
+                    i,
+                    len(to_evaluate_indexes),
+                    index,
+                    meta_info["total"],
+                    seed,
+                    to_save_name,
                 )
             )
         # measure elapsed time
@@ -242,7 +320,9 @@ def main(
         need_time = "Time Left: {:}".format(
             convert_secs2time(epoch_time.avg * (len(to_evaluate_indexes) - i - 1), True)
         )
-        logger.log("This arch costs : {:}".format(convert_secs2time(epoch_time.val, True)))
+        logger.log(
+            "This arch costs : {:}".format(convert_secs2time(epoch_time.val, True))
+        )
         logger.log("{:}".format("*" * 100))
         logger.log(
             "{:}   {:74s}   {:}".format(
@@ -258,7 +338,9 @@ def main(
     logger.close()
 
 
-def train_single_model(save_dir, workers, datasets, xpaths, splits, use_less, seeds, model_str, arch_config):
+def train_single_model(
+    save_dir, workers, datasets, xpaths, splits, use_less, seeds, model_str, arch_config
+):
     assert torch.cuda.is_available(), "CUDA is not available."
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.deterministic = True
@@ -269,19 +351,32 @@ def train_single_model(save_dir, workers, datasets, xpaths, splits, use_less, se
         Path(save_dir)
         / "specifics"
         / "{:}-{:}-{:}-{:}".format(
-            "LESS" if use_less else "FULL", model_str, arch_config["channel"], arch_config["num_cells"]
+            "LESS" if use_less else "FULL",
+            model_str,
+            arch_config["channel"],
+            arch_config["num_cells"],
         )
     )
     logger = Logger(str(save_dir), 0, False)
     if model_str in CellArchitectures:
         arch = CellArchitectures[model_str]
-        logger.log("The model string is found in pre-defined architecture dict : {:}".format(model_str))
+        logger.log(
+            "The model string is found in pre-defined architecture dict : {:}".format(
+                model_str
+            )
+        )
     else:
         try:
             arch = CellStructure.str2structure(model_str)
         except:
-            raise ValueError("Invalid model string : {:}. It can not be found or parsed.".format(model_str))
-    assert arch.check_valid_op(get_search_spaces("cell", "full")), "{:} has the invalid op.".format(arch)
+            raise ValueError(
+                "Invalid model string : {:}. It can not be found or parsed.".format(
+                    model_str
+                )
+            )
+    assert arch.check_valid_op(
+        get_search_spaces("cell", "full")
+    ), "{:} has the invalid op.".format(arch)
     logger.log("Start train-evaluate {:}".format(arch.tostr()))
     logger.log("arch_config : {:}".format(arch_config))
 
@@ -294,27 +389,55 @@ def train_single_model(save_dir, workers, datasets, xpaths, splits, use_less, se
         )
         to_save_name = save_dir / "seed-{:04d}.pth".format(seed)
         if to_save_name.exists():
-            logger.log("Find the existing file {:}, directly load!".format(to_save_name))
+            logger.log(
+                "Find the existing file {:}, directly load!".format(to_save_name)
+            )
             checkpoint = torch.load(to_save_name)
         else:
-            logger.log("Does not find the existing file {:}, train and evaluate!".format(to_save_name))
+            logger.log(
+                "Does not find the existing file {:}, train and evaluate!".format(
+                    to_save_name
+                )
+            )
             checkpoint = evaluate_all_datasets(
-                arch, datasets, xpaths, splits, use_less, seed, arch_config, workers, logger
+                arch,
+                datasets,
+                xpaths,
+                splits,
+                use_less,
+                seed,
+                arch_config,
+                workers,
+                logger,
             )
             torch.save(checkpoint, to_save_name)
         # log information
         logger.log("{:}".format(checkpoint["info"]))
         all_dataset_keys = checkpoint["all_dataset_keys"]
         for dataset_key in all_dataset_keys:
-            logger.log("\n{:} dataset : {:} {:}".format("-" * 15, dataset_key, "-" * 15))
+            logger.log(
+                "\n{:} dataset : {:} {:}".format("-" * 15, dataset_key, "-" * 15)
+            )
             dataset_info = checkpoint[dataset_key]
             # logger.log('Network ==>\n{:}'.format( dataset_info['net_string'] ))
-            logger.log("Flops = {:} MB, Params = {:} MB".format(dataset_info["flop"], dataset_info["param"]))
+            logger.log(
+                "Flops = {:} MB, Params = {:} MB".format(
+                    dataset_info["flop"], dataset_info["param"]
+                )
+            )
             logger.log("config : {:}".format(dataset_info["config"]))
-            logger.log("Training State (finish) = {:}".format(dataset_info["finish-train"]))
+            logger.log(
+                "Training State (finish) = {:}".format(dataset_info["finish-train"])
+            )
             last_epoch = dataset_info["total_epoch"] - 1
-            train_acc1es, train_acc5es = dataset_info["train_acc1es"], dataset_info["train_acc5es"]
-            valid_acc1es, valid_acc5es = dataset_info["valid_acc1es"], dataset_info["valid_acc5es"]
+            train_acc1es, train_acc5es = (
+                dataset_info["train_acc1es"],
+                dataset_info["train_acc5es"],
+            )
+            valid_acc1es, valid_acc5es = (
+                dataset_info["valid_acc1es"],
+                dataset_info["valid_acc5es"],
+            )
             logger.log(
                 "Last Info : Train = Acc@1 {:.2f}% Acc@5 {:.2f}% Error@1 {:.2f}%, Test = Acc@1 {:.2f}% Acc@5 {:.2f}% Error@1 {:.2f}%".format(
                     train_acc1es[last_epoch],
@@ -328,7 +451,9 @@ def train_single_model(save_dir, workers, datasets, xpaths, splits, use_less, se
         # measure elapsed time
         seed_time.update(time.time() - start_time)
         start_time = time.time()
-        need_time = "Time Left: {:}".format(convert_secs2time(seed_time.avg * (len(seeds) - _is - 1), True))
+        need_time = "Time Left: {:}".format(
+            convert_secs2time(seed_time.avg * (len(seeds) - _is - 1), True)
+        )
         logger.log(
             "\n<<<***>>> The {:02d}/{:02d}-th seed is {:} <finish> other procedures need {:}".format(
                 _is, len(seeds), seed, need_time
@@ -340,7 +465,11 @@ def train_single_model(save_dir, workers, datasets, xpaths, splits, use_less, se
 def generate_meta_info(save_dir, max_node, divide=40):
     aa_nas_bench_ss = get_search_spaces("cell", "nas-bench-201")
     archs = CellStructure.gen_all(aa_nas_bench_ss, max_node, False)
-    print("There are {:} archs vs {:}.".format(len(archs), len(aa_nas_bench_ss) ** ((max_node - 1) * max_node / 2)))
+    print(
+        "There are {:} archs vs {:}.".format(
+            len(archs), len(aa_nas_bench_ss) ** ((max_node - 1) * max_node / 2)
+        )
+    )
 
     random.seed(88)  # please do not change this line for reproducibility
     random.shuffle(archs)
@@ -352,10 +481,12 @@ def generate_meta_info(save_dir, max_node, divide=40):
         == "|avg_pool_3x3~0|+|nor_conv_1x1~0|skip_connect~1|+|nor_conv_1x1~0|skip_connect~1|skip_connect~2|"
     ), "please check the 0-th architecture : {:}".format(archs[0])
     assert (
-        archs[9].tostr() == "|avg_pool_3x3~0|+|none~0|none~1|+|skip_connect~0|none~1|nor_conv_3x3~2|"
+        archs[9].tostr()
+        == "|avg_pool_3x3~0|+|none~0|none~1|+|skip_connect~0|none~1|nor_conv_3x3~2|"
     ), "please check the 9-th architecture : {:}".format(archs[9])
     assert (
-        archs[123].tostr() == "|avg_pool_3x3~0|+|avg_pool_3x3~0|nor_conv_1x1~1|+|none~0|avg_pool_3x3~1|nor_conv_3x3~2|"
+        archs[123].tostr()
+        == "|avg_pool_3x3~0|+|avg_pool_3x3~0|nor_conv_1x1~1|+|none~0|avg_pool_3x3~1|nor_conv_3x3~2|"
     ), "please check the 123-th architecture : {:}".format(archs[123])
     total_arch = len(archs)
 
@@ -374,11 +505,21 @@ def generate_meta_info(save_dir, max_node, divide=40):
         and valid_split[10] == 18
         and valid_split[111] == 242
     ), "{:} {:} {:} - {:} {:} {:}".format(
-        train_split[0], train_split[10], train_split[111], valid_split[0], valid_split[10], valid_split[111]
+        train_split[0],
+        train_split[10],
+        train_split[111],
+        valid_split[0],
+        valid_split[10],
+        valid_split[111],
     )
     splits = {num: {"train": train_split, "valid": valid_split}}
 
-    info = {"archs": [x.tostr() for x in archs], "total": total_arch, "max_node": max_node, "splits": splits}
+    info = {
+        "archs": [x.tostr() for x in archs],
+        "total": total_arch,
+        "max_node": max_node,
+        "splits": splits,
+    }
 
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -404,7 +545,11 @@ def generate_meta_info(save_dir, max_node, divide=40):
                 start, xend - 1
             )
         )
-    print("save the training script into {:} and {:}".format(script_name_full, script_name_less))
+    print(
+        "save the training script into {:} and {:}".format(
+            script_name_full, script_name_less
+        )
+    )
     full_file.close()
     less_file.close()
 
@@ -425,29 +570,56 @@ if __name__ == "__main__":
     # mode_choices = ['meta', 'new', 'cover'] + ['specific-{:}'.format(_) for _ in CellArchitectures.keys()]
     # parser = argparse.ArgumentParser(description='Algorithm-Agnostic NAS Benchmark', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser = argparse.ArgumentParser(
-        description="NAS-Bench-201", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description="NAS-Bench-201",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--mode", type=str, required=True, help="The script mode.")
-    parser.add_argument("--save_dir", type=str, help="Folder to save checkpoints and log.")
+    parser.add_argument(
+        "--save_dir", type=str, help="Folder to save checkpoints and log."
+    )
     parser.add_argument("--max_node", type=int, help="The maximum node in a cell.")
     # use for train the model
-    parser.add_argument("--workers", type=int, default=8, help="number of data loading workers (default: 2)")
-    parser.add_argument("--srange", type=int, nargs="+", help="The range of models to be evaluated")
     parser.add_argument(
-        "--arch_index", type=int, default=-1, help="The architecture index to be evaluated (cover mode)."
+        "--workers",
+        type=int,
+        default=8,
+        help="number of data loading workers (default: 2)",
+    )
+    parser.add_argument(
+        "--srange", type=int, nargs="+", help="The range of models to be evaluated"
+    )
+    parser.add_argument(
+        "--arch_index",
+        type=int,
+        default=-1,
+        help="The architecture index to be evaluated (cover mode).",
     )
     parser.add_argument("--datasets", type=str, nargs="+", help="The applied datasets.")
-    parser.add_argument("--xpaths", type=str, nargs="+", help="The root path for this dataset.")
-    parser.add_argument("--splits", type=int, nargs="+", help="The root path for this dataset.")
-    parser.add_argument("--use_less", type=int, default=0, choices=[0, 1], help="Using the less-training-epoch config.")
-    parser.add_argument("--seeds", type=int, nargs="+", help="The range of models to be evaluated")
+    parser.add_argument(
+        "--xpaths", type=str, nargs="+", help="The root path for this dataset."
+    )
+    parser.add_argument(
+        "--splits", type=int, nargs="+", help="The root path for this dataset."
+    )
+    parser.add_argument(
+        "--use_less",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="Using the less-training-epoch config.",
+    )
+    parser.add_argument(
+        "--seeds", type=int, nargs="+", help="The range of models to be evaluated"
+    )
     parser.add_argument("--channel", type=int, help="The number of channels.")
-    parser.add_argument("--num_cells", type=int, help="The number of cells in one stage.")
+    parser.add_argument(
+        "--num_cells", type=int, help="The number of cells in one stage."
+    )
     args = parser.parse_args()
 
-    assert args.mode in ["meta", "new", "cover"] or args.mode.startswith("specific-"), "invalid mode : {:}".format(
-        args.mode
-    )
+    assert args.mode in ["meta", "new", "cover"] or args.mode.startswith(
+        "specific-"
+    ), "invalid mode : {:}".format(args.mode)
 
     if args.mode == "meta":
         generate_meta_info(args.save_dir, args.max_node)
@@ -470,11 +642,15 @@ if __name__ == "__main__":
         assert meta_path.exists(), "{:} does not exist.".format(meta_path)
         meta_info = torch.load(meta_path)
         # check whether args is ok
-        assert len(args.srange) == 2 and args.srange[0] <= args.srange[1], "invalid length of srange args: {:}".format(
-            args.srange
+        assert (
+            len(args.srange) == 2 and args.srange[0] <= args.srange[1]
+        ), "invalid length of srange args: {:}".format(args.srange)
+        assert len(args.seeds) > 0, "invalid length of seeds args: {:}".format(
+            args.seeds
         )
-        assert len(args.seeds) > 0, "invalid length of seeds args: {:}".format(args.seeds)
-        assert len(args.datasets) == len(args.xpaths) == len(args.splits), "invalid infos : {:} vs {:} vs {:}".format(
+        assert (
+            len(args.datasets) == len(args.xpaths) == len(args.splits)
+        ), "invalid infos : {:} vs {:} vs {:}".format(
             len(args.datasets), len(args.xpaths), len(args.splits)
         )
         assert args.workers > 0, "invalid number of workers : {:}".format(args.workers)

@@ -29,7 +29,9 @@ from log_utils import time_string
 
 
 # def fetch_data(root_dir='./output/search', search_space='tss', dataset=None, suffix='-WARMNone'):
-def fetch_data(root_dir="./output/search", search_space="tss", dataset=None, suffix="-WARM0.3"):
+def fetch_data(
+    root_dir="./output/search", search_space="tss", dataset=None, suffix="-WARM0.3"
+):
     ss_dir = "{:}-{:}".format(root_dir, search_space)
     alg2name, alg2path = OrderedDict(), OrderedDict()
     seeds = [777, 888, 999]
@@ -45,8 +47,12 @@ def fetch_data(root_dir="./output/search", search_space="tss", dataset=None, suf
         # alg2name['TAS'] = 'tas-affine0_BN0{:}'.format(suffix)
         # alg2name['FBNetV2'] = 'fbv2-affine0_BN0{:}'.format(suffix)
         # alg2name['TuNAS'] = 'tunas-affine0_BN0{:}'.format(suffix)
-        alg2name["channel-wise interpolation"] = "tas-affine0_BN0-AWD0.001{:}".format(suffix)
-        alg2name["masking + Gumbel-Softmax"] = "mask_gumbel-affine0_BN0-AWD0.001{:}".format(suffix)
+        alg2name["channel-wise interpolation"] = "tas-affine0_BN0-AWD0.001{:}".format(
+            suffix
+        )
+        alg2name[
+            "masking + Gumbel-Softmax"
+        ] = "mask_gumbel-affine0_BN0-AWD0.001{:}".format(suffix)
         alg2name["masking + sampling"] = "mask_rl-affine0_BN0-AWD0.0{:}".format(suffix)
     for alg, name in alg2name.items():
         alg2path[alg] = os.path.join(ss_dir, dataset, name, "seed-{:}-last-info.pth")
@@ -86,7 +92,11 @@ y_max_s = {
     ("ImageNet16-120", "sss"): 46,
 }
 
-name2label = {"cifar10": "CIFAR-10", "cifar100": "CIFAR-100", "ImageNet16-120": "ImageNet-16-120"}
+name2label = {
+    "cifar10": "CIFAR-10",
+    "cifar100": "CIFAR-100",
+    "ImageNet16-120": "ImageNet-16-120",
+}
 
 
 def visualize_curve(api, vis_save_dir, search_space):
@@ -111,10 +121,17 @@ def visualize_curve(api, vis_save_dir, search_space):
                 try:
                     structures, accs = [_[iepoch - 1] for _ in data], []
                 except:
-                    raise ValueError("This alg {:} on {:} has invalid checkpoints.".format(alg, dataset))
+                    raise ValueError(
+                        "This alg {:} on {:} has invalid checkpoints.".format(
+                            alg, dataset
+                        )
+                    )
                 for structure in structures:
                     info = api.get_more_info(
-                        structure, dataset=dataset, hp=90 if api.search_space_name == "size" else 200, is_random=False
+                        structure,
+                        dataset=dataset,
+                        hp=90 if api.search_space_name == "size" else 200,
+                        is_random=False,
                     )
                     accs.append(info["test-accuracy"])
                 accuracies.append(sum(accs) / len(accs))
@@ -122,8 +139,13 @@ def visualize_curve(api, vis_save_dir, search_space):
             alg2accuracies[alg] = accuracies
             ax.plot(xs, accuracies, c=colors[idx], label="{:}".format(alg))
             ax.set_xlabel("The searching epoch", fontsize=LabelSize)
-            ax.set_ylabel("Test accuracy on {:}".format(name2label[dataset]), fontsize=LabelSize)
-            ax.set_title("Searching results on {:}".format(name2label[dataset]), fontsize=LabelSize + 4)
+            ax.set_ylabel(
+                "Test accuracy on {:}".format(name2label[dataset]), fontsize=LabelSize
+            )
+            ax.set_title(
+                "Searching results on {:}".format(name2label[dataset]),
+                fontsize=LabelSize + 4,
+            )
         ax.legend(loc=4, fontsize=LegendFontsize)
 
     fig, axs = plt.subplots(1, 3, figsize=figsize)
@@ -138,12 +160,22 @@ def visualize_curve(api, vis_save_dir, search_space):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="NAS-Bench-X", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        "--save_dir", type=str, default="output/vis-nas-bench/nas-algos", help="Folder to save checkpoints and log."
+    parser = argparse.ArgumentParser(
+        description="NAS-Bench-X",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "--search_space", type=str, default="tss", choices=["tss", "sss"], help="Choose the search space."
+        "--save_dir",
+        type=str,
+        default="output/vis-nas-bench/nas-algos",
+        help="Folder to save checkpoints and log.",
+    )
+    parser.add_argument(
+        "--search_space",
+        type=str,
+        default="tss",
+        choices=["tss", "sss"],
+        help="Choose the search space.",
     )
     args = parser.parse_args()
 

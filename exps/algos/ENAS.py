@@ -15,16 +15,37 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
 from datasets import get_datasets, get_nas_search_loaders
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
+from procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+    get_optim_scheduler,
+)
 from utils import get_model_infos, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from models import get_cell_based_tiny_net, get_search_spaces
 from nas_201_api import NASBench201API as API
 
 
-def train_shared_cnn(xloader, shared_cnn, controller, criterion, scheduler, optimizer, epoch_str, print_freq, logger):
+def train_shared_cnn(
+    xloader,
+    shared_cnn,
+    controller,
+    criterion,
+    scheduler,
+    optimizer,
+    epoch_str,
+    print_freq,
+    logger,
+):
     data_time, batch_time = AverageMeter(), AverageMeter()
-    losses, top1s, top5s, xend = AverageMeter(), AverageMeter(), AverageMeter(), time.time()
+    losses, top1s, top5s, xend = (
+        AverageMeter(),
+        AverageMeter(),
+        AverageMeter(),
+        time.time(),
+    )
 
     shared_cnn.train()
     controller.eval()
@@ -56,7 +77,11 @@ def train_shared_cnn(xloader, shared_cnn, controller, criterion, scheduler, opti
         xend = time.time()
 
         if step % print_freq == 0 or step + 1 == len(xloader):
-            Sstr = "*Train-Shared-CNN* " + time_string() + " [{:}][{:03d}/{:03d}]".format(epoch_str, step, len(xloader))
+            Sstr = (
+                "*Train-Shared-CNN* "
+                + time_string()
+                + " [{:}][{:03d}/{:03d}]".format(epoch_str, step, len(xloader))
+            )
             Tstr = "Time {batch_time.val:.2f} ({batch_time.avg:.2f}) Data {data_time.val:.2f} ({data_time.avg:.2f})".format(
                 batch_time=batch_time, data_time=data_time
             )
@@ -67,11 +92,29 @@ def train_shared_cnn(xloader, shared_cnn, controller, criterion, scheduler, opti
     return losses.avg, top1s.avg, top5s.avg
 
 
-def train_controller(xloader, shared_cnn, controller, criterion, optimizer, config, epoch_str, print_freq, logger):
+def train_controller(
+    xloader,
+    shared_cnn,
+    controller,
+    criterion,
+    optimizer,
+    config,
+    epoch_str,
+    print_freq,
+    logger,
+):
     # config. (containing some necessary arg)
     #   baseline: The baseline score (i.e. average val_acc) from the previous epoch
     data_time, batch_time = AverageMeter(), AverageMeter()
-    GradnormMeter, LossMeter, ValAccMeter, EntropyMeter, BaselineMeter, RewardMeter, xend = (
+    (
+        GradnormMeter,
+        LossMeter,
+        ValAccMeter,
+        EntropyMeter,
+        BaselineMeter,
+        RewardMeter,
+        xend,
+    ) = (
         AverageMeter(),
         AverageMeter(),
         AverageMeter(),
@@ -106,7 +149,9 @@ def train_controller(xloader, shared_cnn, controller, criterion, optimizer, conf
         if config.baseline is None:
             baseline = val_top1
         else:
-            baseline = config.baseline - (1 - config.ctl_bl_dec) * (config.baseline - reward)
+            baseline = config.baseline - (1 - config.ctl_bl_dec) * (
+                config.baseline - reward
+            )
 
         loss = -1 * log_prob * (reward - baseline)
 
@@ -134,18 +179,29 @@ def train_controller(xloader, shared_cnn, controller, criterion, optimizer, conf
             Sstr = (
                 "*Train-Controller* "
                 + time_string()
-                + " [{:}][{:03d}/{:03d}]".format(epoch_str, step, config.ctl_train_steps * config.ctl_num_aggre)
+                + " [{:}][{:03d}/{:03d}]".format(
+                    epoch_str, step, config.ctl_train_steps * config.ctl_num_aggre
+                )
             )
             Tstr = "Time {batch_time.val:.2f} ({batch_time.avg:.2f}) Data {data_time.val:.2f} ({data_time.avg:.2f})".format(
                 batch_time=batch_time, data_time=data_time
             )
             Wstr = "[Loss {loss.val:.3f} ({loss.avg:.3f})  Prec@1 {top1.val:.2f} ({top1.avg:.2f}) Reward {reward.val:.2f} ({reward.avg:.2f})] Baseline {basel.val:.2f} ({basel.avg:.2f})".format(
-                loss=LossMeter, top1=ValAccMeter, reward=RewardMeter, basel=BaselineMeter
+                loss=LossMeter,
+                top1=ValAccMeter,
+                reward=RewardMeter,
+                basel=BaselineMeter,
             )
             Estr = "Entropy={:.4f} ({:.4f})".format(EntropyMeter.val, EntropyMeter.avg)
             logger.log(Sstr + " " + Tstr + " " + Wstr + " " + Estr)
 
-    return LossMeter.avg, ValAccMeter.avg, BaselineMeter.avg, RewardMeter.avg, baseline.item()
+    return (
+        LossMeter.avg,
+        ValAccMeter.avg,
+        BaselineMeter.avg,
+        RewardMeter.avg,
+        baseline.item(),
+    )
 
 
 def get_best_arch(controller, shared_cnn, xloader, n_samples=10):
@@ -164,7 +220,9 @@ def get_best_arch(controller, shared_cnn, xloader, n_samples=10):
             _, _, sampled_arch = controller()
             arch = shared_cnn.module.update_arch(sampled_arch)
             _, logits = shared_cnn(inputs)
-            val_top1, val_top5 = obtain_accuracy(logits.cpu().data, targets.data, topk=(1, 5))
+            val_top1, val_top5 = obtain_accuracy(
+                logits.cpu().data, targets.data, topk=(1, 5)
+            )
 
             archs.append(arch)
             valid_accs.append(val_top1.item())
@@ -188,7 +246,9 @@ def valid_func(xloader, network, criterion):
             _, logits = network(arch_inputs)
             arch_loss = criterion(logits, arch_targets)
             # record
-            arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
+            arch_prec1, arch_prec5 = obtain_accuracy(
+                logits.data, arch_targets.data, topk=(1, 5)
+            )
             arch_losses.update(arch_loss.item(), arch_inputs.size(0))
             arch_top1.update(arch_prec1.item(), arch_inputs.size(0))
             arch_top5.update(arch_prec5.item(), arch_inputs.size(0))
@@ -207,11 +267,20 @@ def main(xargs):
     prepare_seed(xargs.rand_seed)
     logger = prepare_logger(args)
 
-    train_data, test_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
+    train_data, test_data, xshape, class_num = get_datasets(
+        xargs.dataset, xargs.data_path, -1
+    )
     logger.log("use config from : {:}".format(xargs.config_path))
-    config = load_config(xargs.config_path, {"class_num": class_num, "xshape": xshape}, logger)
+    config = load_config(
+        xargs.config_path, {"class_num": class_num, "xshape": xshape}, logger
+    )
     _, train_loader, valid_loader = get_nas_search_loaders(
-        train_data, test_data, xargs.dataset, "configs/nas-benchmark/", config.batch_size, xargs.workers
+        train_data,
+        test_data,
+        xargs.dataset,
+        "configs/nas-benchmark/",
+        config.batch_size,
+        xargs.workers,
     )
     # since ENAS will train the controller on valid-loader, we need to use train transformation for valid-loader
     valid_loader.dataset.transform = deepcopy(train_loader.dataset.transform)
@@ -242,9 +311,14 @@ def main(xargs):
     shared_cnn = get_cell_based_tiny_net(model_config)
     controller = shared_cnn.create_controller()
 
-    w_optimizer, w_scheduler, criterion = get_optim_scheduler(shared_cnn.parameters(), config)
+    w_optimizer, w_scheduler, criterion = get_optim_scheduler(
+        shared_cnn.parameters(), config
+    )
     a_optimizer = torch.optim.Adam(
-        controller.parameters(), lr=config.controller_lr, betas=config.controller_betas, eps=config.controller_eps
+        controller.parameters(),
+        lr=config.controller_lr,
+        betas=config.controller_betas,
+        eps=config.controller_eps,
     )
     logger.log("w-optimizer : {:}".format(w_optimizer))
     logger.log("a-optimizer : {:}".format(a_optimizer))
@@ -259,12 +333,22 @@ def main(xargs):
     else:
         api = API(xargs.arch_nas_dataset)
     logger.log("{:} create API = {:} done".format(time_string(), api))
-    shared_cnn, controller, criterion = torch.nn.DataParallel(shared_cnn).cuda(), controller.cuda(), criterion.cuda()
+    shared_cnn, controller, criterion = (
+        torch.nn.DataParallel(shared_cnn).cuda(),
+        controller.cuda(),
+        criterion.cuda(),
+    )
 
-    last_info, model_base_path, model_best_path = logger.path("info"), logger.path("model"), logger.path("best")
+    last_info, model_base_path, model_best_path = (
+        logger.path("info"),
+        logger.path("model"),
+        logger.path("best"),
+    )
 
     if last_info.exists():  # automatically resume from previous checkpoint
-        logger.log("=> loading checkpoint of the last-info '{:}' start".format(last_info))
+        logger.log(
+            "=> loading checkpoint of the last-info '{:}' start".format(last_info)
+        )
         last_info = torch.load(last_info)
         start_epoch = last_info["epoch"]
         checkpoint = torch.load(last_info["last_checkpoint"])
@@ -277,7 +361,9 @@ def main(xargs):
         w_optimizer.load_state_dict(checkpoint["w_optimizer"])
         a_optimizer.load_state_dict(checkpoint["a_optimizer"])
         logger.log(
-            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(last_info, start_epoch)
+            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(
+                last_info, start_epoch
+            )
         )
     else:
         logger.log("=> do not find the last-info file : {:}".format(last_info))
@@ -292,7 +378,9 @@ def main(xargs):
     )
     for epoch in range(start_epoch, total_epoch):
         w_scheduler.update(epoch, 0.0)
-        need_time = "Time Left: {:}".format(convert_secs2time(epoch_time.val * (total_epoch - epoch), True))
+        need_time = "Time Left: {:}".format(
+            convert_secs2time(epoch_time.val * (total_epoch - epoch), True)
+        )
         epoch_str = "{:03d}-{:03d}".format(epoch, total_epoch)
         logger.log(
             "\n[Search the {:}-th epoch] {:}, LR={:}, baseline={:}".format(
@@ -339,7 +427,13 @@ def main(xargs):
         search_time.update(time.time() - start_time)
         logger.log(
             "[{:}] controller : loss={:.2f}, accuracy={:.2f}%, baseline={:.2f}, reward={:.2f}, current-baseline={:.4f}, time-cost={:.1f} s".format(
-                epoch_str, ctl_loss, ctl_acc, ctl_baseline, ctl_reward, baseline, search_time.sum
+                epoch_str,
+                ctl_loss,
+                ctl_acc,
+                ctl_baseline,
+                ctl_reward,
+                baseline,
+                search_time.sum,
             )
         )
         best_arch, _ = get_best_arch(controller, shared_cnn, valid_loader)
@@ -356,7 +450,9 @@ def main(xargs):
         else:
             find_best = False
 
-        logger.log("<<<--->>> The {:}-th epoch : {:}".format(epoch_str, genotypes[epoch]))
+        logger.log(
+            "<<<--->>> The {:}-th epoch : {:}".format(epoch_str, genotypes[epoch])
+        )
         # save checkpoint
         save_path = save_checkpoint(
             {
@@ -397,18 +493,32 @@ def main(xargs):
         start_time = time.time()
 
     logger.log("\n" + "-" * 100)
-    logger.log("During searching, the best architecture is {:}".format(genotypes["best"]))
+    logger.log(
+        "During searching, the best architecture is {:}".format(genotypes["best"])
+    )
     logger.log("Its accuracy is {:.2f}%".format(valid_accuracies["best"]))
-    logger.log("Randomly select {:} architectures and select the best.".format(xargs.controller_num_samples))
+    logger.log(
+        "Randomly select {:} architectures and select the best.".format(
+            xargs.controller_num_samples
+        )
+    )
     start_time = time.time()
-    final_arch, _ = get_best_arch(controller, shared_cnn, valid_loader, xargs.controller_num_samples)
+    final_arch, _ = get_best_arch(
+        controller, shared_cnn, valid_loader, xargs.controller_num_samples
+    )
     search_time.update(time.time() - start_time)
     shared_cnn.module.update_arch(final_arch)
     final_loss, final_top1, final_top5 = valid_func(valid_loader, shared_cnn, criterion)
     logger.log("The Selected Final Architecture : {:}".format(final_arch))
-    logger.log("Loss={:.3f}, Accuracy@1={:.2f}%, Accuracy@5={:.2f}%".format(final_loss, final_top1, final_top5))
     logger.log(
-        "ENAS : run {:} epochs, cost {:.1f} s, last-geno is {:}.".format(total_epoch, search_time.sum, final_arch)
+        "Loss={:.3f}, Accuracy@1={:.2f}%, Accuracy@5={:.2f}%".format(
+            final_loss, final_top1, final_top5
+        )
+    )
+    logger.log(
+        "ENAS : run {:} epochs, cost {:.1f} s, last-geno is {:}.".format(
+            total_epoch, search_time.sum, final_arch
+        )
     )
     if api is not None:
         logger.log("{:}".format(api.query_by_arch(final_arch)))
@@ -434,18 +544,35 @@ if __name__ == "__main__":
     parser.add_argument("--search_space_name", type=str, help="The search space name.")
     parser.add_argument("--max_nodes", type=int, help="The maximum number of nodes.")
     parser.add_argument("--channel", type=int, help="The number of channels.")
-    parser.add_argument("--num_cells", type=int, help="The number of cells in one stage.")
-    parser.add_argument("--config_path", type=str, help="The config file to train ENAS.")
+    parser.add_argument(
+        "--num_cells", type=int, help="The number of cells in one stage."
+    )
+    parser.add_argument(
+        "--config_path", type=str, help="The config file to train ENAS."
+    )
     parser.add_argument("--controller_train_steps", type=int, help=".")
     parser.add_argument("--controller_num_aggregate", type=int, help=".")
-    parser.add_argument("--controller_entropy_weight", type=float, help="The weight for the entropy of the controller.")
+    parser.add_argument(
+        "--controller_entropy_weight",
+        type=float,
+        help="The weight for the entropy of the controller.",
+    )
     parser.add_argument("--controller_bl_dec", type=float, help=".")
     parser.add_argument("--controller_num_samples", type=int, help=".")
     # log
-    parser.add_argument("--workers", type=int, default=2, help="number of data loading workers (default: 2)")
-    parser.add_argument("--save_dir", type=str, help="Folder to save checkpoints and log.")
     parser.add_argument(
-        "--arch_nas_dataset", type=str, help="The path to load the architecture dataset (nas-benchmark)."
+        "--workers",
+        type=int,
+        default=2,
+        help="number of data loading workers (default: 2)",
+    )
+    parser.add_argument(
+        "--save_dir", type=str, help="Folder to save checkpoints and log."
+    )
+    parser.add_argument(
+        "--arch_nas_dataset",
+        type=str,
+        help="The path to load the architecture dataset (nas-benchmark).",
     )
     parser.add_argument("--print_freq", type=int, help="print frequency (default: 200)")
     parser.add_argument("--rand_seed", type=int, help="manual seed")

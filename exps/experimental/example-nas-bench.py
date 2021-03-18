@@ -28,15 +28,25 @@ from utils import weight_watcher
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Analysis of NAS-Bench-201")
     parser.add_argument(
-        "--api_path", type=str, default=None, help="The path to the NAS-Bench-201 benchmark file and weight dir."
+        "--api_path",
+        type=str,
+        default=None,
+        help="The path to the NAS-Bench-201 benchmark file and weight dir.",
     )
-    parser.add_argument("--archive_path", type=str, default=None, help="The path to the NAS-Bench-201 weight dir.")
+    parser.add_argument(
+        "--archive_path",
+        type=str,
+        default=None,
+        help="The path to the NAS-Bench-201 weight dir.",
+    )
     args = parser.parse_args()
 
     meta_file = Path(args.api_path)
     weight_dir = Path(args.archive_path)
     assert meta_file.exists(), "invalid path for api : {:}".format(meta_file)
-    assert weight_dir.exists() and weight_dir.is_dir(), "invalid path for weight dir : {:}".format(weight_dir)
+    assert (
+        weight_dir.exists() and weight_dir.is_dir()
+    ), "invalid path for weight dir : {:}".format(weight_dir)
 
     api = NASBench201API(meta_file, verbose=True)
 
@@ -46,7 +56,9 @@ if __name__ == "__main__":
     data = "cifar10"  # query the info from CIFAR-10
     config = api.get_net_config(arch_index, data)
     net = get_cell_based_tiny_net(config)
-    meta_info = api.query_meta_info_by_index(arch_index, hp="200")  # all info about this architecture
+    meta_info = api.query_meta_info_by_index(
+        arch_index, hp="200"
+    )  # all info about this architecture
     params = meta_info.get_net_param(data, 888)
 
     net.load_state_dict(params)

@@ -16,7 +16,13 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
 from datasets import get_datasets, SearchDataset
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
+from procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+    get_optim_scheduler,
+)
 from utils import get_model_infos, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from nas_201_api import NASBench201API as API
@@ -34,7 +40,9 @@ class Policy(nn.Module):
             for j in range(i):
                 node_str = "{:}<-{:}".format(i, j)
                 self.edge2index[node_str] = len(self.edge2index)
-        self.arch_parameters = nn.Parameter(1e-3 * torch.randn(len(self.edge2index), len(search_space)))
+        self.arch_parameters = nn.Parameter(
+            1e-3 * torch.randn(len(self.edge2index), len(search_space))
+        )
 
     def generate_arch(self, actions):
         genotypes = []
@@ -74,7 +82,9 @@ class ExponentialMovingAverage(object):
         self._momentum = momentum
 
     def update(self, value):
-        self._numerator = self._momentum * self._numerator + (1 - self._momentum) * value
+        self._numerator = (
+            self._momentum * self._numerator + (1 - self._momentum) * value
+        )
         self._denominator = self._momentum * self._denominator + (1 - self._momentum)
 
     def value(self):
@@ -104,13 +114,17 @@ def main(xargs, nas_bench):
     else:
         dataname = xargs.dataset
     if xargs.data_path is not None:
-        train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
+        train_data, valid_data, xshape, class_num = get_datasets(
+            xargs.dataset, xargs.data_path, -1
+        )
         split_Fpath = "configs/nas-benchmark/cifar-split.txt"
         cifar_split = load_config(split_Fpath, None, None)
         train_split, valid_split = cifar_split.train, cifar_split.valid
         logger.log("Load split file from {:}".format(split_Fpath))
         config_path = "configs/nas-benchmark/algos/R-EA.config"
-        config = load_config(config_path, {"class_num": class_num, "xshape": xshape}, logger)
+        config = load_config(
+            config_path, {"class_num": class_num, "xshape": xshape}, logger
+        )
         # To split data
         train_data_v2 = deepcopy(train_data)
         train_data_v2.transform = valid_data.transform
@@ -137,7 +151,11 @@ def main(xargs, nas_bench):
             )
         )
         logger.log("||||||| {:10s} ||||||| Config={:}".format(xargs.dataset, config))
-        extra_info = {"config": config, "train_loader": train_loader, "valid_loader": valid_loader}
+        extra_info = {
+            "config": config,
+            "train_loader": train_loader,
+            "valid_loader": valid_loader,
+        }
     else:
         config_path = "configs/nas-benchmark/algos/R-EA.config"
         config = load_config(config_path, None, logger)
@@ -160,7 +178,9 @@ def main(xargs, nas_bench):
     # REINFORCE
     # attempts = 0
     x_start_time = time.time()
-    logger.log("Will start searching with time budget of {:} s.".format(xargs.time_budget))
+    logger.log(
+        "Will start searching with time budget of {:} s.".format(xargs.time_budget)
+    )
     total_steps, total_costs, trace = 0, 0, []
     # for istep in range(xargs.RL_steps):
     while total_costs < xargs.time_budget:
@@ -222,16 +242,35 @@ if __name__ == "__main__":
     parser.add_argument("--search_space_name", type=str, help="The search space name.")
     parser.add_argument("--max_nodes", type=int, help="The maximum number of nodes.")
     parser.add_argument("--channel", type=int, help="The number of channels.")
-    parser.add_argument("--num_cells", type=int, help="The number of cells in one stage.")
-    parser.add_argument("--learning_rate", type=float, help="The learning rate for REINFORCE.")
-    # parser.add_argument('--RL_steps',           type=int,   help='The steps for REINFORCE.')
-    parser.add_argument("--EMA_momentum", type=float, help="The momentum value for EMA.")
-    parser.add_argument("--time_budget", type=int, help="The total time cost budge for searching (in seconds).")
-    # log
-    parser.add_argument("--workers", type=int, default=2, help="number of data loading workers (default: 2)")
-    parser.add_argument("--save_dir", type=str, help="Folder to save checkpoints and log.")
     parser.add_argument(
-        "--arch_nas_dataset", type=str, help="The path to load the architecture dataset (tiny-nas-benchmark)."
+        "--num_cells", type=int, help="The number of cells in one stage."
+    )
+    parser.add_argument(
+        "--learning_rate", type=float, help="The learning rate for REINFORCE."
+    )
+    # parser.add_argument('--RL_steps',           type=int,   help='The steps for REINFORCE.')
+    parser.add_argument(
+        "--EMA_momentum", type=float, help="The momentum value for EMA."
+    )
+    parser.add_argument(
+        "--time_budget",
+        type=int,
+        help="The total time cost budge for searching (in seconds).",
+    )
+    # log
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=2,
+        help="number of data loading workers (default: 2)",
+    )
+    parser.add_argument(
+        "--save_dir", type=str, help="Folder to save checkpoints and log."
+    )
+    parser.add_argument(
+        "--arch_nas_dataset",
+        type=str,
+        help="The path to load the architecture dataset (tiny-nas-benchmark).",
     )
     parser.add_argument("--print_freq", type=int, help="print frequency (default: 200)")
     parser.add_argument("--rand_seed", type=int, default=-1, help="manual seed")
@@ -240,7 +279,11 @@ if __name__ == "__main__":
     if args.arch_nas_dataset is None or not os.path.isfile(args.arch_nas_dataset):
         nas_bench = None
     else:
-        print("{:} build NAS-Benchmark-API from {:}".format(time_string(), args.arch_nas_dataset))
+        print(
+            "{:} build NAS-Benchmark-API from {:}".format(
+                time_string(), args.arch_nas_dataset
+            )
+        )
         nas_bench = API(args.arch_nas_dataset)
     if args.rand_seed < 0:
         save_dir, all_indexes, num = None, [], 500

@@ -30,18 +30,32 @@ def main(args):
     prepare_seed(args.rand_seed)
     logger = prepare_logger(args)
 
-    train_data, valid_data, xshape, class_num = get_datasets(args.dataset, args.data_path, args.cutout_length)
+    train_data, valid_data, xshape, class_num = get_datasets(
+        args.dataset, args.data_path, args.cutout_length
+    )
     train_loader = torch.utils.data.DataLoader(
-        train_data, batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True
+        train_data,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.workers,
+        pin_memory=True,
     )
     valid_loader = torch.utils.data.DataLoader(
-        valid_data, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, pin_memory=True
+        valid_data,
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=args.workers,
+        pin_memory=True,
     )
     # get configures
     model_config = load_config(args.model_config, {"class_num": class_num}, logger)
     optim_config = load_config(
         args.optim_config,
-        {"class_num": class_num, "KD_alpha": args.KD_alpha, "KD_temperature": args.KD_temperature},
+        {
+            "class_num": class_num,
+            "KD_alpha": args.KD_alpha,
+            "KD_temperature": args.KD_temperature,
+        },
         logger,
     )
 
@@ -55,20 +69,32 @@ def main(args):
     logger.log("Teacher ====>>>>:\n{:}".format(teacher_base))
     logger.log("model information : {:}".format(base_model.get_message()))
     logger.log("-" * 50)
-    logger.log("Params={:.2f} MB, FLOPs={:.2f} M ... = {:.2f} G".format(param, flop, flop / 1e3))
+    logger.log(
+        "Params={:.2f} MB, FLOPs={:.2f} M ... = {:.2f} G".format(
+            param, flop, flop / 1e3
+        )
+    )
     logger.log("-" * 50)
     logger.log("train_data : {:}".format(train_data))
     logger.log("valid_data : {:}".format(valid_data))
-    optimizer, scheduler, criterion = get_optim_scheduler(base_model.parameters(), optim_config)
+    optimizer, scheduler, criterion = get_optim_scheduler(
+        base_model.parameters(), optim_config
+    )
     logger.log("optimizer  : {:}".format(optimizer))
     logger.log("scheduler  : {:}".format(scheduler))
     logger.log("criterion  : {:}".format(criterion))
 
-    last_info, model_base_path, model_best_path = logger.path("info"), logger.path("model"), logger.path("best")
+    last_info, model_base_path, model_best_path = (
+        logger.path("info"),
+        logger.path("model"),
+        logger.path("best"),
+    )
     network, criterion = torch.nn.DataParallel(base_model).cuda(), criterion.cuda()
 
     if last_info.exists():  # automatically resume from previous checkpoint
-        logger.log("=> loading checkpoint of the last-info '{:}' start".format(last_info))
+        logger.log(
+            "=> loading checkpoint of the last-info '{:}' start".format(last_info)
+        )
         last_info = torch.load(last_info)
         start_epoch = last_info["epoch"] + 1
         checkpoint = torch.load(last_info["last_checkpoint"])
@@ -78,10 +104,14 @@ def main(args):
         valid_accuracies = checkpoint["valid_accuracies"]
         max_bytes = checkpoint["max_bytes"]
         logger.log(
-            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(last_info, start_epoch)
+            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(
+                last_info, start_epoch
+            )
         )
     elif args.resume is not None:
-        assert Path(args.resume).exists(), "Can not find the resume file : {:}".format(args.resume)
+        assert Path(args.resume).exists(), "Can not find the resume file : {:}".format(
+            args.resume
+        )
         checkpoint = torch.load(args.resume)
         start_epoch = checkpoint["epoch"] + 1
         base_model.load_state_dict(checkpoint["base-model"])
@@ -89,9 +119,15 @@ def main(args):
         optimizer.load_state_dict(checkpoint["optimizer"])
         valid_accuracies = checkpoint["valid_accuracies"]
         max_bytes = checkpoint["max_bytes"]
-        logger.log("=> loading checkpoint from '{:}' start with {:}-th epoch.".format(args.resume, start_epoch))
+        logger.log(
+            "=> loading checkpoint from '{:}' start with {:}-th epoch.".format(
+                args.resume, start_epoch
+            )
+        )
     elif args.init_model is not None:
-        assert Path(args.init_model).exists(), "Can not find the initialization file : {:}".format(args.init_model)
+        assert Path(
+            args.init_model
+        ).exists(), "Can not find the initialization file : {:}".format(args.init_model)
         checkpoint = torch.load(args.init_model)
         base_model.load_state_dict(checkpoint["base-model"])
         start_epoch, valid_accuracies, max_bytes = 0, {"best": -1}, {}
@@ -108,7 +144,9 @@ def main(args):
     epoch_time = AverageMeter()
     for epoch in range(start_epoch, total_epoch):
         scheduler.update(epoch, 0.0)
-        need_time = "Time Left: {:}".format(convert_secs2time(epoch_time.avg * (total_epoch - epoch), True))
+        need_time = "Time Left: {:}".format(
+            convert_secs2time(epoch_time.avg * (total_epoch - epoch), True)
+        )
         epoch_str = "epoch={:03d}/{:03d}".format(epoch, total_epoch)
         LRs = scheduler.get_lr()
         find_best = False
@@ -143,7 +181,14 @@ def main(args):
         if (epoch % args.eval_frequency == 0) or (epoch + 1 == total_epoch):
             logger.log("-" * 150)
             valid_loss, valid_acc1, valid_acc5 = valid_func(
-                valid_loader, teacher, network, criterion, optim_config, epoch_str, args.print_freq_eval, logger
+                valid_loader,
+                teacher,
+                network,
+                criterion,
+                optim_config,
+                epoch_str,
+                args.print_freq_eval,
+                logger,
             )
             valid_accuracies[epoch] = valid_acc1
             logger.log(
@@ -162,13 +207,24 @@ def main(args):
                 find_best = True
                 logger.log(
                     "Currently, the best validation accuracy found at {:03d}-epoch :: acc@1={:.2f}, acc@5={:.2f}, error@1={:.2f}, error@5={:.2f}, save into {:}.".format(
-                        epoch, valid_acc1, valid_acc5, 100 - valid_acc1, 100 - valid_acc5, model_best_path
+                        epoch,
+                        valid_acc1,
+                        valid_acc5,
+                        100 - valid_acc1,
+                        100 - valid_acc5,
+                        model_best_path,
                     )
                 )
-            num_bytes = torch.cuda.max_memory_cached(next(network.parameters()).device) * 1.0
+            num_bytes = (
+                torch.cuda.max_memory_cached(next(network.parameters()).device) * 1.0
+            )
             logger.log(
                 "[GPU-Memory-Usage on {:} is {:} bytes, {:.2f} KB, {:.2f} MB, {:.2f} GB.]".format(
-                    next(network.parameters()).device, int(num_bytes), num_bytes / 1e3, num_bytes / 1e6, num_bytes / 1e9
+                    next(network.parameters()).device,
+                    int(num_bytes),
+                    num_bytes / 1e3,
+                    num_bytes / 1e6,
+                    num_bytes / 1e9,
                 )
             )
             max_bytes[epoch] = num_bytes
@@ -210,10 +266,16 @@ def main(args):
         start_time = time.time()
 
     logger.log("\n" + "-" * 200)
-    logger.log("||| Params={:.2f} MB, FLOPs={:.2f} M ... = {:.2f} G".format(param, flop, flop / 1e3))
+    logger.log(
+        "||| Params={:.2f} MB, FLOPs={:.2f} M ... = {:.2f} G".format(
+            param, flop, flop / 1e3
+        )
+    )
     logger.log(
         "Finish training/validation in {:} with Max-GPU-Memory of {:.2f} MB, and save final checkpoint into {:}".format(
-            convert_secs2time(epoch_time.sum, True), max(v for k, v in max_bytes.items()) / 1e6, logger.path("info")
+            convert_secs2time(epoch_time.sum, True),
+            max(v for k, v in max_bytes.items()) / 1e6,
+            logger.path("info"),
         )
     )
     logger.log("-" * 200 + "\n")

@@ -37,7 +37,13 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
 from datasets import get_datasets, get_nas_search_loaders
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
+from procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+    get_optim_scheduler,
+)
 from utils import count_parameters_in_MB, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from models import get_cell_based_tiny_net, get_search_spaces
@@ -49,7 +55,9 @@ def _concat(xs):
     return torch.cat([x.view(-1) for x in xs])
 
 
-def _hessian_vector_product(vector, network, criterion, base_inputs, base_targets, r=1e-2):
+def _hessian_vector_product(
+    vector, network, criterion, base_inputs, base_targets, r=1e-2
+):
     R = r / _concat(vector).norm()
     for p, v in zip(network.weights, vector):
         p.data.add_(R, v)
@@ -68,7 +76,15 @@ def _hessian_vector_product(vector, network, criterion, base_inputs, base_target
     return [(x - y).div_(2 * R) for x, y in zip(grads_p, grads_n)]
 
 
-def backward_step_unrolled(network, criterion, base_inputs, base_targets, w_optimizer, arch_inputs, arch_targets):
+def backward_step_unrolled(
+    network,
+    criterion,
+    base_inputs,
+    base_targets,
+    w_optimizer,
+    arch_inputs,
+    arch_targets,
+):
     # _compute_unrolled_model
     _, logits = network(base_inputs)
     loss = criterion(logits, base_targets)
@@ -80,7 +96,9 @@ def backward_step_unrolled(network, criterion, base_inputs, base_targets, w_opti
     with torch.no_grad():
         theta = _concat(network.weights)
         try:
-            moment = _concat(w_optimizer.state[v]["momentum_buffer"] for v in network.weights)
+            moment = _concat(
+                w_optimizer.state[v]["momentum_buffer"] for v in network.weights
+            )
             moment = moment.mul_(momentum)
         except:
             moment = torch.zeros_like(theta)
@@ -105,7 +123,9 @@ def backward_step_unrolled(network, criterion, base_inputs, base_targets, w_opti
 
     dalpha = unrolled_model.arch_parameters.grad
     vector = [v.grad.data for v in unrolled_model.weights]
-    [implicit_grads] = _hessian_vector_product(vector, network, criterion, base_inputs, base_targets)
+    [implicit_grads] = _hessian_vector_product(
+        vector, network, criterion, base_inputs, base_targets
+    )
 
     dalpha.data.sub_(LR, implicit_grads.data)
 
@@ -116,13 +136,26 @@ def backward_step_unrolled(network, criterion, base_inputs, base_targets, w_opti
     return unrolled_loss.detach(), unrolled_logits.detach()
 
 
-def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, epoch_str, print_freq, algo, logger):
+def search_func(
+    xloader,
+    network,
+    criterion,
+    scheduler,
+    w_optimizer,
+    a_optimizer,
+    epoch_str,
+    print_freq,
+    algo,
+    logger,
+):
     data_time, batch_time = AverageMeter(), AverageMeter()
     base_losses, base_top1, base_top5 = AverageMeter(), AverageMeter(), AverageMeter()
     arch_losses, arch_top1, arch_top5 = AverageMeter(), AverageMeter(), AverageMeter()
     end = time.time()
     network.train()
-    for step, (base_inputs, base_targets, arch_inputs, arch_targets) in enumerate(xloader):
+    for step, (base_inputs, base_targets, arch_inputs, arch_targets) in enumerate(
+        xloader
+    ):
         scheduler.update(None, 1.0 * step / len(xloader))
         base_inputs = base_inputs.cuda(non_blocking=True)
         arch_inputs = arch_inputs.cuda(non_blocking=True)
@@ -155,7 +188,9 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
         base_loss.backward()
         w_optimizer.step()
         # record
-        base_prec1, base_prec5 = obtain_accuracy(logits.data, base_targets.data, topk=(1, 5))
+        base_prec1, base_prec5 = obtain_accuracy(
+            logits.data, base_targets.data, topk=(1, 5)
+        )
         base_losses.update(base_loss.item(), base_inputs.size(0))
         base_top1.update(base_prec1.item(), base_inputs.size(0))
         base_top5.update(base_prec5.item(), base_inputs.size(0))
@@ -174,7 +209,13 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
         network.zero_grad()
         if algo == "darts-v2":
             arch_loss, logits = backward_step_unrolled(
-                network, criterion, base_inputs, base_targets, w_optimizer, arch_inputs, arch_targets
+                network,
+                criterion,
+                base_inputs,
+                base_targets,
+                w_optimizer,
+                arch_inputs,
+                arch_targets,
             )
             a_optimizer.step()
         elif algo == "random" or algo == "enas":
@@ -187,7 +228,9 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
             arch_loss.backward()
             a_optimizer.step()
         # record
-        arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
+        arch_prec1, arch_prec5 = obtain_accuracy(
+            logits.data, arch_targets.data, topk=(1, 5)
+        )
         arch_losses.update(arch_loss.item(), arch_inputs.size(0))
         arch_top1.update(arch_prec1.item(), arch_inputs.size(0))
         arch_top5.update(arch_prec5.item(), arch_inputs.size(0))
@@ -197,7 +240,11 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
         end = time.time()
 
         if step % print_freq == 0 or step + 1 == len(xloader):
-            Sstr = "*SEARCH* " + time_string() + " [{:}][{:03d}/{:03d}]".format(epoch_str, step, len(xloader))
+            Sstr = (
+                "*SEARCH* "
+                + time_string()
+                + " [{:}][{:03d}/{:03d}]".format(epoch_str, step, len(xloader))
+            )
             Tstr = "Time {batch_time.val:.2f} ({batch_time.avg:.2f}) Data {data_time.val:.2f} ({data_time.avg:.2f})".format(
                 batch_time=batch_time, data_time=data_time
             )
@@ -208,14 +255,31 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
                 loss=arch_losses, top1=arch_top1, top5=arch_top5
             )
             logger.log(Sstr + " " + Tstr + " " + Wstr + " " + Astr)
-    return base_losses.avg, base_top1.avg, base_top5.avg, arch_losses.avg, arch_top1.avg, arch_top5.avg
+    return (
+        base_losses.avg,
+        base_top1.avg,
+        base_top5.avg,
+        arch_losses.avg,
+        arch_top1.avg,
+        arch_top5.avg,
+    )
 
 
-def train_controller(xloader, network, criterion, optimizer, prev_baseline, epoch_str, print_freq, logger):
+def train_controller(
+    xloader, network, criterion, optimizer, prev_baseline, epoch_str, print_freq, logger
+):
     # config. (containing some necessary arg)
     #   baseline: The baseline score (i.e. average val_acc) from the previous epoch
     data_time, batch_time = AverageMeter(), AverageMeter()
-    GradnormMeter, LossMeter, ValAccMeter, EntropyMeter, BaselineMeter, RewardMeter, xend = (
+    (
+        GradnormMeter,
+        LossMeter,
+        ValAccMeter,
+        EntropyMeter,
+        BaselineMeter,
+        RewardMeter,
+        xend,
+    ) = (
         AverageMeter(),
         AverageMeter(),
         AverageMeter(),
@@ -255,7 +319,9 @@ def train_controller(xloader, network, criterion, optimizer, prev_baseline, epoc
         if prev_baseline is None:
             baseline = val_top1
         else:
-            baseline = prev_baseline - (1 - controller_bl_dec) * (prev_baseline - reward)
+            baseline = prev_baseline - (1 - controller_bl_dec) * (
+                prev_baseline - reward
+            )
 
         loss = -1 * log_prob * (reward - baseline)
 
@@ -274,7 +340,9 @@ def train_controller(xloader, network, criterion, optimizer, prev_baseline, epoc
         batch_time.update(time.time() - xend)
         xend = time.time()
         if (step + 1) % controller_num_aggregate == 0:
-            grad_norm = torch.nn.utils.clip_grad_norm_(network.controller.parameters(), 5.0)
+            grad_norm = torch.nn.utils.clip_grad_norm_(
+                network.controller.parameters(), 5.0
+            )
             GradnormMeter.update(grad_norm)
             optimizer.step()
             network.controller.zero_grad()
@@ -283,13 +351,18 @@ def train_controller(xloader, network, criterion, optimizer, prev_baseline, epoc
             Sstr = (
                 "*Train-Controller* "
                 + time_string()
-                + " [{:}][{:03d}/{:03d}]".format(epoch_str, step, controller_train_steps * controller_num_aggregate)
+                + " [{:}][{:03d}/{:03d}]".format(
+                    epoch_str, step, controller_train_steps * controller_num_aggregate
+                )
             )
             Tstr = "Time {batch_time.val:.2f} ({batch_time.avg:.2f}) Data {data_time.val:.2f} ({data_time.avg:.2f})".format(
                 batch_time=batch_time, data_time=data_time
             )
             Wstr = "[Loss {loss.val:.3f} ({loss.avg:.3f})  Prec@1 {top1.val:.2f} ({top1.avg:.2f}) Reward {reward.val:.2f} ({reward.avg:.2f})] Baseline {basel.val:.2f} ({basel.avg:.2f})".format(
-                loss=LossMeter, top1=ValAccMeter, reward=RewardMeter, basel=BaselineMeter
+                loss=LossMeter,
+                top1=ValAccMeter,
+                reward=RewardMeter,
+                basel=BaselineMeter,
             )
             Estr = "Entropy={:.4f} ({:.4f})".format(EntropyMeter.val, EntropyMeter.avg)
             logger.log(Sstr + " " + Tstr + " " + Wstr + " " + Estr)
@@ -323,7 +396,9 @@ def get_best_arch(xloader, network, n_samples, algo):
                 loader_iter = iter(xloader)
                 inputs, targets = next(loader_iter)
             _, logits = network(inputs.cuda(non_blocking=True))
-            val_top1, val_top5 = obtain_accuracy(logits.cpu().data, targets.data, topk=(1, 5))
+            val_top1, val_top5 = obtain_accuracy(
+                logits.cpu().data, targets.data, topk=(1, 5)
+            )
             valid_accs.append(val_top1.item())
         best_idx = np.argmax(valid_accs)
         best_arch, best_valid_acc = archs[best_idx], valid_accs[best_idx]
@@ -344,7 +419,9 @@ def valid_func(xloader, network, criterion, algo, logger):
             _, logits = network(arch_inputs.cuda(non_blocking=True))
             arch_loss = criterion(logits, arch_targets)
             # record
-            arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
+            arch_prec1, arch_prec5 = obtain_accuracy(
+                logits.data, arch_targets.data, topk=(1, 5)
+            )
             arch_losses.update(arch_loss.item(), arch_inputs.size(0))
             arch_top1.update(arch_prec1.item(), arch_inputs.size(0))
             arch_top5.update(arch_prec5.item(), arch_inputs.size(0))
@@ -363,11 +440,17 @@ def main(xargs):
     prepare_seed(xargs.rand_seed)
     logger = prepare_logger(args)
 
-    train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
+    train_data, valid_data, xshape, class_num = get_datasets(
+        xargs.dataset, xargs.data_path, -1
+    )
     if xargs.overwite_epochs is None:
         extra_info = {"class_num": class_num, "xshape": xshape}
     else:
-        extra_info = {"class_num": class_num, "xshape": xshape, "epochs": xargs.overwite_epochs}
+        extra_info = {
+            "class_num": class_num,
+            "xshape": xshape,
+            "epochs": xargs.overwite_epochs,
+        }
     config = load_config(xargs.config_path, extra_info, logger)
     search_loader, train_loader, valid_loader = get_nas_search_loaders(
         train_data,
@@ -405,7 +488,9 @@ def main(xargs):
     search_model.set_algo(xargs.algo)
     logger.log("{:}".format(search_model))
 
-    w_optimizer, w_scheduler, criterion = get_optim_scheduler(search_model.weights, config)
+    w_optimizer, w_scheduler, criterion = get_optim_scheduler(
+        search_model.weights, config
+    )
     a_optimizer = torch.optim.Adam(
         search_model.alphas,
         lr=xargs.arch_learning_rate,
@@ -426,13 +511,23 @@ def main(xargs):
         api = None
     logger.log("{:} create API = {:} done".format(time_string(), api))
 
-    last_info, model_base_path, model_best_path = logger.path("info"), logger.path("model"), logger.path("best")
+    last_info, model_base_path, model_best_path = (
+        logger.path("info"),
+        logger.path("model"),
+        logger.path("best"),
+    )
     network, criterion = search_model.cuda(), criterion.cuda()  # use a single GPU
 
-    last_info, model_base_path, model_best_path = logger.path("info"), logger.path("model"), logger.path("best")
+    last_info, model_base_path, model_best_path = (
+        logger.path("info"),
+        logger.path("model"),
+        logger.path("best"),
+    )
 
     if last_info.exists():  # automatically resume from previous checkpoint
-        logger.log("=> loading checkpoint of the last-info '{:}' start".format(last_info))
+        logger.log(
+            "=> loading checkpoint of the last-info '{:}' start".format(last_info)
+        )
         last_info = torch.load(last_info)
         start_epoch = last_info["epoch"]
         checkpoint = torch.load(last_info["last_checkpoint"])
@@ -444,11 +539,17 @@ def main(xargs):
         w_optimizer.load_state_dict(checkpoint["w_optimizer"])
         a_optimizer.load_state_dict(checkpoint["a_optimizer"])
         logger.log(
-            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(last_info, start_epoch)
+            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(
+                last_info, start_epoch
+            )
         )
     else:
         logger.log("=> do not find the last-info file : {:}".format(last_info))
-        start_epoch, valid_accuracies, genotypes = 0, {"best": -1}, {-1: network.return_topK(1, True)[0]}
+        start_epoch, valid_accuracies, genotypes = (
+            0,
+            {"best": -1},
+            {-1: network.return_topK(1, True)[0]},
+        )
         baseline = None
 
     # start training
@@ -460,15 +561,35 @@ def main(xargs):
     )
     for epoch in range(start_epoch, total_epoch):
         w_scheduler.update(epoch, 0.0)
-        need_time = "Time Left: {:}".format(convert_secs2time(epoch_time.val * (total_epoch - epoch), True))
+        need_time = "Time Left: {:}".format(
+            convert_secs2time(epoch_time.val * (total_epoch - epoch), True)
+        )
         epoch_str = "{:03d}-{:03d}".format(epoch, total_epoch)
-        logger.log("\n[Search the {:}-th epoch] {:}, LR={:}".format(epoch_str, need_time, min(w_scheduler.get_lr())))
+        logger.log(
+            "\n[Search the {:}-th epoch] {:}, LR={:}".format(
+                epoch_str, need_time, min(w_scheduler.get_lr())
+            )
+        )
 
         network.set_drop_path(float(epoch + 1) / total_epoch, xargs.drop_path_rate)
         if xargs.algo == "gdas":
-            network.set_tau(xargs.tau_max - (xargs.tau_max - xargs.tau_min) * epoch / (total_epoch - 1))
-            logger.log("[RESET tau as : {:} and drop_path as {:}]".format(network.tau, network.drop_path))
-        search_w_loss, search_w_top1, search_w_top5, search_a_loss, search_a_top1, search_a_top5 = search_func(
+            network.set_tau(
+                xargs.tau_max
+                - (xargs.tau_max - xargs.tau_min) * epoch / (total_epoch - 1)
+            )
+            logger.log(
+                "[RESET tau as : {:} and drop_path as {:}]".format(
+                    network.tau, network.drop_path
+                )
+            )
+        (
+            search_w_loss,
+            search_w_top1,
+            search_w_top5,
+            search_a_loss,
+            search_a_top1,
+            search_a_top5,
+        ) = search_func(
             search_loader,
             network,
             criterion,
@@ -493,7 +614,14 @@ def main(xargs):
         )
         if xargs.algo == "enas":
             ctl_loss, ctl_acc, baseline, ctl_reward = train_controller(
-                valid_loader, network, criterion, a_optimizer, baseline, epoch_str, xargs.print_freq, logger
+                valid_loader,
+                network,
+                criterion,
+                a_optimizer,
+                baseline,
+                epoch_str,
+                xargs.print_freq,
+                logger,
             )
             logger.log(
                 "[{:}] controller : loss={:}, acc={:}, baseline={:}, reward={:}".format(
@@ -501,7 +629,9 @@ def main(xargs):
                 )
             )
 
-        genotype, temp_accuracy = get_best_arch(valid_loader, network, xargs.eval_candidate_num, xargs.algo)
+        genotype, temp_accuracy = get_best_arch(
+            valid_loader, network, xargs.eval_candidate_num, xargs.algo
+        )
         if xargs.algo == "setn" or xargs.algo == "enas":
             network.set_cal_mode("dynamic", genotype)
         elif xargs.algo == "gdas":
@@ -512,8 +642,14 @@ def main(xargs):
             network.set_cal_mode("urs", None)
         else:
             raise ValueError("Invalid algorithm name : {:}".format(xargs.algo))
-        logger.log("[{:}] - [get_best_arch] : {:} -> {:}".format(epoch_str, genotype, temp_accuracy))
-        valid_a_loss, valid_a_top1, valid_a_top5 = valid_func(valid_loader, network, criterion, xargs.algo, logger)
+        logger.log(
+            "[{:}] - [get_best_arch] : {:} -> {:}".format(
+                epoch_str, genotype, temp_accuracy
+            )
+        )
+        valid_a_loss, valid_a_top1, valid_a_top5 = valid_func(
+            valid_loader, network, criterion, xargs.algo, logger
+        )
         logger.log(
             "[{:}] evaluate : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}% | {:}".format(
                 epoch_str, valid_a_loss, valid_a_top1, valid_a_top5, genotype
@@ -522,7 +658,9 @@ def main(xargs):
         valid_accuracies[epoch] = valid_a_top1
 
         genotypes[epoch] = genotype
-        logger.log("<<<--->>> The {:}-th epoch : {:}".format(epoch_str, genotypes[epoch]))
+        logger.log(
+            "<<<--->>> The {:}-th epoch : {:}".format(epoch_str, genotypes[epoch])
+        )
         # save checkpoint
         save_path = save_checkpoint(
             {
@@ -558,7 +696,9 @@ def main(xargs):
 
     # the final post procedure : count the time
     start_time = time.time()
-    genotype, temp_accuracy = get_best_arch(valid_loader, network, xargs.eval_candidate_num, xargs.algo)
+    genotype, temp_accuracy = get_best_arch(
+        valid_loader, network, xargs.eval_candidate_num, xargs.algo
+    )
     if xargs.algo == "setn" or xargs.algo == "enas":
         network.set_cal_mode("dynamic", genotype)
     elif xargs.algo == "gdas":
@@ -571,8 +711,14 @@ def main(xargs):
         raise ValueError("Invalid algorithm name : {:}".format(xargs.algo))
     search_time.update(time.time() - start_time)
 
-    valid_a_loss, valid_a_top1, valid_a_top5 = valid_func(valid_loader, network, criterion, xargs.algo, logger)
-    logger.log("Last : the gentotype is : {:}, with the validation accuracy of {:.3f}%.".format(genotype, valid_a_top1))
+    valid_a_loss, valid_a_top1, valid_a_top5 = valid_func(
+        valid_loader, network, criterion, xargs.algo, logger
+    )
+    logger.log(
+        "Last : the gentotype is : {:}, with the validation accuracy of {:.3f}%.".format(
+            genotype, valid_a_top1
+        )
+    )
 
     logger.log("\n" + "-" * 100)
     # check the performance from the architecture dataset
@@ -595,7 +741,13 @@ if __name__ == "__main__":
         choices=["cifar10", "cifar100", "ImageNet16-120"],
         help="Choose between Cifar10/100 and ImageNet-16.",
     )
-    parser.add_argument("--search_space", type=str, default="tss", choices=["tss"], help="The search space name.")
+    parser.add_argument(
+        "--search_space",
+        type=str,
+        default="tss",
+        choices=["tss"],
+        help="The search space name.",
+    )
     parser.add_argument(
         "--algo",
         type=str,
@@ -603,18 +755,35 @@ if __name__ == "__main__":
         help="The search space name.",
     )
     parser.add_argument(
-        "--use_api", type=int, default=1, choices=[0, 1], help="Whether use API or not (which will cost much memory)."
+        "--use_api",
+        type=int,
+        default=1,
+        choices=[0, 1],
+        help="Whether use API or not (which will cost much memory).",
     )
     # FOR GDAS
-    parser.add_argument("--tau_min", type=float, default=0.1, help="The minimum tau for Gumbel Softmax.")
-    parser.add_argument("--tau_max", type=float, default=10, help="The maximum tau for Gumbel Softmax.")
+    parser.add_argument(
+        "--tau_min", type=float, default=0.1, help="The minimum tau for Gumbel Softmax."
+    )
+    parser.add_argument(
+        "--tau_max", type=float, default=10, help="The maximum tau for Gumbel Softmax."
+    )
     # channels and number-of-cells
-    parser.add_argument("--max_nodes", type=int, default=4, help="The maximum number of nodes.")
-    parser.add_argument("--channel", type=int, default=16, help="The number of channels.")
-    parser.add_argument("--num_cells", type=int, default=5, help="The number of cells in one stage.")
+    parser.add_argument(
+        "--max_nodes", type=int, default=4, help="The maximum number of nodes."
+    )
+    parser.add_argument(
+        "--channel", type=int, default=16, help="The number of channels."
+    )
+    parser.add_argument(
+        "--num_cells", type=int, default=5, help="The number of cells in one stage."
+    )
     #
     parser.add_argument(
-        "--eval_candidate_num", type=int, default=100, help="The number of selected architectures to evaluate."
+        "--eval_candidate_num",
+        type=int,
+        default=100,
+        help="The number of selected architectures to evaluate.",
     )
     #
     parser.add_argument(
@@ -625,7 +794,11 @@ if __name__ == "__main__":
         help="Whether use track_running_stats or not in the BN layer.",
     )
     parser.add_argument(
-        "--affine", type=int, default=0, choices=[0, 1], help="Whether use affine=True or False in the BN layer."
+        "--affine",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="Whether use affine=True or False in the BN layer.",
     )
     parser.add_argument(
         "--config_path",
@@ -634,17 +807,43 @@ if __name__ == "__main__":
         help="The path of configuration.",
     )
     parser.add_argument(
-        "--overwite_epochs", type=int, help="The number of epochs to overwrite that value in config files."
+        "--overwite_epochs",
+        type=int,
+        help="The number of epochs to overwrite that value in config files.",
     )
     # architecture leraning rate
-    parser.add_argument("--arch_learning_rate", type=float, default=3e-4, help="learning rate for arch encoding")
-    parser.add_argument("--arch_weight_decay", type=float, default=1e-3, help="weight decay for arch encoding")
-    parser.add_argument("--arch_eps", type=float, default=1e-8, help="weight decay for arch encoding")
+    parser.add_argument(
+        "--arch_learning_rate",
+        type=float,
+        default=3e-4,
+        help="learning rate for arch encoding",
+    )
+    parser.add_argument(
+        "--arch_weight_decay",
+        type=float,
+        default=1e-3,
+        help="weight decay for arch encoding",
+    )
+    parser.add_argument(
+        "--arch_eps", type=float, default=1e-8, help="weight decay for arch encoding"
+    )
     parser.add_argument("--drop_path_rate", type=float, help="The drop path rate.")
     # log
-    parser.add_argument("--workers", type=int, default=2, help="number of data loading workers (default: 2)")
-    parser.add_argument("--save_dir", type=str, default="./output/search", help="Folder to save checkpoints and log.")
-    parser.add_argument("--print_freq", type=int, default=200, help="print frequency (default: 200)")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=2,
+        help="number of data loading workers (default: 2)",
+    )
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        default="./output/search",
+        help="Folder to save checkpoints and log.",
+    )
+    parser.add_argument(
+        "--print_freq", type=int, default=200, help="print frequency (default: 200)"
+    )
     parser.add_argument("--rand_seed", type=int, help="manual seed")
     args = parser.parse_args()
     if args.rand_seed is None or args.rand_seed < 0:
@@ -653,14 +852,20 @@ if __name__ == "__main__":
         args.save_dir = os.path.join(
             "{:}-{:}".format(args.save_dir, args.search_space),
             args.dataset,
-            "{:}-affine{:}_BN{:}-{:}".format(args.algo, args.affine, args.track_running_stats, args.drop_path_rate),
+            "{:}-affine{:}_BN{:}-{:}".format(
+                args.algo, args.affine, args.track_running_stats, args.drop_path_rate
+            ),
         )
     else:
         args.save_dir = os.path.join(
             "{:}-{:}".format(args.save_dir, args.search_space),
             args.dataset,
             "{:}-affine{:}_BN{:}-E{:}-{:}".format(
-                args.algo, args.affine, args.track_running_stats, args.overwite_epochs, args.drop_path_rate
+                args.algo,
+                args.affine,
+                args.track_running_stats,
+                args.overwite_epochs,
+                args.drop_path_rate,
             ),
         )
 

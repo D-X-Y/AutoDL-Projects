@@ -91,14 +91,22 @@ if __name__ == "__main__":
     for fast_mode in [True, False]:
         for verbose in [True, False]:
             api_nats_tss = create(None, "tss", fast_mode=fast_mode, verbose=True)
-            print("{:} create with fast_mode={:} and verbose={:}".format(time_string(), fast_mode, verbose))
+            print(
+                "{:} create with fast_mode={:} and verbose={:}".format(
+                    time_string(), fast_mode, verbose
+                )
+            )
             test_api(api_nats_tss, False)
             del api_nats_tss
             gc.collect()
 
     for fast_mode in [True, False]:
         for verbose in [True, False]:
-            print("{:} create with fast_mode={:} and verbose={:}".format(time_string(), fast_mode, verbose))
+            print(
+                "{:} create with fast_mode={:} and verbose={:}".format(
+                    time_string(), fast_mode, verbose
+                )
+            )
             api_nats_sss = create(None, "size", fast_mode=fast_mode, verbose=True)
             print("{:} --->>> {:}".format(time_string(), api_nats_sss))
             test_api(api_nats_sss, True)

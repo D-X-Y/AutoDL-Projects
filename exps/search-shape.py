@@ -14,7 +14,11 @@ lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
 print("lib_dir : {:}".format(lib_dir))
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
-from config_utils import load_config, configure2str, obtain_search_single_args as obtain_args
+from config_utils import (
+    load_config,
+    configure2str,
+    obtain_search_single_args as obtain_args,
+)
 from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint
 from procedures import get_optim_scheduler, get_procedures
 from datasets import get_datasets, SearchDataset
@@ -34,10 +38,16 @@ def main(args):
     logger = prepare_logger(args)
 
     # prepare dataset
-    train_data, valid_data, xshape, class_num = get_datasets(args.dataset, args.data_path, args.cutout_length)
+    train_data, valid_data, xshape, class_num = get_datasets(
+        args.dataset, args.data_path, args.cutout_length
+    )
     # train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True , num_workers=args.workers, pin_memory=True)
     valid_loader = torch.utils.data.DataLoader(
-        valid_data, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, pin_memory=True
+        valid_data,
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=args.workers,
+        pin_memory=True,
     )
 
     split_file_path = Path(args.split_path)
@@ -48,9 +58,9 @@ def main(args):
     assert (
         len(set(train_split).intersection(set(valid_split))) == 0
     ), "There should be 0 element that belongs to both train and valid"
-    assert len(train_split) + len(valid_split) == len(train_data), "{:} + {:} vs {:}".format(
-        len(train_split), len(valid_split), len(train_data)
-    )
+    assert len(train_split) + len(valid_split) == len(
+        train_data
+    ), "{:} + {:} vs {:}".format(len(train_split), len(valid_split), len(train_data))
     search_dataset = SearchDataset(args.dataset, train_data, train_split, valid_split)
 
     search_train_loader = torch.utils.data.DataLoader(
@@ -76,12 +86,18 @@ def main(args):
         sampler=None,
     )
     # get configures
-    model_config = load_config(args.model_config, {"class_num": class_num, "search_mode": args.search_shape}, logger)
+    model_config = load_config(
+        args.model_config,
+        {"class_num": class_num, "search_mode": args.search_shape},
+        logger,
+    )
 
     # obtain the model
     search_model = obtain_search_model(model_config)
     MAX_FLOP, param = get_model_infos(search_model, xshape)
-    optim_config = load_config(args.optim_config, {"class_num": class_num, "FLOP": MAX_FLOP}, logger)
+    optim_config = load_config(
+        args.optim_config, {"class_num": class_num, "FLOP": MAX_FLOP}, logger
+    )
     logger.log("Model Information : {:}".format(search_model.get_message()))
     logger.log("MAX_FLOP = {:} M".format(MAX_FLOP))
     logger.log("Params   = {:} M".format(param))
@@ -89,7 +105,9 @@ def main(args):
     logger.log("search-data: {:}".format(search_dataset))
     logger.log("search_train_loader : {:} samples".format(len(train_split)))
     logger.log("search_valid_loader : {:} samples".format(len(valid_split)))
-    base_optimizer, scheduler, criterion = get_optim_scheduler(search_model.base_parameters(), optim_config)
+    base_optimizer, scheduler, criterion = get_optim_scheduler(
+        search_model.base_parameters(), optim_config
+    )
     arch_optimizer = torch.optim.Adam(
         search_model.arch_parameters(),
         lr=optim_config.arch_LR,
@@ -101,7 +119,11 @@ def main(args):
     logger.log("scheduler      : {:}".format(scheduler))
     logger.log("criterion      : {:}".format(criterion))
 
-    last_info, model_base_path, model_best_path = logger.path("info"), logger.path("model"), logger.path("best")
+    last_info, model_base_path, model_best_path = (
+        logger.path("info"),
+        logger.path("model"),
+        logger.path("best"),
+    )
     network, criterion = torch.nn.DataParallel(search_model).cuda(), criterion.cuda()
 
     # load checkpoint
@@ -114,14 +136,24 @@ def main(args):
             resume_path = last_info
         else:
             raise ValueError("Something is wrong.")
-        logger.log("=> loading checkpoint of the last-info '{:}' start".format(resume_path))
+        logger.log(
+            "=> loading checkpoint of the last-info '{:}' start".format(resume_path)
+        )
         checkpoint = torch.load(resume_path)
         if "last_checkpoint" in checkpoint:
             last_checkpoint_path = checkpoint["last_checkpoint"]
             if not last_checkpoint_path.exists():
-                logger.log("Does not find {:}, try another path".format(last_checkpoint_path))
-                last_checkpoint_path = resume_path.parent / last_checkpoint_path.parent.name / last_checkpoint_path.name
-            assert last_checkpoint_path.exists(), "can not find the checkpoint from {:}".format(last_checkpoint_path)
+                logger.log(
+                    "Does not find {:}, try another path".format(last_checkpoint_path)
+                )
+                last_checkpoint_path = (
+                    resume_path.parent
+                    / last_checkpoint_path.parent.name
+                    / last_checkpoint_path.name
+                )
+            assert (
+                last_checkpoint_path.exists()
+            ), "can not find the checkpoint from {:}".format(last_checkpoint_path)
             checkpoint = torch.load(last_checkpoint_path)
         start_epoch = checkpoint["epoch"] + 1
         search_model.load_state_dict(checkpoint["search_model"])
@@ -132,11 +164,22 @@ def main(args):
         arch_genotypes = checkpoint["arch_genotypes"]
         discrepancies = checkpoint["discrepancies"]
         logger.log(
-            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(resume_path, start_epoch)
+            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(
+                resume_path, start_epoch
+            )
         )
     else:
-        logger.log("=> do not find the last-info file : {:} or resume : {:}".format(last_info, args.resume))
-        start_epoch, valid_accuracies, arch_genotypes, discrepancies = 0, {"best": -1}, {}, {}
+        logger.log(
+            "=> do not find the last-info file : {:} or resume : {:}".format(
+                last_info, args.resume
+            )
+        )
+        start_epoch, valid_accuracies, arch_genotypes, discrepancies = (
+            0,
+            {"best": -1},
+            {},
+            {},
+        )
 
     # main procedure
     train_func, valid_func = get_procedures(args.procedure)
@@ -144,15 +187,26 @@ def main(args):
     start_time, epoch_time = time.time(), AverageMeter()
     for epoch in range(start_epoch, total_epoch):
         scheduler.update(epoch, 0.0)
-        search_model.set_tau(args.gumbel_tau_max, args.gumbel_tau_min, epoch * 1.0 / total_epoch)
-        need_time = "Time Left: {:}".format(convert_secs2time(epoch_time.avg * (total_epoch - epoch), True))
+        search_model.set_tau(
+            args.gumbel_tau_max, args.gumbel_tau_min, epoch * 1.0 / total_epoch
+        )
+        need_time = "Time Left: {:}".format(
+            convert_secs2time(epoch_time.avg * (total_epoch - epoch), True)
+        )
         epoch_str = "epoch={:03d}/{:03d}".format(epoch, total_epoch)
         LRs = scheduler.get_lr()
         find_best = False
 
         logger.log(
             "\n***{:s}*** start {:s} {:s}, LR=[{:.6f} ~ {:.6f}], scheduler={:}, tau={:}, FLOP={:.2f}".format(
-                time_string(), epoch_str, need_time, min(LRs), max(LRs), scheduler, search_model.tau, MAX_FLOP
+                time_string(),
+                epoch_str,
+                need_time,
+                min(LRs),
+                max(LRs),
+                scheduler,
+                search_model.tau,
+                MAX_FLOP,
             )
         )
 
@@ -177,10 +231,17 @@ def main(args):
         # log the results
         logger.log(
             "***{:s}*** TRAIN [{:}] base-loss = {:.6f}, arch-loss = {:.6f}, accuracy-1 = {:.2f}, accuracy-5 = {:.2f}".format(
-                time_string(), epoch_str, train_base_loss, train_arch_loss, train_acc1, train_acc5
+                time_string(),
+                epoch_str,
+                train_base_loss,
+                train_arch_loss,
+                train_acc1,
+                train_acc5,
             )
         )
-        cur_FLOP, genotype = search_model.get_flop("genotype", model_config._asdict(), None)
+        cur_FLOP, genotype = search_model.get_flop(
+            "genotype", model_config._asdict(), None
+        )
         arch_genotypes[epoch] = genotype
         arch_genotypes["last"] = genotype
         logger.log("[{:}] genotype : {:}".format(epoch_str, genotype))
@@ -189,7 +250,11 @@ def main(args):
         discrepancies[epoch] = discrepancy
         logger.log(
             "[{:}] FLOP : {:.2f} MB, ratio : {:.4f}, Expected-ratio : {:.4f}, Discrepancy : {:.3f}".format(
-                epoch_str, cur_FLOP, cur_FLOP / MAX_FLOP, args.FLOP_ratio, np.mean(discrepancy)
+                epoch_str,
+                cur_FLOP,
+                cur_FLOP / MAX_FLOP,
+                args.FLOP_ratio,
+                np.mean(discrepancy),
             )
         )
 
@@ -202,7 +267,12 @@ def main(args):
         if (epoch % args.eval_frequency == 0) or (epoch + 1 == total_epoch):
             logger.log("-" * 150)
             valid_loss, valid_acc1, valid_acc5 = valid_func(
-                search_valid_loader, network, criterion, epoch_str, args.print_freq_eval, logger
+                search_valid_loader,
+                network,
+                criterion,
+                epoch_str,
+                args.print_freq_eval,
+                logger,
             )
             valid_accuracies[epoch] = valid_acc1
             logger.log(
@@ -222,7 +292,12 @@ def main(args):
                 find_best = True
                 logger.log(
                     "Currently, the best validation accuracy found at {:03d}-epoch :: acc@1={:.2f}, acc@5={:.2f}, error@1={:.2f}, error@5={:.2f}, save into {:}.".format(
-                        epoch, valid_acc1, valid_acc5, 100 - valid_acc1, 100 - valid_acc5, model_best_path
+                        epoch,
+                        valid_acc1,
+                        valid_acc5,
+                        100 - valid_acc1,
+                        100 - valid_acc5,
+                        model_best_path,
                     )
                 )
 
@@ -262,9 +337,15 @@ def main(args):
 
     logger.log("")
     logger.log("-" * 100)
-    last_config_path = logger.path("log") / "seed-{:}-last.config".format(args.rand_seed)
+    last_config_path = logger.path("log") / "seed-{:}-last.config".format(
+        args.rand_seed
+    )
     configure2str(arch_genotypes["last"], str(last_config_path))
-    logger.log("save the last config int {:} :\n{:}".format(last_config_path, arch_genotypes["last"]))
+    logger.log(
+        "save the last config int {:} :\n{:}".format(
+            last_config_path, arch_genotypes["last"]
+        )
+    )
 
     best_arch, valid_acc = arch_genotypes["best"], valid_accuracies["best"]
     for key, config in arch_genotypes.items():
@@ -275,11 +356,17 @@ def main(args):
             if valid_acc < valid_accuracies[key]:
                 best_arch, valid_acc = config, valid_accuracies[key]
     print(
-        "Best-Arch : {:}\nRatio={:}, Valid-ACC={:}".format(best_arch, best_arch["estimated_FLOP"] / MAX_FLOP, valid_acc)
+        "Best-Arch : {:}\nRatio={:}, Valid-ACC={:}".format(
+            best_arch, best_arch["estimated_FLOP"] / MAX_FLOP, valid_acc
+        )
     )
-    best_config_path = logger.path("log") / "seed-{:}-best.config".format(args.rand_seed)
+    best_config_path = logger.path("log") / "seed-{:}-best.config".format(
+        args.rand_seed
+    )
     configure2str(best_arch, str(best_config_path))
-    logger.log("save the last config int {:} :\n{:}".format(best_config_path, best_arch))
+    logger.log(
+        "save the last config int {:} :\n{:}".format(best_config_path, best_arch)
+    )
     logger.log("\n" + "-" * 200)
     logger.log(
         "Finish training/validation in {:}, and save final checkpoint into {:}".format(

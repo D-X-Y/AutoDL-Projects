@@ -31,18 +31,33 @@ from log_utils import time_string
 def get_valid_test_acc(api, arch, dataset):
     is_size_space = api.search_space_name == "size"
     if dataset == "cifar10":
-        xinfo = api.get_more_info(arch, dataset=dataset, hp=90 if is_size_space else 200, is_random=False)
+        xinfo = api.get_more_info(
+            arch, dataset=dataset, hp=90 if is_size_space else 200, is_random=False
+        )
         test_acc = xinfo["test-accuracy"]
-        xinfo = api.get_more_info(arch, dataset="cifar10-valid", hp=90 if is_size_space else 200, is_random=False)
+        xinfo = api.get_more_info(
+            arch,
+            dataset="cifar10-valid",
+            hp=90 if is_size_space else 200,
+            is_random=False,
+        )
         valid_acc = xinfo["valid-accuracy"]
     else:
-        xinfo = api.get_more_info(arch, dataset=dataset, hp=90 if is_size_space else 200, is_random=False)
+        xinfo = api.get_more_info(
+            arch, dataset=dataset, hp=90 if is_size_space else 200, is_random=False
+        )
         valid_acc = xinfo["valid-accuracy"]
         test_acc = xinfo["test-accuracy"]
-    return valid_acc, test_acc, "validation = {:.2f}, test = {:.2f}\n".format(valid_acc, test_acc)
+    return (
+        valid_acc,
+        test_acc,
+        "validation = {:.2f}, test = {:.2f}\n".format(valid_acc, test_acc),
+    )
 
 
-def fetch_data(root_dir="./output/search", search_space="tss", dataset=None, suffix="-WARM0.3"):
+def fetch_data(
+    root_dir="./output/search", search_space="tss", dataset=None, suffix="-WARM0.3"
+):
     ss_dir = "{:}-{:}".format(root_dir, search_space)
     alg2name, alg2path = OrderedDict(), OrderedDict()
     seeds = [777, 888, 999]
@@ -55,8 +70,12 @@ def fetch_data(root_dir="./output/search", search_space="tss", dataset=None, suf
         alg2name["ENAS"] = "enas-affine0_BN0-None"
         alg2name["SETN"] = "setn-affine0_BN0-None"
     else:
-        alg2name["channel-wise interpolation"] = "tas-affine0_BN0-AWD0.001{:}".format(suffix)
-        alg2name["masking + Gumbel-Softmax"] = "mask_gumbel-affine0_BN0-AWD0.001{:}".format(suffix)
+        alg2name["channel-wise interpolation"] = "tas-affine0_BN0-AWD0.001{:}".format(
+            suffix
+        )
+        alg2name[
+            "masking + Gumbel-Softmax"
+        ] = "mask_gumbel-affine0_BN0-AWD0.001{:}".format(suffix)
         alg2name["masking + sampling"] = "mask_rl-affine0_BN0-AWD0.0{:}".format(suffix)
     for alg, name in alg2name.items():
         alg2path[alg] = os.path.join(ss_dir, dataset, name, "seed-{:}-last-info.pth")
@@ -72,7 +91,9 @@ def fetch_data(root_dir="./output/search", search_space="tss", dataset=None, suf
                 continue
             data = torch.load(xpath, map_location=torch.device("cpu"))
             try:
-                data = torch.load(data["last_checkpoint"], map_location=torch.device("cpu"))
+                data = torch.load(
+                    data["last_checkpoint"], map_location=torch.device("cpu")
+                )
             except:
                 xpath = str(data["last_checkpoint"]).split("E100-")
                 if len(xpath) == 2 and os.path.isfile(xpath[0] + xpath[1]):
@@ -82,7 +103,9 @@ def fetch_data(root_dir="./output/search", search_space="tss", dataset=None, suf
                 elif "tunas" in str(data["last_checkpoint"]):
                     xpath = str(data["last_checkpoint"]).replace("tunas", "mask_rl")
                 else:
-                    raise ValueError("Invalid path: {:}".format(data["last_checkpoint"]))
+                    raise ValueError(
+                        "Invalid path: {:}".format(data["last_checkpoint"])
+                    )
                 data = torch.load(xpath, map_location=torch.device("cpu"))
             alg2data[alg].append(data["genotypes"])
         print("This algorithm : {:} has {:} valid ckps.".format(alg, ok_num))
@@ -108,9 +131,18 @@ y_max_s = {
     ("ImageNet16-120", "sss"): 46,
 }
 
-name2label = {"cifar10": "CIFAR-10", "cifar100": "CIFAR-100", "ImageNet16-120": "ImageNet-16-120"}
+name2label = {
+    "cifar10": "CIFAR-10",
+    "cifar100": "CIFAR-100",
+    "ImageNet16-120": "ImageNet-16-120",
+}
 
-name2suffix = {("sss", "warm"): "-WARM0.3", ("sss", "none"): "-WARMNone", ("tss", "none"): None, ("tss", None): None}
+name2suffix = {
+    ("sss", "warm"): "-WARM0.3",
+    ("sss", "none"): "-WARMNone",
+    ("tss", "none"): None,
+    ("tss", None): None,
+}
 
 
 def visualize_curve(api, vis_save_dir, search_space, suffix):
@@ -123,7 +155,11 @@ def visualize_curve(api, vis_save_dir, search_space, suffix):
 
     def sub_plot_fn(ax, dataset):
         print("{:} plot {:10s}".format(time_string(), dataset))
-        alg2data = fetch_data(search_space=search_space, dataset=dataset, suffix=name2suffix[(search_space, suffix)])
+        alg2data = fetch_data(
+            search_space=search_space,
+            dataset=dataset,
+            suffix=name2suffix[(search_space, suffix)],
+        )
         alg2accuracies = OrderedDict()
         epochs = 100
         colors = ["b", "g", "c", "m", "y", "r"]
@@ -135,10 +171,17 @@ def visualize_curve(api, vis_save_dir, search_space, suffix):
                 try:
                     structures, accs = [_[iepoch - 1] for _ in data], []
                 except:
-                    raise ValueError("This alg {:} on {:} has invalid checkpoints.".format(alg, dataset))
+                    raise ValueError(
+                        "This alg {:} on {:} has invalid checkpoints.".format(
+                            alg, dataset
+                        )
+                    )
                 for structure in structures:
                     info = api.get_more_info(
-                        structure, dataset=dataset, hp=90 if api.search_space_name == "size" else 200, is_random=False
+                        structure,
+                        dataset=dataset,
+                        hp=90 if api.search_space_name == "size" else 200,
+                        is_random=False,
                     )
                     accs.append(info["test-accuracy"])
                 accuracies.append(sum(accs) / len(accs))
@@ -146,17 +189,31 @@ def visualize_curve(api, vis_save_dir, search_space, suffix):
             alg2accuracies[alg] = accuracies
             ax.plot(xs, accuracies, c=colors[idx], label="{:}".format(alg))
             ax.set_xlabel("The searching epoch", fontsize=LabelSize)
-            ax.set_ylabel("Test accuracy on {:}".format(name2label[dataset]), fontsize=LabelSize)
-            ax.set_title("Searching results on {:}".format(name2label[dataset]), fontsize=LabelSize + 4)
+            ax.set_ylabel(
+                "Test accuracy on {:}".format(name2label[dataset]), fontsize=LabelSize
+            )
+            ax.set_title(
+                "Searching results on {:}".format(name2label[dataset]),
+                fontsize=LabelSize + 4,
+            )
             structures, valid_accs, test_accs = [_[epochs - 1] for _ in data], [], []
-            print("{:} plot alg : {:} -- final {:} architectures.".format(time_string(), alg, len(structures)))
+            print(
+                "{:} plot alg : {:} -- final {:} architectures.".format(
+                    time_string(), alg, len(structures)
+                )
+            )
             for arch in structures:
                 valid_acc, test_acc, _ = get_valid_test_acc(api, arch, dataset)
                 test_accs.append(test_acc)
                 valid_accs.append(valid_acc)
             print(
                 "{:} plot alg : {:} -- validation: {:.2f}$\pm${:.2f} -- test: {:.2f}$\pm${:.2f}".format(
-                    time_string(), alg, np.mean(valid_accs), np.std(valid_accs), np.mean(test_accs), np.std(test_accs)
+                    time_string(),
+                    alg,
+                    np.mean(valid_accs),
+                    np.std(valid_accs),
+                    np.mean(test_accs),
+                    np.std(test_accs),
                 )
             )
         ax.legend(loc=4, fontsize=LegendFontsize)
@@ -166,16 +223,23 @@ def visualize_curve(api, vis_save_dir, search_space, suffix):
     for dataset, ax in zip(datasets, axs):
         sub_plot_fn(ax, dataset)
         print("sub-plot {:} on {:} done.".format(dataset, search_space))
-    save_path = (vis_save_dir / "{:}-ws-{:}-curve.png".format(search_space, suffix)).resolve()
+    save_path = (
+        vis_save_dir / "{:}-ws-{:}-curve.png".format(search_space, suffix)
+    ).resolve()
     fig.savefig(save_path, dpi=dpi, bbox_inches="tight", format="png")
     print("{:} save into {:}".format(time_string(), save_path))
     plt.close("all")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="NATS-Bench", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description="NATS-Bench", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
-        "--save_dir", type=str, default="output/vis-nas-bench/nas-algos", help="Folder to save checkpoints and log."
+        "--save_dir",
+        type=str,
+        default="output/vis-nas-bench/nas-algos",
+        help="Folder to save checkpoints and log.",
     )
     args = parser.parse_args()
 

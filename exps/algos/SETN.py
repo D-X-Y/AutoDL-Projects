@@ -15,20 +15,38 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
 from datasets import get_datasets, get_nas_search_loaders
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
+from procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+    get_optim_scheduler,
+)
 from utils import get_model_infos, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from models import get_cell_based_tiny_net, get_search_spaces
 from nas_201_api import NASBench201API as API
 
 
-def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer, epoch_str, print_freq, logger):
+def search_func(
+    xloader,
+    network,
+    criterion,
+    scheduler,
+    w_optimizer,
+    a_optimizer,
+    epoch_str,
+    print_freq,
+    logger,
+):
     data_time, batch_time = AverageMeter(), AverageMeter()
     base_losses, base_top1, base_top5 = AverageMeter(), AverageMeter(), AverageMeter()
     arch_losses, arch_top1, arch_top5 = AverageMeter(), AverageMeter(), AverageMeter()
     end = time.time()
     network.train()
-    for step, (base_inputs, base_targets, arch_inputs, arch_targets) in enumerate(xloader):
+    for step, (base_inputs, base_targets, arch_inputs, arch_targets) in enumerate(
+        xloader
+    ):
         scheduler.update(None, 1.0 * step / len(xloader))
         base_targets = base_targets.cuda(non_blocking=True)
         arch_targets = arch_targets.cuda(non_blocking=True)
@@ -45,7 +63,9 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
         base_loss.backward()
         w_optimizer.step()
         # record
-        base_prec1, base_prec5 = obtain_accuracy(logits.data, base_targets.data, topk=(1, 5))
+        base_prec1, base_prec5 = obtain_accuracy(
+            logits.data, base_targets.data, topk=(1, 5)
+        )
         base_losses.update(base_loss.item(), base_inputs.size(0))
         base_top1.update(base_prec1.item(), base_inputs.size(0))
         base_top5.update(base_prec5.item(), base_inputs.size(0))
@@ -58,7 +78,9 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
         arch_loss.backward()
         a_optimizer.step()
         # record
-        arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
+        arch_prec1, arch_prec5 = obtain_accuracy(
+            logits.data, arch_targets.data, topk=(1, 5)
+        )
         arch_losses.update(arch_loss.item(), arch_inputs.size(0))
         arch_top1.update(arch_prec1.item(), arch_inputs.size(0))
         arch_top5.update(arch_prec5.item(), arch_inputs.size(0))
@@ -68,7 +90,11 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
         end = time.time()
 
         if step % print_freq == 0 or step + 1 == len(xloader):
-            Sstr = "*SEARCH* " + time_string() + " [{:}][{:03d}/{:03d}]".format(epoch_str, step, len(xloader))
+            Sstr = (
+                "*SEARCH* "
+                + time_string()
+                + " [{:}][{:03d}/{:03d}]".format(epoch_str, step, len(xloader))
+            )
             Tstr = "Time {batch_time.val:.2f} ({batch_time.avg:.2f}) Data {data_time.val:.2f} ({data_time.avg:.2f})".format(
                 batch_time=batch_time, data_time=data_time
             )
@@ -81,7 +107,14 @@ def search_func(xloader, network, criterion, scheduler, w_optimizer, a_optimizer
             logger.log(Sstr + " " + Tstr + " " + Wstr + " " + Astr)
             # print (nn.functional.softmax(network.module.arch_parameters, dim=-1))
             # print (network.module.arch_parameters)
-    return base_losses.avg, base_top1.avg, base_top5.avg, arch_losses.avg, arch_top1.avg, arch_top5.avg
+    return (
+        base_losses.avg,
+        base_top1.avg,
+        base_top5.avg,
+        arch_losses.avg,
+        arch_top1.avg,
+        arch_top5.avg,
+    )
 
 
 def get_best_arch(xloader, network, n_samples):
@@ -99,7 +132,9 @@ def get_best_arch(xloader, network, n_samples):
                 inputs, targets = next(loader_iter)
 
             _, logits = network(inputs)
-            val_top1, val_top5 = obtain_accuracy(logits.cpu().data, targets.data, topk=(1, 5))
+            val_top1, val_top5 = obtain_accuracy(
+                logits.cpu().data, targets.data, topk=(1, 5)
+            )
 
             valid_accs.append(val_top1.item())
 
@@ -122,7 +157,9 @@ def valid_func(xloader, network, criterion):
             _, logits = network(arch_inputs)
             arch_loss = criterion(logits, arch_targets)
             # record
-            arch_prec1, arch_prec5 = obtain_accuracy(logits.data, arch_targets.data, topk=(1, 5))
+            arch_prec1, arch_prec5 = obtain_accuracy(
+                logits.data, arch_targets.data, topk=(1, 5)
+            )
             arch_losses.update(arch_loss.item(), arch_inputs.size(0))
             arch_top1.update(arch_prec1.item(), arch_inputs.size(0))
             arch_top5.update(arch_prec5.item(), arch_inputs.size(0))
@@ -141,8 +178,12 @@ def main(xargs):
     prepare_seed(xargs.rand_seed)
     logger = prepare_logger(args)
 
-    train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
-    config = load_config(xargs.config_path, {"class_num": class_num, "xshape": xshape}, logger)
+    train_data, valid_data, xshape, class_num = get_datasets(
+        xargs.dataset, xargs.data_path, -1
+    )
+    config = load_config(
+        xargs.config_path, {"class_num": class_num, "xshape": xshape}, logger
+    )
     search_loader, _, valid_loader = get_nas_search_loaders(
         train_data,
         valid_data,
@@ -187,9 +228,14 @@ def main(xargs):
     logger.log("search space : {:}".format(search_space))
     search_model = get_cell_based_tiny_net(model_config)
 
-    w_optimizer, w_scheduler, criterion = get_optim_scheduler(search_model.get_weights(), config)
+    w_optimizer, w_scheduler, criterion = get_optim_scheduler(
+        search_model.get_weights(), config
+    )
     a_optimizer = torch.optim.Adam(
-        search_model.get_alphas(), lr=xargs.arch_learning_rate, betas=(0.5, 0.999), weight_decay=xargs.arch_weight_decay
+        search_model.get_alphas(),
+        lr=xargs.arch_learning_rate,
+        betas=(0.5, 0.999),
+        weight_decay=xargs.arch_weight_decay,
     )
     logger.log("w-optimizer : {:}".format(w_optimizer))
     logger.log("a-optimizer : {:}".format(a_optimizer))
@@ -204,11 +250,17 @@ def main(xargs):
         api = API(xargs.arch_nas_dataset)
     logger.log("{:} create API = {:} done".format(time_string(), api))
 
-    last_info, model_base_path, model_best_path = logger.path("info"), logger.path("model"), logger.path("best")
+    last_info, model_base_path, model_best_path = (
+        logger.path("info"),
+        logger.path("model"),
+        logger.path("best"),
+    )
     network, criterion = torch.nn.DataParallel(search_model).cuda(), criterion.cuda()
 
     if last_info.exists():  # automatically resume from previous checkpoint
-        logger.log("=> loading checkpoint of the last-info '{:}' start".format(last_info))
+        logger.log(
+            "=> loading checkpoint of the last-info '{:}' start".format(last_info)
+        )
         last_info = torch.load(last_info)
         start_epoch = last_info["epoch"]
         checkpoint = torch.load(last_info["last_checkpoint"])
@@ -219,7 +271,9 @@ def main(xargs):
         w_optimizer.load_state_dict(checkpoint["w_optimizer"])
         a_optimizer.load_state_dict(checkpoint["a_optimizer"])
         logger.log(
-            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(last_info, start_epoch)
+            "=> loading checkpoint of the last-info '{:}' start with {:}-th epoch.".format(
+                last_info, start_epoch
+            )
         )
     else:
         logger.log("=> do not find the last-info file : {:}".format(last_info))
@@ -235,11 +289,24 @@ def main(xargs):
     )
     for epoch in range(start_epoch, total_epoch):
         w_scheduler.update(epoch, 0.0)
-        need_time = "Time Left: {:}".format(convert_secs2time(epoch_time.val * (total_epoch - epoch), True))
+        need_time = "Time Left: {:}".format(
+            convert_secs2time(epoch_time.val * (total_epoch - epoch), True)
+        )
         epoch_str = "{:03d}-{:03d}".format(epoch, total_epoch)
-        logger.log("\n[Search the {:}-th epoch] {:}, LR={:}".format(epoch_str, need_time, min(w_scheduler.get_lr())))
+        logger.log(
+            "\n[Search the {:}-th epoch] {:}, LR={:}".format(
+                epoch_str, need_time, min(w_scheduler.get_lr())
+            )
+        )
 
-        search_w_loss, search_w_top1, search_w_top5, search_a_loss, search_a_top1, search_a_top5 = search_func(
+        (
+            search_w_loss,
+            search_w_top1,
+            search_w_top5,
+            search_a_loss,
+            search_a_top1,
+            search_a_top5,
+        ) = search_func(
             search_loader,
             network,
             criterion,
@@ -264,7 +331,9 @@ def main(xargs):
 
         genotype, temp_accuracy = get_best_arch(valid_loader, network, xargs.select_num)
         network.module.set_cal_mode("dynamic", genotype)
-        valid_a_loss, valid_a_top1, valid_a_top5 = valid_func(valid_loader, network, criterion)
+        valid_a_loss, valid_a_top1, valid_a_top5 = valid_func(
+            valid_loader, network, criterion
+        )
         logger.log(
             "[{:}] evaluate : loss={:.2f}, accuracy@1={:.2f}%, accuracy@5={:.2f}% | {:}".format(
                 epoch_str, valid_a_loss, valid_a_top1, valid_a_top5, genotype
@@ -283,7 +352,9 @@ def main(xargs):
         valid_accuracies[epoch] = valid_a_top1
 
         genotypes[epoch] = genotype
-        logger.log("<<<--->>> The {:}-th epoch : {:}".format(epoch_str, genotypes[epoch]))
+        logger.log(
+            "<<<--->>> The {:}-th epoch : {:}".format(epoch_str, genotypes[epoch])
+        )
         # save checkpoint
         save_path = save_checkpoint(
             {
@@ -321,12 +392,22 @@ def main(xargs):
     genotype, temp_accuracy = get_best_arch(valid_loader, network, xargs.select_num)
     search_time.update(time.time() - start_time)
     network.module.set_cal_mode("dynamic", genotype)
-    valid_a_loss, valid_a_top1, valid_a_top5 = valid_func(valid_loader, network, criterion)
-    logger.log("Last : the gentotype is : {:}, with the validation accuracy of {:.3f}%.".format(genotype, valid_a_top1))
+    valid_a_loss, valid_a_top1, valid_a_top5 = valid_func(
+        valid_loader, network, criterion
+    )
+    logger.log(
+        "Last : the gentotype is : {:}, with the validation accuracy of {:.3f}%.".format(
+            genotype, valid_a_top1
+        )
+    )
 
     logger.log("\n" + "-" * 100)
     # check the performance from the architecture dataset
-    logger.log("SETN : run {:} epochs, cost {:.1f} s, last-geno is {:}.".format(total_epoch, search_time.sum, genotype))
+    logger.log(
+        "SETN : run {:} epochs, cost {:.1f} s, last-geno is {:}.".format(
+            total_epoch, search_time.sum, genotype
+        )
+    )
     if api is not None:
         logger.log("{:}".format(api.query_by_arch(genotype, "200")))
     logger.close()
@@ -345,23 +426,50 @@ if __name__ == "__main__":
     parser.add_argument("--search_space_name", type=str, help="The search space name.")
     parser.add_argument("--max_nodes", type=int, help="The maximum number of nodes.")
     parser.add_argument("--channel", type=int, help="The number of channels.")
-    parser.add_argument("--num_cells", type=int, help="The number of cells in one stage.")
-    parser.add_argument("--select_num", type=int, help="The number of selected architectures to evaluate.")
+    parser.add_argument(
+        "--num_cells", type=int, help="The number of cells in one stage."
+    )
+    parser.add_argument(
+        "--select_num",
+        type=int,
+        help="The number of selected architectures to evaluate.",
+    )
     parser.add_argument(
         "--track_running_stats",
         type=int,
         choices=[0, 1],
         help="Whether use track_running_stats or not in the BN layer.",
     )
-    parser.add_argument("--config_path", type=str, help="The path of the configuration.")
-    # architecture leraning rate
-    parser.add_argument("--arch_learning_rate", type=float, default=3e-4, help="learning rate for arch encoding")
-    parser.add_argument("--arch_weight_decay", type=float, default=1e-3, help="weight decay for arch encoding")
-    # log
-    parser.add_argument("--workers", type=int, default=2, help="number of data loading workers (default: 2)")
-    parser.add_argument("--save_dir", type=str, help="Folder to save checkpoints and log.")
     parser.add_argument(
-        "--arch_nas_dataset", type=str, help="The path to load the architecture dataset (tiny-nas-benchmark)."
+        "--config_path", type=str, help="The path of the configuration."
+    )
+    # architecture leraning rate
+    parser.add_argument(
+        "--arch_learning_rate",
+        type=float,
+        default=3e-4,
+        help="learning rate for arch encoding",
+    )
+    parser.add_argument(
+        "--arch_weight_decay",
+        type=float,
+        default=1e-3,
+        help="weight decay for arch encoding",
+    )
+    # log
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=2,
+        help="number of data loading workers (default: 2)",
+    )
+    parser.add_argument(
+        "--save_dir", type=str, help="Folder to save checkpoints and log."
+    )
+    parser.add_argument(
+        "--arch_nas_dataset",
+        type=str,
+        help="The path to load the architecture dataset (tiny-nas-benchmark).",
     )
     parser.add_argument("--print_freq", type=int, help="print frequency (default: 200)")
     parser.add_argument("--rand_seed", type=int, help="manual seed")

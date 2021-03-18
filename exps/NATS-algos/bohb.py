@@ -36,7 +36,9 @@ def get_topology_config_space(search_space, max_nodes=4):
     for i in range(1, max_nodes):
         for j in range(i):
             node_str = "{:}<-{:}".format(i, j)
-            cs.add_hyperparameter(ConfigSpace.CategoricalHyperparameter(node_str, search_space))
+            cs.add_hyperparameter(
+                ConfigSpace.CategoricalHyperparameter(node_str, search_space)
+            )
     return cs
 
 
@@ -44,7 +46,9 @@ def get_size_config_space(search_space):
     cs = ConfigSpace.ConfigurationSpace()
     for ilayer in range(search_space["numbers"]):
         node_str = "layer-{:}".format(ilayer)
-        cs.add_hyperparameter(ConfigSpace.CategoricalHyperparameter(node_str, search_space["candidates"]))
+        cs.add_hyperparameter(
+            ConfigSpace.CategoricalHyperparameter(node_str, search_space["candidates"])
+        )
     return cs
 
 
@@ -159,8 +163,14 @@ def main(xargs, api):
         current_best_index.append(api.query_index_by_arch(arch))
 
     best_arch = max(workers[0].trajectory, key=lambda x: x[0])[1]
-    logger.log("Best found configuration: {:} within {:.3f} s".format(best_arch, workers[0].total_times[-1]))
-    info = api.query_info_str_by_arch(best_arch, "200" if xargs.search_space == "tss" else "90")
+    logger.log(
+        "Best found configuration: {:} within {:.3f} s".format(
+            best_arch, workers[0].total_times[-1]
+        )
+    )
+    info = api.query_info_str_by_arch(
+        best_arch, "200" if xargs.search_space == "tss" else "90"
+    )
     logger.log("{:}".format(info))
     logger.log("-" * 100)
     logger.close()
@@ -169,7 +179,9 @@ def main(xargs, api):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("BOHB: Robust and Efficient Hyperparameter Optimization at Scale")
+    parser = argparse.ArgumentParser(
+        "BOHB: Robust and Efficient Hyperparameter Optimization at Scale"
+    )
     parser.add_argument(
         "--dataset",
         type=str,
@@ -177,35 +189,80 @@ if __name__ == "__main__":
         help="Choose between Cifar10/100 and ImageNet-16.",
     )
     # general arg
-    parser.add_argument("--search_space", type=str, choices=["tss", "sss"], help="Choose the search space.")
     parser.add_argument(
-        "--time_budget", type=int, default=20000, help="The total time cost budge for searching (in seconds)."
+        "--search_space",
+        type=str,
+        choices=["tss", "sss"],
+        help="Choose the search space.",
     )
-    parser.add_argument("--loops_if_rand", type=int, default=500, help="The total runs for evaluation.")
+    parser.add_argument(
+        "--time_budget",
+        type=int,
+        default=20000,
+        help="The total time cost budge for searching (in seconds).",
+    )
+    parser.add_argument(
+        "--loops_if_rand", type=int, default=500, help="The total runs for evaluation."
+    )
     # BOHB
     parser.add_argument(
-        "--strategy", default="sampling", type=str, nargs="?", help="optimization strategy for the acquisition function"
+        "--strategy",
+        default="sampling",
+        type=str,
+        nargs="?",
+        help="optimization strategy for the acquisition function",
     )
-    parser.add_argument("--min_bandwidth", default=0.3, type=float, nargs="?", help="minimum bandwidth for KDE")
     parser.add_argument(
-        "--num_samples", default=64, type=int, nargs="?", help="number of samples for the acquisition function"
+        "--min_bandwidth",
+        default=0.3,
+        type=float,
+        nargs="?",
+        help="minimum bandwidth for KDE",
     )
     parser.add_argument(
-        "--random_fraction", default=0.33, type=float, nargs="?", help="fraction of random configurations"
+        "--num_samples",
+        default=64,
+        type=int,
+        nargs="?",
+        help="number of samples for the acquisition function",
     )
-    parser.add_argument("--bandwidth_factor", default=3, type=int, nargs="?", help="factor multiplied to the bandwidth")
     parser.add_argument(
-        "--n_iters", default=300, type=int, nargs="?", help="number of iterations for optimization method"
+        "--random_fraction",
+        default=0.33,
+        type=float,
+        nargs="?",
+        help="fraction of random configurations",
+    )
+    parser.add_argument(
+        "--bandwidth_factor",
+        default=3,
+        type=int,
+        nargs="?",
+        help="factor multiplied to the bandwidth",
+    )
+    parser.add_argument(
+        "--n_iters",
+        default=300,
+        type=int,
+        nargs="?",
+        help="number of iterations for optimization method",
     )
     # log
-    parser.add_argument("--save_dir", type=str, default="./output/search", help="Folder to save checkpoints and log.")
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        default="./output/search",
+        help="Folder to save checkpoints and log.",
+    )
     parser.add_argument("--rand_seed", type=int, default=-1, help="manual seed")
     args = parser.parse_args()
 
     api = create(None, args.search_space, fast_mode=False, verbose=False)
 
     args.save_dir = os.path.join(
-        "{:}-{:}".format(args.save_dir, args.search_space), "{:}-T{:}".format(args.dataset, args.time_budget), "BOHB"
+        "{:}-{:}".format(args.save_dir, args.search_space),
+        "{:}-T{:}".format(args.dataset, args.time_budget),
+        "BOHB",
     )
     print("save-dir : {:}".format(args.save_dir))
 

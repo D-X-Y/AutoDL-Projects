@@ -16,7 +16,8 @@ lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 parser = argparse.ArgumentParser(
-    description="Prepare splits for searching", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    description="Prepare splits for searching",
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument("--name", type=str, help="The dataset name.")
 parser.add_argument("--root", type=str, help="The directory to the dataset.")
@@ -73,7 +74,15 @@ def main():
     for index in valid:
         class2numV[targets[index]] += 1
     class2numT, class2numV = dict(class2numT), dict(class2numV)
-    torch.save({"train": train, "valid": valid, "class2numTrain": class2numT, "class2numValid": class2numV}, save_path)
+    torch.save(
+        {
+            "train": train,
+            "valid": valid,
+            "class2numTrain": class2numT,
+            "class2numValid": class2numV,
+        },
+        save_path,
+    )
     print("-" * 80)
 
 

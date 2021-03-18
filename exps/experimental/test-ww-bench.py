@@ -53,8 +53,12 @@ def evaluate(api, weight_dir, data: str):
         # compute the weight watcher results
         config = api.get_net_config(arch_index, data)
         net = get_cell_based_tiny_net(config)
-        meta_info = api.query_meta_info_by_index(arch_index, hp="200" if api.search_space_name == "topology" else "90")
-        params = meta_info.get_net_param(data, 888 if api.search_space_name == "topology" else 777)
+        meta_info = api.query_meta_info_by_index(
+            arch_index, hp="200" if api.search_space_name == "topology" else "90"
+        )
+        params = meta_info.get_net_param(
+            data, 888 if api.search_space_name == "topology" else 777
+        )
         with torch.no_grad():
             net.load_state_dict(params)
             _, summary = weight_watcher.analyze(net, alphas=False)
@@ -73,7 +77,10 @@ def evaluate(api, weight_dir, data: str):
             norms.append(cur_norm)
         # query the accuracy
         info = meta_info.get_metrics(
-            data, "ori-test", iepoch=None, is_random=888 if api.search_space_name == "topology" else 777
+            data,
+            "ori-test",
+            iepoch=None,
+            is_random=888 if api.search_space_name == "topology" else 777,
         )
         accuracies.append(info["accuracy"])
         del net, meta_info
@@ -98,7 +105,11 @@ def main(search_space, meta_file: str, weight_dir, save_dir, xdata):
         for hp in hps:
             nums = api.statistics(data, hp=hp)
             total = sum([k * v for k, v in nums.items()])
-            print("Using {:3s} epochs, trained on {:20s} : {:} trials in total ({:}).".format(hp, data, total, nums))
+            print(
+                "Using {:3s} epochs, trained on {:20s} : {:} trials in total ({:}).".format(
+                    hp, data, total, nums
+                )
+            )
     print(time_string() + " " + "=" * 50)
 
     norms, accuracies = evaluate(api, weight_dir, xdata)
@@ -120,8 +131,15 @@ def main(search_space, meta_file: str, weight_dir, save_dir, xdata):
     plt.xlim(min(indexes), max(indexes))
     plt.ylim(min(indexes), max(indexes))
     # plt.ylabel('y').set_rotation(30)
-    plt.yticks(np.arange(min(indexes), max(indexes), max(indexes) // 3), fontsize=LegendFontsize, rotation="vertical")
-    plt.xticks(np.arange(min(indexes), max(indexes), max(indexes) // 5), fontsize=LegendFontsize)
+    plt.yticks(
+        np.arange(min(indexes), max(indexes), max(indexes) // 3),
+        fontsize=LegendFontsize,
+        rotation="vertical",
+    )
+    plt.xticks(
+        np.arange(min(indexes), max(indexes), max(indexes) // 5),
+        fontsize=LegendFontsize,
+    )
     ax.scatter(indexes, labels, marker="*", s=0.5, c="tab:red", alpha=0.8)
     ax.scatter(indexes, indexes, marker="o", s=0.5, c="tab:blue", alpha=0.8)
     ax.scatter([-1], [-1], marker="o", s=100, c="tab:blue", label="Test accuracy")
@@ -129,7 +147,9 @@ def main(search_space, meta_file: str, weight_dir, save_dir, xdata):
     plt.grid(zorder=0)
     ax.set_axisbelow(True)
     plt.legend(loc=0, fontsize=LegendFontsize)
-    ax.set_xlabel("architecture ranking sorted by the test accuracy ", fontsize=LabelSize)
+    ax.set_xlabel(
+        "architecture ranking sorted by the test accuracy ", fontsize=LabelSize
+    )
     ax.set_ylabel("architecture ranking computed by weight watcher", fontsize=LabelSize)
     save_path = (save_dir / "{:}-{:}-test-ww.pdf".format(search_space, xdata)).resolve()
     fig.savefig(save_path, dpi=dpi, bbox_inches="tight", format="pdf")
@@ -148,9 +168,18 @@ if __name__ == "__main__":
         default="./output/vis-nas-bench/",
         help="The base-name of folder to save checkpoints and log.",
     )
-    parser.add_argument("--search_space", type=str, default=None, choices=["tss", "sss"], help="The search space.")
     parser.add_argument(
-        "--base_path", type=str, default=None, help="The path to the NAS-Bench-201 benchmark file and weight dir."
+        "--search_space",
+        type=str,
+        default=None,
+        choices=["tss", "sss"],
+        help="The search space.",
+    )
+    parser.add_argument(
+        "--base_path",
+        type=str,
+        default=None,
+        help="The path to the NAS-Bench-201 benchmark file and weight dir.",
     )
     parser.add_argument("--dataset", type=str, default=None, help=".")
     args = parser.parse_args()
@@ -160,6 +189,8 @@ if __name__ == "__main__":
     meta_file = Path(args.base_path + ".pth")
     weight_dir = Path(args.base_path + "-full")
     assert meta_file.exists(), "invalid path for api : {:}".format(meta_file)
-    assert weight_dir.exists() and weight_dir.is_dir(), "invalid path for weight dir : {:}".format(weight_dir)
+    assert (
+        weight_dir.exists() and weight_dir.is_dir()
+    ), "invalid path for weight dir : {:}".format(weight_dir)
 
     main(args.search_space, str(meta_file), weight_dir, save_dir, args.dataset)

@@ -23,7 +23,13 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
 from datasets import get_datasets, SearchDataset
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
+from procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+    get_optim_scheduler,
+)
 from utils import get_model_infos, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from models import CellStructure, get_search_spaces
@@ -40,7 +46,9 @@ class PolicyTopology(nn.Module):
             for j in range(i):
                 node_str = "{:}<-{:}".format(i, j)
                 self.edge2index[node_str] = len(self.edge2index)
-        self.arch_parameters = nn.Parameter(1e-3 * torch.randn(len(self.edge2index), len(search_space)))
+        self.arch_parameters = nn.Parameter(
+            1e-3 * torch.randn(len(self.edge2index), len(search_space))
+        )
 
     def generate_arch(self, actions):
         genotypes = []
@@ -76,7 +84,9 @@ class PolicySize(nn.Module):
         super(PolicySize, self).__init__()
         self.candidates = search_space["candidates"]
         self.numbers = search_space["numbers"]
-        self.arch_parameters = nn.Parameter(1e-3 * torch.randn(self.numbers, len(self.candidates)))
+        self.arch_parameters = nn.Parameter(
+            1e-3 * torch.randn(self.numbers, len(self.candidates))
+        )
 
     def generate_arch(self, actions):
         channels = [str(self.candidates[i]) for i in actions]
@@ -103,7 +113,9 @@ class ExponentialMovingAverage(object):
         self._momentum = momentum
 
     def update(self, value):
-        self._numerator = self._momentum * self._numerator + (1 - self._momentum) * value
+        self._numerator = (
+            self._momentum * self._numerator + (1 - self._momentum) * value
+        )
         self._denominator = self._momentum * self._denominator + (1 - self._momentum)
 
     def value(self):
@@ -143,14 +155,18 @@ def main(xargs, api):
 
     # REINFORCE
     x_start_time = time.time()
-    logger.log("Will start searching with time budget of {:} s.".format(xargs.time_budget))
+    logger.log(
+        "Will start searching with time budget of {:} s.".format(xargs.time_budget)
+    )
     total_steps, total_costs, trace = 0, [], []
     current_best_index = []
     while len(total_costs) == 0 or total_costs[-1] < xargs.time_budget:
         start_time = time.time()
         log_prob, action = select_action(policy)
         arch = policy.generate_arch(action)
-        reward, _, _, current_total_cost = api.simulate_train_eval(arch, xargs.dataset, hp="12")
+        reward, _, _, current_total_cost = api.simulate_train_eval(
+            arch, xargs.dataset, hp="12"
+        )
         trace.append((reward, arch))
         total_costs.append(current_total_cost)
 
@@ -168,7 +184,9 @@ def main(xargs, api):
             )
         )
         # to analyze
-        current_best_index.append(api.query_index_by_arch(max(trace, key=lambda x: x[0])[1]))
+        current_best_index.append(
+            api.query_index_by_arch(max(trace, key=lambda x: x[0])[1])
+        )
     # best_arch = policy.genotype() # first version
     best_arch = max(trace, key=lambda x: x[0])[1]
     logger.log(
@@ -176,7 +194,9 @@ def main(xargs, api):
             total_steps, total_costs[-1], time.time() - x_start_time
         )
     )
-    info = api.query_info_str_by_arch(best_arch, "200" if xargs.search_space == "tss" else "90")
+    info = api.query_info_str_by_arch(
+        best_arch, "200" if xargs.search_space == "tss" else "90"
+    )
     logger.log("{:}".format(info))
     logger.log("-" * 100)
     logger.close()
@@ -193,17 +213,38 @@ if __name__ == "__main__":
         choices=["cifar10", "cifar100", "ImageNet16-120"],
         help="Choose between Cifar10/100 and ImageNet-16.",
     )
-    parser.add_argument("--search_space", type=str, choices=["tss", "sss"], help="Choose the search space.")
-    parser.add_argument("--learning_rate", type=float, help="The learning rate for REINFORCE.")
-    parser.add_argument("--EMA_momentum", type=float, default=0.9, help="The momentum value for EMA.")
     parser.add_argument(
-        "--time_budget", type=int, default=20000, help="The total time cost budge for searching (in seconds)."
+        "--search_space",
+        type=str,
+        choices=["tss", "sss"],
+        help="Choose the search space.",
     )
-    parser.add_argument("--loops_if_rand", type=int, default=500, help="The total runs for evaluation.")
-    # log
-    parser.add_argument("--save_dir", type=str, default="./output/search", help="Folder to save checkpoints and log.")
     parser.add_argument(
-        "--arch_nas_dataset", type=str, help="The path to load the architecture dataset (tiny-nas-benchmark)."
+        "--learning_rate", type=float, help="The learning rate for REINFORCE."
+    )
+    parser.add_argument(
+        "--EMA_momentum", type=float, default=0.9, help="The momentum value for EMA."
+    )
+    parser.add_argument(
+        "--time_budget",
+        type=int,
+        default=20000,
+        help="The total time cost budge for searching (in seconds).",
+    )
+    parser.add_argument(
+        "--loops_if_rand", type=int, default=500, help="The total runs for evaluation."
+    )
+    # log
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        default="./output/search",
+        help="Folder to save checkpoints and log.",
+    )
+    parser.add_argument(
+        "--arch_nas_dataset",
+        type=str,
+        help="The path to load the architecture dataset (tiny-nas-benchmark).",
     )
     parser.add_argument("--print_freq", type=int, help="print frequency (default: 200)")
     parser.add_argument("--rand_seed", type=int, default=-1, help="manual seed")

@@ -30,7 +30,9 @@ jobs:
           python --version
           python -m black --version
           echo $PWD ; ls
+          python -m black ./exps -l 88 --check --diff --verbose
           python -m black ./tests -l 88 --check --diff --verbose
+          python -m black ./lib/layers -l 88 --check --diff --verbose
           python -m black ./lib/spaces -l 88 --check --diff --verbose
           python -m black ./lib/trade_models -l 88 --check --diff --verbose
 

@@ -13,6 +13,7 @@ if str(lib_dir) not in sys.path:
 
 from spaces import Categorical
 from spaces import Continuous
+from spaces import Integer
 
 
 class TestBasicSpace(unittest.TestCase):
@@ -25,6 +26,12 @@ class TestBasicSpace(unittest.TestCase):
         self.assertEqual(
             "Categorical(candidates=[1, 2, 3, 4], default_index=None)", str(space)
         )
+
+    def test_integer(self):
+        space = Integer(lower=1, upper=4)
+        for i in range(4):
+            self.assertEqual(space[i], i + 1)
+        self.assertEqual("Integer(lower=1, upper=4, default=None)", str(space))
 
     def test_continuous(self):
         random.seed(999)

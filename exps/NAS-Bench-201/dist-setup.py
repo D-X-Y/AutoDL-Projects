@@ -10,7 +10,9 @@ from setuptools import setup
 
 
 def read(fname="README.md"):
-    with open(os.path.join(os.path.dirname(__file__), fname), encoding="utf-8") as cfile:
+    with open(
+        os.path.join(os.path.dirname(__file__), fname), encoding="utf-8"
+    ) as cfile:
         return cfile.read()
 
 

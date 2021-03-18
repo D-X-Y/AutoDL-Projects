@@ -19,7 +19,13 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
 from datasets import get_datasets, SearchDataset
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
+from procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+    get_optim_scheduler,
+)
 from utils import get_model_infos, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from models import get_search_spaces
@@ -45,12 +51,16 @@ def main(xargs, api):
     current_best_index = []
     while len(total_time_cost) == 0 or total_time_cost[-1] < xargs.time_budget:
         arch = random_arch()
-        accuracy, _, _, total_cost = api.simulate_train_eval(arch, xargs.dataset, hp="12")
+        accuracy, _, _, total_cost = api.simulate_train_eval(
+            arch, xargs.dataset, hp="12"
+        )
         total_time_cost.append(total_cost)
         history.append(arch)
         if best_arch is None or best_acc < accuracy:
             best_acc, best_arch = accuracy, arch
-        logger.log("[{:03d}] : {:} : accuracy = {:.2f}%".format(len(history), arch, accuracy))
+        logger.log(
+            "[{:03d}] : {:} : accuracy = {:.2f}%".format(len(history), arch, accuracy)
+        )
         current_best_index.append(api.query_index_by_arch(best_arch))
     logger.log(
         "{:} best arch is {:}, accuracy = {:.2f}%, visit {:} archs with {:.1f} s.".format(
@@ -58,7 +68,9 @@ def main(xargs, api):
         )
     )
 
-    info = api.query_info_str_by_arch(best_arch, "200" if xargs.search_space == "tss" else "90")
+    info = api.query_info_str_by_arch(
+        best_arch, "200" if xargs.search_space == "tss" else "90"
+    )
     logger.log("{:}".format(info))
     logger.log("-" * 100)
     logger.close()
@@ -73,21 +85,38 @@ if __name__ == "__main__":
         choices=["cifar10", "cifar100", "ImageNet16-120"],
         help="Choose between Cifar10/100 and ImageNet-16.",
     )
-    parser.add_argument("--search_space", type=str, choices=["tss", "sss"], help="Choose the search space.")
+    parser.add_argument(
+        "--search_space",
+        type=str,
+        choices=["tss", "sss"],
+        help="Choose the search space.",
+    )
 
     parser.add_argument(
-        "--time_budget", type=int, default=20000, help="The total time cost budge for searching (in seconds)."
+        "--time_budget",
+        type=int,
+        default=20000,
+        help="The total time cost budge for searching (in seconds).",
     )
-    parser.add_argument("--loops_if_rand", type=int, default=500, help="The total runs for evaluation.")
+    parser.add_argument(
+        "--loops_if_rand", type=int, default=500, help="The total runs for evaluation."
+    )
     # log
-    parser.add_argument("--save_dir", type=str, default="./output/search", help="Folder to save checkpoints and log.")
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        default="./output/search",
+        help="Folder to save checkpoints and log.",
+    )
     parser.add_argument("--rand_seed", type=int, default=-1, help="manual seed")
     args = parser.parse_args()
 
     api = create(None, args.search_space, fast_mode=True, verbose=False)
 
     args.save_dir = os.path.join(
-        "{:}-{:}".format(args.save_dir, args.search_space), "{:}-T{:}".format(args.dataset, args.time_budget), "RANDOM"
+        "{:}-{:}".format(args.save_dir, args.search_space),
+        "{:}-T{:}".format(args.dataset, args.time_budget),
+        "RANDOM",
     )
     print("save-dir : {:}".format(args.save_dir))
 

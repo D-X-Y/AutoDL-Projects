@@ -30,7 +30,11 @@ def show_time(api, epoch=12):
         all_cifar10_time += cifar10_time
         all_cifar100_time += cifar100_time
         all_imagenet_time += imagenet_time
-    print("The total training time for CIFAR-10        (held-out train set) is {:} seconds".format(all_cifar10_time))
+    print(
+        "The total training time for CIFAR-10        (held-out train set) is {:} seconds".format(
+            all_cifar10_time
+        )
+    )
     print(
         "The total training time for CIFAR-100       (held-out train set) is {:} seconds, {:.2f} times longer than that on CIFAR-10".format(
             all_cifar100_time, all_cifar100_time / all_cifar10_time

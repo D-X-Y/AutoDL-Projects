@@ -92,6 +92,32 @@ class Categorical(Space):
             return sample
 
 
+class Integer(Categorical):
+    """A space contains the integer values."""
+
+    def __init__(self, lower: int, upper: int, default: Optional[int] = None):
+        if not isinstance(lower, int) or not isinstance(upper, int):
+            raise ValueError(
+                "The lower [{:}] and uppwer [{:}] must be int.".format(lower, upper)
+            )
+        data = list(range(lower, upper + 1))
+        self._raw_lower = lower
+        self._raw_upper = upper
+        self._raw_default = default
+        if default is not None and (default < lower or default > upper):
+            raise ValueError("The default value [{:}] is out of range.".format(default))
+            default = data.index(default)
+        super(Integer, self).__init__(*data, default=default)
+
+    def __repr__(self):
+        return "{name:}(lower={lower:}, upper={upper:}, default={default:})".format(
+            name=self.__class__.__name__,
+            lower=self._raw_lower,
+            upper=self._raw_upper,
+            default=self._raw_default,
+        )
+
+
 np_float_types = (np.float16, np.float32, np.float64)
 np_int_types = (
     np.uint8,

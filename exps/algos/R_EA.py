@@ -15,7 +15,13 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
 from datasets import get_datasets, SearchDataset
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
+from procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+    get_optim_scheduler,
+)
 from utils import get_model_infos, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from nas_201_api import NASBench201API as API
@@ -38,13 +44,20 @@ class Model(object):
 #       In this case, the LR schedular is converged.
 # For use_012_epoch_training = False, the architecture is planed to be trained for 200 epochs, but we early stop its procedure.
 #
-def train_and_eval(arch, nas_bench, extra_info, dataname="cifar10-valid", use_012_epoch_training=True):
+def train_and_eval(
+    arch, nas_bench, extra_info, dataname="cifar10-valid", use_012_epoch_training=True
+):
 
     if use_012_epoch_training and nas_bench is not None:
         arch_index = nas_bench.query_index_by_arch(arch)
         assert arch_index >= 0, "can not find this arch : {:}".format(arch)
-        info = nas_bench.get_more_info(arch_index, dataname, iepoch=None, hp="12", is_random=True)
-        valid_acc, time_cost = info["valid-accuracy"], info["train-all-time"] + info["valid-per-time"]
+        info = nas_bench.get_more_info(
+            arch_index, dataname, iepoch=None, hp="12", is_random=True
+        )
+        valid_acc, time_cost = (
+            info["valid-accuracy"],
+            info["train-all-time"] + info["valid-per-time"],
+        )
         # _, valid_acc = info.get_metrics('cifar10-valid', 'x-valid' , 25, True) # use the validation accuracy after 25 training epochs
     elif not use_012_epoch_training and nas_bench is not None:
         # Please contact me if you want to use the following logic, because it has some potential issues.
@@ -52,7 +65,9 @@ def train_and_eval(arch, nas_bench, extra_info, dataname="cifar10-valid", use_01
         # It did return values for cifar100 and ImageNet16-120, but it has some potential issues. (Please email me for more details)
         arch_index, nepoch = nas_bench.query_index_by_arch(arch), 25
         assert arch_index >= 0, "can not find this arch : {:}".format(arch)
-        xoinfo = nas_bench.get_more_info(arch_index, "cifar10-valid", iepoch=None, hp="12")
+        xoinfo = nas_bench.get_more_info(
+            arch_index, "cifar10-valid", iepoch=None, hp="12"
+        )
         xocost = nas_bench.get_cost_info(arch_index, "cifar10-valid", hp="200")
         info = nas_bench.get_more_info(
             arch_index, dataname, nepoch, hp="200", is_random=True
@@ -85,9 +100,15 @@ def train_and_eval(arch, nas_bench, extra_info, dataname="cifar10-valid", use_01
             * cost["latency"]
         )
         try:
-            valid_acc, time_cost = info["valid-accuracy"], estimated_train_cost + estimated_valid_cost
+            valid_acc, time_cost = (
+                info["valid-accuracy"],
+                estimated_train_cost + estimated_valid_cost,
+            )
         except:
-            valid_acc, time_cost = info["valtest-accuracy"], estimated_train_cost + estimated_valid_cost
+            valid_acc, time_cost = (
+                info["valtest-accuracy"],
+                estimated_train_cost + estimated_valid_cost,
+            )
     else:
         # train a model from scratch.
         raise ValueError("NOT IMPLEMENT YET")
@@ -131,7 +152,15 @@ def mutate_arch_func(op_names):
 
 
 def regularized_evolution(
-    cycles, population_size, sample_size, time_budget, random_arch, mutate_arch, nas_bench, extra_info, dataname
+    cycles,
+    population_size,
+    sample_size,
+    time_budget,
+    random_arch,
+    mutate_arch,
+    nas_bench,
+    extra_info,
+    dataname,
 ):
     """Algorithm for regularized evolution (i.e. aging evolution).
 
@@ -149,13 +178,18 @@ def regularized_evolution(
           during the evolution experiment.
     """
     population = collections.deque()
-    history, total_time_cost = [], 0  # Not used by the algorithm, only used to report results.
+    history, total_time_cost = (
+        [],
+        0,
+    )  # Not used by the algorithm, only used to report results.
 
     # Initialize the population with random models.
     while len(population) < population_size:
         model = Model()
         model.arch = random_arch()
-        model.accuracy, time_cost = train_and_eval(model.arch, nas_bench, extra_info, dataname)
+        model.accuracy, time_cost = train_and_eval(
+            model.arch, nas_bench, extra_info, dataname
+        )
         population.append(model)
         history.append(model)
         total_time_cost += time_cost
@@ -180,7 +214,9 @@ def regularized_evolution(
         child = Model()
         child.arch = mutate_arch(parent.arch)
         total_time_cost += time.time() - start_time
-        child.accuracy, time_cost = train_and_eval(child.arch, nas_bench, extra_info, dataname)
+        child.accuracy, time_cost = train_and_eval(
+            child.arch, nas_bench, extra_info, dataname
+        )
         if total_time_cost + time_cost > time_budget:  # return
             return history, total_time_cost
         else:
@@ -207,13 +243,17 @@ def main(xargs, nas_bench):
     else:
         dataname = xargs.dataset
     if xargs.data_path is not None:
-        train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
+        train_data, valid_data, xshape, class_num = get_datasets(
+            xargs.dataset, xargs.data_path, -1
+        )
         split_Fpath = "configs/nas-benchmark/cifar-split.txt"
         cifar_split = load_config(split_Fpath, None, None)
         train_split, valid_split = cifar_split.train, cifar_split.valid
         logger.log("Load split file from {:}".format(split_Fpath))
         config_path = "configs/nas-benchmark/algos/R-EA.config"
-        config = load_config(config_path, {"class_num": class_num, "xshape": xshape}, logger)
+        config = load_config(
+            config_path, {"class_num": class_num, "xshape": xshape}, logger
+        )
         # To split data
         train_data_v2 = deepcopy(train_data)
         train_data_v2.transform = valid_data.transform
@@ -240,7 +280,11 @@ def main(xargs, nas_bench):
             )
         )
         logger.log("||||||| {:10s} ||||||| Config={:}".format(xargs.dataset, config))
-        extra_info = {"config": config, "train_loader": train_loader, "valid_loader": valid_loader}
+        extra_info = {
+            "config": config,
+            "train_loader": train_loader,
+            "valid_loader": valid_loader,
+        }
     else:
         config_path = "configs/nas-benchmark/algos/R-EA.config"
         config = load_config(config_path, None, logger)
@@ -253,7 +297,10 @@ def main(xargs, nas_bench):
     # x =random_arch() ; y = mutate_arch(x)
     x_start_time = time.time()
     logger.log("{:} use nas_bench : {:}".format(time_string(), nas_bench))
-    logger.log("-" * 30 + " start searching with the time budget of {:} s".format(xargs.time_budget))
+    logger.log(
+        "-" * 30
+        + " start searching with the time budget of {:} s".format(xargs.time_budget)
+    )
     history, total_cost = regularized_evolution(
         xargs.ea_cycles,
         xargs.ea_population,
@@ -297,17 +344,36 @@ if __name__ == "__main__":
     parser.add_argument("--search_space_name", type=str, help="The search space name.")
     parser.add_argument("--max_nodes", type=int, help="The maximum number of nodes.")
     parser.add_argument("--channel", type=int, help="The number of channels.")
-    parser.add_argument("--num_cells", type=int, help="The number of cells in one stage.")
+    parser.add_argument(
+        "--num_cells", type=int, help="The number of cells in one stage."
+    )
     parser.add_argument("--ea_cycles", type=int, help="The number of cycles in EA.")
     parser.add_argument("--ea_population", type=int, help="The population size in EA.")
     parser.add_argument("--ea_sample_size", type=int, help="The sample size in EA.")
-    parser.add_argument("--ea_fast_by_api", type=int, help="Use our API to speed up the experiments or not.")
-    parser.add_argument("--time_budget", type=int, help="The total time cost budge for searching (in seconds).")
-    # log
-    parser.add_argument("--workers", type=int, default=2, help="number of data loading workers (default: 2)")
-    parser.add_argument("--save_dir", type=str, help="Folder to save checkpoints and log.")
     parser.add_argument(
-        "--arch_nas_dataset", type=str, help="The path to load the architecture dataset (tiny-nas-benchmark)."
+        "--ea_fast_by_api",
+        type=int,
+        help="Use our API to speed up the experiments or not.",
+    )
+    parser.add_argument(
+        "--time_budget",
+        type=int,
+        help="The total time cost budge for searching (in seconds).",
+    )
+    # log
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=2,
+        help="number of data loading workers (default: 2)",
+    )
+    parser.add_argument(
+        "--save_dir", type=str, help="Folder to save checkpoints and log."
+    )
+    parser.add_argument(
+        "--arch_nas_dataset",
+        type=str,
+        help="The path to load the architecture dataset (tiny-nas-benchmark).",
     )
     parser.add_argument("--print_freq", type=int, help="print frequency (default: 200)")
     parser.add_argument("--rand_seed", type=int, default=-1, help="manual seed")
@@ -318,7 +384,11 @@ if __name__ == "__main__":
     if args.arch_nas_dataset is None or not os.path.isfile(args.arch_nas_dataset):
         nas_bench = None
     else:
-        print("{:} build NAS-Benchmark-API from {:}".format(time_string(), args.arch_nas_dataset))
+        print(
+            "{:} build NAS-Benchmark-API from {:}".format(
+                time_string(), args.arch_nas_dataset
+            )
+        )
         nas_bench = API(args.arch_nas_dataset)
     if args.rand_seed < 0:
         save_dir, all_indexes, num = None, [], 500

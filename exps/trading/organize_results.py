@@ -55,7 +55,13 @@ class QResult:
             new_dict[xkey] = values
         return new_dict
 
-    def info(self, keys: List[Text], separate: Text = "& ", space: int = 25, verbose: bool = True):
+    def info(
+        self,
+        keys: List[Text],
+        separate: Text = "& ",
+        space: int = 25,
+        verbose: bool = True,
+    ):
         avaliable_keys = []
         for key in keys:
             if key not in self.result:
@@ -89,7 +95,10 @@ def compare_results(heads, values, names, space=10, verbose=True, sort_key=False
     if verbose:
         print(info_str_dict["head"])
         if sort_key:
-            lines = sorted(list(zip(values, info_str_dict["lines"])), key=lambda x: float(x[0].split(" ")[0]))
+            lines = sorted(
+                list(zip(values, info_str_dict["lines"])),
+                key=lambda x: float(x[0].split(" ")[0]),
+            )
             lines = [x[1] for x in lines]
         else:
             lines = info_str_dict["lines"]
@@ -136,7 +145,11 @@ def query_info(save_dir, verbose):
         if verbose:
             print(
                 "====>>>> {:02d}/{:02d}-th experiment {:9s} has {:02d}/{:02d} finished recorders.".format(
-                    idx + 1, len(experiments), experiment.name, len(recorders), len(recorders) + not_finished
+                    idx + 1,
+                    len(experiments),
+                    experiment.name,
+                    len(recorders),
+                    len(recorders) + not_finished,
                 )
             )
         result = QResult()
@@ -149,7 +162,9 @@ def query_info(save_dir, verbose):
         head_strs.append(head_str)
         value_strs.append(value_str)
         names.append(experiment.name)
-    info_str_dict = compare_results(head_strs, value_strs, names, space=10, verbose=verbose)
+    info_str_dict = compare_results(
+        head_strs, value_strs, names, space=10, verbose=verbose
+    )
     info_value_dict = dict(heads=head_strs, values=value_strs, names=names)
     return info_str_dict, info_value_dict
 
@@ -169,9 +184,18 @@ if __name__ == "__main__":
             raise argparse.ArgumentTypeError("Boolean value expected.")
 
     parser.add_argument(
-        "--save_dir", type=str, nargs="+", default=["./outputs/qlib-baselines"], help="The checkpoint directory."
+        "--save_dir",
+        type=str,
+        nargs="+",
+        default=["./outputs/qlib-baselines"],
+        help="The checkpoint directory.",
     )
-    parser.add_argument("--verbose", type=str2bool, default=False, help="Print detailed log information or not.")
+    parser.add_argument(
+        "--verbose",
+        type=str2bool,
+        default=False,
+        help="Print detailed log information or not.",
+    )
     args = parser.parse_args()
 
     print("Show results of {:}".format(args.save_dir))
@@ -184,4 +208,11 @@ if __name__ == "__main__":
         _, info_dict = query_info(save_dir, args.verbose)
         all_info_dict.append(info_dict)
     info_dict = QResult.merge_dict(all_info_dict)
-    compare_results(info_dict["heads"], info_dict["values"], info_dict["names"], space=10, verbose=True, sort_key=True)
+    compare_results(
+        info_dict["heads"],
+        info_dict["values"],
+        info_dict["names"],
+        space=10,
+        verbose=True,
+        sort_key=True,
+    )

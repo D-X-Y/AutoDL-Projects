@@ -50,7 +50,9 @@ def simplify(save_dir, save_name, nets, total, sup_config):
             seeds.add(seed)
             nums.append(len(xlist))
             print("  [seed={:}] there are {:} checkpoints.".format(seed, len(xlist)))
-        assert len(nets) == total == max(nums), "there are some missed files : {:} vs {:}".format(max(nums), total)
+        assert (
+            len(nets) == total == max(nums)
+        ), "there are some missed files : {:} vs {:}".format(max(nums), total)
     print("{:} start simplify the checkpoint.".format(time_string()))
 
     datasets = ("cifar10-valid", "cifar10", "cifar100", "ImageNet16-120")
@@ -78,7 +80,9 @@ def simplify(save_dir, save_name, nets, total, sup_config):
         # measure elapsed time
         arch_time.update(time.time() - end_time)
         end_time = time.time()
-        need_time = "{:}".format(convert_secs2time(arch_time.avg * (total - index - 1), True))
+        need_time = "{:}".format(
+            convert_secs2time(arch_time.avg * (total - index - 1), True)
+        )
         # print('{:} {:06d}/{:06d} : still need {:}'.format(time_string(), index, total, need_time))
     print("{:} {:} done.".format(time_string(), save_name))
     final_infos = {
@@ -108,7 +112,11 @@ def simplify(save_dir, save_name, nets, total, sup_config):
 def traverse_net(max_node):
     aa_nas_bench_ss = get_search_spaces("cell", "nats-bench")
     archs = CellStructure.gen_all(aa_nas_bench_ss, max_node, False)
-    print("There are {:} archs vs {:}.".format(len(archs), len(aa_nas_bench_ss) ** ((max_node - 1) * max_node / 2)))
+    print(
+        "There are {:} archs vs {:}.".format(
+            len(archs), len(aa_nas_bench_ss) ** ((max_node - 1) * max_node / 2)
+        )
+    )
 
     random.seed(88)  # please do not change this line for reproducibility
     random.shuffle(archs)
@@ -117,10 +125,12 @@ def traverse_net(max_node):
         == "|avg_pool_3x3~0|+|nor_conv_1x1~0|skip_connect~1|+|nor_conv_1x1~0|skip_connect~1|skip_connect~2|"
     ), "please check the 0-th architecture : {:}".format(archs[0])
     assert (
-        archs[9].tostr() == "|avg_pool_3x3~0|+|none~0|none~1|+|skip_connect~0|none~1|nor_conv_3x3~2|"
+        archs[9].tostr()
+        == "|avg_pool_3x3~0|+|none~0|none~1|+|skip_connect~0|none~1|nor_conv_3x3~2|"
     ), "please check the 9-th architecture : {:}".format(archs[9])
     assert (
-        archs[123].tostr() == "|avg_pool_3x3~0|+|avg_pool_3x3~0|nor_conv_1x1~1|+|none~0|avg_pool_3x3~1|nor_conv_3x3~2|"
+        archs[123].tostr()
+        == "|avg_pool_3x3~0|+|avg_pool_3x3~0|nor_conv_1x1~1|+|none~0|avg_pool_3x3~1|nor_conv_3x3~2|"
     ), "please check the 123-th architecture : {:}".format(archs[123])
     return [x.tostr() for x in archs]
 
@@ -128,7 +138,8 @@ def traverse_net(max_node):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description="NATS-Bench (topology search space)", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description="NATS-Bench (topology search space)",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "--base_save_dir",
@@ -136,16 +147,26 @@ if __name__ == "__main__":
         default="./output/NATS-Bench-topology",
         help="The base-name of folder to save checkpoints and log.",
     )
-    parser.add_argument("--max_node", type=int, default=4, help="The maximum node in a cell.")
-    parser.add_argument("--channel", type=int, default=16, help="The number of channels.")
-    parser.add_argument("--num_cells", type=int, default=5, help="The number of cells in one stage.")
+    parser.add_argument(
+        "--max_node", type=int, default=4, help="The maximum node in a cell."
+    )
+    parser.add_argument(
+        "--channel", type=int, default=16, help="The number of channels."
+    )
+    parser.add_argument(
+        "--num_cells", type=int, default=5, help="The number of cells in one stage."
+    )
     parser.add_argument("--check_N", type=int, default=15625, help="For safety.")
-    parser.add_argument("--save_name", type=str, default="process", help="The save directory.")
+    parser.add_argument(
+        "--save_name", type=str, default="process", help="The save directory."
+    )
     args = parser.parse_args()
 
     nets = traverse_net(args.max_node)
     if len(nets) != args.check_N:
-        raise ValueError("Pre-num-check failed : {:} vs {:}".format(len(nets), args.check_N))
+        raise ValueError(
+            "Pre-num-check failed : {:} vs {:}".format(len(nets), args.check_N)
+        )
 
     save_dir = Path(args.base_save_dir)
     simplify(

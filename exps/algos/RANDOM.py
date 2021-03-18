@@ -13,7 +13,13 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 from config_utils import load_config, dict2config, configure2str
 from datasets import get_datasets, SearchDataset
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint, get_optim_scheduler
+from procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+    get_optim_scheduler,
+)
 from utils import get_model_infos, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from models import get_search_spaces
@@ -35,13 +41,17 @@ def main(xargs, nas_bench):
     else:
         dataname = xargs.dataset
     if xargs.data_path is not None:
-        train_data, valid_data, xshape, class_num = get_datasets(xargs.dataset, xargs.data_path, -1)
+        train_data, valid_data, xshape, class_num = get_datasets(
+            xargs.dataset, xargs.data_path, -1
+        )
         split_Fpath = "configs/nas-benchmark/cifar-split.txt"
         cifar_split = load_config(split_Fpath, None, None)
         train_split, valid_split = cifar_split.train, cifar_split.valid
         logger.log("Load split file from {:}".format(split_Fpath))
         config_path = "configs/nas-benchmark/algos/R-EA.config"
-        config = load_config(config_path, {"class_num": class_num, "xshape": xshape}, logger)
+        config = load_config(
+            config_path, {"class_num": class_num, "xshape": xshape}, logger
+        )
         # To split data
         train_data_v2 = deepcopy(train_data)
         train_data_v2.transform = valid_data.transform
@@ -68,7 +78,11 @@ def main(xargs, nas_bench):
             )
         )
         logger.log("||||||| {:10s} ||||||| Config={:}".format(xargs.dataset, config))
-        extra_info = {"config": config, "train_loader": train_loader, "valid_loader": valid_loader}
+        extra_info = {
+            "config": config,
+            "train_loader": train_loader,
+            "valid_loader": valid_loader,
+        }
     else:
         config_path = "configs/nas-benchmark/algos/R-EA.config"
         config = load_config(config_path, None, logger)
@@ -91,10 +105,17 @@ def main(xargs, nas_bench):
         history.append(arch)
         if best_arch is None or best_acc < accuracy:
             best_acc, best_arch = accuracy, arch
-        logger.log("[{:03d}] : {:} : accuracy = {:.2f}%".format(len(history), arch, accuracy))
+        logger.log(
+            "[{:03d}] : {:} : accuracy = {:.2f}%".format(len(history), arch, accuracy)
+        )
     logger.log(
         "{:} best arch is {:}, accuracy = {:.2f}%, visit {:} archs with {:.1f} s (real-cost = {:.3f} s).".format(
-            time_string(), best_arch, best_acc, len(history), total_time_cost, time.time() - x_start_time
+            time_string(),
+            best_arch,
+            best_acc,
+            len(history),
+            total_time_cost,
+            time.time() - x_start_time,
         )
     )
 
@@ -121,14 +142,29 @@ if __name__ == "__main__":
     parser.add_argument("--search_space_name", type=str, help="The search space name.")
     parser.add_argument("--max_nodes", type=int, help="The maximum number of nodes.")
     parser.add_argument("--channel", type=int, help="The number of channels.")
-    parser.add_argument("--num_cells", type=int, help="The number of cells in one stage.")
-    # parser.add_argument('--random_num',         type=int,   help='The number of random selected architectures.')
-    parser.add_argument("--time_budget", type=int, help="The total time cost budge for searching (in seconds).")
-    # log
-    parser.add_argument("--workers", type=int, default=2, help="number of data loading workers (default: 2)")
-    parser.add_argument("--save_dir", type=str, help="Folder to save checkpoints and log.")
     parser.add_argument(
-        "--arch_nas_dataset", type=str, help="The path to load the architecture dataset (tiny-nas-benchmark)."
+        "--num_cells", type=int, help="The number of cells in one stage."
+    )
+    # parser.add_argument('--random_num',         type=int,   help='The number of random selected architectures.')
+    parser.add_argument(
+        "--time_budget",
+        type=int,
+        help="The total time cost budge for searching (in seconds).",
+    )
+    # log
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=2,
+        help="number of data loading workers (default: 2)",
+    )
+    parser.add_argument(
+        "--save_dir", type=str, help="Folder to save checkpoints and log."
+    )
+    parser.add_argument(
+        "--arch_nas_dataset",
+        type=str,
+        help="The path to load the architecture dataset (tiny-nas-benchmark).",
     )
     parser.add_argument("--print_freq", type=int, help="print frequency (default: 200)")
     parser.add_argument("--rand_seed", type=int, help="manual seed")
@@ -137,7 +173,11 @@ if __name__ == "__main__":
     if args.arch_nas_dataset is None or not os.path.isfile(args.arch_nas_dataset):
         nas_bench = None
     else:
-        print("{:} build NAS-Benchmark-API from {:}".format(time_string(), args.arch_nas_dataset))
+        print(
+            "{:} build NAS-Benchmark-API from {:}".format(
+                time_string(), args.arch_nas_dataset
+            )
+        )
         nas_bench = API(args.arch_nas_dataset)
     if args.rand_seed < 0:
         save_dir, all_indexes, num = None, [], 500

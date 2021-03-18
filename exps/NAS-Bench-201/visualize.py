@@ -47,15 +47,21 @@ def visualize_relative_ranking(vis_save_dir):
     print("{:} start to visualize relative ranking".format(time_string()))
     # maximum accuracy with ResNet-level params 11472
     x_010_accs = [
-        cifar010_info["test_accs"][i] if cifar010_info["params"][i] <= cifar010_info["params"][11472] else -1
+        cifar010_info["test_accs"][i]
+        if cifar010_info["params"][i] <= cifar010_info["params"][11472]
+        else -1
         for i in indexes
     ]
     x_100_accs = [
-        cifar100_info["test_accs"][i] if cifar100_info["params"][i] <= cifar100_info["params"][11472] else -1
+        cifar100_info["test_accs"][i]
+        if cifar100_info["params"][i] <= cifar100_info["params"][11472]
+        else -1
         for i in indexes
     ]
     x_img_accs = [
-        imagenet_info["test_accs"][i] if imagenet_info["params"][i] <= imagenet_info["params"][11472] else -1
+        imagenet_info["test_accs"][i]
+        if imagenet_info["params"][i] <= imagenet_info["params"][11472]
+        else -1
         for i in indexes
     ]
 
@@ -79,8 +85,15 @@ def visualize_relative_ranking(vis_save_dir):
     plt.xlim(min(indexes), max(indexes))
     plt.ylim(min(indexes), max(indexes))
     # plt.ylabel('y').set_rotation(0)
-    plt.yticks(np.arange(min(indexes), max(indexes), max(indexes) // 6), fontsize=LegendFontsize, rotation="vertical")
-    plt.xticks(np.arange(min(indexes), max(indexes), max(indexes) // 6), fontsize=LegendFontsize)
+    plt.yticks(
+        np.arange(min(indexes), max(indexes), max(indexes) // 6),
+        fontsize=LegendFontsize,
+        rotation="vertical",
+    )
+    plt.xticks(
+        np.arange(min(indexes), max(indexes), max(indexes) // 6),
+        fontsize=LegendFontsize,
+    )
     # ax.scatter(indexes, cifar100_labels, marker='^', s=0.5, c='tab:green', alpha=0.8, label='CIFAR-100')
     # ax.scatter(indexes, imagenet_labels, marker='*', s=0.5, c='tab:red'  , alpha=0.8, label='ImageNet-16-120')
     # ax.scatter(indexes, indexes        , marker='o', s=0.5, c='tab:blue' , alpha=0.8, label='CIFAR-10')
@@ -113,7 +126,9 @@ def visualize_relative_ranking(vis_save_dir):
     )
     fig = plt.figure(figsize=figsize)
     plt.axis("off")
-    h = sns.heatmap(CoRelMatrix, annot=True, annot_kws={"size": sns_size}, fmt=".3f", linewidths=0.5)
+    h = sns.heatmap(
+        CoRelMatrix, annot=True, annot_kws={"size": sns_size}, fmt=".3f", linewidths=0.5
+    )
     save_path = (vis_save_dir / "co-relation-all.pdf").resolve()
     fig.savefig(save_path, dpi=dpi, bbox_inches="tight", format="pdf")
     print("{:} save into {:}".format(time_string(), save_path))
@@ -142,8 +157,16 @@ def visualize_relative_ranking(vis_save_dir):
         )
         fig = plt.figure(figsize=figsize)
         plt.axis("off")
-        h = sns.heatmap(CoRelMatrix, annot=True, annot_kws={"size": sns_size}, fmt=".3f", linewidths=0.5)
-        save_path = (vis_save_dir / "co-relation-top-{:}.pdf".format(len(selected_indexes))).resolve()
+        h = sns.heatmap(
+            CoRelMatrix,
+            annot=True,
+            annot_kws={"size": sns_size},
+            fmt=".3f",
+            linewidths=0.5,
+        )
+        save_path = (
+            vis_save_dir / "co-relation-top-{:}.pdf".format(len(selected_indexes))
+        ).resolve()
         fig.savefig(save_path, dpi=dpi, bbox_inches="tight", format="pdf")
         print("{:} save into {:}".format(time_string(), save_path))
     plt.close("all")
@@ -155,7 +178,14 @@ def visualize_info(meta_file, dataset, vis_save_dir):
     if not cache_file_path.exists():
         print("Do not find cache file : {:}".format(cache_file_path))
         nas_bench = API(str(meta_file))
-        params, flops, train_accs, valid_accs, test_accs, otest_accs = [], [], [], [], [], []
+        params, flops, train_accs, valid_accs, test_accs, otest_accs = (
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+        )
         for index in range(len(nas_bench)):
             info = nas_bench.query_by_index(index, use_12epochs_result=False)
             resx = info.get_comput_costs(dataset)
@@ -239,7 +269,13 @@ def visualize_info(meta_file, dataset, vis_save_dir):
         plt.yticks(np.arange(0, 51, 10), fontsize=LegendFontsize)
     ax.scatter(params, valid_accs, marker="o", s=0.5, c="tab:blue")
     ax.scatter(
-        [resnet["params"]], [resnet["valid_acc"]], marker="*", s=resnet_scale, c="tab:orange", label="resnet", alpha=0.4
+        [resnet["params"]],
+        [resnet["valid_acc"]],
+        marker="*",
+        s=resnet_scale,
+        c="tab:orange",
+        label="resnet",
+        alpha=0.4,
     )
     plt.grid(zorder=0)
     ax.set_axisbelow(True)
@@ -321,7 +357,10 @@ def visualize_info(meta_file, dataset, vis_save_dir):
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
     plt.xlim(0, max(indexes))
-    plt.xticks(np.arange(min(indexes), max(indexes), max(indexes) // 5), fontsize=LegendFontsize)
+    plt.xticks(
+        np.arange(min(indexes), max(indexes), max(indexes) // 5),
+        fontsize=LegendFontsize,
+    )
     if dataset == "cifar10":
         plt.ylim(50, 100)
         plt.yticks(np.arange(50, 101, 10), fontsize=LegendFontsize)
@@ -357,7 +396,11 @@ def visualize_info(meta_file, dataset, vis_save_dir):
 def visualize_rank_over_time(meta_file, vis_save_dir):
     print("\n" + "-" * 150)
     vis_save_dir.mkdir(parents=True, exist_ok=True)
-    print("{:} start to visualize rank-over-time into {:}".format(time_string(), vis_save_dir))
+    print(
+        "{:} start to visualize rank-over-time into {:}".format(
+            time_string(), vis_save_dir
+        )
+    )
     cache_file_path = vis_save_dir / "rank-over-time-cache-info.pth"
     if not cache_file_path.exists():
         print("Do not find cache file : {:}".format(cache_file_path))
@@ -434,17 +477,26 @@ def visualize_rank_over_time(meta_file, vis_save_dir):
         plt.xlim(min(indexes), max(indexes))
         plt.ylim(min(indexes), max(indexes))
         plt.yticks(
-            np.arange(min(indexes), max(indexes), max(indexes) // 6), fontsize=LegendFontsize, rotation="vertical"
+            np.arange(min(indexes), max(indexes), max(indexes) // 6),
+            fontsize=LegendFontsize,
+            rotation="vertical",
         )
-        plt.xticks(np.arange(min(indexes), max(indexes), max(indexes) // 6), fontsize=LegendFontsize)
+        plt.xticks(
+            np.arange(min(indexes), max(indexes), max(indexes) // 6),
+            fontsize=LegendFontsize,
+        )
         ax.scatter(indexes, valid_ord_lbls, marker="^", s=0.5, c="tab:green", alpha=0.8)
         ax.scatter(indexes, indexes, marker="o", s=0.5, c="tab:blue", alpha=0.8)
-        ax.scatter([-1], [-1], marker="^", s=100, c="tab:green", label="CIFAR-10 validation")
+        ax.scatter(
+            [-1], [-1], marker="^", s=100, c="tab:green", label="CIFAR-10 validation"
+        )
         ax.scatter([-1], [-1], marker="o", s=100, c="tab:blue", label="CIFAR-10 test")
         plt.grid(zorder=0)
         ax.set_axisbelow(True)
         plt.legend(loc="upper left", fontsize=LegendFontsize)
-        ax.set_xlabel("architecture ranking in the final test accuracy", fontsize=LabelSize)
+        ax.set_xlabel(
+            "architecture ranking in the final test accuracy", fontsize=LabelSize
+        )
         ax.set_ylabel("architecture ranking in the validation set", fontsize=LabelSize)
         save_path = (vis_save_dir / "time-{:03d}.pdf".format(sepoch)).resolve()
         fig.savefig(save_path, dpi=dpi, bbox_inches="tight", format="pdf")
@@ -464,7 +516,9 @@ def write_video(save_dir):
     # shape  = (ximage.shape[1], ximage.shape[0])
     shape = (1000, 1000)
     # writer = cv2.VideoWriter(str(video_save_path), cv2.VideoWriter_fourcc(*"MJPG"), 25, shape)
-    writer = cv2.VideoWriter(str(video_save_path), cv2.VideoWriter_fourcc(*"MJPG"), 5, shape)
+    writer = cv2.VideoWriter(
+        str(video_save_path), cv2.VideoWriter_fourcc(*"MJPG"), 5, shape
+    )
     for idx, image in enumerate(images):
         ximage = cv2.imread(str(image))
         _image = cv2.resize(ximage, shape)
@@ -490,9 +544,13 @@ def plot_results_nas_v2(api, dataset_xset_a, dataset_xset_b, root, file_name, y_
         accuracies = []
         for x in all_indexes:
             info = api.arch2infos_full[x]
-            metrics = info.get_metrics(dataset_xset_a[0], dataset_xset_a[1], None, False)
+            metrics = info.get_metrics(
+                dataset_xset_a[0], dataset_xset_a[1], None, False
+            )
             accuracies_A.append(metrics["accuracy"])
-            metrics = info.get_metrics(dataset_xset_b[0], dataset_xset_b[1], None, False)
+            metrics = info.get_metrics(
+                dataset_xset_b[0], dataset_xset_b[1], None, False
+            )
             accuracies_B.append(metrics["accuracy"])
             accuracies.append((accuracies_A[-1], accuracies_B[-1]))
         if indexes is None:
@@ -580,7 +638,14 @@ def plot_results_nas(api, dataset, xset, root, file_name, y_lims):
     plt.ylabel("The accuracy (%)", fontsize=LabelSize)
 
     for idx, legend in enumerate(legends):
-        plt.plot(indexes, All_Accs[legend], color=color_set[idx], linestyle="-", label="{:}".format(legend), lw=2)
+        plt.plot(
+            indexes,
+            All_Accs[legend],
+            color=color_set[idx],
+            linestyle="-",
+            label="{:}".format(legend),
+            lw=2,
+        )
         print(
             "{:} : mean = {:}, std = {:} :: {:.2f}$\\pm${:.2f}".format(
                 legend,
@@ -646,13 +711,19 @@ def just_show(api):
         return xresults
 
     for xkey in xpaths.keys():
-        all_paths = ["{:}/seed-{:}-basic.pth".format(xpaths[xkey], seed) for seed in xseeds[xkey]]
+        all_paths = [
+            "{:}/seed-{:}-basic.pth".format(xpaths[xkey], seed) for seed in xseeds[xkey]
+        ]
         all_datas = [torch.load(xpath) for xpath in all_paths]
         accyss = [get_accs(xdatas) for xdatas in all_datas]
         accyss = np.array(accyss)
         print("\nxkey = {:}".format(xkey))
         for i in range(accyss.shape[1]):
-            print("---->>>> {:.2f}$\\pm${:.2f}".format(accyss[:, i].mean(), accyss[:, i].std()))
+            print(
+                "---->>>> {:.2f}$\\pm${:.2f}".format(
+                    accyss[:, i].mean(), accyss[:, i].std()
+                )
+            )
 
     print("\n{:}".format(get_accs(None, 11472)))  # resnet
     pairs = [
@@ -665,10 +736,16 @@ def just_show(api):
     ]
     for dataset, metric_on_set in pairs:
         arch_index, highest_acc = api.find_best(dataset, metric_on_set)
-        print("[{:10s}-{:10s} ::: index={:5d}, accuracy={:.2f}".format(dataset, metric_on_set, arch_index, highest_acc))
+        print(
+            "[{:10s}-{:10s} ::: index={:5d}, accuracy={:.2f}".format(
+                dataset, metric_on_set, arch_index, highest_acc
+            )
+        )
 
 
-def show_nas_sharing_w(api, dataset, subset, vis_save_dir, sufix, file_name, y_lims, x_maxs):
+def show_nas_sharing_w(
+    api, dataset, subset, vis_save_dir, sufix, file_name, y_lims, x_maxs
+):
     color_set = ["r", "b", "g", "c", "m", "y", "k"]
     dpi, width, height = 300, 3400, 2600
     LabelSize, LegendFontsize = 28, 28
@@ -685,12 +762,24 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, sufix, file_name, y_l
     plt.ylabel("The accuracy (%)", fontsize=LabelSize)
 
     xpaths = {
-        "RSPS": "output/search-cell-nas-bench-201/RANDOM-NAS-cifar10-{:}/checkpoint/".format(sufix),
-        "DARTS-V1": "output/search-cell-nas-bench-201/DARTS-V1-cifar10-{:}/checkpoint/".format(sufix),
-        "DARTS-V2": "output/search-cell-nas-bench-201/DARTS-V2-cifar10-{:}/checkpoint/".format(sufix),
-        "GDAS": "output/search-cell-nas-bench-201/GDAS-cifar10-{:}/checkpoint/".format(sufix),
-        "SETN": "output/search-cell-nas-bench-201/SETN-cifar10-{:}/checkpoint/".format(sufix),
-        "ENAS": "output/search-cell-nas-bench-201/ENAS-cifar10-{:}/checkpoint/".format(sufix),
+        "RSPS": "output/search-cell-nas-bench-201/RANDOM-NAS-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "DARTS-V1": "output/search-cell-nas-bench-201/DARTS-V1-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "DARTS-V2": "output/search-cell-nas-bench-201/DARTS-V2-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "GDAS": "output/search-cell-nas-bench-201/GDAS-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "SETN": "output/search-cell-nas-bench-201/SETN-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "ENAS": "output/search-cell-nas-bench-201/ENAS-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
     }
     """
   xseeds = {'RSPS'    : [5349, 59613, 5983],
@@ -713,16 +802,20 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, sufix, file_name, y_l
     def get_accs(xdata):
         epochs, xresults = xdata["epoch"], []
         if -1 in xdata["genotypes"]:
-            metrics = api.arch2infos_full[api.query_index_by_arch(xdata["genotypes"][-1])].get_metrics(
+            metrics = api.arch2infos_full[
+                api.query_index_by_arch(xdata["genotypes"][-1])
+            ].get_metrics(dataset, subset, None, False)
+        else:
+            metrics = api.arch2infos_full[api.random()].get_metrics(
                 dataset, subset, None, False
             )
-        else:
-            metrics = api.arch2infos_full[api.random()].get_metrics(dataset, subset, None, False)
         xresults.append(metrics["accuracy"])
         for iepoch in range(epochs):
             genotype = xdata["genotypes"][iepoch]
             index = api.query_index_by_arch(genotype)
-            metrics = api.arch2infos_full[index].get_metrics(dataset, subset, None, False)
+            metrics = api.arch2infos_full[index].get_metrics(
+                dataset, subset, None, False
+            )
             xresults.append(metrics["accuracy"])
         return xresults
 
@@ -735,7 +828,9 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, sufix, file_name, y_l
 
     for idx, method in enumerate(xxxstrs):
         xkey = method
-        all_paths = ["{:}/seed-{:}-basic.pth".format(xpaths[xkey], seed) for seed in xseeds[xkey]]
+        all_paths = [
+            "{:}/seed-{:}-basic.pth".format(xpaths[xkey], seed) for seed in xseeds[xkey]
+        ]
         all_datas = [torch.load(xpath, map_location="cpu") for xpath in all_paths]
         accyss = [get_accs(xdatas) for xdatas in all_datas]
         accyss = np.array(accyss)
@@ -762,7 +857,9 @@ def show_nas_sharing_w(api, dataset, subset, vis_save_dir, sufix, file_name, y_l
     fig.savefig(str(save_path), dpi=dpi, bbox_inches="tight", format="pdf")
 
 
-def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, sufix, file_name, y_lims, x_maxs):
+def show_nas_sharing_w_v2(
+    api, data_sub_a, data_sub_b, vis_save_dir, sufix, file_name, y_lims, x_maxs
+):
     color_set = ["r", "b", "g", "c", "m", "y", "k"]
     dpi, width, height = 300, 3400, 2600
     LabelSize, LegendFontsize = 28, 28
@@ -779,12 +876,24 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, sufix, file
     plt.ylabel("The accuracy (%)", fontsize=LabelSize)
 
     xpaths = {
-        "RSPS": "output/search-cell-nas-bench-201/RANDOM-NAS-cifar10-{:}/checkpoint/".format(sufix),
-        "DARTS-V1": "output/search-cell-nas-bench-201/DARTS-V1-cifar10-{:}/checkpoint/".format(sufix),
-        "DARTS-V2": "output/search-cell-nas-bench-201/DARTS-V2-cifar10-{:}/checkpoint/".format(sufix),
-        "GDAS": "output/search-cell-nas-bench-201/GDAS-cifar10-{:}/checkpoint/".format(sufix),
-        "SETN": "output/search-cell-nas-bench-201/SETN-cifar10-{:}/checkpoint/".format(sufix),
-        "ENAS": "output/search-cell-nas-bench-201/ENAS-cifar10-{:}/checkpoint/".format(sufix),
+        "RSPS": "output/search-cell-nas-bench-201/RANDOM-NAS-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "DARTS-V1": "output/search-cell-nas-bench-201/DARTS-V1-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "DARTS-V2": "output/search-cell-nas-bench-201/DARTS-V2-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "GDAS": "output/search-cell-nas-bench-201/GDAS-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "SETN": "output/search-cell-nas-bench-201/SETN-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
+        "ENAS": "output/search-cell-nas-bench-201/ENAS-cifar10-{:}/checkpoint/".format(
+            sufix
+        ),
     }
     """
   xseeds = {'RSPS'    : [5349, 59613, 5983],
@@ -807,16 +916,20 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, sufix, file
     def get_accs(xdata, dataset, subset):
         epochs, xresults = xdata["epoch"], []
         if -1 in xdata["genotypes"]:
-            metrics = api.arch2infos_full[api.query_index_by_arch(xdata["genotypes"][-1])].get_metrics(
+            metrics = api.arch2infos_full[
+                api.query_index_by_arch(xdata["genotypes"][-1])
+            ].get_metrics(dataset, subset, None, False)
+        else:
+            metrics = api.arch2infos_full[api.random()].get_metrics(
                 dataset, subset, None, False
             )
-        else:
-            metrics = api.arch2infos_full[api.random()].get_metrics(dataset, subset, None, False)
         xresults.append(metrics["accuracy"])
         for iepoch in range(epochs):
             genotype = xdata["genotypes"][iepoch]
             index = api.query_index_by_arch(genotype)
-            metrics = api.arch2infos_full[index].get_metrics(dataset, subset, None, False)
+            metrics = api.arch2infos_full[index].get_metrics(
+                dataset, subset, None, False
+            )
             xresults.append(metrics["accuracy"])
         return xresults
 
@@ -829,10 +942,16 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, sufix, file
 
     for idx, method in enumerate(xxxstrs):
         xkey = method
-        all_paths = ["{:}/seed-{:}-basic.pth".format(xpaths[xkey], seed) for seed in xseeds[xkey]]
+        all_paths = [
+            "{:}/seed-{:}-basic.pth".format(xpaths[xkey], seed) for seed in xseeds[xkey]
+        ]
         all_datas = [torch.load(xpath, map_location="cpu") for xpath in all_paths]
-        accyss_A = np.array([get_accs(xdatas, data_sub_a[0], data_sub_a[1]) for xdatas in all_datas])
-        accyss_B = np.array([get_accs(xdatas, data_sub_b[0], data_sub_b[1]) for xdatas in all_datas])
+        accyss_A = np.array(
+            [get_accs(xdatas, data_sub_a[0], data_sub_a[1]) for xdatas in all_datas]
+        )
+        accyss_B = np.array(
+            [get_accs(xdatas, data_sub_b[0], data_sub_b[1]) for xdatas in all_datas]
+        )
         epochs = list(range(accyss_A.shape[1]))
         for j, accyss in enumerate([accyss_A, accyss_B]):
             if x_maxs == 50:
@@ -859,7 +978,9 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, sufix, file
             )
             setname = data_sub_a if j == 0 else data_sub_b
             print(
-                "{:} -- {:} ---- {:.2f}$\\pm${:.2f}".format(method, setname, accyss[:, -1].mean(), accyss[:, -1].std())
+                "{:} -- {:} ---- {:.2f}$\\pm${:.2f}".format(
+                    method, setname, accyss[:, -1].mean(), accyss[:, -1].std()
+                )
             )
     # plt.legend(loc=4, fontsize=LegendFontsize)
     plt.legend(loc=0, fontsize=LegendFontsize)
@@ -871,7 +992,10 @@ def show_nas_sharing_w_v2(api, data_sub_a, data_sub_b, vis_save_dir, sufix, file
 def show_reinforce(api, root, dataset, xset, file_name, y_lims):
     print("root-path={:}, dataset={:}, xset={:}".format(root, dataset, xset))
     LRs = ["0.01", "0.02", "0.1", "0.2", "0.5"]
-    checkpoints = ["./output/search-cell-nas-bench-201/REINFORCE-cifar10-{:}/results.pth".format(x) for x in LRs]
+    checkpoints = [
+        "./output/search-cell-nas-bench-201/REINFORCE-cifar10-{:}/results.pth".format(x)
+        for x in LRs
+    ]
     acc_lr_dict, indexes = {}, None
     for lr, checkpoint in zip(LRs, checkpoints):
         all_indexes, accuracies = torch.load(checkpoint, map_location="cpu"), []
@@ -882,7 +1006,11 @@ def show_reinforce(api, root, dataset, xset, file_name, y_lims):
         if indexes is None:
             indexes = list(range(len(accuracies)))
         acc_lr_dict[lr] = np.array(sorted(accuracies))
-        print("LR={:.3f}, mean={:}, std={:}".format(float(lr), acc_lr_dict[lr].mean(), acc_lr_dict[lr].std()))
+        print(
+            "LR={:.3f}, mean={:}, std={:}".format(
+                float(lr), acc_lr_dict[lr].mean(), acc_lr_dict[lr].std()
+            )
+        )
 
     color_set = ["r", "b", "g", "c", "m", "y", "k"]
     dpi, width, height = 300, 3400, 2600
@@ -903,7 +1031,15 @@ def show_reinforce(api, root, dataset, xset, file_name, y_lims):
         legend = "LR={:.2f}".format(float(LR))
         # color, linestyle = color_set[idx // 2], '-' if idx % 2 == 0 else '-.'
         color, linestyle = color_set[idx], "-"
-        plt.plot(indexes, acc_lr_dict[LR], color=color, linestyle=linestyle, label=legend, lw=2, alpha=0.8)
+        plt.plot(
+            indexes,
+            acc_lr_dict[LR],
+            color=color,
+            linestyle=linestyle,
+            label=legend,
+            lw=2,
+            alpha=0.8,
+        )
         print(
             "{:} : mean = {:}, std = {:} :: {:.2f}$\\pm${:.2f}".format(
                 legend,
@@ -922,7 +1058,10 @@ def show_reinforce(api, root, dataset, xset, file_name, y_lims):
 def show_rea(api, root, dataset, xset, file_name, y_lims):
     print("root-path={:}, dataset={:}, xset={:}".format(root, dataset, xset))
     SSs = [3, 5, 10]
-    checkpoints = ["./output/search-cell-nas-bench-201/R-EA-cifar10-SS{:}/results.pth".format(x) for x in SSs]
+    checkpoints = [
+        "./output/search-cell-nas-bench-201/R-EA-cifar10-SS{:}/results.pth".format(x)
+        for x in SSs
+    ]
     acc_ss_dict, indexes = {}, None
     for ss, checkpoint in zip(SSs, checkpoints):
         all_indexes, accuracies = torch.load(checkpoint, map_location="cpu"), []
@@ -933,7 +1072,11 @@ def show_rea(api, root, dataset, xset, file_name, y_lims):
         if indexes is None:
             indexes = list(range(len(accuracies)))
         acc_ss_dict[ss] = np.array(sorted(accuracies))
-        print("Sample-Size={:2d}, mean={:}, std={:}".format(ss, acc_ss_dict[ss].mean(), acc_ss_dict[ss].std()))
+        print(
+            "Sample-Size={:2d}, mean={:}, std={:}".format(
+                ss, acc_ss_dict[ss].mean(), acc_ss_dict[ss].std()
+            )
+        )
 
     color_set = ["r", "b", "g", "c", "m", "y", "k"]
     dpi, width, height = 300, 3400, 2600
@@ -954,7 +1097,15 @@ def show_rea(api, root, dataset, xset, file_name, y_lims):
         legend = "sample-size={:2d}".format(ss)
         # color, linestyle = color_set[idx // 2], '-' if idx % 2 == 0 else '-.'
         color, linestyle = color_set[idx], "-"
-        plt.plot(indexes, acc_ss_dict[ss], color=color, linestyle=linestyle, label=legend, lw=2, alpha=0.8)
+        plt.plot(
+            indexes,
+            acc_ss_dict[ss],
+            color=color,
+            linestyle=linestyle,
+            label=legend,
+            lw=2,
+            alpha=0.8,
+        )
         print(
             "{:} : mean = {:}, std = {:} :: {:.2f}$\\pm${:.2f}".format(
                 legend,
@@ -973,7 +1124,8 @@ def show_rea(api, root, dataset, xset, file_name, y_lims):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description="NAS-Bench-201", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description="NAS-Bench-201",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "--save_dir",
@@ -981,7 +1133,12 @@ if __name__ == "__main__":
         default="./output/search-cell-nas-bench-201/visuals",
         help="The base-name of folder to save checkpoints and log.",
     )
-    parser.add_argument("--api_path", type=str, default=None, help="The path to the NAS-Bench-201 benchmark file.")
+    parser.add_argument(
+        "--api_path",
+        type=str,
+        default=None,
+        help="The path to the NAS-Bench-201 benchmark file.",
+    )
     args = parser.parse_args()
 
     vis_save_dir = Path(args.save_dir)
@@ -1066,9 +1223,25 @@ if __name__ == "__main__":
     )
 
     show_nas_sharing_w(
-        api, "cifar10-valid", "x-valid", vis_save_dir, "BN0", "BN0-XX-CIFAR010-VALID.pdf", (0, 100, 10), 250
+        api,
+        "cifar10-valid",
+        "x-valid",
+        vis_save_dir,
+        "BN0",
+        "BN0-XX-CIFAR010-VALID.pdf",
+        (0, 100, 10),
+        250,
     )
-    show_nas_sharing_w(api, "cifar10", "ori-test", vis_save_dir, "BN0", "BN0-XX-CIFAR010-TEST.pdf", (0, 100, 10), 250)
+    show_nas_sharing_w(
+        api,
+        "cifar10",
+        "ori-test",
+        vis_save_dir,
+        "BN0",
+        "BN0-XX-CIFAR010-TEST.pdf",
+        (0, 100, 10),
+        250,
+    )
     """
   for x_maxs in [50, 250]:
     show_nas_sharing_w(api, 'cifar10-valid' , 'x-valid' , vis_save_dir, 'nas-plot.pdf', (0, 100,10), x_maxs)

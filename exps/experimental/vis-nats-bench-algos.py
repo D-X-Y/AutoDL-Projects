@@ -42,7 +42,9 @@ def fetch_data(root_dir="./output/search", search_space="tss", dataset=None):
     for alg, path in alg2path.items():
         data = torch.load(path)
         for index, info in data.items():
-            info["time_w_arch"] = [(x, y) for x, y in zip(info["all_total_times"], info["all_archs"])]
+            info["time_w_arch"] = [
+                (x, y) for x, y in zip(info["all_total_times"], info["all_archs"])
+            ]
             for j, arch in enumerate(info["all_archs"]):
                 assert arch != -1, "invalid arch from {:} {:} {:} ({:}, {:})".format(
                     alg, search_space, dataset, index, j
@@ -57,12 +59,16 @@ def query_performance(api, data, dataset, ticket):
         time_w_arch = sorted(info["time_w_arch"], key=lambda x: abs(x[0] - ticket))
         time_a, arch_a = time_w_arch[0]
         time_b, arch_b = time_w_arch[1]
-        info_a = api.get_more_info(arch_a, dataset=dataset, hp=90 if is_size_space else 200, is_random=False)
-        info_b = api.get_more_info(arch_b, dataset=dataset, hp=90 if is_size_space else 200, is_random=False)
+        info_a = api.get_more_info(
+            arch_a, dataset=dataset, hp=90 if is_size_space else 200, is_random=False
+        )
+        info_b = api.get_more_info(
+            arch_b, dataset=dataset, hp=90 if is_size_space else 200, is_random=False
+        )
         accuracy_a, accuracy_b = info_a["test-accuracy"], info_b["test-accuracy"]
-        interplate = (time_b - ticket) / (time_b - time_a) * accuracy_a + (ticket - time_a) / (
-            time_b - time_a
-        ) * accuracy_b
+        interplate = (time_b - ticket) / (time_b - time_a) * accuracy_a + (
+            ticket - time_a
+        ) / (time_b - time_a) * accuracy_b
         results.append(interplate)
     return sum(results) / len(results)
 
@@ -85,7 +91,11 @@ y_max_s = {
     ("ImageNet16-120", "sss"): 46,
 }
 
-name2label = {"cifar10": "CIFAR-10", "cifar100": "CIFAR-100", "ImageNet16-120": "ImageNet-16-120"}
+name2label = {
+    "cifar10": "CIFAR-10",
+    "cifar100": "CIFAR-100",
+    "ImageNet16-120": "ImageNet-16-120",
+}
 
 
 def visualize_curve(api, vis_save_dir, search_space, max_time):
@@ -100,7 +110,9 @@ def visualize_curve(api, vis_save_dir, search_space, max_time):
         alg2data = fetch_data(search_space=search_space, dataset=dataset)
         alg2accuracies = OrderedDict()
         total_tickets = 150
-        time_tickets = [float(i) / total_tickets * max_time for i in range(total_tickets)]
+        time_tickets = [
+            float(i) / total_tickets * max_time for i in range(total_tickets)
+        ]
         colors = ["b", "g", "c", "m", "y"]
         ax.set_xlim(0, 200)
         ax.set_ylim(y_min_s[(dataset, search_space)], y_max_s[(dataset, search_space)])
@@ -111,10 +123,20 @@ def visualize_curve(api, vis_save_dir, search_space, max_time):
                 accuracy = query_performance(api, data, dataset, ticket)
                 accuracies.append(accuracy)
             alg2accuracies[alg] = accuracies
-            ax.plot([x / 100 for x in time_tickets], accuracies, c=colors[idx], label="{:}".format(alg))
+            ax.plot(
+                [x / 100 for x in time_tickets],
+                accuracies,
+                c=colors[idx],
+                label="{:}".format(alg),
+            )
             ax.set_xlabel("Estimated wall-clock time (1e2 seconds)", fontsize=LabelSize)
-            ax.set_ylabel("Test accuracy on {:}".format(name2label[dataset]), fontsize=LabelSize)
-            ax.set_title("Searching results on {:}".format(name2label[dataset]), fontsize=LabelSize + 4)
+            ax.set_ylabel(
+                "Test accuracy on {:}".format(name2label[dataset]), fontsize=LabelSize
+            )
+            ax.set_title(
+                "Searching results on {:}".format(name2label[dataset]),
+                fontsize=LabelSize + 4,
+            )
         ax.legend(loc=4, fontsize=LegendFontsize)
 
     fig, axs = plt.subplots(1, 3, figsize=figsize)
@@ -129,12 +151,25 @@ def visualize_curve(api, vis_save_dir, search_space, max_time):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="NAS-Bench-X", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        "--save_dir", type=str, default="output/vis-nas-bench/nas-algos", help="Folder to save checkpoints and log."
+    parser = argparse.ArgumentParser(
+        description="NAS-Bench-X",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--search_space", type=str, choices=["tss", "sss"], help="Choose the search space.")
-    parser.add_argument("--max_time", type=float, default=20000, help="The maximum time budget.")
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        default="output/vis-nas-bench/nas-algos",
+        help="Folder to save checkpoints and log.",
+    )
+    parser.add_argument(
+        "--search_space",
+        type=str,
+        choices=["tss", "sss"],
+        help="Choose the search space.",
+    )
+    parser.add_argument(
+        "--max_time", type=float, default=20000, help="The maximum time budget."
+    )
     args = parser.parse_args()
 
     save_dir = Path(args.save_dir)
