@@ -11,7 +11,7 @@ The Python files in this folder are used to re-produce the results in ``NATS-Ben
 
 ## Requirements
 
-- `nats_bench`>=v1.1 : you can use `pip install nats_bench` to install or from [sources](https://github.com/D-X-Y/NATS-Bench)
+- `nats_bench`>=v1.2 : you can use `pip install nats_bench` to install or from [sources](https://github.com/D-X-Y/NATS-Bench)
 - `hpbandster` : if you want to run BOHB
 
 ## Citation

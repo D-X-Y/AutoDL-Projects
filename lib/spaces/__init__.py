@@ -5,3 +5,4 @@
 #####################################################
 
 from .basic_space import Categorical
+from .basic_space import Continuous
