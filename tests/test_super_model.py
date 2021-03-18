@@ -26,3 +26,5 @@ class TestSuperLinear(unittest.TestCase):
         bias = spaces.Categorical(True, False)
         model = super_core.SuperLinear(10, out_features, bias=bias)
         print(model)
+        print(model.super_run_type)
+        print(model.abstract_search_space())

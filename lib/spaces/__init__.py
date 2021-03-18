@@ -11,5 +11,6 @@ from .basic_space import Space
 from .basic_space import VirtualNode
 from .basic_op import has_categorical
 from .basic_op import has_continuous
+from .basic_op import is_determined
 from .basic_op import get_min
 from .basic_op import get_max

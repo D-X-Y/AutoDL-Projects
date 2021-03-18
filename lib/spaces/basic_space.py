@@ -30,9 +30,12 @@ class Space(metaclass=abc.ABCMeta):
     def determined(self):
         raise NotImplementedError
 
-    @abc.abstractmethod
-    def __repr__(self):
+    @abc.abstractproperty
+    def xrepr(self, indent=0):
         raise NotImplementedError
+
+    def __repr__(self):
+        return self.xrepr()
 
     @abc.abstractmethod
     def has(self, x):
@@ -58,15 +61,28 @@ class VirtualNode(Space):
 
     def has(self, x):
         for key, value in self._attributes.items():
-            if isinstance(value, Space) and value.has(x):
+            if value.has(x):
                 return True
         return False
 
-    def __repr__(self):
-        strs = [self.__class__.__name__ + "("]
-        indent = " " * 4
+    def append(self, key, value):
+        if not isinstance(value, Space):
+            raise ValueError("Invalid type of value: {:}".format(type(value)))
+        self._attributes[key] = value
+
+    def determined(self):
         for key, value in self._attributes.items():
-            strs.append(indent + strs(value))
+            if not value.determined(x):
+                return False
+        return True
+
+    def random(self, recursion=True):
+        raise NotImplementedError
+
+    def xrepr(self, indent=0):
+        strs = [self.__class__.__name__ + "("]
+        for key, value in self._attributes.items():
+            strs.append(value.xrepr(indent + 2) + ",")
         strs.append(")")
         return "\n".join(strs)
 
@@ -104,10 +120,11 @@ class Categorical(Space):
     def __len__(self):
         return len(self._candidates)
 
-    def __repr__(self):
-        return "{name:}(candidates={cs:}, default_index={default:})".format(
+    def xrepr(self, indent=0):
+        xrepr = "{name:}(candidates={cs:}, default_index={default:})".format(
             name=self.__class__.__name__, cs=self._candidates, default=self._default
         )
+        return " " * indent + xrepr
 
     def has(self, x):
         super().has(x)
@@ -143,13 +160,14 @@ class Integer(Categorical):
             default = data.index(default)
         super(Integer, self).__init__(*data, default=default)
 
-    def __repr__(self):
-        return "{name:}(lower={lower:}, upper={upper:}, default={default:})".format(
+    def xrepr(self, indent=0):
+        xrepr = "{name:}(lower={lower:}, upper={upper:}, default={default:})".format(
             name=self.__class__.__name__,
             lower=self._raw_lower,
             upper=self._raw_upper,
             default=self._raw_default,
         )
+        return " " * indent + xrepr
 
 
 np_float_types = (np.float16, np.float32, np.float64)
@@ -198,14 +216,15 @@ class Continuous(Space):
     def determined(self):
         return abs(self.lower - self.upper) <= self._eps
 
-    def __repr__(self):
-        return "{name:}(lower={lower:}, upper={upper:}, default_value={default:}, log_scale={log:})".format(
+    def xrepr(self, indent=0):
+        xrepr = "{name:}(lower={lower:}, upper={upper:}, default_value={default:}, log_scale={log:})".format(
             name=self.__class__.__name__,
             lower=self._lower,
             upper=self._upper,
             default=self._default,
             log=self._log_scale,
         )
+        return " " * indent + xrepr
 
     def convert(self, x):
         if isinstance(x, np_float_types) and x.size == 1:

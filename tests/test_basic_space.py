@@ -14,7 +14,7 @@ if str(lib_dir) not in sys.path:
 from spaces import Categorical
 from spaces import Continuous
 from spaces import Integer
-from spaces import Integer
+from spaces import is_determined
 from spaces import get_min
 from spaces import get_max
 
@@ -92,3 +92,7 @@ class TestBasicSpace(unittest.TestCase):
         print(nested_space)
         for i in range(1, 13):
             self.assertTrue(nested_space.has(i))
+
+        # Test Simple Op
+        self.assertTrue(is_determined(1))
+        self.assertFalse(is_determined(nested_space))

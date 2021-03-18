@@ -19,6 +19,13 @@ def has_continuous(space_or_value, x):
         return abs(space_or_value - x) <= _EPS
 
 
+def is_determined(space_or_value):
+    if isinstance(space_or_value, Space):
+        return space_or_value.determined
+    else:
+        return True
+
+
 def get_max(space_or_value):
     if isinstance(space_or_value, Integer):
         return max(space_or_value.candidates)
