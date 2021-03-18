@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import layers as xlayers
+import xlayers
 
 
 DEFAULT_NET_CONFIG = dict(

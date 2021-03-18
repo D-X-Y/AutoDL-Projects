@@ -43,5 +43,5 @@ jobs:
           echo "Show what we have here:"
           ls
           python --version
-          python -m pytest ./tests -s
+          python -m pytest ./tests/test_basic_space.py -s
         shell: bash

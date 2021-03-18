@@ -7,6 +7,7 @@ import math
 import copy
 import random
 import numpy as np
+from collections import OrderedDict
 
 from typing import Optional
 
@@ -42,6 +43,32 @@ class Space(metaclass=abc.ABCMeta):
 
     def copy(self):
         return copy.deepcopy(self)
+
+
+class VirtualNode(Space):
+    """For a nested search space, we represent it as a tree structure.
+
+    For example,
+    """
+
+    def __init__(self, id=None, value=None):
+        self._id = id
+        self._value = value
+        self._attributes = OrderedDict()
+
+    def has(self, x):
+        for key, value in self._attributes.items():
+            if isinstance(value, Space) and value.has(x):
+                return True
+        return False
+
+    def __repr__(self):
+        strs = [self.__class__.__name__ + "("]
+        indent = " " * 4
+        for key, value in self._attributes.items():
+            strs.append(indent + strs(value))
+        strs.append(")")
+        return "\n".join(strs)
 
 
 class Categorical(Space):

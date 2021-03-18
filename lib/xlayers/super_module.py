@@ -14,12 +14,12 @@ class SuperRunMode(Enum):
     Default = "fullmodel"
 
 
-class SuperModule(abc.ABCMeta, nn.Module):
+class SuperModule(abc.ABC, nn.Module):
     """This class equips the nn.Module class with the ability to apply AutoDL."""
 
     def __init__(self):
         super(SuperModule, self).__init__()
-        self._super_run_type = SuperRunMode.default
+        self._super_run_type = SuperRunMode.Default
 
     @abc.abstractmethod
     def abstract_search_space(self):
