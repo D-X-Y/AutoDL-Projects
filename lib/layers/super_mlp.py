@@ -1,38 +1,71 @@
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.03 #
+#####################################################
 import torch.nn as nn
 from torch.nn.parameter import Parameter
-from typing import Optional
+from torch import Tensor
 
+import math
+from typing import Optional, Union
+
+import spaces
 from layers.super_module import SuperModule
-from layers.super_module import SuperModule
+from layers.super_module import SuperRunType
+
+IntSpaceType = Union[int, spaces.Integer, spaces.Categorical]
+BoolSpaceType = Union[bool, spaces.Categorical]
 
 
 class SuperLinear(SuperModule):
     """Applies a linear transformation to the incoming data: :math:`y = xA^T + b`"""
 
-    def __init__(self, in_features: int, out_features: int, bias: bool = True) -> None:
+    def __init__(
+        self,
+        in_features: IntSpaceType,
+        out_features: IntSpaceType,
+        bias: BoolSpaceType = True,
+    ) -> None:
         super(SuperLinear, self).__init__()
-        self.in_features = in_features
-        self.out_features = out_features
-        self.weight = Parameter(torch.Tensor(out_features, in_features))
+
+        # the raw input args
+        self._in_features = in_features
+        self._out_features = out_features
+        self._bias = bias
+
+        self._super_weight = Parameter(
+            torch.Tensor(self.out_features, self.in_features)
+        )
         if bias:
-            self.bias = Parameter(torch.Tensor(out_features))
+            self._super_bias = Parameter(torch.Tensor(self.out_features))
         else:
-            self.register_parameter("bias", None)
+            self.register_parameter("_super_bias", None)
         self.reset_parameters()
 
-    def reset_parameters(self) -> None:
-        init.kaiming_uniform_(self.weight, a=math.sqrt(5))
-        if self.bias is not None:
-            fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
-            bound = 1 / math.sqrt(fan_in)
-            init.uniform_(self.bias, -bound, bound)
+    @property
+    def in_features(self):
+        return spaces.get_max(self._in_features)
 
-    def forward(self, input: Tensor) -> Tensor:
-        return F.linear(input, self.weight, self.bias)
+    @property
+    def out_features(self):
+        return spaces.get_max(self._out_features)
+
+    @property
+    def bias(self):
+        return spaces.has_categorical(self._bias, True)
+
+    def reset_parameters(self) -> None:
+        nn.init.kaiming_uniform_(self._super_weight, a=math.sqrt(5))
+        if self.bias:
+            fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self._super_weight)
+            bound = 1 / math.sqrt(fan_in)
+            nn.init.uniform_(self._super_bias, -bound, bound)
+
+    def forward_raw(self, input: Tensor) -> Tensor:
+        return F.linear(input, self._super_weight, self._super_bias)
 
     def extra_repr(self) -> str:
         return "in_features={:}, out_features={:}, bias={:}".format(
-            self.in_features, self.out_features, self.bias is not None
+            self.in_features, self.out_features, self.bias
         )
 
 

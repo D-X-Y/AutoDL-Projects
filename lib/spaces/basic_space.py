@@ -10,6 +10,9 @@ import numpy as np
 
 from typing import Optional
 
+
+__all__ = ["_EPS", "Space", "Categorical", "Integer", "Continuous"]
+
 _EPS = 1e-9
 
 
@@ -53,6 +56,10 @@ class Categorical(Space):
             self._candidates
         ), "default >= {:}".format(len(self._candidates))
         assert len(self) > 0, "Please provide at least one candidate"
+
+    @property
+    def candidates(self):
+        return self._candidates
 
     @property
     def determined(self):

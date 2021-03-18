@@ -43,5 +43,5 @@ jobs:
           echo "Show what we have here:"
           ls
           python --version
-          python -m pytest ./tests --durations=0
+          python -m pytest ./tests -s
         shell: bash

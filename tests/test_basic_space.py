@@ -14,6 +14,9 @@ if str(lib_dir) not in sys.path:
 from spaces import Categorical
 from spaces import Continuous
 from spaces import Integer
+from spaces import Integer
+from spaces import get_min
+from spaces import get_max
 
 
 class TestBasicSpace(unittest.TestCase):
@@ -32,6 +35,8 @@ class TestBasicSpace(unittest.TestCase):
         for i in range(4):
             self.assertEqual(space[i], i + 1)
         self.assertEqual("Integer(lower=1, upper=4, default=None)", str(space))
+        self.assertEqual(get_max(space), 4)
+        self.assertEqual(get_min(space), 1)
 
     def test_continuous(self):
         random.seed(999)
@@ -84,5 +89,6 @@ class TestBasicSpace(unittest.TestCase):
             Categorical(4, Categorical(5, 6, 7, Categorical(8, 9), 10), 11),
             12,
         )
+        print(nested_space)
         for i in range(1, 13):
             self.assertTrue(nested_space.has(i))
