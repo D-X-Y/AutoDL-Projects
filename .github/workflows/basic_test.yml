@@ -1,4 +1,4 @@
-name: Run Python Tests for Spaces
+name: Test Spaces
 on:
   push:
     branches:

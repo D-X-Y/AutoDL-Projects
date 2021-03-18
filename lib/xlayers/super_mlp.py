@@ -55,11 +55,11 @@ class SuperLinear(SuperModule):
     def abstract_search_space(self):
         root_node = spaces.VirtualNode(id(self))
         if not spaces.is_determined(self._in_features):
-          root_node.append("_in_features", self._in_features)
+            root_node.append("_in_features", self._in_features)
         if not spaces.is_determined(self._out_features):
-          root_node.append("_out_features", self._out_features)
+            root_node.append("_out_features", self._out_features)
         if not spaces.is_determined(self._bias):
-          root_node.append("_bias", self._bias)
+            root_node.append("_bias", self._bias)
         return root_node
 
     def reset_parameters(self) -> None:

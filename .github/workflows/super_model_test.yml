@@ -1,4 +1,4 @@
-name: Run Python Tests for Super Model
+name: Test Super Model
 on:
   push:
     branches:
