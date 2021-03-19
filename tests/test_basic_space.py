@@ -102,8 +102,6 @@ class TestAbstractSpace(unittest.TestCase):
     """Test the abstract search spaces."""
 
     def test_continous(self):
-      space = Continuous(0, 1)
-      self.assertEqual(space, space.abstract())
-      print(space.abstract())
-
-
+        space = Continuous(0, 1)
+        self.assertEqual(space, space.abstract())
+        print(space.abstract())
