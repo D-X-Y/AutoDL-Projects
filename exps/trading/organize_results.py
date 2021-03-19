@@ -93,6 +93,7 @@ def compare_results(heads, values, names, space=10, verbose=True, sort_key=False
         xline = QResult.full_str(name, space) + value
         info_str_dict["lines"].append(xline)
     if verbose:
+        print("\nThere are {:} algorithms.".format(len(values)))
         print(info_str_dict["head"])
         if sort_key:
             lines = sorted(
@@ -187,7 +188,7 @@ if __name__ == "__main__":
         "--save_dir",
         type=str,
         nargs="+",
-        default=["./outputs/qlib-baselines"],
+        default=[],
         help="The checkpoint directory.",
     )
     parser.add_argument(
@@ -199,6 +200,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Show results of {:}".format(args.save_dir))
+    if not args.save_dir:
+        raise ValueError("Receive no input directory for [args.save_dir]")
 
     provider_uri = "~/.qlib/qlib_data/cn_data"
     qlib.init(provider_uri=provider_uri, region=REG_CN)
