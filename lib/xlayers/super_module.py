@@ -32,7 +32,7 @@ class SuperModule(abc.ABC, nn.Module):
 
         self.apply(_reset_super_run)
 
-    def apply_candiate(self, abstract_child):
+    def apply_candidate(self, abstract_child):
         if not isinstance(abstract_child, spaces.VirtualNode):
             raise ValueError(
                 "Invalid abstract child program: {:}".format(abstract_child)

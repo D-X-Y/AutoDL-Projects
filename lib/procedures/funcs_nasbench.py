@@ -78,23 +78,42 @@ def procedure(xloader, network, criterion, scheduler, optimizer, mode: str):
     return losses.avg, top1.avg, top5.avg, batch_time.sum
 
 
-def evaluate_for_seed(arch_config, opt_config, train_loader, valid_loaders, seed: int, logger):
+def evaluate_for_seed(
+    arch_config, opt_config, train_loader, valid_loaders, seed: int, logger
+):
 
     prepare_seed(seed)  # random seed
     net = get_cell_based_tiny_net(arch_config)
     # net = TinyNetwork(arch_config['channel'], arch_config['num_cells'], arch, config.class_num)
     flop, param = get_model_infos(net, opt_config.xshape)
     logger.log("Network : {:}".format(net.get_message()), False)
-    logger.log("{:} Seed-------------------------- {:} --------------------------".format(time_string(), seed))
+    logger.log(
+        "{:} Seed-------------------------- {:} --------------------------".format(
+            time_string(), seed
+        )
+    )
     logger.log("FLOP = {:} MB, Param = {:} MB".format(flop, param))
     # train and valid
     optimizer, scheduler, criterion = get_optim_scheduler(net.parameters(), opt_config)
     default_device = torch.cuda.current_device()
-    network = torch.nn.DataParallel(net, device_ids=[default_device]).cuda(device=default_device)
+    network = torch.nn.DataParallel(net, device_ids=[default_device]).cuda(
+        device=default_device
+    )
     criterion = criterion.cuda(device=default_device)
     # start training
-    start_time, epoch_time, total_epoch = time.time(), AverageMeter(), opt_config.epochs + opt_config.warmup
-    train_losses, train_acc1es, train_acc5es, valid_losses, valid_acc1es, valid_acc5es = {}, {}, {}, {}, {}, {}
+    start_time, epoch_time, total_epoch = (
+        time.time(),
+        AverageMeter(),
+        opt_config.epochs + opt_config.warmup,
+    )
+    (
+        train_losses,
+        train_acc1es,
+        train_acc5es,
+        valid_losses,
+        valid_acc1es,
+        valid_acc5es,
+    ) = ({}, {}, {}, {}, {}, {})
     train_times, valid_times, lrs = {}, {}, {}
     for epoch in range(total_epoch):
         scheduler.update(epoch, 0.0)
@@ -120,7 +139,9 @@ def evaluate_for_seed(arch_config, opt_config, train_loader, valid_loaders, seed
         # measure elapsed time
         epoch_time.update(time.time() - start_time)
         start_time = time.time()
-        need_time = "Time Left: {:}".format(convert_secs2time(epoch_time.avg * (total_epoch - epoch - 1), True))
+        need_time = "Time Left: {:}".format(
+            convert_secs2time(epoch_time.avg * (total_epoch - epoch - 1), True)
+        )
         logger.log(
             "{:} {:} epoch={:03d}/{:03d} :: Train [loss={:.5f}, acc@1={:.2f}%, acc@5={:.2f}%] Valid [loss={:.5f}, acc@1={:.2f}%, acc@5={:.2f}%], lr={:}".format(
                 time_string(),
@@ -171,14 +192,29 @@ def get_nas_bench_loaders(workers):
     break_line = "-" * 150
     print("{:} Create data-loader for all datasets".format(time_string()))
     print(break_line)
-    TRAIN_CIFAR10, VALID_CIFAR10, xshape, class_num = get_datasets("cifar10", str(torch_dir / "cifar.python"), -1)
+    TRAIN_CIFAR10, VALID_CIFAR10, xshape, class_num = get_datasets(
+        "cifar10", str(torch_dir / "cifar.python"), -1
+    )
     print(
         "original CIFAR-10 : {:} training images and {:} test images : {:} input shape : {:} number of classes".format(
             len(TRAIN_CIFAR10), len(VALID_CIFAR10), xshape, class_num
         )
     )
-    cifar10_splits = load_config(root_dir / "configs" / "nas-benchmark" / "cifar-split.txt", None, None)
-    assert cifar10_splits.train[:10] == [0, 5, 7, 11, 13, 15, 16, 17, 20, 24] and cifar10_splits.valid[:10] == [
+    cifar10_splits = load_config(
+        root_dir / "configs" / "nas-benchmark" / "cifar-split.txt", None, None
+    )
+    assert cifar10_splits.train[:10] == [
+        0,
+        5,
+        7,
+        11,
+        13,
+        15,
+        16,
+        17,
+        20,
+        24,
+    ] and cifar10_splits.valid[:10] == [
         1,
         2,
         3,
@@ -194,7 +230,11 @@ def get_nas_bench_loaders(workers):
     temp_dataset.transform = VALID_CIFAR10.transform
     # data loader
     trainval_cifar10_loader = torch.utils.data.DataLoader(
-        TRAIN_CIFAR10, batch_size=cifar_config.batch_size, shuffle=True, num_workers=workers, pin_memory=True
+        TRAIN_CIFAR10,
+        batch_size=cifar_config.batch_size,
+        shuffle=True,
+        num_workers=workers,
+        pin_memory=True,
     )
     train_cifar10_loader = torch.utils.data.DataLoader(
         TRAIN_CIFAR10,
@@ -211,7 +251,11 @@ def get_nas_bench_loaders(workers):
         pin_memory=True,
     )
     test__cifar10_loader = torch.utils.data.DataLoader(
-        VALID_CIFAR10, batch_size=cifar_config.batch_size, shuffle=False, num_workers=workers, pin_memory=True
+        VALID_CIFAR10,
+        batch_size=cifar_config.batch_size,
+        shuffle=False,
+        num_workers=workers,
+        pin_memory=True,
     )
     print(
         "CIFAR-10  : trval-loader has {:3d} batch with {:} per batch".format(
@@ -235,14 +279,29 @@ def get_nas_bench_loaders(workers):
     )
     print(break_line)
     # CIFAR-100
-    TRAIN_CIFAR100, VALID_CIFAR100, xshape, class_num = get_datasets("cifar100", str(torch_dir / "cifar.python"), -1)
+    TRAIN_CIFAR100, VALID_CIFAR100, xshape, class_num = get_datasets(
+        "cifar100", str(torch_dir / "cifar.python"), -1
+    )
     print(
         "original CIFAR-100: {:} training images and {:} test images : {:} input shape : {:} number of classes".format(
             len(TRAIN_CIFAR100), len(VALID_CIFAR100), xshape, class_num
         )
     )
-    cifar100_splits = load_config(root_dir / "configs" / "nas-benchmark" / "cifar100-test-split.txt", None, None)
-    assert cifar100_splits.xvalid[:10] == [1, 3, 4, 5, 8, 10, 13, 14, 15, 16] and cifar100_splits.xtest[:10] == [
+    cifar100_splits = load_config(
+        root_dir / "configs" / "nas-benchmark" / "cifar100-test-split.txt", None, None
+    )
+    assert cifar100_splits.xvalid[:10] == [
+        1,
+        3,
+        4,
+        5,
+        8,
+        10,
+        13,
+        14,
+        15,
+        16,
+    ] and cifar100_splits.xtest[:10] == [
         0,
         2,
         6,
@@ -255,7 +314,11 @@ def get_nas_bench_loaders(workers):
         24,
     ]
     train_cifar100_loader = torch.utils.data.DataLoader(
-        TRAIN_CIFAR100, batch_size=cifar_config.batch_size, shuffle=True, num_workers=workers, pin_memory=True
+        TRAIN_CIFAR100,
+        batch_size=cifar_config.batch_size,
+        shuffle=True,
+        num_workers=workers,
+        pin_memory=True,
     )
     valid_cifar100_loader = torch.utils.data.DataLoader(
         VALID_CIFAR100,
@@ -271,9 +334,15 @@ def get_nas_bench_loaders(workers):
         num_workers=workers,
         pin_memory=True,
     )
-    print("CIFAR-100  : train-loader has {:3d} batch".format(len(train_cifar100_loader)))
-    print("CIFAR-100  : valid-loader has {:3d} batch".format(len(valid_cifar100_loader)))
-    print("CIFAR-100  : test--loader has {:3d} batch".format(len(test__cifar100_loader)))
+    print(
+        "CIFAR-100  : train-loader has {:3d} batch".format(len(train_cifar100_loader))
+    )
+    print(
+        "CIFAR-100  : valid-loader has {:3d} batch".format(len(valid_cifar100_loader))
+    )
+    print(
+        "CIFAR-100  : test--loader has {:3d} batch".format(len(test__cifar100_loader))
+    )
     print(break_line)
 
     imagenet16_config_path = "configs/nas-benchmark/ImageNet-16.config"
@@ -286,8 +355,23 @@ def get_nas_bench_loaders(workers):
             len(TRAIN_ImageNet16_120), len(VALID_ImageNet16_120), xshape, class_num
         )
     )
-    imagenet_splits = load_config(root_dir / "configs" / "nas-benchmark" / "imagenet-16-120-test-split.txt", None, None)
-    assert imagenet_splits.xvalid[:10] == [1, 2, 3, 6, 7, 8, 9, 12, 16, 18] and imagenet_splits.xtest[:10] == [
+    imagenet_splits = load_config(
+        root_dir / "configs" / "nas-benchmark" / "imagenet-16-120-test-split.txt",
+        None,
+        None,
+    )
+    assert imagenet_splits.xvalid[:10] == [
+        1,
+        2,
+        3,
+        6,
+        7,
+        8,
+        9,
+        12,
+        16,
+        18,
+    ] and imagenet_splits.xtest[:10] == [
         0,
         4,
         5,

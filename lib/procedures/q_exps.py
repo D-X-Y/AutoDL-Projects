@@ -41,7 +41,10 @@ def update_gpu(config, gpu):
     if "task" in config and "model" in config["task"]:
         if "GPU" in config["task"]["model"]:
             config["task"]["model"]["GPU"] = gpu
-        elif "kwargs" in config["task"]["model"] and "GPU" in config["task"]["model"]["kwargs"]:
+        elif (
+            "kwargs" in config["task"]["model"]
+            and "GPU" in config["task"]["model"]["kwargs"]
+        ):
             config["task"]["model"]["kwargs"]["GPU"] = gpu
     elif "model" in config:
         if "GPU" in config["model"]:
@@ -68,7 +71,12 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
     model_fit_kwargs = dict(dataset=dataset)
 
     # Let's start the experiment.
-    with R.start(experiment_name=experiment_name, recorder_name=recorder_name, uri=uri, resume=True):
+    with R.start(
+        experiment_name=experiment_name,
+        recorder_name=recorder_name,
+        uri=uri,
+        resume=True,
+    ):
         # Setup log
         recorder_root_dir = R.get_recorder().get_local_dir()
         log_file = os.path.join(recorder_root_dir, "{:}.log".format(experiment_name))

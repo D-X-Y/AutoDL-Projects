@@ -50,6 +50,10 @@ class Space(metaclass=abc.ABCMeta):
     def clean_last_abstract(self):
         raise NotImplementedError
 
+    def clean_last(self):
+        self.clean_last_sample()
+        self.clean_last_abstract()
+
     @abc.abstractproperty
     def determined(self) -> bool:
         raise NotImplementedError

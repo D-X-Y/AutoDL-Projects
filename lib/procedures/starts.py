@@ -31,7 +31,9 @@ def prepare_logger(xargs):
     logger.log("CUDA GPU numbers : {:}".format(torch.cuda.device_count()))
     logger.log(
         "CUDA_VISIBLE_DEVICES : {:}".format(
-            os.environ["CUDA_VISIBLE_DEVICES"] if "CUDA_VISIBLE_DEVICES" in os.environ else "None"
+            os.environ["CUDA_VISIBLE_DEVICES"]
+            if "CUDA_VISIBLE_DEVICES" in os.environ
+            else "None"
         )
     )
     return logger
@@ -54,10 +56,14 @@ def get_machine_info():
 def save_checkpoint(state, filename, logger):
     if osp.isfile(filename):
         if hasattr(logger, "log"):
-            logger.log("Find {:} exist, delete is at first before saving".format(filename))
+            logger.log(
+                "Find {:} exist, delete is at first before saving".format(filename)
+            )
         os.remove(filename)
     torch.save(state, filename)
-    assert osp.isfile(filename), "save filename : {:} failed, which is not found.".format(filename)
+    assert osp.isfile(
+        filename
+    ), "save filename : {:} failed, which is not found.".format(filename)
     if hasattr(logger, "log"):
         logger.log("save checkpoint into {:}".format(filename))
     return filename
