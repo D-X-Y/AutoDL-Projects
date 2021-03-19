@@ -96,3 +96,14 @@ class TestBasicSpace(unittest.TestCase):
         # Test Simple Op
         self.assertTrue(is_determined(1))
         self.assertFalse(is_determined(nested_space))
+
+
+class TestAbstractSpace(unittest.TestCase):
+    """Test the abstract search spaces."""
+
+    def test_continous(self):
+      space = Continuous(0, 1)
+      self.assertEqual(space, space.abstract())
+      print(space.abstract())
+
+
