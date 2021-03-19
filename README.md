@@ -96,7 +96,8 @@ Some methods use knowledge distillation (KD), which require pre-trained models. 
 
 Please use
 ```
-git clone --recurse-submodules git@github.com:D-X-Y/AutoDL-Projects.git
+git clone --recurse-submodules git@github.com:D-X-Y/AutoDL-Projects.git XAutoDL
+git clone --recurse-submodules https://github.com/D-X-Y/AutoDL-Projects.git XAutoDL
 ```
 to download this repo with submodules.
 

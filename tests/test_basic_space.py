@@ -48,7 +48,7 @@ class TestBasicSpace(unittest.TestCase):
         space = Continuous(lower, upper, log=False)
         values = []
         for i in range(1000000):
-            x = space.random().value
+            x = space.random(reuse_last=False).value
             self.assertGreaterEqual(x, lower)
             self.assertGreaterEqual(upper, x)
             values.append(x)
@@ -96,6 +96,12 @@ class TestBasicSpace(unittest.TestCase):
         # Test Simple Op
         self.assertTrue(is_determined(1))
         self.assertFalse(is_determined(nested_space))
+
+    def test_duplicate(self):
+        space = Categorical(1, 2, 3, 4)
+        x = space.random()
+        for _ in range(100):
+            self.assertEqual(x, space.random(reuse_last=True))
 
 
 class TestAbstractSpace(unittest.TestCase):
