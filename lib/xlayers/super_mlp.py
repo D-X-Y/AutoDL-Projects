@@ -3,6 +3,7 @@
 #####################################################
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 import math
 from typing import Optional, Union
@@ -52,14 +53,15 @@ class SuperLinear(SuperModule):
     def bias(self):
         return spaces.has_categorical(self._bias, True)
 
+    @property
     def abstract_search_space(self):
         root_node = spaces.VirtualNode(id(self))
         if not spaces.is_determined(self._in_features):
-            root_node.append("_in_features", self._in_features)
+            root_node.append("_in_features", self._in_features.abstract())
         if not spaces.is_determined(self._out_features):
-            root_node.append("_out_features", self._out_features)
+            root_node.append("_out_features", self._out_features.abstract())
         if not spaces.is_determined(self._bias):
-            root_node.append("_bias", self._bias)
+            root_node.append("_bias", self._bias.abstract())
         return root_node
 
     def reset_parameters(self) -> None:
@@ -68,6 +70,37 @@ class SuperLinear(SuperModule):
             fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self._super_weight)
             bound = 1 / math.sqrt(fan_in)
             nn.init.uniform_(self._super_bias, -bound, bound)
+
+    def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
+        # check inputs ->
+        if not spaces.is_determined(self._in_features):
+            expected_input_dim = self.abstract_child["_in_features"].value
+        else:
+            expected_input_dim = spaces.get_determined_value(self._in_features)
+        if input.size(-1) != expected_input_dim:
+            raise ValueError(
+                "Expect the input dim of {:} instead of {:}".format(
+                    expected_input_dim, input.size(-1)
+                )
+            )
+        # create the weight matrix
+        if not spaces.is_determined(self._out_features):
+            out_dim = self.abstract_child["_out_features"].value
+        else:
+            out_dim = spaces.get_determined_value(self._out_features)
+        candidate_weight = self._super_weight[:out_dim, :expected_input_dim]
+        # create the bias matrix
+        if not spaces.is_determined(self._bias):
+            if self.abstract_child["_bias"].value:
+                candidate_bias = self._super_bias[:out_dim]
+            else:
+                candidate_bias = None
+        else:
+            if spaces.get_determined_value(self._bias):
+                candidate_bias = self._super_bias[:out_dim]
+            else:
+                candidate_bias = None
+        return F.linear(input, candidate_weight, candidate_bias)
 
     def forward_raw(self, input: torch.Tensor) -> torch.Tensor:
         return F.linear(input, self._super_weight, self._super_bias)
@@ -78,8 +111,9 @@ class SuperLinear(SuperModule):
         )
 
 
-class SuperMLP(nn.Module):
-    # MLP: FC -> Activation -> Drop -> FC -> Drop
+class SuperMLP(SuperModule):
+    """An MLP layer: FC -> Activation -> Drop -> FC -> Drop."""
+
     def __init__(
         self,
         in_features,
@@ -88,13 +122,13 @@ class SuperMLP(nn.Module):
         act_layer=nn.GELU,
         drop: Optional[float] = None,
     ):
-        super(MLP, self).__init__()
+        super(SuperMLP, self).__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
         self.fc1 = nn.Linear(in_features, hidden_features)
         self.act = act_layer()
         self.fc2 = nn.Linear(hidden_features, out_features)
-        self.drop = nn.Dropout(drop or 0)
+        self.drop = nn.Dropout(drop or 0.0)
 
     def forward(self, x):
         x = self.fc1(x)

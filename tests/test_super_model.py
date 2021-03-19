@@ -25,6 +25,26 @@ class TestSuperLinear(unittest.TestCase):
         out_features = spaces.Categorical(12, 24, 36)
         bias = spaces.Categorical(True, False)
         model = super_core.SuperLinear(10, out_features, bias=bias)
-        print(model)
+        print("The simple super linear module is:\n{:}".format(model))
+
         print(model.super_run_type)
-        print(model.abstract_search_space())
+        self.assertTrue(model.bias)
+
+        inputs = torch.rand(32, 10)
+        print("Input shape: {:}".format(inputs.shape))
+        print("Weight shape: {:}".format(model._super_weight.shape))
+        print("Bias shape: {:}".format(model._super_bias.shape))
+        outputs = model(inputs)
+        self.assertEqual(tuple(outputs.shape), (32, 36))
+
+        abstract_space = model.abstract_search_space
+        abstract_child = abstract_space.random()
+        print("The abstract searc space:\n{:}".format(abstract_space))
+        print("The abstract child program:\n{:}".format(abstract_child))
+
+        model.set_super_run_type(super_core.SuperRunMode.Candidate)
+        model.apply_candiate(abstract_child)
+
+        output_shape = (32, abstract_child["_out_features"].value)
+        outputs = model(inputs)
+        self.assertEqual(tuple(outputs.shape), output_shape)

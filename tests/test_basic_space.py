@@ -41,14 +41,14 @@ class TestBasicSpace(unittest.TestCase):
     def test_continuous(self):
         random.seed(999)
         space = Continuous(0, 1)
-        self.assertGreaterEqual(space.random(), 0)
-        self.assertGreaterEqual(1, space.random())
+        self.assertGreaterEqual(space.random().value, 0)
+        self.assertGreaterEqual(1, space.random().value)
 
         lower, upper = 1.5, 4.6
         space = Continuous(lower, upper, log=False)
         values = []
         for i in range(1000000):
-            x = space.random()
+            x = space.random().value
             self.assertGreaterEqual(x, lower)
             self.assertGreaterEqual(upper, x)
             values.append(x)
@@ -89,7 +89,7 @@ class TestBasicSpace(unittest.TestCase):
             Categorical(4, Categorical(5, 6, 7, Categorical(8, 9), 10), 11),
             12,
         )
-        print(nested_space)
+        print("\nThe nested search space:\n{:}".format(nested_space))
         for i in range(1, 13):
             self.assertTrue(nested_space.has(i))
 
@@ -102,6 +102,19 @@ class TestAbstractSpace(unittest.TestCase):
     """Test the abstract search spaces."""
 
     def test_continous(self):
+        print("")
         space = Continuous(0, 1)
         self.assertEqual(space, space.abstract())
+        print("The abstract search space for Continuous: {:}".format(space.abstract()))
+
+        space = Categorical(1, 2, 3)
+        self.assertEqual(len(space.abstract()), 3)
         print(space.abstract())
+
+        nested_space = Categorical(
+            Categorical(1, 2, 3),
+            Categorical(4, Categorical(5, 6, 7, Categorical(8, 9), 10), 11),
+            12,
+        )
+        abstract_nested_space = nested_space.abstract()
+        print("The abstract nested search space:\n{:}".format(abstract_nested_space))

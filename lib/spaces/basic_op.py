@@ -1,4 +1,5 @@
 from spaces.basic_space import Space
+from spaces.basic_space import VirtualNode
 from spaces.basic_space import Integer
 from spaces.basic_space import Continuous
 from spaces.basic_space import Categorical
@@ -24,6 +25,20 @@ def is_determined(space_or_value):
         return space_or_value.determined
     else:
         return True
+
+
+def get_determined_value(space_or_value):
+    if not is_determined(space_or_value):
+        raise ValueError("This input is not determined: {:}".format(space_or_value))
+    if isinstance(space_or_value, Space):
+        if isinstance(space_or_value, Continuous):
+            return space_or_value.lower
+        elif isinstance(space_or_value, Categorical):
+            return get_determined_value(space_or_value[0])
+        else:  # VirtualNode
+            return space_or_value.value
+    else:
+        return space_or_value
 
 
 def get_max(space_or_value):
