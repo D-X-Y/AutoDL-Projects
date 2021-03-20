@@ -6,14 +6,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import math
-from typing import Optional, Union, Callable
+from typing import Optional, Callable
 
 import spaces
 from .super_module import SuperModule
-from .super_module import SuperRunMode
-
-IntSpaceType = Union[int, spaces.Integer, spaces.Categorical]
-BoolSpaceType = Union[bool, spaces.Categorical]
+from .super_module import IntSpaceType
+from .super_module import BoolSpaceType
 
 
 class SuperLinear(SuperModule):

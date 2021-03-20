@@ -5,3 +5,4 @@ from .super_module import SuperRunMode
 from .super_module import SuperModule
 from .super_linear import SuperLinear
 from .super_linear import SuperMLP
+from .super_attention import SuperAttention

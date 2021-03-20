@@ -26,6 +26,7 @@ class TestSuperLinear(unittest.TestCase):
         bias = spaces.Categorical(True, False)
         model = super_core.SuperLinear(10, out_features, bias=bias)
         print("The simple super linear module is:\n{:}".format(model))
+        model.apply_verbose(True)
 
         print(model.super_run_type)
         self.assertTrue(model.bias)
@@ -55,6 +56,7 @@ class TestSuperLinear(unittest.TestCase):
         out_features = spaces.Categorical(24, 36, 48)
         mlp = super_core.SuperMLP(10, hidden_features, out_features)
         print(mlp)
+        mlp.apply_verbose(True)
         self.assertTrue(mlp.fc1._out_features, mlp.fc2._in_features)
 
         inputs = torch.rand(4, 10)
@@ -84,4 +86,30 @@ class TestSuperLinear(unittest.TestCase):
         mlp.apply_candidate(abstract_child)
         outputs = mlp(inputs)
         output_shape = (4, abstract_child["fc2"]["_out_features"].value)
+        self.assertEqual(tuple(outputs.shape), output_shape)
+
+    def test_super_attention(self):
+        proj_dim = spaces.Categorical(12, 24, 36)
+        num_heads = spaces.Categorical(2, 4, 6)
+        model = super_core.SuperAttention(10, proj_dim, num_heads)
+        print(model)
+        model.apply_verbose(True)
+
+        inputs = torch.rand(4, 20, 10)  # batch size, sequence length, channel
+        outputs = model(inputs)
+
+        abstract_space = model.abstract_search_space
+        print(
+            "The abstract search space for SuperAttention is:\n{:}".format(
+                abstract_space
+            )
+        )
+        abstract_space.clean_last()
+        abstract_child = abstract_space.random(reuse_last=True)
+        print("The abstract child program is:\n{:}".format(abstract_child))
+
+        model.set_super_run_type(super_core.SuperRunMode.Candidate)
+        model.apply_candidate(abstract_child)
+        outputs = model(inputs)
+        output_shape = (4, 20, abstract_child["proj"]["_out_features"].value)
         self.assertEqual(tuple(outputs.shape), output_shape)
