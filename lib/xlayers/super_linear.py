@@ -113,7 +113,7 @@ class SuperLinear(SuperModule):
         )
 
 
-class SuperMLP(SuperModule):
+class SuperMLPv1(SuperModule):
     """An MLP layer: FC -> Activation -> Drop -> FC -> Drop."""
 
     def __init__(
@@ -124,7 +124,7 @@ class SuperMLP(SuperModule):
         act_layer: Callable[[], nn.Module] = nn.GELU,
         drop: Optional[float] = None,
     ):
-        super(SuperMLP, self).__init__()
+        super(SuperMLPv1, self).__init__()
         self._in_features = in_features
         self._hidden_features = hidden_features
         self._out_features = out_features
@@ -146,20 +146,17 @@ class SuperMLP(SuperModule):
         return root_node
 
     def apply_candidate(self, abstract_child: spaces.VirtualNode):
-        super(SuperMLP, self).apply_candidate(abstract_child)
+        super(SuperMLPv1, self).apply_candidate(abstract_child)
         if "fc1" in abstract_child:
             self.fc1.apply_candidate(abstract_child["fc1"])
         if "fc2" in abstract_child:
             self.fc2.apply_candidate(abstract_child["fc2"])
 
     def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
-        return self._unified_forward(input)
+        return self.forward_raw(input)
 
     def forward_raw(self, input: torch.Tensor) -> torch.Tensor:
-        return self._unified_forward(input)
-
-    def _unified_forward(self, x):
-        x = self.fc1(x)
+        x = self.fc1(input)
         x = self.act(x)
         x = self.drop(x)
         x = self.fc2(x)
@@ -170,6 +167,140 @@ class SuperMLP(SuperModule):
         return "in_features={:}, hidden_features={:}, out_features={:}, drop={:}, fc1 -> act -> drop -> fc2 -> drop,".format(
             self._in_features,
             self._hidden_features,
+            self._out_features,
+            self._drop_rate,
+        )
+
+
+class SuperMLPv2(SuperModule):
+    """An MLP layer: FC -> Activation -> Drop -> FC -> Drop."""
+
+    def __init__(
+        self,
+        in_features: IntSpaceType,
+        hidden_multiplier: IntSpaceType,
+        out_features: IntSpaceType,
+        act_layer: Callable[[], nn.Module] = nn.GELU,
+        drop: Optional[float] = None,
+    ):
+        super(SuperMLPv2, self).__init__()
+        self._in_features = in_features
+        self._hidden_multiplier = hidden_multiplier
+        self._out_features = out_features
+        self._drop_rate = drop
+        self._params = nn.ParameterDict({})
+
+        self._create_linear(
+            "fc1", self.in_features, int(self.in_features * self.hidden_multiplier)
+        )
+        self._create_linear(
+            "fc2", int(self.in_features * self.hidden_multiplier), self.out_features
+        )
+        self.act = act_layer()
+        self.drop = nn.Dropout(drop or 0.0)
+        self.reset_parameters()
+
+    @property
+    def in_features(self):
+        return spaces.get_max(self._in_features)
+
+    @property
+    def hidden_multiplier(self):
+        return spaces.get_max(self._hidden_multiplier)
+
+    @property
+    def out_features(self):
+        return spaces.get_max(self._out_features)
+
+    def _create_linear(self, name, inC, outC):
+        self._params["{:}_super_weight".format(name)] = torch.nn.Parameter(
+            torch.Tensor(outC, inC)
+        )
+        self._params["{:}_super_bias".format(name)] = torch.nn.Parameter(
+            torch.Tensor(outC)
+        )
+
+    def reset_parameters(self) -> None:
+        nn.init.kaiming_uniform_(self._params["fc1_super_weight"], a=math.sqrt(5))
+        nn.init.kaiming_uniform_(self._params["fc2_super_weight"], a=math.sqrt(5))
+        fan_in, _ = nn.init._calculate_fan_in_and_fan_out(
+            self._params["fc1_super_weight"]
+        )
+        bound = 1 / math.sqrt(fan_in)
+        nn.init.uniform_(self._params["fc1_super_bias"], -bound, bound)
+        fan_in, _ = nn.init._calculate_fan_in_and_fan_out(
+            self._params["fc2_super_weight"]
+        )
+        bound = 1 / math.sqrt(fan_in)
+        nn.init.uniform_(self._params["fc2_super_bias"], -bound, bound)
+
+    @property
+    def abstract_search_space(self):
+        root_node = spaces.VirtualNode(id(self))
+        if not spaces.is_determined(self._in_features):
+            root_node.append(
+                "_in_features", self._in_features.abstract(reuse_last=True)
+            )
+        if not spaces.is_determined(self._hidden_multiplier):
+            root_node.append(
+                "_hidden_multiplier", self._hidden_multiplier.abstract(reuse_last=True)
+            )
+        if not spaces.is_determined(self._out_features):
+            root_node.append(
+                "_out_features", self._out_features.abstract(reuse_last=True)
+            )
+        return root_node
+
+    def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
+        # check inputs ->
+        if not spaces.is_determined(self._in_features):
+            expected_input_dim = self.abstract_child["_in_features"].value
+        else:
+            expected_input_dim = spaces.get_determined_value(self._in_features)
+        if input.size(-1) != expected_input_dim:
+            raise ValueError(
+                "Expect the input dim of {:} instead of {:}".format(
+                    expected_input_dim, input.size(-1)
+                )
+            )
+        # create the weight and bias matrix for fc1
+        if not spaces.is_determined(self._hidden_multiplier):
+            hmul = self.abstract_child["_hidden_multiplier"].value * expected_input_dim
+        else:
+            hmul = spaces.get_determined_value(self._hidden_multiplier)
+        hidden_dim = int(expected_input_dim * hmul)
+        _fc1_weight = self._params["fc1_super_weight"][:hidden_dim, :expected_input_dim]
+        _fc1_bias = self._params["fc1_super_bias"][:hidden_dim]
+        x = F.linear(input, _fc1_weight, _fc1_bias)
+        x = self.act(x)
+        x = self.drop(x)
+        # create the weight and bias matrix for fc2
+        if not spaces.is_determined(self._out_features):
+            out_dim = self.abstract_child["_out_features"].value
+        else:
+            out_dim = spaces.get_determined_value(self._out_features)
+        _fc2_weight = self._params["fc2_super_weight"][:out_dim, :hidden_dim]
+        _fc2_bias = self._params["fc2_super_bias"][:out_dim]
+        x = F.linear(x, _fc2_weight, _fc2_bias)
+        x = self.drop(x)
+        return x
+
+    def forward_raw(self, input: torch.Tensor) -> torch.Tensor:
+        x = F.linear(
+            input, self._params["fc1_super_weight"], self._params["fc1_super_bias"]
+        )
+        x = self.act(x)
+        x = self.drop(x)
+        x = F.linear(
+            x, self._params["fc2_super_weight"], self._params["fc2_super_bias"]
+        )
+        x = self.drop(x)
+        return x
+
+    def extra_repr(self) -> str:
+        return "in_features={:}, hidden_multiplier={:}, out_features={:}, drop={:}, fc1 -> act -> drop -> fc2 -> drop,".format(
+            self._in_features,
+            self._hidden_multiplier,
             self._out_features,
             self._drop_rate,
         )

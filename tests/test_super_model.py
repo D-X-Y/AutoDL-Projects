@@ -51,10 +51,10 @@ class TestSuperLinear(unittest.TestCase):
         outputs = model(inputs)
         self.assertEqual(tuple(outputs.shape), output_shape)
 
-    def test_super_mlp(self):
+    def test_super_mlp_v1(self):
         hidden_features = spaces.Categorical(12, 24, 36)
         out_features = spaces.Categorical(24, 36, 48)
-        mlp = super_core.SuperMLP(10, hidden_features, out_features)
+        mlp = super_core.SuperMLPv1(10, hidden_features, out_features)
         print(mlp)
         mlp.apply_verbose(True)
         self.assertTrue(mlp.fc1._out_features, mlp.fc2._in_features)
@@ -64,7 +64,9 @@ class TestSuperLinear(unittest.TestCase):
         self.assertEqual(tuple(outputs.shape), (4, 48))
 
         abstract_space = mlp.abstract_search_space
-        print("The abstract search space for SuperMLP is:\n{:}".format(abstract_space))
+        print(
+            "The abstract search space for SuperMLPv1 is:\n{:}".format(abstract_space)
+        )
         self.assertEqual(
             abstract_space["fc1"]["_out_features"],
             abstract_space["fc2"]["_in_features"],
@@ -88,28 +90,28 @@ class TestSuperLinear(unittest.TestCase):
         output_shape = (4, abstract_child["fc2"]["_out_features"].value)
         self.assertEqual(tuple(outputs.shape), output_shape)
 
-    def test_super_attention(self):
-        proj_dim = spaces.Categorical(12, 24, 36)
-        num_heads = spaces.Categorical(2, 4, 6)
-        model = super_core.SuperAttention(10, proj_dim, num_heads)
-        print(model)
-        model.apply_verbose(True)
+    def test_super_mlp_v2(self):
+        hidden_multiplier = spaces.Categorical(1.0, 2.0, 3.0)
+        out_features = spaces.Categorical(24, 36, 48)
+        mlp = super_core.SuperMLPv2(10, hidden_multiplier, out_features)
+        print(mlp)
+        mlp.apply_verbose(True)
 
-        inputs = torch.rand(4, 20, 10)  # batch size, sequence length, channel
-        outputs = model(inputs)
+        inputs = torch.rand(4, 10)
+        outputs = mlp(inputs)
+        self.assertEqual(tuple(outputs.shape), (4, 48))
 
-        abstract_space = model.abstract_search_space
+        abstract_space = mlp.abstract_search_space
         print(
-            "The abstract search space for SuperAttention is:\n{:}".format(
-                abstract_space
-            )
+            "The abstract search space for SuperMLPv2 is:\n{:}".format(abstract_space)
         )
+
         abstract_space.clean_last()
         abstract_child = abstract_space.random(reuse_last=True)
         print("The abstract child program is:\n{:}".format(abstract_child))
 
-        model.set_super_run_type(super_core.SuperRunMode.Candidate)
-        model.apply_candidate(abstract_child)
-        outputs = model(inputs)
-        output_shape = (4, 20, abstract_child["proj"]["_out_features"].value)
+        mlp.set_super_run_type(super_core.SuperRunMode.Candidate)
+        mlp.apply_candidate(abstract_child)
+        outputs = mlp(inputs)
+        output_shape = (4, abstract_child["_out_features"].value)
         self.assertEqual(tuple(outputs.shape), output_shape)
