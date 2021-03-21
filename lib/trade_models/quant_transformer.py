@@ -27,8 +27,10 @@ import torch.utils.data as th_data
 
 from log_utils import AverageMeter
 from utils import count_parameters
-from trade_models.transformers import DEFAULT_NET_CONFIG
-from trade_models.transformers import get_transformer
+
+from xlayers import super_core
+from .transformers import DEFAULT_NET_CONFIG
+from .transformers import get_transformer
 
 
 from qlib.model.base import Model
@@ -90,6 +92,7 @@ class QuantTransformer(Model):
                 torch.cuda.manual_seed_all(self.seed)
 
         self.model = get_transformer(self.net_config)
+        self.model.set_super_run_type(super_core.SuperRunMode.FullModel)
         self.logger.info("model: {:}".format(self.model))
         self.logger.info("model size: {:.3f} MB".format(count_parameters(self.model)))
 

@@ -13,6 +13,8 @@
 # python exps/trading/baselines.py --alg LightGBM   #
 # python exps/trading/baselines.py --alg DoubleE    #
 # python exps/trading/baselines.py --alg TabNet     #
+#                                                   #
+# python exps/trading/baselines.py --alg Transformer#
 #####################################################
 import sys
 import argparse
