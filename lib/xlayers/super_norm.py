@@ -75,8 +75,10 @@ class SuperLayerNorm1D(SuperModule):
         return F.layer_norm(input, (self.in_dim,), self.weight, self.bias, self.eps)
 
     def extra_repr(self) -> str:
-        return "{in_dim}, eps={eps}, " "elementwise_affine={elementwise_affine}".format(
-            in_dim=self._in_dim,
-            eps=self._eps,
-            elementwise_affine=self._elementwise_affine,
+        return (
+            "shape={in_dim}, eps={eps}, elementwise_affine={elementwise_affine}".format(
+                in_dim=self._in_dim,
+                eps=self._eps,
+                elementwise_affine=self._elementwise_affine,
+            )
         )

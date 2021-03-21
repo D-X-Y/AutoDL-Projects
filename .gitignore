@@ -130,3 +130,5 @@ TEMP-L.sh
 .vscode
 mlruns
 outputs
+
+pytest_cache

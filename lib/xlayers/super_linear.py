@@ -109,7 +109,7 @@ class SuperLinear(SuperModule):
 
     def extra_repr(self) -> str:
         return "in_features={:}, out_features={:}, bias={:}".format(
-            self.in_features, self.out_features, self.bias
+            self._in_features, self._out_features, self._bias
         )
 
 

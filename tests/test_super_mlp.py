@@ -56,7 +56,7 @@ class TestSuperLinear(unittest.TestCase):
         out_features = spaces.Categorical(24, 36, 48)
         mlp = super_core.SuperMLPv1(10, hidden_features, out_features)
         print(mlp)
-        mlp.apply_verbose(True)
+        mlp.apply_verbose(False)
         self.assertTrue(mlp.fc1._out_features, mlp.fc2._in_features)
 
         inputs = torch.rand(4, 10)
@@ -95,7 +95,7 @@ class TestSuperLinear(unittest.TestCase):
         out_features = spaces.Categorical(24, 36, 48)
         mlp = super_core.SuperMLPv2(10, hidden_multiplier, out_features)
         print(mlp)
-        mlp.apply_verbose(True)
+        mlp.apply_verbose(False)
 
         inputs = torch.rand(4, 10)
         outputs = mlp(inputs)
@@ -114,4 +114,21 @@ class TestSuperLinear(unittest.TestCase):
         mlp.apply_candidate(abstract_child)
         outputs = mlp(inputs)
         output_shape = (4, abstract_child["_out_features"].value)
+        self.assertEqual(tuple(outputs.shape), output_shape)
+
+    def test_super_stem(self):
+        out_features = spaces.Categorical(24, 36, 48)
+        model = super_core.SuperAlphaEBDv1(6, out_features)
+        inputs = torch.rand(4, 360)
+
+        abstract_space = model.abstract_search_space
+        abstract_space.clean_last()
+        abstract_child = abstract_space.random(reuse_last=True)
+        print("The abstract searc space:\n{:}".format(abstract_space))
+        print("The abstract child program:\n{:}".format(abstract_child))
+
+        model.set_super_run_type(super_core.SuperRunMode.Candidate)
+        model.apply_candidate(abstract_child)
+        outputs = model(inputs)
+        output_shape = (4, 60, abstract_child["_embed_dim"].value)
         self.assertEqual(tuple(outputs.shape), output_shape)

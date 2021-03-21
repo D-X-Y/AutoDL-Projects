@@ -37,10 +37,7 @@ class SuperAttention(SuperModule):
         self._proj_dim = proj_dim
         self._num_heads = num_heads
         self._qkv_bias = qkv_bias
-        # head_dim = dim // num_heads
-        # self.scale = qk_scale or math.sqrt(head_dim)
 
-        # self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
         self.q_fc = SuperLinear(input_dim, input_dim, bias=qkv_bias)
         self.k_fc = SuperLinear(input_dim, input_dim, bias=qkv_bias)
         self.v_fc = SuperLinear(input_dim, input_dim, bias=qkv_bias)
