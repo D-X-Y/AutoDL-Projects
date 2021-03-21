@@ -16,3 +16,8 @@ python -m black __init__.py -l 120
 
 pytest -W ignore::DeprecationWarning qlib/tests/test_all_pipeline.py
 ```
+
+
+```
+conda update --all
+```

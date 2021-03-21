@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.03 #
 #####################################################
-# pytest ./tests/test_super_model.py -s             #
+# pytest ./tests/test_super_att.py -s               #
 #####################################################
 import sys, random
 import unittest

@@ -1,6 +1,8 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.03 #
 #####################################################
+# pytest tests/test_basic_space.py -s               #
+#####################################################
 import sys, random
 import unittest
 import pytest
