@@ -59,7 +59,7 @@ class QResult:
         self,
         keys: List[Text],
         separate: Text = "& ",
-        space: int = 25,
+        space: int = 20,
         verbose: bool = True,
     ):
         avaliable_keys = []
@@ -84,13 +84,13 @@ class QResult:
         return head_str, value_str
 
 
-def compare_results(heads, values, names, space=10, verbose=True, sort_key=False):
+def compare_results(heads, values, names, space=10, separate="& ", verbose=True, sort_key=False):
     for idx, x in enumerate(heads):
         assert x == heads[0], "[{:}] \n{:}\nvs\n{:}".format(idx, x, heads[0])
-    new_head = QResult.full_str("Name", space) + heads[0]
+    new_head = QResult.full_str("Name", space) + separate + heads[0]
     info_str_dict = dict(head=new_head, lines=[])
     for name, value in zip(names, values):
-        xline = QResult.full_str(name, space) + value
+        xline = QResult.full_str(name, space) + separate + value
         info_str_dict["lines"].append(xline)
     if verbose:
         print("\nThere are {:} algorithms.".format(len(values)))
@@ -159,6 +159,8 @@ def query_info(save_dir, verbose):
         if not len(result):
             print("There are no valid recorders for {:}".format(experiment))
             continue
+        else:
+            print("There are {:} valid recorders for {:}".format(len(recorders), experiment.name))
         head_str, value_str = result.info(all_keys, verbose=verbose)
         head_strs.append(head_str)
         value_strs.append(value_str)
@@ -215,7 +217,7 @@ if __name__ == "__main__":
         info_dict["heads"],
         info_dict["values"],
         info_dict["names"],
-        space=10,
+        space=12,
         verbose=True,
         sort_key=True,
     )
