@@ -84,7 +84,9 @@ class QResult:
         return head_str, value_str
 
 
-def compare_results(heads, values, names, space=10, separate="& ", verbose=True, sort_key=False):
+def compare_results(
+    heads, values, names, space=10, separate="& ", verbose=True, sort_key=False
+):
     for idx, x in enumerate(heads):
         assert x == heads[0], "[{:}] \n{:}\nvs\n{:}".format(idx, x, heads[0])
     new_head = QResult.full_str("Name", space) + separate + heads[0]
@@ -104,7 +106,7 @@ def compare_results(heads, values, names, space=10, separate="& ", verbose=True,
         else:
             lines = info_str_dict["lines"]
         for xline in lines:
-            print(xline)
+            print(xline + "\\\\")
     return info_str_dict
 
 
@@ -160,7 +162,11 @@ def query_info(save_dir, verbose):
             print("There are no valid recorders for {:}".format(experiment))
             continue
         else:
-            print("There are {:} valid recorders for {:}".format(len(recorders), experiment.name))
+            print(
+                "There are {:} valid recorders for {:}".format(
+                    len(recorders), experiment.name
+                )
+            )
         head_str, value_str = result.info(all_keys, verbose=verbose)
         head_strs.append(head_str)
         value_strs.append(value_str)
