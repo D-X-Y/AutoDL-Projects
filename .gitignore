@@ -128,7 +128,7 @@ TEMP-L.sh
 
 # Visual Studio Code
 .vscode
-mlruns
+mlruns*
 outputs
 
 pytest_cache

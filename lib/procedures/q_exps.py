@@ -98,6 +98,7 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
         R.save_objects(**{"model.pkl": model})
 
         # Generate records: prediction, backtest, and analysis
+        import pdb; pdb.set_trace()
         for record in task_config["record"]:
             record = record.copy()
             if record["class"] == "SignalRecord":
