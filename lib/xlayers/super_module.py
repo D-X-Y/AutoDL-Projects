@@ -14,6 +14,13 @@ IntSpaceType = Union[int, spaces.Integer, spaces.Categorical]
 BoolSpaceType = Union[bool, spaces.Categorical]
 
 
+class LayerOrder(Enum):
+    """This class defines the enumerations for order of operation in a residual or normalization-based layer."""
+
+    PreNorm = "pre-norm"
+    PostNorm = "post-norm"
+
+
 class SuperRunMode(Enum):
     """This class defines the enumerations for Super Model Running Mode."""
 

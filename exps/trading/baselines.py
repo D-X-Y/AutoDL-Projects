@@ -15,6 +15,7 @@
 # python exps/trading/baselines.py --alg TabNet     #
 #                                                   #
 # python exps/trading/baselines.py --alg Transformer#
+# python exps/trading/baselines.py --alg TSF-A      #
 #####################################################
 import sys
 import argparse
@@ -59,6 +60,7 @@ def retrieve_configs():
     alg2names["NAIVE-V1"] = "workflow_config_naive_v1_Alpha360.yaml"
     alg2names["NAIVE-V2"] = "workflow_config_naive_v2_Alpha360.yaml"
     alg2names["Transformer"] = "workflow_config_transformer_Alpha360.yaml"
+    alg2names["TSF-A"] = "workflow_config_transformer_basic_Alpha360.yaml"
 
     # find the yaml paths
     alg2paths = OrderedDict()

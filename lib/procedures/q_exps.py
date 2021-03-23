@@ -6,7 +6,7 @@ import inspect
 import os
 import pprint
 import logging
-
+from copy import deepcopy
 import qlib
 from qlib.utils import init_instance_by_config
 from qlib.workflow import R
@@ -33,11 +33,14 @@ def set_log_basic_config(filename=None, format=None, level=None):
     if format is None:
         format = C.logging_config["formatters"]["logger_format"]["format"]
 
+    # Remove all handlers associated with the root logger object.
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
     logging.basicConfig(filename=filename, format=format, level=level)
 
 
 def update_gpu(config, gpu):
-    config = config.copy()
+    config = deepcopy(config)
     if "task" in config and "model" in config["task"]:
         if "GPU" in config["task"]["model"]:
             config["task"]["model"]["GPU"] = gpu
@@ -59,13 +62,20 @@ def update_gpu(config, gpu):
 
 
 def update_market(config, market):
-    config = config.copy()
+    config = deepcopy(config.copy())
     config["market"] = market
     config["data_handler_config"]["instruments"] = market
     return config
 
 
-def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
+def run_exp(
+    task_config,
+    dataset,
+    experiment_name,
+    recorder_name,
+    uri,
+    model_obj_name="model.pkl",
+):
 
     model = init_instance_by_config(task_config["model"])
     model_fit_kwargs = dict(dataset=dataset)
@@ -80,6 +90,7 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
         # Setup log
         recorder_root_dir = R.get_recorder().get_local_dir()
         log_file = os.path.join(recorder_root_dir, "{:}.log".format(experiment_name))
+
         set_log_basic_config(log_file)
         logger = get_module_logger("q.run_exp")
         logger.info("task_config::\n{:}".format(pprint.pformat(task_config, indent=2)))
@@ -87,20 +98,29 @@ def run_exp(task_config, dataset, experiment_name, recorder_name, uri):
         logger.info("dataset={:}".format(dataset))
 
         # Train model
-        R.log_params(**flatten_dict(task_config))
-        if "save_path" in inspect.getfullargspec(model.fit).args:
-            model_fit_kwargs["save_path"] = os.path.join(recorder_root_dir, "model.ckp")
-        elif "save_dir" in inspect.getfullargspec(model.fit).args:
-            model_fit_kwargs["save_dir"] = os.path.join(recorder_root_dir, "model-ckps")
-        model.fit(**model_fit_kwargs)
+        try:
+            model = R.load_object(model_obj_name)
+            logger.info("[Find existing object from {:}]".format(model_obj_name))
+        except OSError:
+            R.log_params(**flatten_dict(task_config))
+            if "save_path" in inspect.getfullargspec(model.fit).args:
+                model_fit_kwargs["save_path"] = os.path.join(
+                    recorder_root_dir, "model.ckp"
+                )
+            elif "save_dir" in inspect.getfullargspec(model.fit).args:
+                model_fit_kwargs["save_dir"] = os.path.join(
+                    recorder_root_dir, "model-ckps"
+                )
+            model.fit(**model_fit_kwargs)
+            R.save_objects(**{model_obj_name: model})
+        except:
+            raise ValueError("Something wrong.")
         # Get the recorder
         recorder = R.get_recorder()
-        R.save_objects(**{"model.pkl": model})
 
         # Generate records: prediction, backtest, and analysis
-        import pdb; pdb.set_trace()
         for record in task_config["record"]:
-            record = record.copy()
+            record = deepcopy(record)
             if record["class"] == "SignalRecord":
                 srconf = {"model": model, "dataset": dataset, "recorder": recorder}
                 record["kwargs"].update(srconf)
