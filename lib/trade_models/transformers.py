@@ -46,7 +46,7 @@ _default_max_depth = 5
 DefaultSearchSpace = dict(
     d_feat=6,
     stem_dim=spaces.Categorical(*_get_list_mul(8, 16)),
-    embed_dims=_get_mul_specs(_get_list_mul(8, 16), _default_max_depth),
+    embed_dim=spaces.Categorical(*_get_list_mul(8, 16)),
     num_heads=_get_mul_specs((1, 2, 4, 8), _default_max_depth),
     mlp_hidden_multipliers=_get_mul_specs((0.5, 1, 2, 4, 8), _default_max_depth),
     qkv_bias=True,
@@ -62,7 +62,7 @@ class SuperTransformer(super_core.SuperModule):
         self,
         d_feat: int = 6,
         stem_dim: super_core.IntSpaceType = DefaultSearchSpace["stem_dim"],
-        embed_dims: List[super_core.IntSpaceType] = DefaultSearchSpace["embed_dims"],
+        embed_dim: List[super_core.IntSpaceType] = DefaultSearchSpace["embed_dim"],
         num_heads: List[super_core.IntSpaceType] = DefaultSearchSpace["num_heads"],
         mlp_hidden_multipliers: List[super_core.IntSpaceType] = DefaultSearchSpace[
             "mlp_hidden_multipliers"
@@ -73,7 +73,7 @@ class SuperTransformer(super_core.SuperModule):
         max_seq_len: int = 65,
     ):
         super(SuperTransformer, self).__init__()
-        self._embed_dims = embed_dims
+        self._embed_dim = embed_dim
         self._stem_dim = stem_dim
         self._num_heads = num_heads
         self._mlp_hidden_multipliers = mlp_hidden_multipliers
@@ -85,22 +85,15 @@ class SuperTransformer(super_core.SuperModule):
             d_model=stem_dim, max_seq_len=max_seq_len, dropout=pos_drop
         )
         # build the transformer encode layers -->> check params
-        _assert_types(embed_dims, (tuple, list))
         _assert_types(num_heads, (tuple, list))
         _assert_types(mlp_hidden_multipliers, (tuple, list))
-        num_layers = len(embed_dims)
-        assert (
-            num_layers == len(num_heads) == len(mlp_hidden_multipliers)
-        ), "{:} vs {:} vs {:}".format(
-            num_layers, len(num_heads), len(mlp_hidden_multipliers)
+        assert len(num_heads) == len(mlp_hidden_multipliers), "{:} vs {:}".format(
+            len(num_heads), len(mlp_hidden_multipliers)
         )
         # build the transformer encode layers -->> backbone
-        layers, input_dim = [], stem_dim
-        for embed_dim, num_head, mlp_hidden_multiplier in zip(
-            embed_dims, num_heads, mlp_hidden_multipliers
-        ):
+        layers = []
+        for num_head, mlp_hidden_multiplier in zip(num_heads, mlp_hidden_multipliers):
             layer = super_core.SuperTransformerEncoderLayer(
-                input_dim,
                 embed_dim,
                 num_head,
                 qkv_bias,
@@ -108,11 +101,12 @@ class SuperTransformer(super_core.SuperModule):
                 other_drop,
             )
             layers.append(layer)
-            input_dim = embed_dim
         self.backbone = super_core.SuperSequential(*layers)
 
         # the regression head
-        self.head = super_core.SuperLinear(self._embed_dims[-1], 1)
+        self.head = super_core.SuperSequential(
+            super_core.SuperLayerNorm1D(embed_dim), super_core.SuperLinear(embed_dim, 1)
+        )
         trunc_normal_(self.cls_token, std=0.02)
         self.apply(self._init_weights)
 
@@ -123,14 +117,16 @@ class SuperTransformer(super_core.SuperModule):
     @property
     def abstract_search_space(self):
         root_node = spaces.VirtualNode(id(self))
+        if not spaces.is_determined(self._stem_dim):
+            root_node.append("_stem_dim", self._stem_dim.abstract(reuse_last=True))
+        if not spaces.is_determined(self._stem_dim):
+            root_node.append("_embed_dim", self._embed_dim.abstract(reuse_last=True))
         xdict = dict(
             input_embed=self.input_embed.abstract_search_space,
             pos_embed=self.pos_embed.abstract_search_space,
             backbone=self.backbone.abstract_search_space,
             head=self.head.abstract_search_space,
         )
-        if not spaces.is_determined(self._stem_dim):
-            root_node.append("_stem_dim", self._stem_dim.abstract(reuse_last=True))
         for key, space in xdict.items():
             if not spaces.is_determined(space):
                 root_node.append(key, space)
@@ -196,7 +192,7 @@ def get_transformer(config):
         model = SuperTransformer(
             d_feat=config.get("d_feat"),
             stem_dim=config.get("stem_dim"),
-            embed_dims=config.get("embed_dims"),
+            embed_dim=config.get("embed_dim"),
             num_heads=config.get("num_heads"),
             mlp_hidden_multipliers=config.get("mlp_hidden_multipliers"),
             qkv_bias=config.get("qkv_bias"),

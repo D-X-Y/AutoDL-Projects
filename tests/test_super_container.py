@@ -36,25 +36,31 @@ def _internal_func(inputs, model):
     return abstract_child, outputs
 
 
-def _create_stel(input_dim, output_dim):
-    return super_core.SuperTransformerEncoderLayer(
-        input_dim,
-        output_dim,
-        num_heads=spaces.Categorical(2, 4, 6),
-        mlp_hidden_multiplier=spaces.Categorical(1, 2, 4),
+def _create_stel(input_dim, output_dim, order):
+    return super_core.SuperSequential(
+        super_core.SuperLinear(input_dim, output_dim),
+        super_core.SuperTransformerEncoderLayer(
+            output_dim,
+            num_heads=spaces.Categorical(2, 4, 6),
+            mlp_hidden_multiplier=spaces.Categorical(1, 2, 4),
+            order=order,
+        ),
     )
 
 
 @pytest.mark.parametrize("batch", (1, 2, 4))
 @pytest.mark.parametrize("seq_dim", (1, 10, 30))
 @pytest.mark.parametrize("input_dim", (6, 12, 24, 27))
-def test_super_sequential(batch, seq_dim, input_dim):
+@pytest.mark.parametrize(
+    "order", (super_core.LayerOrder.PreNorm, super_core.LayerOrder.PostNorm)
+)
+def test_super_sequential(batch, seq_dim, input_dim, order):
     out1_dim = spaces.Categorical(12, 24, 36)
     out2_dim = spaces.Categorical(24, 36, 48)
     out3_dim = spaces.Categorical(36, 72, 100)
-    layer1 = _create_stel(input_dim, out1_dim)
-    layer2 = _create_stel(out1_dim, out2_dim)
-    layer3 = _create_stel(out2_dim, out3_dim)
+    layer1 = _create_stel(input_dim, out1_dim, order)
+    layer2 = _create_stel(out1_dim, out2_dim, order)
+    layer3 = _create_stel(out2_dim, out3_dim, order)
     model = super_core.SuperSequential(layer1, layer2, layer3)
     print(model)
     model.apply_verbose(True)

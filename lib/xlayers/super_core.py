@@ -3,6 +3,7 @@
 #####################################################
 from .super_module import SuperRunMode
 from .super_module import IntSpaceType
+from .super_module import LayerOrder
 
 from .super_module import SuperModule
 from .super_container import SuperSequential
