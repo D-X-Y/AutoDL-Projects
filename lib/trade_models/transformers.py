@@ -45,7 +45,6 @@ DEFAULT_NET_CONFIG = None
 _default_max_depth = 5
 DefaultSearchSpace = dict(
     d_feat=6,
-    stem_dim=spaces.Categorical(*_get_list_mul(8, 16)),
     embed_dim=spaces.Categorical(*_get_list_mul(8, 16)),
     num_heads=_get_mul_specs((1, 2, 4, 8), _default_max_depth),
     mlp_hidden_multipliers=_get_mul_specs((0.5, 1, 2, 4, 8), _default_max_depth),
@@ -61,7 +60,6 @@ class SuperTransformer(super_core.SuperModule):
     def __init__(
         self,
         d_feat: int = 6,
-        stem_dim: super_core.IntSpaceType = DefaultSearchSpace["stem_dim"],
         embed_dim: List[super_core.IntSpaceType] = DefaultSearchSpace["embed_dim"],
         num_heads: List[super_core.IntSpaceType] = DefaultSearchSpace["num_heads"],
         mlp_hidden_multipliers: List[super_core.IntSpaceType] = DefaultSearchSpace[
@@ -74,15 +72,14 @@ class SuperTransformer(super_core.SuperModule):
     ):
         super(SuperTransformer, self).__init__()
         self._embed_dim = embed_dim
-        self._stem_dim = stem_dim
         self._num_heads = num_heads
         self._mlp_hidden_multipliers = mlp_hidden_multipliers
 
         # the stem part
-        self.input_embed = super_core.SuperAlphaEBDv1(d_feat, stem_dim)
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, self.stem_dim))
+        self.input_embed = super_core.SuperAlphaEBDv1(d_feat, embed_dim)
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, self.embed_dim))
         self.pos_embed = super_core.SuperPositionalEncoder(
-            d_model=stem_dim, max_seq_len=max_seq_len, dropout=pos_drop
+            d_model=embed_dim, max_seq_len=max_seq_len, dropout=pos_drop
         )
         # build the transformer encode layers -->> check params
         _assert_types(num_heads, (tuple, list))
@@ -111,15 +108,13 @@ class SuperTransformer(super_core.SuperModule):
         self.apply(self._init_weights)
 
     @property
-    def stem_dim(self):
-        return spaces.get_max(self._stem_dim)
+    def embed_dim(self):
+        return spaces.get_max(self._embed_dim)
 
     @property
     def abstract_search_space(self):
         root_node = spaces.VirtualNode(id(self))
-        if not spaces.is_determined(self._stem_dim):
-            root_node.append("_stem_dim", self._stem_dim.abstract(reuse_last=True))
-        if not spaces.is_determined(self._stem_dim):
+        if not spaces.is_determined(self._embed_dim):
             root_node.append("_embed_dim", self._embed_dim.abstract(reuse_last=True))
         xdict = dict(
             input_embed=self.input_embed.abstract_search_space,
@@ -155,13 +150,13 @@ class SuperTransformer(super_core.SuperModule):
     def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
         batch, flatten_size = input.shape
         feats = self.input_embed(input)  # batch * 60 * 64
-        if not spaces.is_determined(self._stem_dim):
-            stem_dim = self.abstract_child["_stem_dim"].value
+        if not spaces.is_determined(self._embed_dim):
+            embed_dim = self.abstract_child["_embed_dim"].value
         else:
-            stem_dim = spaces.get_determined_value(self._stem_dim)
+            embed_dim = spaces.get_determined_value(self._embed_dim)
         cls_tokens = self.cls_token.expand(batch, -1, -1)
         cls_tokens = F.interpolate(
-            cls_tokens, size=(stem_dim), mode="linear", align_corners=True
+            cls_tokens, size=(embed_dim), mode="linear", align_corners=True
         )
         feats_w_ct = torch.cat((cls_tokens, feats), dim=1)
         feats_w_tp = self.pos_embed(feats_w_ct)
@@ -191,7 +186,6 @@ def get_transformer(config):
     if name == "basic":
         model = SuperTransformer(
             d_feat=config.get("d_feat"),
-            stem_dim=config.get("stem_dim"),
             embed_dim=config.get("embed_dim"),
             num_heads=config.get("num_heads"),
             mlp_hidden_multipliers=config.get("mlp_hidden_multipliers"),

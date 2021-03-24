@@ -47,13 +47,12 @@ task:
             net_config:
                 name: basic
                 d_feat: 6
-                stem_dim: 48
-                embed_dims: [48, 48, 48, 48, 48]
+                embed_dim: 48
                 num_heads: [4, 4, 4, 4, 4]
                 mlp_hidden_multipliers: [4, 4, 4, 4, 4]
                 qkv_bias: True
                 pos_drop: 0.1
-                other_drop: 0.1
+                other_drop: 0
             opt_config:
             loss: mse
             GPU: 0
