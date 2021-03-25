@@ -18,7 +18,7 @@ class SuperLayerNorm1D(SuperModule):
     """Super Layer Norm."""
 
     def __init__(
-        self, dim: IntSpaceType, eps: float = 1e-5, elementwise_affine: bool = True
+        self, dim: IntSpaceType, eps: float = 1e-6, elementwise_affine: bool = True
     ) -> None:
         super(SuperLayerNorm1D, self).__init__()
         self._in_dim = dim
