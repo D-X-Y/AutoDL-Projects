@@ -61,7 +61,7 @@ At this moment, this project provides the following algorithms and scripts to ru
     <tr> <!-- (6-th row) -->
     <td align="center" valign="middle"> NATS-Bench </td>
     <td align="center" valign="middle"> <a href="https://xuanyidong.com/assets/projects/NATS-Bench"> NATS-Bench: Benchmarking NAS Algorithms for Architecture Topology and Size</a> </td>
-    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/main/docs/NATS-Bench.md">NATS-Bench.md</a> </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/NATS-Bench">NATS-Bench.md</a> </td>
     </tr>
     <tr> <!-- (7-th row) -->
     <td align="center" valign="middle"> ... </td>
