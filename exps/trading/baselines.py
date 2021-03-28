@@ -67,6 +67,18 @@ def extend_transformer_settings(alg2configs, name):
     return alg2configs
 
 
+def remove_PortAnaRecord(alg2configs):
+    alg2configs = copy.deepcopy(alg2configs)
+    for key, config in alg2configs.items():
+        xlist = config["task"]["record"]
+        new_list = []
+        for x in xlist:
+            if x["class"] != "PortAnaRecord":
+                new_list.append(x)
+        config["task"]["record"] = new_list
+    return alg2configs
+
+
 def retrieve_configs():
     # https://github.com/microsoft/qlib/blob/main/examples/benchmarks/
     config_dir = (lib_dir / ".." / "configs" / "qlib").resolve()
@@ -105,6 +117,12 @@ def retrieve_configs():
             )
         )
     alg2configs = extend_transformer_settings(alg2configs, "TSF")
+    alg2configs = remove_PortAnaRecord(alg2configs)
+    print(
+        "There are {:} algorithms : {:}".format(
+            len(alg2configs), list(alg2configs.keys())
+        )
+    )
     return alg2configs
 
 

@@ -223,7 +223,7 @@ if __name__ == "__main__":
         info_dict["heads"],
         info_dict["values"],
         info_dict["names"],
-        space=12,
+        space=14,
         verbose=True,
         sort_key=True,
     )
