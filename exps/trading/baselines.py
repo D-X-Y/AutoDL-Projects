@@ -58,7 +58,7 @@ def to_layer(config, embed_dim, depth):
 
 def extend_transformer_settings(alg2configs, name):
     config = copy.deepcopy(alg2configs[name])
-    for i in range(6):
+    for i in range(1, 7):
         for j in [6, 12, 24, 32, 48, 64]:
             for k in [0, 0.1]:
                 alg2configs[name + "-{:}x{:}-d{:}".format(i, j, k)] = to_layer(
