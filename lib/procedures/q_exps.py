@@ -107,7 +107,7 @@ def run_exp(
                 model = R.load_object(model_obj_name)
             logger.info("[Find existing object from {:}]".format(model_obj_name))
         except OSError:
-            R.log_params(**flatten_dict(task_config))
+            # R.log_params(**flatten_dict(task_config))
             if "save_path" in inspect.getfullargspec(model.fit).args:
                 model_fit_kwargs["save_path"] = os.path.join(
                     recorder_root_dir, "model.ckp"
