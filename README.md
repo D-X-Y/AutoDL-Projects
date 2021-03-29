@@ -105,11 +105,11 @@ to download this repo with submodules.
 
 If you find that this project helps your research, please consider citing the related paper:
 ```
-@article{dong2020autohas,
+@inproceedings{dong2021autohas,
   title={{AutoHAS}: Efficient Hyperparameter and Architecture Search},
   author={Dong, Xuanyi and Tan, Mingxing and Yu, Adams Wei and Peng, Daiyi and Gabrys, Bogdan and Le, Quoc V},
-  journal={arXiv preprint arXiv:2006.03656},
-  year={2020}
+  booktitle = {International Conference on Learning Representations (ICLR) Workshop on Neural Architecture Search},
+  year={2021}
 }
 @article{dong2021nats,
   title   = {{NATS-Bench}: Benchmarking NAS Algorithms for Architecture Topology and Size},

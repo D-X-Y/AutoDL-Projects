@@ -112,6 +112,12 @@ class QuantTransformer(Model):
     def use_gpu(self):
         return self.device != torch.device("cpu")
 
+    def to(self, device):
+        if device is None:
+            self.model.to(self.device)
+        else:
+            self.model.to("cpu")
+
     def loss_fn(self, pred, label):
         mask = ~torch.isnan(label)
         if self.opt_config["loss"] == "mse":
