@@ -3,7 +3,7 @@
 #####################################################
 # python exps/trading/organize_results.py           #
 #####################################################
-import sys, argparse
+import re, sys, argparse
 import numpy as np
 from typing import List, Text
 from collections import defaultdict, OrderedDict
@@ -121,7 +121,7 @@ def filter_finished(recorders):
     return returned_recorders, not_finished
 
 
-def query_info(save_dir, verbose):
+def query_info(save_dir, verbose, name_filter):
     R.set_uri(save_dir)
     experiments = R.list_experiments()
 
@@ -142,6 +142,8 @@ def query_info(save_dir, verbose):
     head_strs, value_strs, names = [], [], []
     for idx, (key, experiment) in enumerate(experiments.items()):
         if experiment.id == "0":
+            continue
+        if name_filter is not None and re.match(name_filter, experiment.name) is None:
             continue
         recorders = experiment.list_recorders()
         recorders, not_finished = filter_finished(recorders)
@@ -205,6 +207,9 @@ if __name__ == "__main__":
         default=False,
         help="Print detailed log information or not.",
     )
+    parser.add_argument(
+        "--name_filter", type=str, default=".*", help="Filter experiment names."
+    )
     args = parser.parse_args()
 
     print("Show results of {:}".format(args.save_dir))
@@ -216,7 +221,7 @@ if __name__ == "__main__":
 
     all_info_dict = []
     for save_dir in args.save_dir:
-        _, info_dict = query_info(save_dir, args.verbose)
+        _, info_dict = query_info(save_dir, args.verbose, args.name_filter)
         all_info_dict.append(info_dict)
     info_dict = QResult.merge_dict(all_info_dict)
     compare_results(
