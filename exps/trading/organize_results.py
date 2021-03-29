@@ -131,9 +131,9 @@ def query_info(save_dir, verbose):
         "ICIR": "ICIR",
         "Rank IC": "Rank_IC",
         "Rank ICIR": "Rank_ICIR",
-        "excess_return_with_cost.annualized_return": "Annualized_Return",
+        # "excess_return_with_cost.annualized_return": "Annualized_Return",
         # "excess_return_with_cost.information_ratio": "Information_Ratio",
-        "excess_return_with_cost.max_drawdown": "Max_Drawdown",
+        # "excess_return_with_cost.max_drawdown": "Max_Drawdown",
     }
     all_keys = list(key_map.values())
 
