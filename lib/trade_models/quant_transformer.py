@@ -298,7 +298,7 @@ class QuantTransformer(Model):
                 results_dict=results_dict,
                 start_epoch=iepoch + 1,
             )
-            torch.save(save_info, ckp_path, map_location="cpu")
+            torch.save(save_info, ckp_path)
         self.logger.info(
             "The best score: {:.6f} @ {:02d}-th epoch".format(best_score, best_epoch)
         )
