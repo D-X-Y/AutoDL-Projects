@@ -22,8 +22,11 @@ depths="1 2 3 4 5 6"
 
 for channel in ${channels}
 do
-  for depth in ${depths}
-  do
-    python exps/trading/baselines.py --alg TSF-${depth}x${channel}-drop${drop} --gpu ${gpu} --market ${market}
-  done
+    python exps/trading/baselines.py --alg TSF-1x${channel}-drop${drop} \
+	    				   TSF-2x${channel}-drop${drop} \
+					   TSF-3x${channel}-drop${drop} \
+					   TSF-4x${channel}-drop${drop} \
+					   TSF-5x${channel}-drop${drop} \
+					   TSF-6x${channel}-drop${drop} \
+		                     --gpu ${gpu} --market ${market} --shared_dataset True
 done
