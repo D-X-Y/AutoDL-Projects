@@ -212,6 +212,7 @@ if __name__ == "__main__":
         )
     elif len(args.alg) > 1:
         assert args.shared_dataset, "Must allow share dataset"
+        pprint(args)
         configs = [
             update_gpu(update_market(alg2configs[name], args.market), args.gpu)
             for name in args.alg
@@ -222,6 +223,7 @@ if __name__ == "__main__":
         pprint(dataset_config)
         pprint(dataset)
         for alg_name, config in zip(args.alg, configs):
+            print("Run {:} over {:}".format(alg_name, args.alg))
             for irun in range(args.times):
                 run_exp(
                     config.get("task"),
