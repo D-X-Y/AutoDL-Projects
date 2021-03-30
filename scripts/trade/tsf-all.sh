@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# bash scripts/trade/tsf-all.sh 0 csi300 0
-# bash scripts/trade/tsf-all.sh 0 csi300 0.1
+# bash scripts/trade/tsf-all.sh 0 csi300 0_0
+# bash scripts/trade/tsf-all.sh 0 csi300 0.1_0
 # bash scripts/trade/tsf-all.sh 1 all    
 #
 set -e
@@ -24,6 +24,6 @@ for channel in ${channels}
 do
   for depth in ${depths}
   do
-    python exps/trading/baselines.py --alg TSF-${depth}x${channel}-d${drop} --gpu ${gpu} --market ${market}
+    python exps/trading/baselines.py --alg TSF-${depth}x${channel}-drop${drop} --gpu ${gpu} --market ${market}
   done
 done

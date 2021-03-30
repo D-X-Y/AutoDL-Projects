@@ -25,8 +25,8 @@ class SuperLayerNorm1D(SuperModule):
         self._eps = eps
         self._elementwise_affine = elementwise_affine
         if self._elementwise_affine:
-            self.weight = nn.Parameter(torch.Tensor(self.in_dim))
-            self.bias = nn.Parameter(torch.Tensor(self.in_dim))
+            self.register_parameter("weight", nn.Parameter(torch.Tensor(self.in_dim)))
+            self.register_parameter("bias", nn.Parameter(torch.Tensor(self.in_dim)))
         else:
             self.register_parameter("weight", None)
             self.register_parameter("bias", None)

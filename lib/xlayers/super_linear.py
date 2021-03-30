@@ -30,11 +30,14 @@ class SuperLinear(SuperModule):
         self._out_features = out_features
         self._bias = bias
         # weights to be optimized
-        self._super_weight = torch.nn.Parameter(
-            torch.Tensor(self.out_features, self.in_features)
+        self.register_parameter(
+            "_super_weight",
+            torch.nn.Parameter(torch.Tensor(self.out_features, self.in_features)),
         )
         if self.bias:
-            self._super_bias = torch.nn.Parameter(torch.Tensor(self.out_features))
+            self.register_parameter(
+                "_super_bias", torch.nn.Parameter(torch.Tensor(self.out_features))
+            )
         else:
             self.register_parameter("_super_bias", None)
         self.reset_parameters()

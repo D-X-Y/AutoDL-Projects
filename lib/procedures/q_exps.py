@@ -107,7 +107,7 @@ def run_exp(
                 model = R.load_object(model_obj_name)
             logger.info("[Find existing object from {:}]".format(model_obj_name))
         except OSError:
-            # R.log_params(**flatten_dict(task_config))
+            R.log_params(**flatten_dict(update_gpu(task_config, None)))
             if "save_path" in inspect.getfullargspec(model.fit).args:
                 model_fit_kwargs["save_path"] = os.path.join(
                     recorder_root_dir, "model.ckp"
@@ -126,9 +126,6 @@ def run_exp(
             else:
                 R.save_objects(**{model_obj_name: model})
         except Exception as e:
-            import pdb
-
-            pdb.set_trace()
             raise ValueError("Something wrong: {:}".format(e))
         # Get the recorder
         recorder = R.get_recorder()
