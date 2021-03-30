@@ -15,6 +15,7 @@ lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
+from config_utils import arg_str2bool
 import qlib
 from qlib.config import REG_CN
 from qlib.workflow import R
@@ -184,16 +185,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser("Show Results")
 
-    def str2bool(v):
-        if isinstance(v, bool):
-            return v
-        elif v.lower() in ("yes", "true", "t", "y", "1"):
-            return True
-        elif v.lower() in ("no", "false", "f", "n", "0"):
-            return False
-        else:
-            raise argparse.ArgumentTypeError("Boolean value expected.")
-
     parser.add_argument(
         "--save_dir",
         type=str,
@@ -203,7 +194,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--verbose",
-        type=str2bool,
+        type=arg_str2bool,
         default=False,
         help="Print detailed log information or not.",
     )
@@ -228,7 +219,7 @@ if __name__ == "__main__":
         info_dict["heads"],
         info_dict["values"],
         info_dict["names"],
-        space=14,
+        space=18,
         verbose=True,
         sort_key=True,
     )
