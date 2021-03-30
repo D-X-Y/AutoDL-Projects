@@ -37,6 +37,7 @@ jobs:
           python -m black ./lib/trade_models -l 88 --check --diff --verbose
           python -m black ./lib/procedures -l 88 --check --diff --verbose
           python -m black ./lib/config_utils -l 88 --check --diff --verbose
+          python -m black ./lib/log_utils -l 88 --check --diff --verbose
 
       - name: Test Search Space
         run: |
