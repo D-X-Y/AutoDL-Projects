@@ -132,3 +132,4 @@ mlruns*
 outputs
 
 pytest_cache
+*.pkl
