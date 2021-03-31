@@ -3,7 +3,7 @@
 #####################################################
 # python exps/trading/organize_results.py           #
 #####################################################
-import re, sys, argparse
+import os, re, sys, argparse
 import numpy as np
 from typing import List, Text
 from collections import defaultdict, OrderedDict
@@ -22,11 +22,26 @@ from qlib.workflow import R
 
 
 class QResult:
-    def __init__(self):
+    """A class to maintain the results of a qlib experiment."""
+
+    def __init__(self, name):
         self._result = defaultdict(list)
+        self._name = name
+        self._recorder_paths = []
 
     def append(self, key, value):
         self._result[key].append(value)
+
+    def append_path(self, xpath):
+        self._recorder_paths.append(xpath)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def paths(self):
+        return self._recorder_paths
 
     @property
     def result(self):
@@ -72,8 +87,10 @@ class QResult:
         head_str = separate.join([self.full_str(x, space) for x in avaliable_keys])
         values = []
         for key in avaliable_keys:
-            # current_values = self._result[key]
-            current_values = [x * 100 for x in self._result[key]]
+            if "IR" in key:
+                current_values = [x * 100 for x in self._result[key]]
+            else:
+                current_values = self._result[key]
             mean = np.mean(current_values)
             std = np.std(current_values)
             # values.append("{:.4f} $\pm$ {:.4f}".format(mean, std))
@@ -122,25 +139,13 @@ def filter_finished(recorders):
     return returned_recorders, not_finished
 
 
-def query_info(save_dir, verbose, name_filter):
+def query_info(save_dir, verbose, name_filter, key_map):
     R.set_uri(save_dir)
     experiments = R.list_experiments()
 
-    key_map = {
-        # "RMSE": "RMSE",
-        "IC": "IC",
-        "ICIR": "ICIR",
-        "Rank IC": "Rank_IC",
-        "Rank ICIR": "Rank_ICIR",
-        # "excess_return_with_cost.annualized_return": "Annualized_Return",
-        # "excess_return_with_cost.information_ratio": "Information_Ratio",
-        # "excess_return_with_cost.max_drawdown": "Max_Drawdown",
-    }
-    all_keys = list(key_map.values())
-
     if verbose:
         print("There are {:} experiments.".format(len(experiments)))
-    head_strs, value_strs, names = [], [], []
+    qresults = []
     for idx, (key, experiment) in enumerate(experiments.items()):
         if experiment.id == "0":
             continue
@@ -158,9 +163,12 @@ def query_info(save_dir, verbose, name_filter):
                     len(recorders) + not_finished,
                 )
             )
-        result = QResult()
+        result = QResult(experiment.name)
         for recorder_id, recorder in recorders.items():
             result.update(recorder.list_metrics(), key_map)
+            result.append_path(
+                os.path.join(recorder.uri, recorder.experiment_id, recorder.id)
+            )
         if not len(result):
             print("There are no valid recorders for {:}".format(experiment))
             continue
@@ -170,15 +178,8 @@ def query_info(save_dir, verbose, name_filter):
                     len(recorders), experiment.name
                 )
             )
-        head_str, value_str = result.info(all_keys, verbose=verbose)
-        head_strs.append(head_str)
-        value_strs.append(value_str)
-        names.append(experiment.name)
-    info_str_dict = compare_results(
-        head_strs, value_strs, names, space=10, verbose=verbose
-    )
-    info_value_dict = dict(heads=head_strs, values=value_strs, names=names)
-    return info_str_dict, info_value_dict
+        qresults.append(result)
+    return qresults
 
 
 if __name__ == "__main__":
@@ -210,15 +211,37 @@ if __name__ == "__main__":
     provider_uri = "~/.qlib/qlib_data/cn_data"
     qlib.init(provider_uri=provider_uri, region=REG_CN)
 
-    all_info_dict = []
+    """
+    key_map = {
+        # "RMSE": "RMSE",
+        "IC": "IC",
+        "ICIR": "ICIR",
+        "Rank IC": "Rank_IC",
+        "Rank ICIR": "Rank_ICIR",
+        # "excess_return_with_cost.annualized_return": "Annualized_Return",
+        # "excess_return_with_cost.information_ratio": "Information_Ratio",
+        # "excess_return_with_cost.max_drawdown": "Max_Drawdown",
+    }
+    """
+    key_map = dict()
+    for xset in ("train", "valid", "test"):
+        key_map["{:}-mean-IC".format(xset)] = "IC ({:})".format(xset)
+        key_map["{:}-mean-ICIR".format(xset)] = "ICIR ({:})".format(xset)
+
+    all_qresults = []
     for save_dir in args.save_dir:
-        _, info_dict = query_info(save_dir, args.verbose, args.name_filter)
-        all_info_dict.append(info_dict)
-    info_dict = QResult.merge_dict(all_info_dict)
+        qresults = query_info(save_dir, args.verbose, args.name_filter, key_map)
+        all_qresults.extend(qresults)
+    names, head_strs, value_strs = [], [], []
+    for result in all_qresults:
+        head_str, value_str = result.info(list(key_map.values()), verbose=args.verbose)
+        head_strs.append(head_str)
+        value_strs.append(value_str)
+        names.append(result.name)
     compare_results(
-        info_dict["heads"],
-        info_dict["values"],
-        info_dict["names"],
+        head_strs,
+        value_strs,
+        names,
         space=18,
         verbose=True,
         sort_key=True,
