@@ -122,6 +122,22 @@ fi
 # DXY personalized enviornment
 export TORCH_HOME="$HOME/.torch"
 
+# Command History Settings
+export HISTTIMEFORMAT='%F, %T '
+HISTSIZE=10000
+HISTFILESIZE=10000
+shopt -s histappend
+export HISTCONTROL=ignoredups:erasedups  # no duplicate entries
+# Save and reload the history after each command finishes
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+# Ingore history/ls/pwd
+export HISTIGNORE="history:ls:pwd:"
+# Search the history to complete the command
+if [[ $- == *i* ]]
+then
+        bind '"\e[A": history-search-backward'
+        bind '"\e[B": history-search-forward'
+fi
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
