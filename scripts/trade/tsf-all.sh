@@ -18,7 +18,7 @@ market=$2
 drop=$3
 
 channels="6 12 24 32 48 64"
-depths="1 2 3 4 5 6"
+#depths="1 2 3 4 5 6"
 
 for channel in ${channels}
 do

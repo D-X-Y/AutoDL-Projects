@@ -10,4 +10,4 @@ cp ${script_dir}/bashrc ~/.bashrc
 
 wget https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh
 wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
-
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
