@@ -4,9 +4,9 @@
 import os, sys, time, torch
 import torch.nn.functional as F
 
-# our modules
+# modules in AutoDL
 from log_utils import AverageMeter, time_string
-from utils import obtain_accuracy
+from .eval_funcs import obtain_accuracy
 
 
 def simple_KD_train(

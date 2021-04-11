@@ -20,87 +20,7 @@ import qlib
 from qlib.config import REG_CN
 from qlib.workflow import R
 
-
-class QResult:
-    """A class to maintain the results of a qlib experiment."""
-
-    def __init__(self, name):
-        self._result = defaultdict(list)
-        self._name = name
-        self._recorder_paths = []
-
-    def append(self, key, value):
-        self._result[key].append(value)
-
-    def append_path(self, xpath):
-        self._recorder_paths.append(xpath)
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def paths(self):
-        return self._recorder_paths
-
-    @property
-    def result(self):
-        return self._result
-
-    def __len__(self):
-        return len(self._result)
-
-    def update(self, metrics, filter_keys=None):
-        for key, value in metrics.items():
-            if filter_keys is not None and key in filter_keys:
-                key = filter_keys[key]
-            elif filter_keys is not None:
-                continue
-            self.append(key, value)
-
-    @staticmethod
-    def full_str(xstr, space):
-        xformat = "{:" + str(space) + "s}"
-        return xformat.format(str(xstr))
-
-    @staticmethod
-    def merge_dict(dict_list):
-        new_dict = dict()
-        for xkey in dict_list[0].keys():
-            values = [x for xdict in dict_list for x in xdict[xkey]]
-            new_dict[xkey] = values
-        return new_dict
-
-    def info(
-        self,
-        keys: List[Text],
-        separate: Text = "& ",
-        space: int = 20,
-        verbose: bool = True,
-    ):
-        avaliable_keys = []
-        for key in keys:
-            if key not in self.result:
-                print("There are invalid key [{:}].".format(key))
-            else:
-                avaliable_keys.append(key)
-        head_str = separate.join([self.full_str(x, space) for x in avaliable_keys])
-        values = []
-        for key in avaliable_keys:
-            if "IR" in key:
-                current_values = [x * 100 for x in self._result[key]]
-            else:
-                current_values = self._result[key]
-            mean = np.mean(current_values)
-            std = np.std(current_values)
-            # values.append("{:.4f} $\pm$ {:.4f}".format(mean, std))
-            values.append("{:.2f} $\pm$ {:.2f}".format(mean, std))
-        value_str = separate.join([self.full_str(x, space) for x in values])
-        if verbose:
-            print(head_str)
-            print(value_str)
-        return head_str, value_str
-
+from utils.qlib_utils import QResult
 
 def compare_results(
     heads, values, names, space=10, separate="& ", verbose=True, sort_key=False
@@ -149,7 +69,7 @@ def query_info(save_dir, verbose, name_filter, key_map):
     for idx, (key, experiment) in enumerate(experiments.items()):
         if experiment.id == "0":
             continue
-        if name_filter is not None and re.match(name_filter, experiment.name) is None:
+        if name_filter is not None and re.fullmatch(name_filter, experiment.name) is None:
             continue
         recorders = experiment.list_recorders()
         recorders, not_finished = filter_finished(recorders)

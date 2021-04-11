@@ -2,9 +2,11 @@
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2019 #
 ##################################################
 import os, sys, time, torch
+
+# modules in AutoDL
 from log_utils import AverageMeter
 from log_utils import time_string
-from utils import obtain_accuracy
+from .eval_funcs import obtain_accuracy
 
 
 def basic_train(

@@ -3,12 +3,14 @@
 #####################################################
 import os, time, copy, torch, pathlib
 
+# modules in AutoDL
 import datasets
 from config_utils import load_config
 from procedures import prepare_seed, get_optim_scheduler
-from utils import get_model_infos, obtain_accuracy
 from log_utils import AverageMeter, time_string, convert_secs2time
 from models import get_cell_based_tiny_net
+from utils import get_model_infos
+from .eval_funcs import obtain_accuracy
 
 
 __all__ = ["evaluate_for_seed", "pure_evaluate", "get_nas_bench_loaders"]

@@ -76,10 +76,12 @@ def rotate2affine(degree):
 
 # shape is a tuple [H, W]
 def normalize_points(shape, points):
-    assert (isinstance(shape, tuple) or isinstance(shape, list)) and len(shape) == 2, "invalid shape : {:}".format(
+    assert (isinstance(shape, tuple) or isinstance(shape, list)) and len(
         shape
-    )
-    assert isinstance(points, torch.Tensor) and (points.shape[0] == 2), "points are wrong : {:}".format(points.shape)
+    ) == 2, "invalid shape : {:}".format(shape)
+    assert isinstance(points, torch.Tensor) and (
+        points.shape[0] == 2
+    ), "points are wrong : {:}".format(points.shape)
     (H, W), points = shape, points.clone()
     points[0, :] = normalize_L(points[0, :], W)
     points[1, :] = normalize_L(points[1, :], H)
@@ -88,10 +90,12 @@ def normalize_points(shape, points):
 
 # shape is a tuple [H, W]
 def normalize_points_batch(shape, points):
-    assert (isinstance(shape, tuple) or isinstance(shape, list)) and len(shape) == 2, "invalid shape : {:}".format(
+    assert (isinstance(shape, tuple) or isinstance(shape, list)) and len(
         shape
-    )
-    assert isinstance(points, torch.Tensor) and (points.size(-1) == 2), "points are wrong : {:}".format(points.shape)
+    ) == 2, "invalid shape : {:}".format(shape)
+    assert isinstance(points, torch.Tensor) and (
+        points.size(-1) == 2
+    ), "points are wrong : {:}".format(points.shape)
     (H, W), points = shape, points.clone()
     x = normalize_L(points[..., 0], W)
     y = normalize_L(points[..., 1], H)
@@ -100,10 +104,12 @@ def normalize_points_batch(shape, points):
 
 # shape is a tuple [H, W]
 def denormalize_points(shape, points):
-    assert (isinstance(shape, tuple) or isinstance(shape, list)) and len(shape) == 2, "invalid shape : {:}".format(
+    assert (isinstance(shape, tuple) or isinstance(shape, list)) and len(
         shape
-    )
-    assert isinstance(points, torch.Tensor) and (points.shape[0] == 2), "points are wrong : {:}".format(points.shape)
+    ) == 2, "invalid shape : {:}".format(shape)
+    assert isinstance(points, torch.Tensor) and (
+        points.shape[0] == 2
+    ), "points are wrong : {:}".format(points.shape)
     (H, W), points = shape, points.clone()
     points[0, :] = denormalize_L(points[0, :], W)
     points[1, :] = denormalize_L(points[1, :], H)
@@ -112,10 +118,12 @@ def denormalize_points(shape, points):
 
 # shape is a tuple [H, W]
 def denormalize_points_batch(shape, points):
-    assert (isinstance(shape, tuple) or isinstance(shape, list)) and len(shape) == 2, "invalid shape : {:}".format(
+    assert (isinstance(shape, tuple) or isinstance(shape, list)) and len(
         shape
-    )
-    assert isinstance(points, torch.Tensor) and (points.shape[-1] == 2), "points are wrong : {:}".format(points.shape)
+    ) == 2, "invalid shape : {:}".format(shape)
+    assert isinstance(points, torch.Tensor) and (
+        points.shape[-1] == 2
+    ), "points are wrong : {:}".format(points.shape)
     (H, W), points = shape, points.clone()
     x = denormalize_L(points[..., 0], W)
     y = denormalize_L(points[..., 1], H)
@@ -145,5 +153,7 @@ def affine2image(image, theta, shape):
     theta = theta[:2, :].unsqueeze(0)
     grid_size = torch.Size([1, C, shape[0], shape[1]])
     grid = F.affine_grid(theta, grid_size)
-    affI = F.grid_sample(image.unsqueeze(0), grid, mode="bilinear", padding_mode="border")
+    affI = F.grid_sample(
+        image.unsqueeze(0), grid, mode="bilinear", padding_mode="border"
+    )
     return affI.squeeze(0)

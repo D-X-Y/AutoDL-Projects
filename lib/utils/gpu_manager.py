@@ -2,7 +2,15 @@ import os
 
 
 class GPUManager:
-    queries = ("index", "gpu_name", "memory.free", "memory.used", "memory.total", "power.draw", "power.limit")
+    queries = (
+        "index",
+        "gpu_name",
+        "memory.free",
+        "memory.used",
+        "memory.total",
+        "power.draw",
+        "power.limit",
+    )
 
     def __init__(self):
         all_gpus = self.query_gpu(False)
@@ -28,7 +36,9 @@ class GPUManager:
                 find = False
                 for gpu in all_gpus:
                     if gpu["index"] == CUDA_VISIBLE_DEVICE:
-                        assert not find, "Duplicate cuda device index : {}".format(CUDA_VISIBLE_DEVICE)
+                        assert not find, "Duplicate cuda device index : {}".format(
+                            CUDA_VISIBLE_DEVICE
+                        )
                         find = True
                         selected_gpus.append(gpu.copy())
                         selected_gpus[-1]["index"] = "{}".format(idx)
@@ -52,7 +62,9 @@ class GPUManager:
 
     def select_by_memory(self, numbers=1):
         all_gpus = self.query_gpu(False)
-        assert numbers <= len(all_gpus), "Require {} gpus more than you have".format(numbers)
+        assert numbers <= len(all_gpus), "Require {} gpus more than you have".format(
+            numbers
+        )
         alls = []
         for idx, gpu in enumerate(all_gpus):
             free_memory = gpu["memory.free"]
