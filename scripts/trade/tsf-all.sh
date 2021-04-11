@@ -18,7 +18,7 @@ market=$2
 drop=$3
 
 channels="6 12 24 32 48 64"
-#depths="1 2 3 4 5 6"
+#depths="1 2 3 4 5 6 7 8"
 
 for channel in ${channels}
 do
@@ -28,5 +28,7 @@ do
 					   TSF-4x${channel}-drop${drop} \
 					   TSF-5x${channel}-drop${drop} \
 					   TSF-6x${channel}-drop${drop} \
+					   TSF-7x${channel}-drop${drop} \
+					   TSF-8x${channel}-drop${drop} \
 		                     --gpu ${gpu} --market ${market} --shared_dataset True
 done
