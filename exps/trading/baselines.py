@@ -85,7 +85,9 @@ def extend_train_data(alg2configs, name):
     config = copy.deepcopy(alg2configs[name])
     start_times = (
         "2008-01-01",
+        "2008-07-01",
         "2009-01-01",
+        "2009-07-01",
         "2010-01-01",
         "2011-01-01",
         "2012-01-01",
