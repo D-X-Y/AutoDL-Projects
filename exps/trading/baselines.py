@@ -64,7 +64,7 @@ def extend_transformer_settings(alg2configs, name):
     config = copy.deepcopy(alg2configs[name])
     for i in range(1, 9):
         for j in (6, 12, 24, 32, 48, 64):
-            for k1 in (0, 0.1, 0.2, 0.3):
+            for k1 in (0, 0.05, 0.1, 0.2, 0.3):
                 for k2 in (0, 0.1):
                     alg2configs[
                         name + "-{:}x{:}-drop{:}_{:}".format(i, j, k1, k2)

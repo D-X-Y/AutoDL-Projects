@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from typing import List, Text
 from collections import defaultdict, OrderedDict
@@ -10,12 +11,32 @@ class QResult:
         self._result = defaultdict(list)
         self._name = name
         self._recorder_paths = []
+        self._date2ICs = []
 
     def append(self, key, value):
         self._result[key].append(value)
 
     def append_path(self, xpath):
         self._recorder_paths.append(xpath)
+
+    def append_date2ICs(self, date2IC):
+        if self._date2ICs:  # not empty
+            keys = sorted(list(date2IC.keys()))
+            pre_keys = sorted(list(self._date2ICs[0].keys()))
+            assert len(keys) == len(pre_keys)
+            for i, (x, y) in enumerate(zip(keys, pre_keys)):
+                assert x == y, "[{:}] {:} vs {:}".format(i, x, y)
+        self._date2ICs.append(date2IC)
+
+    def find_all_dates(self):
+        dates = self._date2ICs[-1].keys()
+        return sorted(list(dates))
+
+    def get_IC_by_date(self, date, scale=1.0):
+        values = []
+        for date2IC in self._date2ICs:
+            values.append(date2IC[date] * scale)
+        return float(np.mean(values)), float(np.std(values))
 
     @property
     def name(self):

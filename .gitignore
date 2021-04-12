@@ -133,3 +133,4 @@ outputs
 
 pytest_cache
 *.pkl
+*.pth

@@ -22,6 +22,7 @@ from qlib.workflow import R
 
 from utils.qlib_utils import QResult
 
+
 def compare_results(
     heads, values, names, space=10, separate="& ", verbose=True, sort_key=False
 ):
@@ -69,7 +70,10 @@ def query_info(save_dir, verbose, name_filter, key_map):
     for idx, (key, experiment) in enumerate(experiments.items()):
         if experiment.id == "0":
             continue
-        if name_filter is not None and re.fullmatch(name_filter, experiment.name) is None:
+        if (
+            name_filter is not None
+            and re.fullmatch(name_filter, experiment.name) is None
+        ):
             continue
         recorders = experiment.list_recorders()
         recorders, not_finished = filter_finished(recorders)
