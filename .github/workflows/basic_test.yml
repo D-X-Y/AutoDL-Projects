@@ -48,4 +48,5 @@ jobs:
           ls
           python --version
           python -m pytest ./tests/test_basic_space.py -s
+          python -m pytest ./tests/test_synthetic.py -s
         shell: bash
