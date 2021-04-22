@@ -56,5 +56,5 @@ jobs:
           python -m pip install parameterized
           python -m pip install torch torchvision
           python --version
-          python -m pytest ./tests/test_synthetic.py -s
+          python -m pytest ./tests/test_synthetic*.py -s
         shell: bash

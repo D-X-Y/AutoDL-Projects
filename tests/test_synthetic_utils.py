@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.03 #
 #####################################################
-# pytest tests/test_synthetic.py -s                 #
+# pytest tests/test_synthetic_utils.py -s           #
 #####################################################
 import sys, random
 import unittest
@@ -14,7 +14,7 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
 from datasets import QuadraticFunc
-from datasets import SynAdaptiveEnv
+from datasets import ConstantGenerator, SinGenerator
 
 
 class TestQuadraticFunc(unittest.TestCase):
@@ -40,11 +40,21 @@ class TestQuadraticFunc(unittest.TestCase):
         self.assertTrue(abs(function[1] - 1) < thresh)
 
 
-class TestSynAdaptiveEnv(unittest.TestCase):
-    """Test the synethtic adaptive environment."""
+class TestConstantGenerator(unittest.TestCase):
+    """Test the constant data generator."""
 
     def test_simple(self):
-        dataset = SynAdaptiveEnv()
+        dataset = ConstantGenerator()
+        for i, (idx, t, x) in enumerate(dataset):
+            assert i == idx, "First loop: {:} vs {:}".format(i, idx)
+            assert x == 0.1
+
+
+class TestSinGenerator(unittest.TestCase):
+    """Test the synethtic data generator."""
+
+    def test_simple(self):
+        dataset = SinGenerator()
         for i, (idx, t, x) in enumerate(dataset):
             assert i == idx, "First loop: {:} vs {:}".format(i, idx)
         for i, (idx, t, x) in enumerate(dataset):

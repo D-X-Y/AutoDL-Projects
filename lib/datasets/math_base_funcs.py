@@ -176,93 +176,31 @@ class QuarticFunc(FitFunc):
         )
 
 
-class SynAdaptiveEnv(data.Dataset):
-    """The synethtic dataset for adaptive environment.
+class DynamicQuadraticFunc(FitFunc):
+    """The dynamic quadratic function that outputs f(x) = a * x^2 + b * x + c."""
 
-    - x in [0, 1]
-    - y = amplitude-scale-of(x) * sin( period-phase-shift-of(x) )
-    - where
-    - the amplitude scale is a quadratic function of x
-    - the period-phase-shift is another quadratic function of x
+    def __init__(self, list_of_points=None):
+        super(DynamicQuadraticFunc, self).__init__(3, list_of_points)
+        self._timestamp = None
 
-    """
-
-    def __init__(
-        self,
-        num: int = 100,
-        num_sin_phase: int = 7,
-        min_amplitude: float = 1,
-        max_amplitude: float = 4,
-        phase_shift: float = 0,
-        mode: Optional[str] = None,
-    ):
-        self._amplitude_scale = QuadraticFunc(
-            [(0, min_amplitude), (0.5, max_amplitude), (1, min_amplitude)]
+    def __getitem__(self, x):
+        self.check_valid()
+        return (
+            self._params[0][self._timestamp] * x * x
+            + self._params[1][self._timestamp] * x
+            + self._params[2][self._timestamp]
         )
 
-        self._num_sin_phase = num_sin_phase
-        self._interval = 1.0 / (float(num) - 1)
-        self._total_num = num
+    def _getitem(self, x, weights):
+        raise NotImplementedError
 
-        fitting_data = []
-        temp_max_scalar = 2 ** (num_sin_phase - 1)
-        for i in range(num_sin_phase):
-            value = (2 ** i) / temp_max_scalar
-            next_value = (2 ** (i + 1)) / temp_max_scalar
-            for _phase in (0, 0.25, 0.5, 0.75):
-                inter_value = value + (next_value - value) * _phase
-                fitting_data.append((inter_value, math.pi * (2 * i + _phase)))
-        self._period_phase_shift = QuarticFunc(fitting_data)
-
-        # Training Set 60%
-        num_of_train = int(self._total_num * 0.6)
-        # Validation Set 20%
-        num_of_valid = int(self._total_num * 0.2)
-        # Test Set 20%
-        num_of_set = self._total_num - num_of_train - num_of_valid
-        all_indexes = list(range(self._total_num))
-        if mode is None:
-            self._indexes = all_indexes
-        elif mode.lower() in ("train", "training"):
-            self._indexes = all_indexes[:num_of_train]
-        elif mode.lower() in ("valid", "validation"):
-            self._indexes = all_indexes[num_of_train : num_of_train + num_of_valid]
-        elif mode.lower() in ("test", "testing"):
-            self._indexes = all_indexes[num_of_train + num_of_valid :]
-        else:
-            raise ValueError("Unkonwn mode of {:}".format(mode))
-
-    def __iter__(self):
-        self._iter_num = 0
-        return self
-
-    def __next__(self):
-        if self._iter_num >= len(self):
-            raise StopIteration
-        self._iter_num += 1
-        return self.__getitem__(self._iter_num - 1)
-
-    def __getitem__(self, index):
-        assert 0 <= index < len(self), "{:} is not in [0, {:})".format(index, len(self))
-        index = self._indexes[index]
-        position = self._interval * index
-        value = self._amplitude_scale[position] * math.sin(
-            self._period_phase_shift[position]
-        )
-        return index, position, value
-
-    def __len__(self):
-        return len(self._indexes)
+    def set_timestamp(self, timestamp):
+        self._timestamp = timestamp
 
     def __repr__(self):
-        return (
-            "{name}({cur_num:}/{total} elements,\n"
-            "amplitude={amplitude},\n"
-            "period_phase_shift={period_phase_shift})".format(
-                name=self.__class__.__name__,
-                cur_num=self._total_num,
-                total=len(self),
-                amplitude=self._amplitude_scale,
-                period_phase_shift=self._period_phase_shift,
-            )
+        return "{name}(y = {a} * x^2 + {b} * x + {c})".format(
+            name=self.__class__.__name__,
+            a=self._params[0],
+            b=self._params[1],
+            c=self._params[2],
         )
