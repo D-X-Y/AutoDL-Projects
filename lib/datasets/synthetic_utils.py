@@ -77,7 +77,7 @@ class SinGenerator(UnifiedSplit, data.Dataset):
                 fitting_data.append((inter_value, math.pi * (2 * i + _phase)))
         self._period_phase_shift = QuarticFunc(fitting_data)
         UnifiedSplit.__init__(self, self._total_num, mode)
-        self._transform = lambda x: x
+        self._transform = None
 
     def __iter__(self):
         self._iter_num = 0
@@ -92,14 +92,20 @@ class SinGenerator(UnifiedSplit, data.Dataset):
     def set_transform(self, transform):
         self._transform = transform
 
+    def transform(self, x):
+        if self._transform is None:
+            return x
+        else:
+            return self._transform(x)
+
     def __getitem__(self, index):
         assert 0 <= index < len(self), "{:} is not in [0, {:})".format(index, len(self))
         index = self._indexes[index]
         position = self._interval * index
-        value = self._amplitude_scale[position] * math.sin(
-            self._period_phase_shift[position]
+        value = self._amplitude_scale(position) * math.sin(
+            self._period_phase_shift(position)
         )
-        return index, position, self._transform(value)
+        return index, position, self.transform(value)
 
     def __len__(self):
         return len(self._indexes)
