@@ -49,8 +49,8 @@ class SuperModule(abc.ABC, nn.Module):
     def add_module(self, name: str, module: Optional[torch.nn.Module]) -> None:
         if not isinstance(module, SuperModule):
             warnings.warn(
-                "Add {:} module, which is not SuperModule, into {:}".format(
-                    name, self.__class__.__name__
+                "Add {:}:{:} module, which is not SuperModule, into {:}".format(
+                    name, module.__class__.__name__, self.__class__.__name__
                 )
                 + "\n"
                 + "It may cause some functions invalid."
