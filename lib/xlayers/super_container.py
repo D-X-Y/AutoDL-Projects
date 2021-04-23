@@ -91,6 +91,8 @@ class SuperSequential(SuperModule):
     def abstract_search_space(self):
         root_node = spaces.VirtualNode(id(self))
         for index, module in enumerate(self):
+            if not isinstance(module, SuperModule):
+                continue
             space = module.abstract_search_space
             if not spaces.is_determined(space):
                 root_node.append(str(index), space)
@@ -98,9 +100,9 @@ class SuperSequential(SuperModule):
 
     def apply_candidate(self, abstract_child: spaces.VirtualNode):
         super(SuperSequential, self).apply_candidate(abstract_child)
-        for index in range(len(self)):
+        for index, module in enumerate(self):
             if str(index) in abstract_child:
-                self.__getitem__(index).apply_candidate(abstract_child[str(index)])
+                module.apply_candidate(abstract_child[str(index)])
 
     def forward_candidate(self, input):
         return self.forward_raw(input)

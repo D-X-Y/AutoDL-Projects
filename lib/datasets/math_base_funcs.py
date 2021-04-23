@@ -33,6 +33,14 @@ class FitFunc(abc.ABC):
     def __call__(self, x):
         raise NotImplementedError
 
+    def noise_call(self, x, std=0.1):
+        clean_y = self.__call__(x)
+        if isinstance(clean_y, np.ndarray):
+            noise_y = clean_y + np.random.normal(scale=std, size=clean_y.shape)
+        else:
+            raise ValueError("Unkonwn type: {:}".format(type(clean_y)))
+        return noise_y
+
     @abc.abstractmethod
     def _getitem(self, x):
         raise NotImplementedError

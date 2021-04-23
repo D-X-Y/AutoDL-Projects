@@ -72,3 +72,17 @@ def test_super_sequential(batch, seq_dim, input_dim, order):
         out3_dim.abstract(reuse_last=True).random(reuse_last=True).value,
     )
     assert tuple(outputs.shape) == output_shape
+
+
+def test_super_sequential_v1():
+    model = super_core.SuperSequential(
+        super_core.SuperSimpleNorm(1, 1),
+        torch.nn.ReLU(),
+        super_core.SuperLinear(10, 10),
+    )
+    inputs = torch.rand(10, 10)
+    print(model)
+    outputs = model(inputs)
+
+    abstract_search_space = model.abstract_search_space
+    print(abstract_search_space)

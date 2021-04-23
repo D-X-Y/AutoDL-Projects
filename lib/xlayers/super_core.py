@@ -9,6 +9,7 @@ from .super_module import SuperModule
 from .super_container import SuperSequential
 from .super_linear import SuperLinear
 from .super_linear import SuperMLPv1, SuperMLPv2
+from .super_norm import SuperSimpleNorm
 from .super_norm import SuperLayerNorm1D
 from .super_attention import SuperAttention
 from .super_transformer import SuperTransformerEncoderLayer

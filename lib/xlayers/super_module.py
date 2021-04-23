@@ -3,6 +3,7 @@
 #####################################################
 
 import abc
+import warnings
 from typing import Optional, Union, Callable
 import torch
 import torch.nn as nn
@@ -44,6 +45,17 @@ class SuperModule(abc.ABC, nn.Module):
                 m._super_run_type = super_run_type
 
         self.apply(_reset_super_run)
+
+    def add_module(self, name: str, module: Optional[torch.nn.Module]) -> None:
+        if not isinstance(module, SuperModule):
+            warnings.warn(
+                "Add {:} module, which is not SuperModule, into {:}".format(
+                    name, self.__class__.__name__
+                )
+                + "\n"
+                + "It may cause some functions invalid."
+            )
+        super(SuperModule, self).add_module(name, module)
 
     def apply_verbose(self, verbose):
         def _reset_verbose(m):
