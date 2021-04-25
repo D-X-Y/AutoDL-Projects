@@ -14,5 +14,8 @@ from .super_norm import SuperLayerNorm1D
 from .super_attention import SuperAttention
 from .super_transformer import SuperTransformerEncoderLayer
 
+from .super_activations import SuperReLU
+
 from .super_trade_stem import SuperAlphaEBDv1
 from .super_positional_embedding import SuperPositionalEncoder
+
