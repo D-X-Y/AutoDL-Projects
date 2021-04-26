@@ -17,8 +17,7 @@ from .super_module import BoolSpaceType
 class SuperReLU(SuperModule):
     """Applies a the rectified linear unit function element-wise."""
 
-    def __init__(
-        self, inplace=False) -> None:
+    def __init__(self, inplace=False) -> None:
         super(SuperReLU, self).__init__()
         self._inplace = inplace
 
@@ -33,4 +32,4 @@ class SuperReLU(SuperModule):
         return F.relu(input, inplace=self._inplace)
 
     def extra_repr(self) -> str:
-        return 'inplace=True' if self._inplace else ''
+        return "inplace=True" if self._inplace else ""

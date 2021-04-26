@@ -79,6 +79,7 @@ def test_super_sequential_v1():
         super_core.SuperSimpleNorm(1, 1),
         torch.nn.ReLU(),
         super_core.SuperLinear(10, 10),
+        super_core.SuperReLU()
     )
     inputs = torch.rand(10, 10)
     print(model)
