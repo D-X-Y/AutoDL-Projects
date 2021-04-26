@@ -19,7 +19,7 @@ class SyntheticDEnv(data.Dataset):
         mean_functors: List[data.Dataset],
         cov_functors: List[List[data.Dataset]],
         num_per_task: int = 5000,
-        time_stamp_config: Optional[Dict] = None,
+        timestamp_config: Optional[Dict] = None,
         mode: Optional[str] = None,
     ):
         self._ndim = len(mean_functors)
@@ -31,12 +31,12 @@ class SyntheticDEnv(data.Dataset):
                 cov_functor
             ), "length does not match {:} vs. {:}".format(self._ndim, len(cov_functor))
         self._num_per_task = num_per_task
-        if time_stamp_config is None:
-            time_stamp_config = dict(mode=mode)
+        if timestamp_config is None:
+            timestamp_config = dict(mode=mode)
         else:
-            time_stamp_config["mode"] = mode
+            timestamp_config["mode"] = mode
 
-        self._timestamp_generator = TimeStamp(**time_stamp_config)
+        self._timestamp_generator = TimeStamp(**timestamp_config)
 
         self._mean_functors = mean_functors
         self._cov_functors = cov_functors

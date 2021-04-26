@@ -2,21 +2,23 @@
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
 
-from .math_base_funcs import DynamicQuadraticFunc
+from .math_adv_funcs import DynamicQuadraticFunc
 from .math_adv_funcs import ConstantFunc, ComposedSinFunc
 from .synthetic_env import SyntheticDEnv
 
 
-def create_example_v1(timestamps=50, num_per_task=5000):
+def create_example_v1(
+    timestamp_config=dict(num=100, min_timestamp=0.0, max_timestamp=1.0),
+    num_per_task=5000,
+):
     mean_generator = ComposedSinFunc()
     std_generator = ComposedSinFunc(min_amplitude=0.5, max_amplitude=0.5)
-    std_generator.set_transform(lambda x: x + 1)
 
     dynamic_env = SyntheticDEnv(
         [mean_generator],
         [[std_generator]],
         num_per_task=num_per_task,
-        time_stamp_config=dict(num=timestamps),
+        timestamp_config=timestamp_config,
     )
 
     function = DynamicQuadraticFunc()
