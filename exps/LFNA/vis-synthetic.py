@@ -150,7 +150,7 @@ def compare_cl(save_dir):
                 "color": "k",
                 "s": 12,
                 "xlim": (round(cl_xaxis_min, 1), round(cl_xaxis_max, 1)),
-                "ylim": (-18, 2),
+                "ylim": (-20, 6),
                 "alpha": 0.99,
                 "label": "Continual Learning",
             }
@@ -170,7 +170,7 @@ def compare_cl(save_dir):
             xdir=save_dir
         )
     )
-    video_cmd = "{:} -pix_fmt yuv420p {xdir}/vis.mp4".format(base_cmd, xdir=save_dir)
+    video_cmd = "{:} -pix_fmt yuv420p {xdir}/compare-cl.mp4".format(base_cmd, xdir=save_dir)
     print(video_cmd + "\n")
     os.system(video_cmd)
     # os.system("{:} {xdir}/vis.webm".format(base_cmd, xdir=save_dir))
