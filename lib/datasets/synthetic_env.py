@@ -63,7 +63,7 @@ class SyntheticDEnv(data.Dataset):
         dataset = np.random.multivariate_normal(
             mean_list, cov_matrix, size=self._num_per_task
         )
-        return index, torch.Tensor(dataset)
+        return timestamp, torch.Tensor(dataset)
 
     def __len__(self):
         return len(self._timestamp_generator)

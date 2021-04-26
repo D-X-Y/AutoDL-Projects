@@ -3,6 +3,7 @@
 #####################################################
 import abc
 
+
 def obtain_accuracy(output, target, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     maxk = max(topk)
@@ -20,7 +21,6 @@ def obtain_accuracy(output, target, topk=(1,)):
 
 
 class EvaluationMetric(abc.ABC):
-    
     def __init__(self):
         self._total_metrics = 0
 

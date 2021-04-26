@@ -8,9 +8,10 @@ from .synthetic_env import SyntheticDEnv
 
 
 def create_example_v1(
-    timestamp_config=dict(num=100, min_timestamp=0.0, max_timestamp=1.0),
+    timestamp_config=None,
     num_per_task=5000,
 ):
+    # timestamp_config=dict(num=100, min_timestamp=0.0, max_timestamp=1.0),
     mean_generator = ComposedSinFunc()
     std_generator = ComposedSinFunc(min_amplitude=0.5, max_amplitude=0.5)
 
