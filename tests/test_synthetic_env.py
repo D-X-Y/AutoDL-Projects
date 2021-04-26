@@ -13,7 +13,7 @@ print("library path: {:}".format(lib_dir))
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
-from datasets import ConstantGenerator, SinGenerator
+from datasets import ConstantFunc, ComposedSinFunc
 from datasets import SyntheticDEnv
 
 
@@ -21,10 +21,10 @@ class TestSynethicEnv(unittest.TestCase):
     """Test the synethtic environment."""
 
     def test_simple(self):
-        mean_generator = SinGenerator()
-        std_generator = ConstantGenerator(constant=0.5)
+        mean_generator = ComposedSinFunc(constant=0.1)
+        std_generator = ConstantFunc(constant=0.5)
 
-        dataset = SyntheticDEnv([mean_generator], [[std_generator]])
+        dataset = SyntheticDEnv([mean_generator], [[std_generator]], num_per_task=5000)
         print(dataset)
         for timestamp, tau in dataset:
             assert tau.shape == (5000, 1)

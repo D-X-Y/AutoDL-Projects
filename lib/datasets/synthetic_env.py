@@ -4,45 +4,42 @@
 import math
 import abc
 import numpy as np
-from typing import List, Optional
+from typing import List, Optional, Dict
 import torch
 import torch.utils.data as data
 
-from .synthetic_utils import UnifiedSplit
+from .synthetic_utils import TimeStamp
 
 
-class SyntheticDEnv(UnifiedSplit, data.Dataset):
+class SyntheticDEnv(data.Dataset):
     """The synethtic dynamic environment."""
 
     def __init__(
         self,
-        mean_generators: List[data.Dataset],
-        cov_generators: List[List[data.Dataset]],
+        mean_functors: List[data.Dataset],
+        cov_functors: List[List[data.Dataset]],
         num_per_task: int = 5000,
+        time_stamp_config: Optional[Dict] = None,
         mode: Optional[str] = None,
     ):
-        self._ndim = len(mean_generators)
+        self._ndim = len(mean_functors)
         assert self._ndim == len(
-            cov_generators
-        ), "length does not match {:} vs. {:}".format(self._ndim, len(cov_generators))
-        for cov_generator in cov_generators:
+            cov_functors
+        ), "length does not match {:} vs. {:}".format(self._ndim, len(cov_functors))
+        for cov_functor in cov_functors:
             assert self._ndim == len(
-                cov_generator
-            ), "length does not match {:} vs. {:}".format(
-                self._ndim, len(cov_generator)
-            )
+                cov_functor
+            ), "length does not match {:} vs. {:}".format(self._ndim, len(cov_functor))
         self._num_per_task = num_per_task
-        self._total_num = len(mean_generators[0])
-        for mean_generator in mean_generators:
-            assert self._total_num == len(mean_generator)
-        for cov_generator in cov_generators:
-            for cov_g in cov_generator:
-                assert self._total_num == len(cov_g)
+        if time_stamp_config is None:
+            time_stamp_config = dict(mode=mode)
+        else:
+            time_stamp_config["mode"] = mode
 
-        self._mean_generators = mean_generators
-        self._cov_generators = cov_generators
+        self._timestamp_generator = TimeStamp(**time_stamp_config)
 
-        UnifiedSplit.__init__(self, self._total_num, mode)
+        self._mean_functors = mean_functors
+        self._cov_functors = cov_functors
 
     def __iter__(self):
         self._iter_num = 0
@@ -56,11 +53,11 @@ class SyntheticDEnv(UnifiedSplit, data.Dataset):
 
     def __getitem__(self, index):
         assert 0 <= index < len(self), "{:} is not in [0, {:})".format(index, len(self))
-        index = self._indexes[index]
-        mean_list = [generator[index][-1] for generator in self._mean_generators]
+        index, timestamp = self._timestamp_generator[index]
+        mean_list = [functor(timestamp) for functor in self._mean_functors]
         cov_matrix = [
-            [cov_gen[index][-1] for cov_gen in cov_generator]
-            for cov_generator in self._cov_generators
+            [cov_gen(timestamp) for cov_gen in cov_functor]
+            for cov_functor in self._cov_functors
         ]
 
         dataset = np.random.multivariate_normal(
@@ -69,13 +66,13 @@ class SyntheticDEnv(UnifiedSplit, data.Dataset):
         return index, torch.Tensor(dataset)
 
     def __len__(self):
-        return len(self._indexes)
+        return len(self._timestamp_generator)
 
     def __repr__(self):
         return "{name}({cur_num:}/{total} elements, ndim={ndim}, num_per_task={num_per_task})".format(
             name=self.__class__.__name__,
             cur_num=len(self),
-            total=self._total_num,
+            total=len(self._timestamp_generator),
             ndim=self._ndim,
             num_per_task=self._num_per_task,
         )

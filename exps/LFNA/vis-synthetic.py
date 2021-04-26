@@ -31,10 +31,10 @@ from datasets.synthetic_example import create_example_v1
 from utils.temp_sync import optimize_fn, evaluate_fn
 
 
-def draw_multi_fig(save_dir, timestamp, scatter_list, fig_title=None):
+def draw_multi_fig(save_dir, timestamp, scatter_list, wh, fig_title=None):
     save_path = save_dir / "{:04d}".format(timestamp)
     # print('Plot the figure at timestamp-{:} into {:}'.format(timestamp, save_path))
-    dpi, width, height = 40, 2000, 1300
+    dpi, width, height = 40, wh[0], wh[1]
     figsize = width / float(dpi), height / float(dpi)
     LabelSize, LegendFontsize, font_gap = 80, 80, 5
 
@@ -61,8 +61,7 @@ def draw_multi_fig(save_dir, timestamp, scatter_list, fig_title=None):
             tick.label.set_rotation(10)
         for tick in cur_ax.yaxis.get_major_ticks():
             tick.label.set_fontsize(LabelSize - font_gap)
-
-    plt.legend(loc=1, fontsize=LegendFontsize)
+        plt.legend(loc=1, fontsize=LegendFontsize)
     fig.savefig(str(save_path) + ".pdf", dpi=dpi, bbox_inches="tight", format="pdf")
     fig.savefig(str(save_path) + ".png", dpi=dpi, bbox_inches="tight", format="png")
     plt.close("all")
@@ -115,18 +114,19 @@ def compare_cl(save_dir):
                 "color": "r",
                 "s": 10,
                 "xlim": (-6, 6 + timestamp * 0.2),
-                "ylim": (-200, 40),
+                "ylim": (-40, 40),
                 "alpha": 0.99,
                 "label": "Continual Learning",
             }
         )
 
         draw_multi_fig(
-            save_dir, timestamp, scatter_list, "Timestamp={:03d}".format(timestamp)
+            save_dir, timestamp, scatter_list,
+            wh=(2000, 1300), fig_title="Timestamp={:03d}".format(timestamp)
         )
     print("Save all figures into {:}".format(save_dir))
     save_dir = save_dir.resolve()
-    cmd = "ffmpeg -y -i {xdir}/%04d.png -pix_fmt yuv420p -vf fps=2 -vf scale=1500:1000 -vb 5000k {xdir}/vis.mp4".format(
+    cmd = "ffmpeg -y -i {xdir}/%04d.png -pix_fmt yuv420p -vf fps=2 -vf scale=2000:1300 -vb 5000k {xdir}/vis.mp4".format(
         xdir=save_dir
     )
     os.system(cmd)
