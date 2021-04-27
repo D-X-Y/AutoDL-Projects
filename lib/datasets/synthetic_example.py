@@ -1,8 +1,9 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
+import copy
 
-from .math_adv_funcs import DynamicQuadraticFunc
+from .math_dynamic_funcs import DynamicQuadraticFunc
 from .math_adv_funcs import ConstantFunc, ComposedSinFunc
 from .synthetic_env import SyntheticDEnv
 
@@ -11,7 +12,6 @@ def create_example_v1(
     timestamp_config=None,
     num_per_task=5000,
 ):
-    # timestamp_config=dict(num=100, min_timestamp=0.0, max_timestamp=1.0),
     mean_generator = ComposedSinFunc()
     std_generator = ComposedSinFunc(min_amplitude=0.5, max_amplitude=0.5)
 
@@ -32,4 +32,6 @@ def create_example_v1(
         num_sin_phase=5, phase_shift=0.4, max_amplitude=0.9
     )
     function.set(function_param)
+
+    dynamic_env.set_oracle_map(copy.deepcopy(function))
     return dynamic_env, function

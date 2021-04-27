@@ -13,20 +13,20 @@ import torch.utils.data as data
 class FitFunc(abc.ABC):
     """The fit function that outputs f(x) = a * x^2 + b * x + c."""
 
-    def __init__(self, freedom: int, list_of_points=None, _params=None):
+    def __init__(self, freedom: int, list_of_points=None, params=None):
         self._params = dict()
         for i in range(freedom):
             self._params[i] = None
         self._freedom = freedom
-        if list_of_points is not None and _params is not None:
-            raise ValueError("list_of_points and _params can not be set simultaneously")
+        if list_of_points is not None and params is not None:
+            raise ValueError("list_of_points and params can not be set simultaneously")
         if list_of_points is not None:
             self.fit(list_of_points=list_of_points)
-        if _params is not None:
-            self.set(_params)
+        if params is not None:
+            self.set(params)
 
-    def set(self, _params):
-        self._params = copy.deepcopy(_params)
+    def set(self, params):
+        self._params = copy.deepcopy(params)
 
     def check_valid(self):
         for key, value in self._params.items():

@@ -6,3 +6,4 @@ black ./lib/datasets
 black ./lib/xlayers
 black ./exps/LFNA
 black ./exps/trading
+black ./lib/procedures

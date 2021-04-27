@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.02 #
 ############################################################################
-# CUDA_VISIBLE_DEVICES=0 python exps/LFNA/vis-synthetic.py                 #
+# python exps/LFNA/vis-synthetic.py                                        #
 ############################################################################
 import os, sys, copy, random
 import torch
@@ -83,7 +83,7 @@ def find_max(cur, others):
 def compare_cl(save_dir):
     save_dir = Path(str(save_dir))
     save_dir.mkdir(parents=True, exist_ok=True)
-    dynamic_env, function = create_example_v1(
+    dynamic_env, cl_function = create_example_v1(
         # timestamp_config=dict(num=200, min_timestamp=-1, max_timestamp=1.0),
         timestamp_config=dict(num=200),
         num_per_task=1000,
@@ -91,7 +91,6 @@ def compare_cl(save_dir):
 
     models = dict()
 
-    cl_function = copy.deepcopy(function)
     cl_function.set_timestamp(0)
     cl_xaxis_min = None
     cl_xaxis_max = None
@@ -99,23 +98,15 @@ def compare_cl(save_dir):
     all_data = OrderedDict()
 
     for idx, (timestamp, dataset) in enumerate(tqdm(dynamic_env, ncols=50)):
-        xaxis_all = dataset[:, 0].numpy()
+        xaxis_all = dataset[0][:, 0].numpy()
+        yaxis_all = dataset[1][:, 0].numpy()
         current_data = dict()
-
-        function.set_timestamp(timestamp)
-        yaxis_all = function.noise_call(xaxis_all)
         current_data["lfna_xaxis_all"] = xaxis_all
         current_data["lfna_yaxis_all"] = yaxis_all
 
         # compute cl-min
         cl_xaxis_min = find_min(cl_xaxis_min, xaxis_all.mean() - xaxis_all.std())
         cl_xaxis_max = find_max(cl_xaxis_max, xaxis_all.mean() + xaxis_all.std())
-        """
-        cl_xaxis_all = np.arange(cl_xaxis_min, cl_xaxis_max, step=0.05)
-        cl_yaxis_all = cl_function.noise_call(cl_xaxis_all)
-        current_data["cl_xaxis_all"] = cl_xaxis_all
-        current_data["cl_yaxis_all"] = cl_yaxis_all
-        """
         all_data[timestamp] = current_data
 
     global_cl_xaxis_all = np.arange(cl_xaxis_min, cl_xaxis_max, step=0.1)
@@ -170,10 +161,12 @@ def compare_cl(save_dir):
             xdir=save_dir
         )
     )
-    video_cmd = "{:} -pix_fmt yuv420p {xdir}/compare-cl.mp4".format(base_cmd, xdir=save_dir)
+    video_cmd = "{:} -pix_fmt yuv420p {xdir}/compare-cl.mp4".format(
+        base_cmd, xdir=save_dir
+    )
     print(video_cmd + "\n")
     os.system(video_cmd)
-    # os.system("{:} {xdir}/vis.webm".format(base_cmd, xdir=save_dir))
+    os.system("{:} -pix_fmt yuv420p {xdir}/vis.webm".format(base_cmd, xdir=save_dir))
 
 
 if __name__ == "__main__":

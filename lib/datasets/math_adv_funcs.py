@@ -14,41 +14,6 @@ from .math_base_funcs import QuadraticFunc
 from .math_base_funcs import QuarticFunc
 
 
-class DynamicQuadraticFunc(FitFunc):
-    """The dynamic quadratic function that outputs f(x) = a * x^2 + b * x + c.
-    The a, b, and c is a function of timestamp.
-    """
-
-    def __init__(self, list_of_points=None):
-        super(DynamicQuadraticFunc, self).__init__(3, list_of_points)
-        self._timestamp = None
-
-    def __call__(self, x, timestamp=None):
-        self.check_valid()
-        if timestamp is None:
-            timestamp = self._timestamp
-        a = self._params[0](timestamp)
-        b = self._params[1](timestamp)
-        c = self._params[2](timestamp)
-        convert_fn = lambda x: x[-1] if isinstance(x, (tuple, list)) else x
-        a, b, c = convert_fn(a), convert_fn(b), convert_fn(c)
-        return a * x * x + b * x + c
-
-    def _getitem(self, x, weights):
-        raise NotImplementedError
-
-    def set_timestamp(self, timestamp):
-        self._timestamp = timestamp
-
-    def __repr__(self):
-        return "{name}({a} * x^2 + {b} * x + {c})".format(
-            name=self.__class__.__name__,
-            a=self._params[0],
-            b=self._params[1],
-            c=self._params[2],
-        )
-
-
 class ConstantFunc(FitFunc):
     """The constant function: f(x) = c."""
 
