@@ -53,6 +53,14 @@ class TimeStamp(UnifiedSplit, data.Dataset):
         self._total_num = num
         UnifiedSplit.__init__(self, self._total_num, mode)
 
+    @property
+    def min_timestamp(self):
+        return self._min_timestamp
+
+    @property
+    def max_timestamp(self):
+        return self._max_timestamp
+
     def __iter__(self):
         self._iter_num = 0
         return self

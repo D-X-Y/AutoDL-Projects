@@ -24,6 +24,7 @@ if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
 
+from datasets.synthetic_core import get_synthetic_env
 from datasets.synthetic_example import create_example_v1
 from utils.temp_sync import optimize_fn, evaluate_fn
 
@@ -169,6 +170,52 @@ def compare_cl(save_dir):
     os.system("{:} -pix_fmt yuv420p {xdir}/vis.webm".format(base_cmd, xdir=save_dir))
 
 
+def visualize_env(save_dir):
+    save_dir = Path(str(save_dir))
+    save_dir.mkdir(parents=True, exist_ok=True)
+
+    dynamic_env = get_synthetic_env()
+    min_t, max_t = dynamic_env.min_timestamp, dynamic_env.max_timestamp
+    for idx, (timestamp, (allx, ally)) in enumerate(tqdm(dynamic_env, ncols=50)):
+        dpi, width, height = 30, 1800, 1400
+        figsize = width / float(dpi), height / float(dpi)
+        LabelSize, LegendFontsize, font_gap = 80, 80, 5
+        fig = plt.figure(figsize=figsize)
+
+        cur_ax = fig.add_subplot(1, 1, 1)
+        allx, ally = allx[:, 0].numpy(), ally[:, 0].numpy()
+        cur_ax.scatter(
+            allx,
+            ally,
+            color="k",
+            linestyle="-",
+            alpha=0.99,
+            s=10,
+            label="timestamp={:05d}".format(idx),
+        )
+        cur_ax.set_xlabel("X", fontsize=LabelSize)
+        cur_ax.set_ylabel("Y", rotation=0, fontsize=LabelSize)
+        for tick in cur_ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(LabelSize - font_gap)
+            tick.label.set_rotation(10)
+        for tick in cur_ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(LabelSize - font_gap)
+        cur_ax.set_xlim(-10, 10)
+        cur_ax.set_ylim(-60, 60)
+        cur_ax.legend(loc=1, fontsize=LegendFontsize)
+
+        save_path = save_dir / "{:05d}".format(idx)
+        fig.savefig(str(save_path) + ".pdf", dpi=dpi, bbox_inches="tight", format="pdf")
+        fig.savefig(str(save_path) + ".png", dpi=dpi, bbox_inches="tight", format="png")
+        plt.close("all")
+    save_dir = save_dir.resolve()
+    base_cmd = "ffmpeg -y -i {xdir}/%05d.png -vf scale=1800:1400 -pix_fmt yuv420p -vb 5000k".format(
+        xdir=save_dir
+    )
+    os.system("{:} {xdir}/env.mp4".format(base_cmd, xdir=save_dir))
+    os.system("{:} {xdir}/vis.webm".format(base_cmd, xdir=save_dir))
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser("Visualize synthetic data.")
@@ -180,4 +227,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    visualize_env(os.path.join(args.save_dir, "vis-env"))
     compare_cl(os.path.join(args.save_dir, "compare-cl"))

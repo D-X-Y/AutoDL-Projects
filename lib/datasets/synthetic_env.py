@@ -43,6 +43,14 @@ class SyntheticDEnv(data.Dataset):
 
         self._oracle_map = None
 
+    @property
+    def min_timestamp(self):
+        return self._timestamp_generator.min_timestamp
+
+    @property
+    def max_timestamp(self):
+        return self._timestamp_generator.max_timestamp
+
     def set_oracle_map(self, functor):
         self._oracle_map = functor
 
@@ -61,7 +69,7 @@ class SyntheticDEnv(data.Dataset):
         index, timestamp = self._timestamp_generator[index]
         mean_list = [functor(timestamp) for functor in self._mean_functors]
         cov_matrix = [
-            [cov_gen(timestamp) for cov_gen in cov_functor]
+            [abs(cov_gen(timestamp)) for cov_gen in cov_functor]
             for cov_functor in self._cov_functors
         ]
 
