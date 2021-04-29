@@ -136,7 +136,8 @@ def main(args):
         )
         save_checkpoint(
             {
-                "model": model.state_dict(),
+                "model_state_dict": model.state_dict(),
+                "model": model,
                 "index": idx,
                 "timestamp": env_info["{:}-timestamp".format(idx)],
             },
