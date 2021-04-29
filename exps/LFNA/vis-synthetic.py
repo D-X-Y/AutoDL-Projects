@@ -300,7 +300,7 @@ def compare_algs_v2(save_dir, alg_dir="./outputs/lfna-synthetic"):
 
     alg_name2dir = OrderedDict()
     alg_name2dir["Optimal"] = "use-same-timestamp"
-    alg_name2dir["History SL"] = "use-all-past-data"
+    alg_name2dir["Supervised Learning (History Data)"] = "use-all-past-data"
     colors = ["r", "g"]
 
     alg2xs, alg2ys = defaultdict(list), defaultdict(list)
