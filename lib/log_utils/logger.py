@@ -59,8 +59,10 @@ class Logger(object):
         )
 
     def path(self, mode):
-        valids = ("model", "best", "info", "log")
-        if mode == "model":
+        valids = ("model", "best", "info", "log", None)
+        if mode is None:
+            return self.log_dir
+        elif mode == "model":
             return self.model_dir / "seed-{:}-basic.pth".format(self.seed)
         elif mode == "best":
             return self.model_dir / "seed-{:}-best.pth".format(self.seed)

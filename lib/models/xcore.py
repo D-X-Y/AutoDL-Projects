@@ -4,12 +4,14 @@
 # Use module in xlayers to construct different models #
 #######################################################
 from typing import List, Text, Dict, Any
+import torch
 
 __all__ = ["get_model"]
 
 
-from xlayers.super_core import SuperSequential, SuperMLPv1
+from xlayers.super_core import SuperSequential
 from xlayers.super_core import SuperSimpleNorm
+from xlayers.super_core import SuperLeakyReLU
 from xlayers.super_core import SuperLinear
 
 
@@ -19,9 +21,9 @@ def get_model(config: Dict[Text, Any], **kwargs):
         model = SuperSequential(
             SuperSimpleNorm(kwargs["mean"], kwargs["std"]),
             SuperLinear(kwargs["input_dim"], 200),
-            torch.nn.LeakyReLU(),
+            SuperLeakyReLU(),
             SuperLinear(200, 100),
-            torch.nn.LeakyReLU(),
+            SuperLeakyReLU(),
             SuperLinear(100, kwargs["output_dim"]),
         )
     else:

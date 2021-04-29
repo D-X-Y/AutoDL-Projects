@@ -18,11 +18,3 @@ def obtain_accuracy(output, target, topk=(1,)):
         correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
-
-
-class EvaluationMetric(abc.ABC):
-    def __init__(self):
-        self._total_metrics = 0
-
-    def __len__(self):
-        return self._total_metrics

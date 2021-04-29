@@ -12,49 +12,48 @@ from log_utils import time_string
 from .eval_funcs import obtain_accuracy
 
 
-def basic_train(
+def get_device(tensors):
+    if isinstance(tensors, (list, tuple)):
+        return get_device(tensors[0])
+    elif isinstance(tensors, dict):
+        for key, value in tensors.items():
+            return get_device(value)
+    else:
+        return tensors.device
+
+
+def basic_train_fn(
     xloader,
     network,
     criterion,
-    scheduler,
     optimizer,
-    optim_config,
-    extra_info,
-    print_freq,
+    metric,
     logger,
 ):
-    loss, acc1, acc5 = procedure(
+    results = procedure(
         xloader,
         network,
         criterion,
-        scheduler,
         optimizer,
+        metric,
         "train",
-        optim_config,
-        extra_info,
-        print_freq,
         logger,
     )
-    return loss, acc1, acc5
+    return results
 
 
-def basic_valid(
-    xloader, network, criterion, optim_config, extra_info, print_freq, logger
-):
+def basic_eval_fn(xloader, network, metric, logger):
     with torch.no_grad():
-        loss, acc1, acc5 = procedure(
+        results = procedure(
             xloader,
             network,
-            criterion,
             None,
             None,
+            metric,
             "valid",
-            None,
-            extra_info,
-            print_freq,
             logger,
         )
-    return loss, acc1, acc5
+    return results
 
 
 def procedure(
@@ -62,12 +61,11 @@ def procedure(
     network,
     criterion,
     optimizer,
-    eval_metric,
+    metric,
     mode: Text,
-    print_freq: int = 100,
     logger_fn: Callable = None,
 ):
-    data_time, batch_time, losses = AverageMeter(), AverageMeter(), AverageMeter()
+    data_time, batch_time = AverageMeter(), AverageMeter()
     if mode.lower() == "train":
         network.train()
     elif mode.lower() == "valid":
@@ -80,49 +78,23 @@ def procedure(
         # measure data loading time
         data_time.update(time.time() - end)
         # calculate prediction and loss
-        targets = targets.cuda(non_blocking=True)
 
         if mode == "train":
             optimizer.zero_grad()
 
         outputs = network(inputs)
-        loss = criterion(outputs, targets)
+        targets = targets.to(get_device(outputs))
 
         if mode == "train":
+            loss = criterion(outputs, targets)
             loss.backward()
             optimizer.step()
 
         # record
-        metrics = eval_metric(logits.data, targets.data)
-        prec1, prec5 = obtain_accuracy(logits.data, targets.data, topk=(1, 5))
-        losses.update(loss.item(), inputs.size(0))
-        top1.update(prec1.item(), inputs.size(0))
-        top5.update(prec5.item(), inputs.size(0))
+        with torch.no_grad():
+            results = metric(outputs, targets)
 
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
-
-        if i % print_freq == 0 or (i + 1) == len(xloader):
-            Sstr = (
-                " {:5s} ".format(mode.upper())
-                + time_string()
-                + " [{:}][{:03d}/{:03d}]".format(extra_info, i, len(xloader))
-            )
-            Lstr = "Loss {loss.val:.3f} ({loss.avg:.3f})  Prec@1 {top1.val:.2f} ({top1.avg:.2f}) Prec@5 {top5.val:.2f} ({top5.avg:.2f})".format(
-                loss=losses, top1=top1, top5=top5
-            )
-            Istr = "Size={:}".format(list(inputs.size()))
-            logger.log(Sstr + " " + Tstr + " " + Lstr + " " + Istr)
-
-    logger.log(
-        " **{mode:5s}** Prec@1 {top1.avg:.2f} Prec@5 {top5.avg:.2f} Error@1 {error1:.2f} Error@5 {error5:.2f} Loss:{loss:.3f}".format(
-            mode=mode.upper(),
-            top1=top1,
-            top5=top5,
-            error1=100 - top1.avg,
-            error5=100 - top5.avg,
-            loss=losses.avg,
-        )
-    )
-    return losses.avg, top1.avg, top5.avg
+    return metric.get_info()
