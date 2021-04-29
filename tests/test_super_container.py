@@ -78,6 +78,7 @@ def test_super_sequential_v1():
     model = super_core.SuperSequential(
         super_core.SuperSimpleNorm(1, 1),
         torch.nn.ReLU(),
+        super_core.SuperLeakyReLU(),
         super_core.SuperLinear(10, 10),
         super_core.SuperReLU(),
     )
