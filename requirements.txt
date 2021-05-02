@@ -1,2 +1,2 @@
 nats_bench>=1.4
-pytorch>=1.5.0
+pytorch
