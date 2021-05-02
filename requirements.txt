@@ -1,2 +1,3 @@
 nats_bench>=1.4
-pytorch
+torchvision
+qlib  # For some modules
