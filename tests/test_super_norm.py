@@ -64,7 +64,7 @@ class TestSuperSimpleNorm(unittest.TestCase):
         model.apply_verbose(True)
 
         print(model.super_run_type)
-        self.assertTrue(model[1].bias)
+        self.assertTrue(model[2].bias)
 
         inputs = torch.rand(20, 10)
         print("Input shape: {:}".format(inputs.shape))
@@ -80,6 +80,6 @@ class TestSuperSimpleNorm(unittest.TestCase):
         model.set_super_run_type(super_core.SuperRunMode.Candidate)
         model.apply_candidate(abstract_child)
 
-        output_shape = (20, abstract_child["1"]["_out_features"].value)
+        output_shape = (20, abstract_child["2"]["_out_features"].value)
         outputs = model(inputs)
         self.assertEqual(tuple(outputs.shape), output_shape)

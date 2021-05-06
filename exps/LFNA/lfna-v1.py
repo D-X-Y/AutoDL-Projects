@@ -24,6 +24,8 @@ from models.xcore import get_model
 
 
 class Population:
+    """A population used to maintain models at different timestamps."""
+
     def __init__(self):
         self._time2model = dict()
 
