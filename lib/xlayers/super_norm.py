@@ -89,8 +89,8 @@ class SuperSimpleNorm(SuperModule):
 
     def __init__(self, mean, std, inplace=False) -> None:
         super(SuperSimpleNorm, self).__init__()
-        self._mean = mean
-        self._std = std
+        self.register_buffer("_mean", torch.tensor(mean, dtype=torch.float))
+        self.register_buffer("_std", torch.tensor(std, dtype=torch.float))
         self._inplace = inplace
 
     @property
@@ -111,7 +111,7 @@ class SuperSimpleNorm(SuperModule):
         if (std == 0).any():
             raise ValueError(
                 "std evaluated to zero after conversion to {}, leading to division by zero.".format(
-                    dtype
+                    tensor.dtype
                 )
             )
         while mean.ndim < tensor.ndim:
@@ -119,6 +119,75 @@ class SuperSimpleNorm(SuperModule):
         return tensor.sub_(mean).div_(std)
 
     def extra_repr(self) -> str:
-        return "mean={mean}, std={mean}, inplace={inplace}".format(
-            mean=self._mean, std=self._std, inplace=self._inplace
+        return "mean={mean}, std={std}, inplace={inplace}".format(
+            mean=self._mean.item(), std=self._std.item(), inplace=self._inplace
         )
+
+
+class SuperSimpleLearnableNorm(SuperModule):
+    """Super simple normalization."""
+
+    def __init__(self, mean=0, std=1, eps=1e-6, inplace=False) -> None:
+        super(SuperSimpleLearnableNorm, self).__init__()
+        self.register_parameter(
+            "_mean", nn.Parameter(torch.tensor(mean, dtype=torch.float))
+        )
+        self.register_parameter(
+            "_std", nn.Parameter(torch.tensor(std, dtype=torch.float))
+        )
+        self._eps = eps
+        self._inplace = inplace
+
+    @property
+    def abstract_search_space(self):
+        return spaces.VirtualNode(id(self))
+
+    def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
+        # check inputs ->
+        return self.forward_raw(input)
+
+    def forward_raw(self, input: torch.Tensor) -> torch.Tensor:
+        if not self._inplace:
+            tensor = input.clone()
+        else:
+            tensor = input
+        mean, std = (
+            self._mean.to(tensor.device),
+            torch.abs(self._std.to(tensor.device)) + self._eps,
+        )
+        if (std == 0).any():
+            raise ValueError("std leads to division by zero.")
+        while mean.ndim < tensor.ndim:
+            mean, std = torch.unsqueeze(mean, dim=0), torch.unsqueeze(std, dim=0)
+        return tensor.sub_(mean).div_(std)
+
+    def extra_repr(self) -> str:
+        return "mean={mean}, std={std}, inplace={inplace}".format(
+            mean=self._mean.item(), std=self._std.item(), inplace=self._inplace
+        )
+
+
+class SuperIdentity(SuperModule):
+    """Super identity mapping layer."""
+
+    def __init__(self, inplace=False, **kwargs) -> None:
+        super(SuperIdentity, self).__init__()
+        self._inplace = inplace
+
+    @property
+    def abstract_search_space(self):
+        return spaces.VirtualNode(id(self))
+
+    def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
+        # check inputs ->
+        return self.forward_raw(input)
+
+    def forward_raw(self, input: torch.Tensor) -> torch.Tensor:
+        if not self._inplace:
+            tensor = input.clone()
+        else:
+            tensor = input
+        return tensor
+
+    def extra_repr(self) -> str:
+        return "inplace={inplace}".format(inplace=self._inplace)

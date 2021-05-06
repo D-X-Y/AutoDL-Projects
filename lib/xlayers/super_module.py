@@ -30,6 +30,45 @@ class SuperRunMode(Enum):
     Default = "fullmodel"
 
 
+class TensorContainer:
+    """A class to maintain both parameters and buffers for a model."""
+
+    def __init__(self):
+        self._names = []
+        self._tensors = []
+        self._param_or_buffers = []
+        self._name2index = dict()
+
+    def append(self, name, tensor, param_or_buffer):
+        if not isinstance(tensor, torch.Tensor):
+            raise TypeError(
+                "The input tensor must be torch.Tensor instead of {:}".format(
+                    type(tensor)
+                )
+            )
+        self._names.append(name)
+        self._tensors.append(tensor)
+        self._param_or_buffers.append(param_or_buffer)
+        assert name not in self._name2index, "The [{:}] has already been added.".format(
+            name
+        )
+        self._name2index[name] = len(self._names) - 1
+
+    def numel(self):
+        total = 0
+        for tensor in self._tensors:
+            total += tensor.numel()
+        return total
+
+    def __len__(self):
+        return len(self._names)
+
+    def __repr__(self):
+        return "{name}({num} tensors)".format(
+            name=self.__class__.__name__, num=len(self)
+        )
+
+
 class SuperModule(abc.ABC, nn.Module):
     """This class equips the nn.Module class with the ability to apply AutoDL."""
 
@@ -70,6 +109,14 @@ class SuperModule(abc.ABC, nn.Module):
                 "Invalid abstract child program: {:}".format(abstract_child)
             )
         self._abstract_child = abstract_child
+
+    def named_parameters_buffers(self):
+        container = TensorContainer()
+        for name, param in self.named_parameters():
+            container.append(name, param, True)
+        for name, buf in self.named_buffers():
+            container.append(name, buf, False)
+        return container
 
     @property
     def abstract_search_space(self):
