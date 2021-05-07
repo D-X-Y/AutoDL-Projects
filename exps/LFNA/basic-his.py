@@ -86,9 +86,10 @@ def main(args):
             input_dim=1,
             output_dim=1,
             act_cls="leaky_relu",
-            norm_cls="simple_norm",
-            mean=mean,
-            std=std,
+            norm_cls="identity",
+            # norm_cls="simple_norm",
+            # mean=mean,
+            # std=std,
         )
         model = get_model(dict(model_type="simple_mlp"), **model_kwargs)
         # build optimizer

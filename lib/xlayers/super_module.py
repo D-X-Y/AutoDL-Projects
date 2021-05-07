@@ -55,6 +55,10 @@ class TensorContainer:
                 )
         return result
 
+    def requires_grad_(self, requires_grad=True):
+        for tensor in self._tensors:
+          tensor.requires_grad_(requires_grad)
+
     @property
     def tensors(self):
         return self._tensors
@@ -162,7 +166,7 @@ class SuperModule(abc.ABC, nn.Module):
             )
         self._abstract_child = abstract_child
 
-    def named_parameters_buffers(self):
+    def get_w_container(self):
         container = TensorContainer()
         for name, param in self.named_parameters():
             container.append(name, param, True)
