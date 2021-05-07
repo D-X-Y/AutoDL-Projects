@@ -27,8 +27,13 @@ from .super_transformer import SuperTransformerEncoderLayer
 
 from .super_activations import SuperReLU
 from .super_activations import SuperLeakyReLU
+from .super_activations import SuperTanh
 
-super_name2activation = {"relu": SuperReLU, "leaky_relu": SuperLeakyReLU}
+super_name2activation = {
+    "relu": SuperReLU,
+    "leaky_relu": SuperLeakyReLU,
+    "tanh": SuperTanh,
+}
 
 
 from .super_trade_stem import SuperAlphaEBDv1

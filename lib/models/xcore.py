@@ -34,3 +34,4 @@ def get_model(config: Dict[Text, Any], **kwargs):
     else:
         raise TypeError("Unkonwn model type: {:}".format(model_type))
     return model
+

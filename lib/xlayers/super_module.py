@@ -39,6 +39,41 @@ class TensorContainer:
         self._param_or_buffers = []
         self._name2index = dict()
 
+    def additive(self, tensors):
+        result = TensorContainer()
+        for index, name in enumerate(self._names):
+            new_tensor = self._tensors[index] + tensors[index]
+            result.append(name, new_tensor, self._param_or_buffers[index])
+        return result
+
+    def no_grad_clone(self):
+        result = TensorContainer()
+        with torch.no_grad():
+            for index, name in enumerate(self._names):
+                result.append(
+                    name, self._tensors[index].clone(), self._param_or_buffers[index]
+                )
+        return result
+
+    @property
+    def tensors(self):
+        return self._tensors
+
+    def flatten(self, tensors=None):
+        if tensors is None:
+            tensors = self._tensors
+        tensors = [tensor.view(-1) for tensor in tensors]
+        return torch.cat(tensors)
+
+    def unflatten(self, tensor):
+        tensors, s = [], 0
+        for raw_tensor in self._tensors:
+            length = raw_tensor.numel()
+            x = torch.reshape(tensor[s : s + length], shape=raw_tensor.shape)
+            tensors.append(x)
+            s += length
+        return tensors
+
     def append(self, name, tensor, param_or_buffer):
         if not isinstance(tensor, torch.Tensor):
             raise TypeError(
@@ -53,6 +88,23 @@ class TensorContainer:
             name
         )
         self._name2index[name] = len(self._names) - 1
+
+    def query(self, name):
+        if not self.has(name):
+            raise ValueError(
+                "The {:} is not in {:}".format(name, list(self._name2index.keys()))
+            )
+        index = self._name2index[name]
+        return self._tensors[index]
+
+    def has(self, name):
+        return name in self._name2index
+
+    def has_prefix(self, prefix):
+        for name, idx in self._name2index.items():
+            if name.startswith(prefix):
+                return name
+        return False
 
     def numel(self):
         total = 0
@@ -181,3 +233,6 @@ class SuperModule(abc.ABC, nn.Module):
                 )
             )
         return outputs
+
+    def forward_with_container(self, inputs, container, prefix=[]):
+        raise NotImplementedError

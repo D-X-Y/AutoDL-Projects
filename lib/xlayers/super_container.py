@@ -111,3 +111,10 @@ class SuperSequential(SuperModule):
         for module in self:
             input = module(input)
         return input
+
+    def forward_with_container(self, input, container, prefix=[]):
+        for index, module in enumerate(self):
+            input = module.forward_with_container(
+                input, container, prefix + [str(index)]
+            )
+        return input

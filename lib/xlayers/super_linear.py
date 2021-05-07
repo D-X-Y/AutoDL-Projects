@@ -115,6 +115,16 @@ class SuperLinear(SuperModule):
             self._in_features, self._out_features, self._bias
         )
 
+    def forward_with_container(self, input, container, prefix=[]):
+        super_weight_name = ".".join(prefix + ["_super_weight"])
+        super_weight = container.query(super_weight_name)
+        super_bias_name = ".".join(prefix + ["_super_bias"])
+        if container.has(super_bias_name):
+            super_bias = container.query(super_bias_name)
+        else:
+            super_bias = None
+        return F.linear(input, super_weight, super_bias)
+
 
 class SuperMLPv1(SuperModule):
     """An MLP layer: FC -> Activation -> Drop -> FC -> Drop."""
