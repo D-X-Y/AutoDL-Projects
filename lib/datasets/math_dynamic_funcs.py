@@ -37,6 +37,33 @@ class DynamicFunc(FitFunc):
         return noise_y
 
 
+class DynamicLinearFunc(DynamicFunc):
+    """The dynamic linear function that outputs f(x) = a * x + b.
+    The a and b is a function of timestamp.
+    """
+
+    def __init__(self, params=None):
+        super(DynamicLinearFunc, self).__init__(3, params)
+
+    def __call__(self, x, timestamp=None):
+        self.check_valid()
+        if timestamp is None:
+            timestamp = self._timestamp
+        a = self._params[0](timestamp)
+        b = self._params[1](timestamp)
+        convert_fn = lambda x: x[-1] if isinstance(x, (tuple, list)) else x
+        a, b = convert_fn(a), convert_fn(b)
+        return a * x + b
+
+    def __repr__(self):
+        return "{name}({a} * x + {b}, timestamp={timestamp})".format(
+            name=self.__class__.__name__,
+            a=self._params[0],
+            b=self._params[1],
+            timestamp=self._timestamp,
+        )
+
+
 class DynamicQuadraticFunc(DynamicFunc):
     """The dynamic quadratic function that outputs f(x) = a * x^2 + b * x + c.
     The a, b, and c is a function of timestamp.

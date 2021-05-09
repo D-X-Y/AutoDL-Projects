@@ -15,6 +15,7 @@ if str(lib_dir) not in sys.path:
 
 from datasets import QuadraticFunc
 from datasets import ConstantFunc
+from datasets import DynamicLinearFunc
 from datasets import DynamicQuadraticFunc
 from datasets import ComposedSinFunc
 
@@ -42,6 +43,23 @@ class TestDynamicFunc(unittest.TestCase):
         function_param[2] = ComposedSinFunc(
             num=timestamps, num_sin_phase=5, phase_shift=0.4, max_amplitude=0.9
         )
+        function.set(function_param)
+        print(function)
+
+        with self.assertRaises(TypeError) as context:
+            function(0)
+
+        function.set_timestamp(1)
+        print(function(2))
+
+    def test_simple_linear(self):
+        timestamps = 30
+        function = DynamicLinearFunc()
+        function_param = dict()
+        function_param[0] = ComposedSinFunc(
+            num=timestamps, num_sin_phase=4, phase_shift=1.0, max_amplitude=1.0
+        )
+        function_param[1] = ConstantFunc(constant=0.9)
         function.set(function_param)
         print(function)
 

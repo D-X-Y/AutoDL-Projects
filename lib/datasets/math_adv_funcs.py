@@ -59,18 +59,24 @@ class ComposedSinFunc(FitFunc):
         max_amplitude = kwargs.get("max_amplitude", 4)
         phase_shift = kwargs.get("phase_shift", 0.0)
         # create parameters
-        amplitude_scale = QuadraticFunc(
-            [(0, min_amplitude), (0.5, max_amplitude), (1, min_amplitude)]
-        )
-        fitting_data = []
-        temp_max_scalar = 2 ** (num_sin_phase - 1)
-        for i in range(num_sin_phase):
-            value = (2 ** i) / temp_max_scalar
-            next_value = (2 ** (i + 1)) / temp_max_scalar
-            for _phase in (0, 0.25, 0.5, 0.75):
-                inter_value = value + (next_value - value) * _phase
-                fitting_data.append((inter_value, math.pi * (2 * i + _phase)))
-        period_phase_shift = QuarticFunc(fitting_data)
+        if kwargs.get("amplitude_scale", None) is None:
+            amplitude_scale = QuadraticFunc(
+                [(0, min_amplitude), (0.5, max_amplitude), (1, min_amplitude)]
+            )
+        else:
+            amplitude_scale = kwargs.get("amplitude_scale")
+        if kwargs.get("period_phase_shift", None) is None:
+            fitting_data = []
+            temp_max_scalar = 2 ** (num_sin_phase - 1)
+            for i in range(num_sin_phase):
+                value = (2 ** i) / temp_max_scalar
+                next_value = (2 ** (i + 1)) / temp_max_scalar
+                for _phase in (0, 0.25, 0.5, 0.75):
+                    inter_value = value + (next_value - value) * _phase
+                    fitting_data.append((inter_value, math.pi * (2 * i + _phase)))
+            period_phase_shift = QuarticFunc(fitting_data)
+        else:
+            period_phase_shift = kwargs.get("period_phase_shift")
         self.set(
             dict(amplitude_scale=amplitude_scale, period_phase_shift=period_phase_shift)
         )
