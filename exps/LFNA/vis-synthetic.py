@@ -25,7 +25,6 @@ if str(lib_dir) not in sys.path:
 
 from models.xcore import get_model
 from datasets.synthetic_core import get_synthetic_env
-from datasets.synthetic_example import create_example_v1
 from utils.temp_sync import optimize_fn, evaluate_fn
 from procedures.metric_utils import MSEMetric
 
@@ -214,9 +213,10 @@ def visualize_env(save_dir, version):
         fig.savefig(str(save_path) + ".png", dpi=dpi, bbox_inches="tight", format="png")
         plt.close("all")
     save_dir = save_dir.resolve()
-    base_cmd = "ffmpeg -y -i {xdir}/%05d.png -vf scale=1800:1400 -pix_fmt yuv420p -vb 5000k".format(
-        xdir=save_dir
+    base_cmd = "ffmpeg -y -i {xdir}/v{version}-%05d.png -vf scale=1800:1400 -pix_fmt yuv420p -vb 5000k".format(
+        xdir=save_dir, version=version
     )
+    print(base_cmd)
     os.system("{:} {xdir}/env-{ver}.mp4".format(base_cmd, xdir=save_dir, ver=version))
     os.system("{:} {xdir}/env-{ver}.webm".format(base_cmd, xdir=save_dir, ver=version))
 
