@@ -3,9 +3,10 @@
 #####################################################
 from .synthetic_utils import TimeStamp
 from .synthetic_env import SyntheticDEnv
-from .math_dynamic_funcs import DynamicLinearFunc
-from .math_dynamic_funcs import DynamicQuadraticFunc
-from .math_adv_funcs import ConstantFunc, ComposedSinFunc
+from .math_core import LinearFunc
+from .math_core import DynamicLinearFunc
+from .math_core import DynamicQuadraticFunc
+from .math_core import ConstantFunc, ComposedSinFunc
 
 
 __all__ = ["TimeStamp", "SyntheticDEnv", "get_synthetic_env"]
@@ -32,7 +33,8 @@ def get_synthetic_env(total_timestamp=1000, num_per_task=1000, mode=None, versio
         function = DynamicLinearFunc()
         function_param = dict()
         function_param[0] = ComposedSinFunc(
-            amplitude_scale=ConstantFunc(1.0), period_phase_shift=ConstantFunc(10)
+            amplitude_scale=ConstantFunc(1.0),
+            period_phase_shift=LinearFunc(params={0: 10, 1: 0}),
         )
         function_param[1] = ConstantFunc(constant=0.9)
     elif version == "v2":

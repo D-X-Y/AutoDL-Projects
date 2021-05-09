@@ -103,11 +103,32 @@ class FitFunc(abc.ABC):
         )
 
 
+class LinearFunc(FitFunc):
+    """The linear function that outputs f(x) = a * x + b."""
+
+    def __init__(self, list_of_points=None, params=None):
+        super(LinearFunc, self).__init__(2, list_of_points, params)
+
+    def __call__(self, x):
+        self.check_valid()
+        return self._params[0] * x + self._params[1]
+
+    def _getitem(self, x, weights):
+        return weights[0] * x + weights[1]
+
+    def __repr__(self):
+        return "{name}({a} * x + {b})".format(
+            name=self.__class__.__name__,
+            a=self._params[0],
+            b=self._params[1],
+        )
+
+
 class QuadraticFunc(FitFunc):
     """The quadratic function that outputs f(x) = a * x^2 + b * x + c."""
 
-    def __init__(self, list_of_points=None):
-        super(QuadraticFunc, self).__init__(3, list_of_points)
+    def __init__(self, list_of_points=None, params=None):
+        super(QuadraticFunc, self).__init__(3, list_of_points, params)
 
     def __call__(self, x):
         self.check_valid()
