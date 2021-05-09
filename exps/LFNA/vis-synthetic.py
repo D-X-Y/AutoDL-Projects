@@ -179,11 +179,11 @@ def compare_cl(save_dir):
     )
 
 
-def visualize_env(save_dir):
+def visualize_env(save_dir, version):
     save_dir = Path(str(save_dir))
     save_dir.mkdir(parents=True, exist_ok=True)
 
-    dynamic_env = get_synthetic_env()
+    dynamic_env = get_synthetic_env(version=version)
     min_t, max_t = dynamic_env.min_timestamp, dynamic_env.max_timestamp
     for idx, (timestamp, (allx, ally)) in enumerate(tqdm(dynamic_env, ncols=50)):
         dpi, width, height = 30, 1800, 1400
@@ -201,11 +201,15 @@ def visualize_env(save_dir):
             tick.label.set_rotation(10)
         for tick in cur_ax.yaxis.get_major_ticks():
             tick.label.set_fontsize(LabelSize - font_gap)
-        cur_ax.set_xlim(-10, 10)
-        cur_ax.set_ylim(-60, 60)
+        if version == "v1":
+            cur_ax.set_xlim(-2, 2)
+            cur_ax.set_ylim(-60, 60)
+        elif version == "v2":
+            cur_ax.set_xlim(-10, 10)
+            cur_ax.set_ylim(-60, 60)
         cur_ax.legend(loc=1, fontsize=LegendFontsize)
 
-        save_path = save_dir / "{:05d}".format(idx)
+        save_path = save_dir / "v{:}-{:05d}".format(version, idx)
         fig.savefig(str(save_path) + ".pdf", dpi=dpi, bbox_inches="tight", format="pdf")
         fig.savefig(str(save_path) + ".png", dpi=dpi, bbox_inches="tight", format="png")
         plt.close("all")
@@ -213,8 +217,8 @@ def visualize_env(save_dir):
     base_cmd = "ffmpeg -y -i {xdir}/%05d.png -vf scale=1800:1400 -pix_fmt yuv420p -vb 5000k".format(
         xdir=save_dir
     )
-    os.system("{:} {xdir}/env.mp4".format(base_cmd, xdir=save_dir))
-    os.system("{:} {xdir}/env.webm".format(base_cmd, xdir=save_dir))
+    os.system("{:} {xdir}/env-{ver}.mp4".format(base_cmd, xdir=save_dir, ver=version))
+    os.system("{:} {xdir}/env-{ver}.webm".format(base_cmd, xdir=save_dir, ver=version))
 
 
 def compare_algs(save_dir, alg_dir="./outputs/lfna-synthetic"):
@@ -417,7 +421,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    compare_algs_v2(os.path.join(args.save_dir, "compare-alg-v2"))
-    # visualize_env(os.path.join(args.save_dir, "vis-env"))
+    visualize_env(os.path.join(args.save_dir, "vis-env"), "v1")
+    visualize_env(os.path.join(args.save_dir, "vis-env"), "v2")
+    # compare_algs_v2(os.path.join(args.save_dir, "compare-alg-v2"))
     # compare_cl(os.path.join(args.save_dir, "compare-cl"))
     # compare_algs(os.path.join(args.save_dir, "compare-alg"))

@@ -29,6 +29,13 @@ def get_synthetic_env(total_timestamp=1000, num_per_task=1000, mode=None, versio
         ),
     )
     if version == "v1":
+        function = DynamicLinearFunc()
+        function_param = dict()
+        function_param[0] = ComposedSinFunc(
+            amplitude_scale=ConstantFunc(1.0), period_phase_shift=ConstantFunc(10)
+        )
+        function_param[1] = ConstantFunc(constant=0.9)
+    elif version == "v2":
         function = DynamicQuadraticFunc()
         function_param = dict()
         function_param[0] = ComposedSinFunc(
@@ -38,13 +45,6 @@ def get_synthetic_env(total_timestamp=1000, num_per_task=1000, mode=None, versio
         function_param[2] = ComposedSinFunc(
             num_sin_phase=5, phase_shift=0.4, max_amplitude=0.9
         )
-    elif version == "v2":
-        function = DynamicLinearFunc()
-        function_param = dict()
-        function_param[0] = ComposedSinFunc(
-            amplitude_scale=ConstantFunc(1.0), period_phase_shift=ConstantFunc(1.0)
-        )
-        function_param[1] = ConstantFunc(constant=0.9)
     else:
         raise ValueError("Unknown version: {:}".format(version))
 
