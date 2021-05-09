@@ -23,6 +23,9 @@ from datasets.synthetic_core import get_synthetic_env
 from models.xcore import get_model
 
 
+from lfna_utils import lfna_setup
+
+
 def subsample(historical_x, historical_y, maxn=10000):
     total = historical_x.size(0)
     if total <= maxn:
@@ -33,24 +36,7 @@ def subsample(historical_x, historical_y, maxn=10000):
 
 
 def main(args):
-    prepare_seed(args.rand_seed)
-    logger = prepare_logger(args)
-
-    cache_path = (
-        logger.path(None) / ".." / "env-{:}-info.pth".format(args.env_version)
-    ).resolve()
-    if cache_path.exists():
-        env_info = torch.load(cache_path)
-    else:
-        env_info = dict()
-        dynamic_env = get_synthetic_env(version=args.env_version)
-        env_info["total"] = len(dynamic_env)
-        for idx, (timestamp, (_allx, _ally)) in enumerate(tqdm(dynamic_env)):
-            env_info["{:}-timestamp".format(idx)] = timestamp
-            env_info["{:}-x".format(idx)] = _allx
-            env_info["{:}-y".format(idx)] = _ally
-        env_info["dynamic_env"] = dynamic_env
-        torch.save(env_info, cache_path)
+    logger, env_info = lfna_setup(args)
 
     # check indexes to be evaluated
     to_evaluate_indexes = split_str2indexes(args.srange, env_info["total"], None)
@@ -59,6 +45,8 @@ def main(args):
             args.srange, len(to_evaluate_indexes)
         )
     )
+
+    w_container_per_epoch = dict()
 
     per_timestamp_time, start_time = AverageMeter(), time.time()
     for i, idx in enumerate(to_evaluate_indexes):
@@ -89,9 +77,6 @@ def main(args):
             output_dim=1,
             act_cls="leaky_relu",
             norm_cls="identity",
-            # norm_cls="simple_norm",
-            # mean=mean,
-            # std=std,
         )
         model = get_model(dict(model_type="simple_mlp"), **model_kwargs)
         # build optimizer
@@ -144,6 +129,7 @@ def main(args):
         save_path = logger.path(None) / "{:04d}-{:04d}.pth".format(
             idx, env_info["total"]
         )
+        w_container_per_epoch[idx] = model.get_w_container().no_grad_clone()
         save_checkpoint(
             {
                 "model_state_dict": model.state_dict(),
@@ -155,10 +141,14 @@ def main(args):
             logger,
         )
         logger.log("")
-
         per_timestamp_time.update(time.time() - start_time)
         start_time = time.time()
 
+    save_checkpoint(
+        {"w_container_per_epoch": w_container_per_epoch},
+        logger.path(None) / "final-ckp.pth",
+        logger,
+    )
     logger.log("-" * 200 + "\n")
     logger.close()
 
@@ -210,5 +200,7 @@ if __name__ == "__main__":
     if args.rand_seed is None or args.rand_seed < 0:
         args.rand_seed = random.randint(1, 100000)
     assert args.save_dir is not None, "The save dir argument can not be None"
-    args.save_dir = "{:}-{:}".format(args.save_dir, args.env_version)
+    args.save_dir = "{:}-{:}-d{:}".format(
+        args.save_dir, args.env_version, args.hidden_dim
+    )
     main(args)

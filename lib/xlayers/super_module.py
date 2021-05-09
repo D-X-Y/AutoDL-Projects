@@ -59,6 +59,9 @@ class TensorContainer:
         for tensor in self._tensors:
             tensor.requires_grad_(requires_grad)
 
+    def parameters(self):
+        return self._tensors
+
     @property
     def tensors(self):
         return self._tensors
