@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/LFNA/basic-his.py --srange 1-999 --env_version v1
+# python exps/LFNA/basic-his.py --srange 1-999 --env_version v1 --hidden_dim 16
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -36,7 +36,7 @@ def subsample(historical_x, historical_y, maxn=10000):
 
 
 def main(args):
-    logger, env_info = lfna_setup(args)
+    logger, env_info, model_kwargs = lfna_setup(args)
 
     # check indexes to be evaluated
     to_evaluate_indexes = split_str2indexes(args.srange, env_info["total"], None)
@@ -71,13 +71,6 @@ def main(args):
         historical_x, historical_y = torch.cat(historical_x), torch.cat(historical_y)
         historical_x, historical_y = subsample(historical_x, historical_y)
         # build model
-        mean, std = historical_x.mean().item(), historical_x.std().item()
-        model_kwargs = dict(
-            input_dim=1,
-            output_dim=1,
-            act_cls="leaky_relu",
-            norm_cls="identity",
-        )
         model = get_model(dict(model_type="simple_mlp"), **model_kwargs)
         # build optimizer
         optimizer = torch.optim.Adam(model.parameters(), lr=args.init_lr, amsgrad=True)
@@ -166,6 +159,12 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="The synthetic enviornment version.",
+    )
+    parser.add_argument(
+        "--hidden_dim",
+        type=int,
+        required=True,
+        help="The hidden dimension.",
     )
     parser.add_argument(
         "--init_lr",

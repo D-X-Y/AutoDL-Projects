@@ -169,7 +169,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir",
         type=str,
-        default="./outputs/lfna-synthetic/maml",
+        default="./outputs/lfna-synthetic/use-maml",
         help="The checkpoint directory.",
     )
     parser.add_argument(
@@ -177,6 +177,12 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="The synthetic enviornment version.",
+    )
+    parser.add_argument(
+        "--hidden_dim",
+        type=int,
+        required=True,
+        help="The hidden dimension.",
     )
     parser.add_argument(
         "--meta_lr",
@@ -217,4 +223,7 @@ if __name__ == "__main__":
     if args.rand_seed is None or args.rand_seed < 0:
         args.rand_seed = random.randint(1, 100000)
     assert args.save_dir is not None, "The save dir argument can not be None"
+    args.save_dir = "{:}-{:}-d{:}".format(
+        args.save_dir, args.env_version, args.hidden_dim
+    )
     main(args)
