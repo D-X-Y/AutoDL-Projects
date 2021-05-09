@@ -13,7 +13,7 @@ print("library path: {:}".format(lib_dir))
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
-from datasets import TimeStamp
+from datasets.synthetic_core import TimeStamp
 
 
 class TestTimeStamp(unittest.TestCase):

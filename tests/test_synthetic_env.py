@@ -13,8 +13,8 @@ print("library path: {:}".format(lib_dir))
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
-from datasets import ConstantFunc, ComposedSinFunc
-from datasets import SyntheticDEnv
+from datasets.math_core import ConstantFunc, ComposedSinFunc
+from datasets.synthetic_core import SyntheticDEnv
 
 
 class TestSynethicEnv(unittest.TestCase):

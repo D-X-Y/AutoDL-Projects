@@ -13,7 +13,7 @@ print("library path: {:}".format(lib_dir))
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
-from datasets import QuadraticFunc
+from datasets.math_core import QuadraticFunc
 
 
 class TestQuadraticFunc(unittest.TestCase):

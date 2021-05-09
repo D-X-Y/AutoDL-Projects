@@ -13,11 +13,11 @@ print("library path: {:}".format(lib_dir))
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
-from datasets import QuadraticFunc
-from datasets import ConstantFunc
-from datasets import DynamicLinearFunc
-from datasets import DynamicQuadraticFunc
-from datasets import ComposedSinFunc
+from datasets.math_core import QuadraticFunc
+from datasets.math_core import ConstantFunc
+from datasets.math_core import DynamicLinearFunc
+from datasets.math_core import DynamicQuadraticFunc
+from datasets.math_core import ComposedSinFunc
 
 
 class TestConstantFunc(unittest.TestCase):
