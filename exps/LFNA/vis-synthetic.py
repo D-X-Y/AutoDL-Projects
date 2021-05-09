@@ -203,7 +203,7 @@ def visualize_env(save_dir, version):
             tick.label.set_fontsize(LabelSize - font_gap)
         if version == "v1":
             cur_ax.set_xlim(-2, 2)
-            cur_ax.set_ylim(-60, 60)
+            cur_ax.set_ylim(-8, 8)
         elif version == "v2":
             cur_ax.set_xlim(-10, 10)
             cur_ax.set_ylim(-60, 60)

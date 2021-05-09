@@ -33,8 +33,9 @@ def get_synthetic_env(total_timestamp=1000, num_per_task=1000, mode=None, versio
         function = DynamicLinearFunc()
         function_param = dict()
         function_param[0] = ComposedSinFunc(
-            amplitude_scale=ConstantFunc(1.0),
-            period_phase_shift=LinearFunc(params={0: 10, 1: 0}),
+            amplitude_scale=ConstantFunc(3.0),
+            num_sin_phase=9,
+            sin_speed_use_power=False,
         )
         function_param[1] = ConstantFunc(constant=0.9)
     elif version == "v2":

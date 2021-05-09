@@ -55,6 +55,7 @@ class ComposedSinFunc(FitFunc):
 
     def fit(self, **kwargs):
         num_sin_phase = kwargs.get("num_sin_phase", 7)
+        sin_speed_use_power = kwargs.get("sin_speed_use_power", True)
         min_amplitude = kwargs.get("min_amplitude", 1)
         max_amplitude = kwargs.get("max_amplitude", 4)
         phase_shift = kwargs.get("phase_shift", 0.0)
@@ -67,10 +68,17 @@ class ComposedSinFunc(FitFunc):
             amplitude_scale = kwargs.get("amplitude_scale")
         if kwargs.get("period_phase_shift", None) is None:
             fitting_data = []
-            temp_max_scalar = 2 ** (num_sin_phase - 1)
+            if sin_speed_use_power:
+                temp_max_scalar = 2 ** (num_sin_phase - 1)
+            else:
+                temp_max_scalar = num_sin_phase - 1
             for i in range(num_sin_phase):
-                value = (2 ** i) / temp_max_scalar
-                next_value = (2 ** (i + 1)) / temp_max_scalar
+                if sin_speed_use_power:
+                    value = (2 ** i) / temp_max_scalar
+                    next_value = (2 ** (i + 1)) / temp_max_scalar
+                else:
+                    value = i / temp_max_scalar
+                    next_value = (i + 1) / temp_max_scalar
                 for _phase in (0, 0.25, 0.5, 0.75):
                     inter_value = value + (next_value - value) * _phase
                     fitting_data.append((inter_value, math.pi * (2 * i + _phase)))
