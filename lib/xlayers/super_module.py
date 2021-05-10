@@ -46,6 +46,13 @@ class TensorContainer:
             result.append(name, new_tensor, self._param_or_buffers[index])
         return result
 
+    def create_container(self, tensors):
+        result = TensorContainer()
+        for index, name in enumerate(self._names):
+            new_tensor = tensors[index]
+            result.append(name, new_tensor, self._param_or_buffers[index])
+        return result
+
     def no_grad_clone(self):
         result = TensorContainer()
         with torch.no_grad():

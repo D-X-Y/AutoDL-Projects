@@ -1,6 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
+import copy
 import torch
 from tqdm import tqdm
 from procedures import prepare_seed, prepare_logger
@@ -37,6 +38,24 @@ def lfna_setup(args):
     return logger, env_info, model_kwargs
 
 
+def train_model(model, dataset, lr, epochs):
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)
+    best_loss, best_param = None, None
+    for _iepoch in range(epochs):
+        preds = model(dataset.x)
+        optimizer.zero_grad()
+        loss = criterion(preds, dataset.y)
+        loss.backward()
+        optimizer.step()
+        # save best
+        if best_loss is None or best_loss > loss.item():
+            best_loss = loss.item()
+            best_param = copy.deepcopy(model.state_dict())
+    model.load_state_dict(best_param)
+    return best_loss
+
+
 class TimeData:
     def __init__(self, timestamp, xs, ys):
         self._timestamp = timestamp
@@ -56,6 +75,6 @@ class TimeData:
         return self._timestamp
 
     def __repr__(self):
-        return "{name}(timestamp={:}, with {num} samples)".format(
+        return "{name}(timestamp={timestamp}, with {num} samples)".format(
             name=self.__class__.__name__, timestamp=self._timestamp, num=len(self._xs)
         )

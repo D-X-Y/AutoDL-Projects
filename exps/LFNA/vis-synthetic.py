@@ -237,6 +237,8 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
     alg_name2dir["Optimal"] = "use-same-timestamp"
     alg_name2dir["Supervised Learning (History Data)"] = "use-all-past-data"
     alg_name2dir["MAML"] = "use-maml-s1"
+    alg_name2dir["LFNA (fix init)"] = "lfna-fix-init"
+    alg_name2dir["LFNA (debug)"] = "lfna-debug"
     alg_name2all_containers = OrderedDict()
     if version == "v1":
         poststr = "v1-d16"
@@ -256,7 +258,7 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
     )
 
     alg2xs, alg2ys = defaultdict(list), defaultdict(list)
-    colors = ["r", "g", "b"]
+    colors = ["r", "g", "b", "m", "y"]
 
     dynamic_env = env_info["dynamic_env"]
     min_t, max_t = dynamic_env.min_timestamp, dynamic_env.max_timestamp

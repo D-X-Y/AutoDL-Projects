@@ -51,6 +51,10 @@ class SyntheticDEnv(data.Dataset):
     def max_timestamp(self):
         return self._timestamp_generator.max_timestamp
 
+    @property
+    def timestamp_interval(self):
+        return self._timestamp_generator.interval
+
     def set_oracle_map(self, functor):
         self._oracle_map = functor
 
@@ -67,6 +71,9 @@ class SyntheticDEnv(data.Dataset):
     def __getitem__(self, index):
         assert 0 <= index < len(self), "{:} is not in [0, {:})".format(index, len(self))
         index, timestamp = self._timestamp_generator[index]
+        return self.__call__(timestamp)
+
+    def __call__(self, timestamp):
         mean_list = [functor(timestamp) for functor in self._mean_functors]
         cov_matrix = [
             [abs(cov_gen(timestamp)) for cov_gen in cov_functor]
