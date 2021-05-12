@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/LFNA/lfna-test-hpnet.py --env_version v1 --hidden_dim 16
+# python exps/LFNA/lfna-test-hpnet.py --env_version v1 --hidden_dim 16 --layer_dim 32 --epochs 50000
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -33,17 +33,17 @@ from lfna_models import HyperNet
 def main(args):
     logger, env_info, model_kwargs = lfna_setup(args)
     dynamic_env = env_info["dynamic_env"]
-    model = get_model(dict(model_type="simple_mlp"), **model_kwargs)
+    model = get_model(**model_kwargs)
     model = model.to(args.device)
     criterion = torch.nn.MSELoss()
 
     logger.log("There are {:} weights.".format(model.get_w_container().numel()))
 
     shape_container = model.get_w_container().to_shape_container()
-    hypernet = HyperNet(shape_container, args.hidden_dim, args.task_dim)
+    hypernet = HyperNet(shape_container, args.layer_dim, args.task_dim)
     hypernet = hypernet.to(args.device)
     # task_embed = torch.nn.Parameter(torch.Tensor(env_info["total"], args.task_dim))
-    total_bar = 10
+    total_bar = 16
     task_embeds = []
     for i in range(total_bar):
         tensor = torch.Tensor(1, args.task_dim).to(args.device)
@@ -51,8 +51,12 @@ def main(args):
     for task_embed in task_embeds:
         trunc_normal_(task_embed, std=0.02)
 
+    model.train()
+    hypernet.train()
+
     parameters = list(hypernet.parameters()) + task_embeds
-    optimizer = torch.optim.Adam(parameters, lr=args.init_lr, amsgrad=True)
+    # optimizer = torch.optim.Adam(parameters, lr=args.init_lr, amsgrad=True)
+    optimizer = torch.optim.Adam(parameters, lr=args.init_lr, weight_decay=1e-5)
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer,
         milestones=[
@@ -98,7 +102,7 @@ def main(args):
         lr_scheduler.step()
 
         loss_meter.update(final_loss.item())
-        if iepoch % 200 == 0:
+        if iepoch % 100 == 0:
             logger.log(
                 head_str
                 + " meta-loss: {:.4f} ({:.4f}) :: lr={:.5f}, batch={:}".format(
@@ -126,6 +130,26 @@ def main(args):
     print(model)
     print(hypernet)
 
+    w_container_per_epoch = dict()
+    for idx in range(0, total_bar):
+        future_time = env_info["{:}-timestamp".format(idx)]
+        future_x = env_info["{:}-x".format(idx)]
+        future_y = env_info["{:}-y".format(idx)]
+        future_container = hypernet(task_embeds[idx])
+        w_container_per_epoch[idx] = future_container.no_grad_clone()
+        with torch.no_grad():
+            future_y_hat = model.forward_with_container(
+                future_x, w_container_per_epoch[idx]
+            )
+            future_loss = criterion(future_y_hat, future_y)
+        logger.log("meta-test: [{:03d}] -> loss={:.4f}".format(idx, future_loss.item()))
+
+    save_checkpoint(
+        {"w_container_per_epoch": w_container_per_epoch},
+        logger.path(None) / "final-ckp.pth",
+        logger,
+    )
+
     logger.log("-" * 200 + "\n")
     logger.close()
 
@@ -146,6 +170,12 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--hidden_dim",
+        type=int,
+        required=True,
+        help="The hidden dimension.",
+    )
+    parser.add_argument(
+        "--layer_dim",
         type=int,
         required=True,
         help="The hidden dimension.",
@@ -181,7 +211,7 @@ if __name__ == "__main__":
     if args.rand_seed is None or args.rand_seed < 0:
         args.rand_seed = random.randint(1, 100000)
     assert args.save_dir is not None, "The save dir argument can not be None"
-    args.task_dim = args.hidden_dim
+    args.task_dim = args.layer_dim
     args.save_dir = "{:}-{:}-d{:}".format(
         args.save_dir, args.env_version, args.hidden_dim
     )

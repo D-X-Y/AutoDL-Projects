@@ -14,6 +14,7 @@ from .super_norm import SuperSimpleNorm
 from .super_norm import SuperLayerNorm1D
 from .super_norm import SuperSimpleLearnableNorm
 from .super_norm import SuperIdentity
+from .super_dropout import SuperDropout
 
 super_name2norm = {
     "simple_norm": SuperSimpleNorm,

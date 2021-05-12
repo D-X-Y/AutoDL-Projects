@@ -31,7 +31,7 @@ from lfna_models import HyperNet_VX as HyperNet
 def main(args):
     logger, env_info, model_kwargs = lfna_setup(args)
     dynamic_env = env_info["dynamic_env"]
-    model = get_model(dict(model_type="simple_mlp"), **model_kwargs)
+    model = get_model(**model_kwargs)
 
     total_time = env_info["total"]
     for i in range(total_time):

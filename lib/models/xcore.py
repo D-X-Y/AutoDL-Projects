@@ -11,6 +11,7 @@ __all__ = ["get_model"]
 
 from xlayers.super_core import SuperSequential
 from xlayers.super_core import SuperLinear
+from xlayers.super_core import SuperDropout
 from xlayers.super_core import super_name2norm
 from xlayers.super_core import super_name2activation
 
@@ -47,7 +48,20 @@ def get_model(config: Dict[Text, Any], **kwargs):
             last_dim = hidden_dim
         sub_layers.append(SuperLinear(last_dim, kwargs["output_dim"]))
         model = SuperSequential(*sub_layers)
-
+    elif model_type == "dual_norm_mlp":
+        act_cls = super_name2activation[kwargs["act_cls"]]
+        norm_cls = super_name2norm[kwargs["norm_cls"]]
+        sub_layers, last_dim = [], kwargs["input_dim"]
+        for i, hidden_dim in enumerate(kwargs["hidden_dims"]):
+            if i > 0:
+                sub_layers.append(norm_cls(last_dim, elementwise_affine=False))
+            sub_layers.append(SuperLinear(last_dim, hidden_dim))
+            sub_layers.append(SuperDropout(kwargs["dropout"]))
+            sub_layers.append(SuperLinear(hidden_dim, hidden_dim))
+            sub_layers.append(act_cls())
+            last_dim = hidden_dim
+        sub_layers.append(SuperLinear(last_dim, kwargs["output_dim"]))
+        model = SuperSequential(*sub_layers)
     else:
         raise TypeError("Unkonwn model type: {:}".format(model_type))
     return model
