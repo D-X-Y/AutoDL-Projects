@@ -31,11 +31,21 @@ class HyperNet(super_core.SuperModule):
         model_kwargs = dict(
             input_dim=layer_embeding + task_embedding,
             output_dim=max(self._numel_per_layer),
+            hidden_dims=[layer_embeding * 4] * 4,
+            act_cls="gelu",
+            norm_cls="layer_norm_1d",
+        )
+        self._generator = get_model(dict(model_type="norm_mlp"), **model_kwargs)
+        """
+        model_kwargs = dict(
+            input_dim=layer_embeding + task_embedding,
+            output_dim=max(self._numel_per_layer),
             hidden_dim=layer_embeding * 4,
             act_cls="sigmoid",
             norm_cls="identity",
         )
         self._generator = get_model(dict(model_type="simple_mlp"), **model_kwargs)
+        """
         self._return_container = return_container
         print("generator: {:}".format(self._generator))
 

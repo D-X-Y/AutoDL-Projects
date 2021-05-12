@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/LFNA/lfna-test-hpnet.py --env_version v1 --hidden_dim 16
+# python exps/LFNA/lfna-tall-hpnet.py --env_version v1 --hidden_dim 16
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -40,8 +40,7 @@ def main(args):
 
     shape_container = model.get_w_container().to_shape_container()
     hypernet = HyperNet(shape_container, args.hidden_dim, args.task_dim)
-    # task_embed = torch.nn.Parameter(torch.Tensor(env_info["total"], args.task_dim))
-    total_bar = 10
+    total_bar = env_info["total"] - 1
     task_embeds = []
     for i in range(total_bar):
         task_embeds.append(torch.nn.Parameter(torch.Tensor(1, args.task_dim)))
@@ -59,7 +58,6 @@ def main(args):
         gamma=0.1,
     )
 
-    # total_bar = env_info["total"] - 1
     # LFNA meta-training
     loss_meter = AverageMeter()
     per_epoch_time, start_time = AverageMeter(), time.time()
@@ -73,10 +71,11 @@ def main(args):
             + need_time
         )
 
+        limit_bar = float(iepoch + 1) / args.epochs * total_bar
+        limit_bar = min(max(0, int(limit_bar)), total_bar)
         losses = []
-        # for ibatch in range(args.meta_batch):
-        for cur_time in range(total_bar):
-            # cur_time = random.randint(0, total_bar)
+        for ibatch in range(args.meta_batch):
+            cur_time = random.randint(0, limit_bar)
             cur_task_embed = task_embeds[cur_time]
             cur_container = hypernet(cur_task_embed)
             cur_x = env_info["{:}-x".format(cur_time)]
@@ -98,11 +97,12 @@ def main(args):
         if iepoch % 200 == 0:
             logger.log(
                 head_str
-                + "meta-loss: {:.4f} ({:.4f}) :: lr={:.5f}, batch={:}".format(
+                + "meta-loss: {:.4f} ({:.4f}) :: lr={:.5f}, batch={:}, limit={:}".format(
                     loss_meter.avg,
                     loss_meter.val,
                     min(lr_scheduler.get_last_lr()),
                     len(losses),
+                    limit_bar,
                 )
             )
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir",
         type=str,
-        default="./outputs/lfna-synthetic/lfna-test-hpnet",
+        default="./outputs/lfna-synthetic/lfna-tall-hpnet",
         help="The checkpoint directory.",
     )
     parser.add_argument(

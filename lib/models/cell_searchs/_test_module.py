@@ -4,9 +4,11 @@
 import torch
 from search_model_enas_utils import Controller
 
-def main():
-  controller = Controller(6, 4)
-  predictions = controller()
 
-if __name__ == '__main__':
-  main()
+def main():
+    controller = Controller(6, 4)
+    predictions = controller()
+
+
+if __name__ == "__main__":
+    main()

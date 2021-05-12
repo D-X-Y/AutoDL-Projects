@@ -35,6 +35,22 @@ def get_model(config: Dict[Text, Any], **kwargs):
             act_cls(),
             SuperLinear(hidden_dim2, kwargs["output_dim"]),
         )
+    elif model_type == "norm_mlp":
+        act_cls = super_name2activation[kwargs["act_cls"]]
+        norm_cls = super_name2norm[kwargs["norm_cls"]]
+        sub_layers, last_dim = [], kwargs["input_dim"]
+        for i, hidden_dim in enumerate(kwargs["hidden_dims"]):
+            sub_layers.extend(
+                [
+                    norm_cls(last_dim, elementwise_affine=False),
+                    SuperLinear(last_dim, hidden_dim),
+                    act_cls(),
+                ]
+            )
+            last_dim = hidden_dim
+        sub_layers.append(SuperLinear(last_dim, kwargs["output_dim"]))
+        model = SuperSequential(*sub_layers)
+
     else:
         raise TypeError("Unkonwn model type: {:}".format(model_type))
     return model
