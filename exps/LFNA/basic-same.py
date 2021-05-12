@@ -58,6 +58,7 @@ def main(args):
         # build model
         model = get_model(**model_kwargs)
         print(model)
+        model.analyze_weights()
         # build optimizer
         optimizer = torch.optim.Adam(model.parameters(), lr=args.init_lr, amsgrad=True)
         criterion = torch.nn.MSELoss()
@@ -168,7 +169,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--epochs",
         type=int,
-        default=1000,
+        default=300,
         help="The total number of epochs.",
     )
     parser.add_argument(

@@ -66,6 +66,15 @@ class SuperModule(abc.ABC, nn.Module):
             container.append(name, buf, False)
         return container
 
+    def analyze_weights(self):
+        with torch.no_grad():
+            for name, param in self.named_parameters():
+                shapestr = "[{:10s}] shape={:}".format(name, list(param.shape))
+                finalstr = shapestr + "{:.2f} +- {:.2f}".format(
+                    param.mean(), param.std()
+                )
+                print(finalstr)
+
     @property
     def abstract_search_space(self):
         raise NotImplementedError
