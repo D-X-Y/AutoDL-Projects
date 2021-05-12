@@ -34,17 +34,20 @@ def main(args):
     logger, env_info, model_kwargs = lfna_setup(args)
     dynamic_env = env_info["dynamic_env"]
     model = get_model(dict(model_type="simple_mlp"), **model_kwargs)
+    model = model.to(args.device)
     criterion = torch.nn.MSELoss()
 
     logger.log("There are {:} weights.".format(model.get_w_container().numel()))
 
     shape_container = model.get_w_container().to_shape_container()
     hypernet = HyperNet(shape_container, args.hidden_dim, args.task_dim)
+    hypernet = hypernet.to(args.device)
     # task_embed = torch.nn.Parameter(torch.Tensor(env_info["total"], args.task_dim))
     total_bar = 10
     task_embeds = []
     for i in range(total_bar):
-        task_embeds.append(torch.nn.Parameter(torch.Tensor(1, args.task_dim)))
+        tensor = torch.Tensor(1, args.task_dim).to(args.device)
+        task_embeds.append(torch.nn.Parameter(tensor))
     for task_embed in task_embeds:
         trunc_normal_(task_embed, std=0.02)
 
@@ -79,8 +82,8 @@ def main(args):
             # cur_time = random.randint(0, total_bar)
             cur_task_embed = task_embeds[cur_time]
             cur_container = hypernet(cur_task_embed)
-            cur_x = env_info["{:}-x".format(cur_time)]
-            cur_y = env_info["{:}-y".format(cur_time)]
+            cur_x = env_info["{:}-x".format(cur_time)].to(args.device)
+            cur_y = env_info["{:}-y".format(cur_time)].to(args.device)
             cur_dataset = TimeData(cur_time, cur_x, cur_y)
 
             preds = model.forward_with_container(cur_dataset.x, cur_container)
@@ -98,7 +101,7 @@ def main(args):
         if iepoch % 200 == 0:
             logger.log(
                 head_str
-                + "meta-loss: {:.4f} ({:.4f}) :: lr={:.5f}, batch={:}".format(
+                + " meta-loss: {:.4f} ({:.4f}) :: lr={:.5f}, batch={:}".format(
                     loss_meter.avg,
                     loss_meter.val,
                     min(lr_scheduler.get_last_lr()),
@@ -165,6 +168,12 @@ if __name__ == "__main__":
         type=int,
         default=2000,
         help="The total number of epochs.",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cpu",
+        help="",
     )
     # Random Seed
     parser.add_argument("--rand_seed", type=int, default=-1, help="manual seed")
