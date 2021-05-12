@@ -90,6 +90,7 @@ def main(args):
 
         final_loss = torch.stack(losses).mean()
         final_loss.backward()
+        torch.nn.utils.clip_grad_norm_(parameters, 1.0)
         optimizer.step()
         lr_scheduler.step()
 
