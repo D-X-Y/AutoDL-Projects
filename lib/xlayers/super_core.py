@@ -41,4 +41,5 @@ super_name2activation = {
 
 
 from .super_trade_stem import SuperAlphaEBDv1
+from .super_positional_embedding import SuperDynamicPositionE
 from .super_positional_embedding import SuperPositionalEncoder
