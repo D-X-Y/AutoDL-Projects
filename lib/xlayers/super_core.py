@@ -28,9 +28,13 @@ from .super_transformer import SuperTransformerEncoderLayer
 from .super_activations import SuperReLU
 from .super_activations import SuperLeakyReLU
 from .super_activations import SuperTanh
+from .super_activations import SuperGELU
+from .super_activations import SuperSigmoid
 
 super_name2activation = {
     "relu": SuperReLU,
+    "sigmoid": SuperSigmoid,
+    "gelu": SuperGELU,
     "leaky_relu": SuperLeakyReLU,
     "tanh": SuperTanh,
 }

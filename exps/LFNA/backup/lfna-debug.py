@@ -25,6 +25,7 @@ from xlayers import super_core
 
 
 from lfna_utils import lfna_setup, train_model, TimeData
+from lfna_models import HyperNet
 
 
 class LFNAmlp:
@@ -77,17 +78,40 @@ def main(args):
             nkey = "{:}-{:}".format(i, xkey)
             assert nkey in env_info, "{:} no in {:}".format(nkey, list(env_info.keys()))
     train_time_bar = total_time // 2
-    network = get_model(dict(model_type="simple_mlp"), **model_kwargs)
 
     criterion = torch.nn.MSELoss()
-    logger.log("There are {:} weights.".format(network.get_w_container().numel()))
+    logger.log("There are {:} weights.".format(model.get_w_container().numel()))
 
     adaptor = LFNAmlp(args.meta_seq, (200, 200), "leaky_relu", criterion)
 
     # pre-train the model
-    init_dataset = TimeData(0, env_info["0-x"], env_info["0-y"])
-    init_loss = train_model(network, init_dataset, args.init_lr, args.epochs)
+    dataset = init_dataset = TimeData(0, env_info["0-x"], env_info["0-y"])
+
+    shape_container = model.get_w_container().to_shape_container()
+    hypernet = HyperNet(shape_container, 16)
+
+    optimizer = torch.optim.Adam(hypernet.parameters(), lr=args.init_lr, amsgrad=True)
+
+    best_loss, best_param = None, None
+    for _iepoch in range(args.epochs):
+        container = hypernet(None)
+
+        preds = model.forward_with_container(dataset.x, container)
+        optimizer.zero_grad()
+        loss = criterion(preds, dataset.y)
+        loss.backward()
+        optimizer.step()
+        # save best
+        if best_loss is None or best_loss > loss.item():
+            best_loss = loss.item()
+            best_param = copy.deepcopy(model.state_dict())
+    print("hyper-net : best={:.4f}".format(best_loss))
+
+    init_loss = train_model(model, init_dataset, args.init_lr, args.epochs)
     logger.log("The pre-training loss is {:.4f}".format(init_loss))
+    import pdb
+
+    pdb.set_trace()
 
     all_past_containers = []
     ground_truth_path = (

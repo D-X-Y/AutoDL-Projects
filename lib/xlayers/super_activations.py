@@ -38,6 +38,46 @@ class SuperReLU(SuperModule):
         return "inplace=True" if self._inplace else ""
 
 
+class SuperGELU(SuperModule):
+    """Applies a the Gaussian Error Linear Units function element-wise."""
+
+    def __init__(self) -> None:
+        super(SuperGELU, self).__init__()
+
+    @property
+    def abstract_search_space(self):
+        return spaces.VirtualNode(id(self))
+
+    def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
+        return self.forward_raw(input)
+
+    def forward_raw(self, input: torch.Tensor) -> torch.Tensor:
+        return F.gelu(input)
+
+    def forward_with_container(self, input, container, prefix=[]):
+        return self.forward_raw(input)
+
+
+class SuperSigmoid(SuperModule):
+    """Applies a the Sigmoid function element-wise."""
+
+    def __init__(self) -> None:
+        super(SuperSigmoid, self).__init__()
+
+    @property
+    def abstract_search_space(self):
+        return spaces.VirtualNode(id(self))
+
+    def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
+        return self.forward_raw(input)
+
+    def forward_raw(self, input: torch.Tensor) -> torch.Tensor:
+        return torch.sigmoid(input)
+
+    def forward_with_container(self, input, container, prefix=[]):
+        return self.forward_raw(input)
+
+
 class SuperLeakyReLU(SuperModule):
     """https://pytorch.org/docs/stable/_modules/torch/nn/modules/activation.html#LeakyReLU"""
 
