@@ -55,6 +55,7 @@ class LFNA_Meta(super_core.SuperModule):
                     order=super_core.LayerOrder.PostNorm,
                 )
             )
+        layers.append(super_core.SuperLinear(time_embedding, time_embedding))
         self.meta_corrector = super_core.SuperSequential(*layers)
 
         model_kwargs = dict(

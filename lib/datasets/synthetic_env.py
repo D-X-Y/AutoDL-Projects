@@ -110,8 +110,10 @@ class SyntheticDEnv(data.Dataset):
         if self._seq_length is None:
             return self.__call__(timestamp)
         else:
+            noise = random.random() * self.timestamp_interval * 0.3
             timestamps = [
-                timestamp + i * self.timestamp_interval for i in range(self._seq_length)
+                timestamp + i * self.timestamp_interval + noise
+                for i in range(self._seq_length)
             ]
             xdata = [self.__call__(timestamp) for timestamp in timestamps]
             return zip_sequence(xdata)

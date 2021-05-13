@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/LFNA/lfna.py --env_version v1
+# python exps/LFNA/lfna.py --env_version v1 --device cuda
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
