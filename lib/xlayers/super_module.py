@@ -75,6 +75,15 @@ class SuperModule(abc.ABC, nn.Module):
                 )
                 print(finalstr)
 
+    def numel(self, buffer=True):
+        total = 0
+        for name, param in self.named_parameters():
+            total += param.numel()
+        if buffer:
+            for name, buf in self.named_buffers():
+                total += buf.numel()
+        return total
+
     @property
     def abstract_search_space(self):
         raise NotImplementedError
