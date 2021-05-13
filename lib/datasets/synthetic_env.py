@@ -43,6 +43,7 @@ class SyntheticDEnv(data.Dataset):
         num_per_task: int = 5000,
         timestamp_config: Optional[Dict] = None,
         mode: Optional[str] = None,
+        timestamp_noise_scale: float = 0.3,
     ):
         self._ndim = len(mean_functors)
         assert self._ndim == len(
@@ -59,6 +60,7 @@ class SyntheticDEnv(data.Dataset):
             timestamp_config["mode"] = mode
 
         self._timestamp_generator = TimeStamp(**timestamp_config)
+        self._timestamp_noise_scale = timestamp_noise_scale
 
         self._mean_functors = mean_functors
         self._cov_functors = cov_functors
@@ -110,7 +112,9 @@ class SyntheticDEnv(data.Dataset):
         if self._seq_length is None:
             return self.__call__(timestamp)
         else:
-            noise = random.random() * self.timestamp_interval * 0.3
+            noise = (
+                random.random() * self.timestamp_interval * self._timestamp_noise_scale
+            )
             timestamps = [
                 timestamp + i * self.timestamp_interval + noise
                 for i in range(self._seq_length)
