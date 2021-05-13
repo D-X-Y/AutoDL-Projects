@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/LFNA/lfna.py --env_version v1 --hidden_dim 16 --layer_dim 32 --epochs 50000
+# python exps/LFNA/lfna.py --env_version v1
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -19,56 +19,82 @@ from utils import split_str2indexes
 
 from procedures.advanced_main import basic_train_fn, basic_eval_fn
 from procedures.metric_utils import SaveMetric, MSEMetric, ComposeMetric
-from datasets.synthetic_core import get_synthetic_env
+from datasets.synthetic_core import get_synthetic_env, EnvSampler
 from models.xcore import get_model
 from xlayers import super_core, trunc_normal_
 
-
 from lfna_utils import lfna_setup, train_model, TimeData
+from lfna_meta_model import LFNA_Meta
 
-from lfna_models_v2 import HyperNet
+
+def epoch_train(loader, meta_model, base_model, optimizer, criterion, device, logger):
+    base_model.train()
+    meta_model.train()
+    loss_meter = AverageMeter()
+    for ibatch, batch_data in enumerate(loader):
+        timestamps, (batch_seq_inputs, batch_seq_targets) = batch_data
+        timestamps = timestamps.squeeze(dim=-1).to(device)
+        batch_seq_inputs = batch_seq_inputs.to(device)
+        batch_seq_targets = batch_seq_targets.to(device)
+
+        optimizer.zero_grad()
+
+        batch_seq_containers = meta_model(timestamps)
+        losses = []
+        for seq_containers, seq_inputs, seq_targets in zip(
+            batch_seq_containers, batch_seq_inputs, batch_seq_targets
+        ):
+            for container, inputs, targets in zip(
+                seq_containers, seq_inputs, seq_targets
+            ):
+                predictions = base_model.forward_with_container(inputs, container)
+                loss = criterion(predictions, targets)
+                losses.append(loss)
+        final_loss = torch.stack(losses).mean()
+        final_loss.backward()
+        optimizer.step()
+        loss_meter.update(final_loss.item())
+    return loss_meter
 
 
 def main(args):
     logger, env_info, model_kwargs = lfna_setup(args)
-    dynamic_env = env_info["dynamic_env"]
-    model = get_model(**model_kwargs)
-    model = model.to(args.device)
+    dynamic_env = get_synthetic_env(mode="train", version=args.env_version)
+    base_model = get_model(**model_kwargs)
+    base_model = base_model.to(args.device)
     criterion = torch.nn.MSELoss()
 
-    logger.log("There are {:} weights.".format(model.get_w_container().numel()))
-    # meta_train_range = (dynamic_env.min_timestamp, (dynamic_env.min_timestamp + dynamic_env.max_timestamp) / 2)
-    # meta_train_interval = dynamic_env.timestamp_interval
-
-    shape_container = model.get_w_container().to_shape_container()
+    shape_container = base_model.get_w_container().to_shape_container()
 
     # pre-train the hypernetwork
-    timestamps = list(
-        dynamic_env.get_timestamp(index) for index in range(len(dynamic_env) // 2)
+    timestamps = dynamic_env.get_timestamp(None)
+    meta_model = LFNA_Meta(shape_container, args.layer_dim, args.time_dim, timestamps)
+    meta_model = meta_model.to(args.device)
+
+    logger.log("The base-model has {:} weights.".format(base_model.numel()))
+    logger.log("The meta-model has {:} weights.".format(meta_model.numel()))
+
+    batch_sampler = EnvSampler(dynamic_env, args.meta_batch, args.sampler_enlarge)
+    dynamic_env.reset_max_seq_length(args.seq_length)
+    """
+    env_loader = torch.utils.data.DataLoader(
+        dynamic_env,
+        batch_size=args.meta_batch,
+        shuffle=True,
+        num_workers=args.workers,
+        pin_memory=True,
+    )
+    """
+    env_loader = torch.utils.data.DataLoader(
+        dynamic_env,
+        batch_sampler=batch_sampler,
+        num_workers=args.workers,
+        pin_memory=True,
     )
 
-    hypernet = HyperNet(shape_container, args.layer_dim, args.task_dim, timestamps)
-    hypernet = hypernet.to(args.device)
-
-    import pdb
-
-    pdb.set_trace()
-
-    # task_embed = torch.nn.Parameter(torch.Tensor(env_info["total"], args.task_dim))
-    total_bar = 16
-    task_embeds = []
-    for i in range(total_bar):
-        tensor = torch.Tensor(1, args.task_dim).to(args.device)
-        task_embeds.append(torch.nn.Parameter(tensor))
-    for task_embed in task_embeds:
-        trunc_normal_(task_embed, std=0.02)
-
-    model.train()
-    hypernet.train()
-
-    parameters = list(hypernet.parameters()) + task_embeds
-    # optimizer = torch.optim.Adam(parameters, lr=args.init_lr, amsgrad=True)
-    optimizer = torch.optim.Adam(parameters, lr=args.init_lr, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(
+        meta_model.parameters(), lr=args.init_lr, weight_decay=1e-5, amsgrad=True
+    )
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer,
         milestones=[
@@ -77,70 +103,58 @@ def main(args):
         ],
         gamma=0.1,
     )
+    logger.log("The base-model is\n{:}".format(base_model))
+    logger.log("The meta-model is\n{:}".format(meta_model))
+    logger.log("The optimizer is\n{:}".format(optimizer))
+    logger.log("Per epoch iterations = {:}".format(len(env_loader)))
 
-    # total_bar = env_info["total"] - 1
     # LFNA meta-training
-    loss_meter = AverageMeter()
     per_epoch_time, start_time = AverageMeter(), time.time()
+    last_success_epoch = 0
     for iepoch in range(args.epochs):
 
-        need_time = "Time Left: {:}".format(
+        head_str = "[{:}] [{:04d}/{:04d}] ".format(
+            time_string(), iepoch, args.epochs
+        ) + "Time Left: {:}".format(
             convert_secs2time(per_epoch_time.avg * (args.epochs - iepoch), True)
         )
-        head_str = (
-            "[{:}] [{:04d}/{:04d}] ".format(time_string(), iepoch, args.epochs)
-            + need_time
+
+        loss_meter = epoch_train(
+            env_loader,
+            meta_model,
+            base_model,
+            optimizer,
+            criterion,
+            args.device,
+            logger,
         )
-
-        losses = []
-        # for ibatch in range(args.meta_batch):
-        for cur_time in range(total_bar):
-            # cur_time = random.randint(0, total_bar)
-            cur_task_embed = task_embeds[cur_time]
-            cur_container = hypernet(cur_task_embed)
-            cur_x = env_info["{:}-x".format(cur_time)].to(args.device)
-            cur_y = env_info["{:}-y".format(cur_time)].to(args.device)
-            cur_dataset = TimeData(cur_time, cur_x, cur_y)
-
-            preds = model.forward_with_container(cur_dataset.x, cur_container)
-            optimizer.zero_grad()
-            loss = criterion(preds, cur_dataset.y)
-
-            losses.append(loss)
-
-        final_loss = torch.stack(losses).mean()
-        final_loss.backward()
-        optimizer.step()
         lr_scheduler.step()
-
-        loss_meter.update(final_loss.item())
-        if iepoch % 100 == 0:
-            logger.log(
-                head_str
-                + " meta-loss: {:.4f} ({:.4f}) :: lr={:.5f}, batch={:}".format(
-                    loss_meter.avg,
-                    loss_meter.val,
-                    min(lr_scheduler.get_last_lr()),
-                    len(losses),
-                )
-            )
-
+        logger.log(
+            head_str
+            + " meta-loss: {meter.avg:.4f} ({meter.count:.0f})".format(meter=loss_meter)
+            + " :: lr={:.5f}".format(min(lr_scheduler.get_last_lr()))
+        )
+        success, best_score = meta_model.save_best(-loss_meter.avg)
+        if success:
+            logger.log("Achieve the best with best_score = {:.3f}".format(best_score))
+            last_success_epoch = iepoch
             save_checkpoint(
                 {
-                    "hypernet": hypernet.state_dict(),
-                    "task_embed": task_embed,
+                    "meta_model": meta_model.state_dict(),
+                    "optimizer": optimizer.state_dict(),
                     "lr_scheduler": lr_scheduler.state_dict(),
                     "iepoch": iepoch,
+                    "args": args,
                 },
                 logger.path("model"),
                 logger,
             )
-            loss_meter.reset()
+        if iepoch - last_success_epoch >= args.early_stop_thresh:
+            logger.log("Early stop at {:}".format(iepoch))
+            break
+
         per_epoch_time.update(time.time() - start_time)
         start_time = time.time()
-
-    print(model)
-    print(hypernet)
 
     w_container_per_epoch = dict()
     for idx in range(0, total_bar):
@@ -183,20 +197,26 @@ if __name__ == "__main__":
     parser.add_argument(
         "--hidden_dim",
         type=int,
-        required=True,
+        default=16,
         help="The hidden dimension.",
     )
     parser.add_argument(
         "--layer_dim",
         type=int,
-        required=True,
-        help="The hidden dimension.",
+        default=16,
+        help="The layer chunk dimension.",
+    )
+    parser.add_argument(
+        "--time_dim",
+        type=int,
+        default=16,
+        help="The timestamp dimension.",
     )
     #####
     parser.add_argument(
         "--init_lr",
         type=float,
-        default=0.1,
+        default=0.01,
         help="The initial learning rate for the optimizer (default is Adam)",
     )
     parser.add_argument(
@@ -206,10 +226,23 @@ if __name__ == "__main__":
         help="The batch size for the meta-model",
     )
     parser.add_argument(
-        "--epochs",
+        "--sampler_enlarge",
         type=int,
-        default=2000,
-        help="The total number of epochs.",
+        default=5,
+        help="Enlarge the #iterations for an epoch",
+    )
+    parser.add_argument("--epochs", type=int, default=1000, help="The total #epochs.")
+    parser.add_argument(
+        "--early_stop_thresh",
+        type=int,
+        default=50,
+        help="The maximum epochs for early stop.",
+    )
+    parser.add_argument(
+        "--seq_length", type=int, default=5, help="The sequence length."
+    )
+    parser.add_argument(
+        "--workers", type=int, default=4, help="The number of workers in parallel."
     )
     parser.add_argument(
         "--device",
@@ -223,8 +256,7 @@ if __name__ == "__main__":
     if args.rand_seed is None or args.rand_seed < 0:
         args.rand_seed = random.randint(1, 100000)
     assert args.save_dir is not None, "The save dir argument can not be None"
-    args.task_dim = args.layer_dim
-    args.save_dir = "{:}-{:}-d{:}".format(
-        args.save_dir, args.env_version, args.hidden_dim
+    args.save_dir = "{:}-{:}-d{:}_{:}_{:}".format(
+        args.save_dir, args.env_version, args.hidden_dim, args.layer_dim, args.time_dim
     )
     main(args)

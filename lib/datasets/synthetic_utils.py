@@ -30,6 +30,7 @@ class UnifiedSplit:
             self._indexes = all_indexes[num_of_train + num_of_valid :]
         else:
             raise ValueError("Unkonwn mode of {:}".format(mode))
+        self._all_indexes = all_indexes
         self._mode = mode
 
     @property

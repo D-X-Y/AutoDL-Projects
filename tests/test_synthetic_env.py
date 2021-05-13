@@ -23,8 +23,16 @@ class TestSynethicEnv(unittest.TestCase):
     def test_simple(self):
         mean_generator = ComposedSinFunc(constant=0.1)
         std_generator = ConstantFunc(constant=0.5)
-
         dataset = SyntheticDEnv([mean_generator], [[std_generator]], num_per_task=5000)
         print(dataset)
         for timestamp, tau in dataset:
-            assert tau.shape == (5000, 1)
+            self.assertEqual(tau.shape, (5000, 1))
+
+    def test_length(self):
+        mean_generator = ComposedSinFunc(constant=0.1)
+        std_generator = ConstantFunc(constant=0.5)
+        dataset = SyntheticDEnv([mean_generator], [[std_generator]], num_per_task=5000)
+        self.assertEqual(len(dataset), 100)
+
+        dataset = SyntheticDEnv([mean_generator], [[std_generator]], mode="train")
+        self.assertEqual(len(dataset), 60)

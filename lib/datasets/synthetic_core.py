@@ -2,6 +2,7 @@
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.05 #
 #####################################################
 from .synthetic_utils import TimeStamp
+from .synthetic_env import EnvSampler
 from .synthetic_env import SyntheticDEnv
 from .math_core import LinearFunc
 from .math_core import DynamicLinearFunc

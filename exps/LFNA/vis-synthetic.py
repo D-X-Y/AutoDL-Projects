@@ -225,8 +225,8 @@ def visualize_env(save_dir, version):
 def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
     save_dir = Path(str(save_dir))
     for substr in ("pdf", "png"):
-      sub_save_dir = save_dir / substr
-      sub_save_dir.mkdir(parents=True, exist_ok=True)
+        sub_save_dir = save_dir / substr
+        sub_save_dir.mkdir(parents=True, exist_ok=True)
 
     dpi, width, height = 30, 3200, 2000
     figsize = width / float(dpi), height / float(dpi)
