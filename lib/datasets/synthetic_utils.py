@@ -60,7 +60,7 @@ class TimeStamp(UnifiedSplit, data.Dataset):
     @property
     def max_timestamp(self):
         return self._max_timestamp
-  
+
     @property
     def interval(self):
         return self._interval

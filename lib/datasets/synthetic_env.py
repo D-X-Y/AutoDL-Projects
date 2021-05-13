@@ -55,6 +55,10 @@ class SyntheticDEnv(data.Dataset):
     def timestamp_interval(self):
         return self._timestamp_generator.interval
 
+    def get_timestamp(self, index):
+        index, timestamp = self._timestamp_generator[index]
+        return timestamp
+
     def set_oracle_map(self, functor):
         self._oracle_map = functor
 
