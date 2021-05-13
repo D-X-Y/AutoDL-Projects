@@ -1,8 +1,8 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/LFNA/lfna-test-hpnet.py --env_version v1 --hidden_dim 16 --layer_dim 32 --epochs 500000 --init_lr 0.01
-# python exps/LFNA/lfna-test-hpnet.py --env_version v1 --hidden_dim 16 --layer_dim 32 --epochs 500000 --init_lr 0.01 --device cuda
+# python exps/LFNA/lfna-test-hpnet.py --env_version v1 --hidden_dim 16 --layer_dim 16 --epochs 20000 --init_lr 0.01
+# python exps/LFNA/lfna-test-hpnet.py --env_version v1 --hidden_dim 16 --layer_dim 16 --epochs 10000 --init_lr 0.01 --device cuda
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -39,7 +39,8 @@ def main(args):
     criterion = torch.nn.MSELoss()
 
     shape_container = model.get_w_container().to_shape_container()
-    hypernet = HyperNet(shape_container, args.layer_dim, args.task_dim)
+    total_bar = 100
+    hypernet = HyperNet(shape_container, args.layer_dim, args.task_dim, total_bar)
     hypernet = hypernet.to(args.device)
 
     logger.log(
@@ -52,14 +53,6 @@ def main(args):
             time_string(), hypernet.numel()
         )
     )
-    # task_embed = torch.nn.Parameter(torch.Tensor(env_info["total"], args.task_dim))
-    total_bar = 100
-    task_embeds = []
-    for i in range(total_bar):
-        tensor = torch.Tensor(1, args.task_dim).to(args.device)
-        task_embeds.append(torch.nn.Parameter(tensor))
-    for task_embed in task_embeds:
-        trunc_normal_(task_embed, std=0.02)
     for i in range(total_bar):
         env_info["{:}-x".format(i)] = env_info["{:}-x".format(i)].to(args.device)
         env_info["{:}-y".format(i)] = env_info["{:}-y".format(i)].to(args.device)
@@ -67,9 +60,9 @@ def main(args):
     model.train()
     hypernet.train()
 
-    parameters = list(hypernet.parameters()) + task_embeds
-    # optimizer = torch.optim.Adam(parameters, lr=args.init_lr, amsgrad=True)
-    optimizer = torch.optim.Adam(parameters, lr=args.init_lr, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(
+        hypernet.parameters(), lr=args.init_lr, weight_decay=1e-5, amsgrad=True
+    )
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer,
         milestones=[
@@ -97,10 +90,10 @@ def main(args):
         # for ibatch in range(args.meta_batch):
         for cur_time in range(total_bar):
             # cur_time = random.randint(0, total_bar)
-            cur_task_embed = task_embeds[cur_time]
-            cur_container = hypernet(cur_task_embed)
-            cur_x = env_info["{:}-x".format(cur_time)].to(args.device)
-            cur_y = env_info["{:}-y".format(cur_time)].to(args.device)
+            # cur_task_embed = task_embeds[cur_time]
+            cur_container = hypernet(cur_time)
+            cur_x = env_info["{:}-x".format(cur_time)]
+            cur_y = env_info["{:}-y".format(cur_time)]
             cur_dataset = TimeData(cur_time, cur_x, cur_y)
 
             preds = model.forward_with_container(cur_dataset.x, cur_container)
@@ -126,10 +119,14 @@ def main(args):
                 )
             )
 
+            success, best_score = hypernet.save_best(-loss_meter.avg)
+            if success:
+                logger.log(
+                    "Achieve the best with best_score = {:.3f}".format(best_score)
+                )
             save_checkpoint(
                 {
                     "hypernet": hypernet.state_dict(),
-                    "task_embed": task_embed,
                     "lr_scheduler": lr_scheduler.state_dict(),
                     "iepoch": iepoch,
                 },
@@ -142,13 +139,15 @@ def main(args):
 
     print(model)
     print(hypernet)
+    hypernet.load_best()
 
     w_container_per_epoch = dict()
     for idx in range(0, total_bar):
         future_time = env_info["{:}-timestamp".format(idx)]
         future_x = env_info["{:}-x".format(idx)]
         future_y = env_info["{:}-y".format(idx)]
-        future_container = hypernet(task_embeds[idx])
+        # future_container = hypernet(task_embeds[idx])
+        future_container = hypernet(idx)
         w_container_per_epoch[idx] = future_container.no_grad_clone()
         with torch.no_grad():
             future_y_hat = model.forward_with_container(

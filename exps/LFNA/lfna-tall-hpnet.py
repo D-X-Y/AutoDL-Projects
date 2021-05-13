@@ -36,7 +36,7 @@ def main(args):
     model = get_model(**model_kwargs)
     criterion = torch.nn.MSELoss()
 
-    logger.log("There are {:} weights.".format(model.get_w_container().numel()))
+    logger.log("There are {:} weights.".format(model.numel()))
 
     shape_container = model.get_w_container().to_shape_container()
     hypernet = HyperNet(shape_container, args.hidden_dim, args.task_dim)

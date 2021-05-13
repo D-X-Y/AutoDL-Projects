@@ -15,7 +15,12 @@ class HyperNet(super_core.SuperModule):
     """The hyper-network."""
 
     def __init__(
-        self, shape_container, layer_embeding, task_embedding, return_container=True
+        self,
+        shape_container,
+        layer_embeding,
+        task_embedding,
+        num_tasks,
+        return_container=True,
     ):
         super(HyperNet, self).__init__()
         self._shape_container = shape_container
@@ -28,36 +33,33 @@ class HyperNet(super_core.SuperModule):
             "_super_layer_embed",
             torch.nn.Parameter(torch.Tensor(self._num_layers, layer_embeding)),
         )
+        self.register_parameter(
+            "_super_task_embed",
+            torch.nn.Parameter(torch.Tensor(num_tasks, task_embedding)),
+        )
         trunc_normal_(self._super_layer_embed, std=0.02)
+        trunc_normal_(self._super_task_embed, std=0.02)
 
         model_kwargs = dict(
             config=dict(model_type="dual_norm_mlp"),
             input_dim=layer_embeding + task_embedding,
             output_dim=max(self._numel_per_layer),
-            hidden_dims=[layer_embeding * 2] * 3,
+            hidden_dims=[(layer_embeding + task_embedding) * 2] * 3,
             act_cls="gelu",
             norm_cls="layer_norm_1d",
-            dropout=0.1,
+            dropout=0.2,
         )
         self._generator = get_model(**model_kwargs)
-        """
-        model_kwargs = dict(
-            input_dim=layer_embeding + task_embedding,
-            output_dim=max(self._numel_per_layer),
-            hidden_dim=layer_embeding * 4,
-            act_cls="sigmoid",
-            norm_cls="identity",
-        )
-        self._generator = get_model(dict(model_type="simple_mlp"), **model_kwargs)
-        """
         self._return_container = return_container
         print("generator: {:}".format(self._generator))
 
-    def forward_raw(self, task_embed):
-        # task_embed = F.normalize(task_embed, dim=-1, p=2)
-        # layer_embed = F.normalize(self._super_layer_embed, dim=-1, p=2)
+    def forward_raw(self, task_embed_id):
         layer_embed = self._super_layer_embed
-        task_embed = task_embed.view(1, -1).expand(self._num_layers, -1)
+        task_embed = (
+            self._super_task_embed[task_embed_id]
+            .view(1, -1)
+            .expand(self._num_layers, -1)
+        )
 
         joint_embed = torch.cat((task_embed, layer_embed), dim=-1)
         weights = self._generator(joint_embed)
