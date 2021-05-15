@@ -56,11 +56,11 @@ class TimeStamp(UnifiedSplit, data.Dataset):
 
     @property
     def min_timestamp(self):
-        return self._min_timestamp
+        return self._min_timestamp + self._interval * min(self._indexes)
 
     @property
     def max_timestamp(self):
-        return self._max_timestamp
+        return self._min_timestamp + self._interval * max(self._indexes)
 
     @property
     def interval(self):

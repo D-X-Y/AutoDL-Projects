@@ -80,6 +80,12 @@ class SyntheticDEnv(data.Dataset):
     def timestamp_interval(self):
         return self._timestamp_generator.interval
 
+    def random_timestamp(self):
+        return (
+            random.random() * (self.max_timestamp - self.min_timestamp)
+            + self.min_timestamp
+        )
+
     def reset_max_seq_length(self, seq_length):
         self._seq_length = seq_length
 

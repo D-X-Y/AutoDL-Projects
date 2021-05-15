@@ -41,7 +41,7 @@ def main(args):
     w_container_per_epoch = dict()
 
     per_timestamp_time, start_time = AverageMeter(), time.time()
-    for idx in range(env_info["total"]):
+    for idx in range(1, env_info["total"]):
 
         need_time = "Time Left: {:}".format(
             convert_secs2time(per_timestamp_time.avg * (env_info["total"] - idx), True)
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     if args.rand_seed is None or args.rand_seed < 0:
         args.rand_seed = random.randint(1, 100000)
     assert args.save_dir is not None, "The save dir argument can not be None"
-    args.save_dir = "{:}-{:}-d{:}".format(
-        args.save_dir, args.env_version, args.hidden_dim
+    args.save_dir = "{:}-d{:}_e{:}_lr{:}-env{:}".format(
+        args.save_dir, args.hidden_dim, args.epochs, args.init_lr, args.env_version
     )
     main(args)

@@ -237,18 +237,20 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
     env_info = torch.load(cache_path)
 
     alg_name2dir = OrderedDict()
-    alg_name2dir["Optimal"] = "use-same-timestamp"
     # alg_name2dir["Supervised Learning (History Data)"] = "use-all-past-data"
     # alg_name2dir["MAML"] = "use-maml-s1"
     # alg_name2dir["LFNA (fix init)"] = "lfna-fix-init"
-    alg_name2dir["LFNA (debug)"] = "lfna-tall-hpnet"
-    alg_name2all_containers = OrderedDict()
     if version == "v1":
-        poststr = "v1-d16"
+        # alg_name2dir["Optimal"] = "use-same-timestamp"
+        alg_name2dir["LFNA"] = "lfna-battle-v1-d16_16_16-e200"
+        alg_name2dir[
+            "Previous Timestamp"
+        ] = "use-prev-timestamp-d16_e500_lr0.1-prev5-envv1"
     else:
         raise ValueError("Invalid version: {:}".format(version))
+    alg_name2all_containers = OrderedDict()
     for idx_alg, (alg, xdir) in enumerate(alg_name2dir.items()):
-        ckp_path = Path(alg_dir) / "{:}-{:}".format(xdir, poststr) / "final-ckp.pth"
+        ckp_path = Path(alg_dir) / str(xdir) / "final-ckp.pth"
         xdata = torch.load(ckp_path, map_location="cpu")
         alg_name2all_containers[alg] = xdata["w_container_per_epoch"]
     # load the basic model
@@ -267,11 +269,11 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
     dynamic_env = env_info["dynamic_env"]
     min_t, max_t = dynamic_env.min_timestamp, dynamic_env.max_timestamp
 
-    linewidths = 10
+    linewidths, skip = 10, 5
     for idx, (timestamp, (ori_allx, ori_ally)) in enumerate(
         tqdm(dynamic_env, ncols=50)
     ):
-        if idx == 0:
+        if idx <= skip:
             continue
         fig = plt.figure(figsize=figsize)
         cur_ax = fig.add_subplot(2, 1, 1)
@@ -335,9 +337,9 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
         cur_ax.set_ylim(0, 10)
         cur_ax.legend(loc=1, fontsize=LegendFontsize)
 
-        pdf_save_path = save_dir / "pdf" / "v{:}-{:05d}.pdf".format(version, idx)
+        pdf_save_path = save_dir / "pdf" / "v{:}-{:05d}.pdf".format(version, idx - skip)
         fig.savefig(str(pdf_save_path), dpi=dpi, bbox_inches="tight", format="pdf")
-        png_save_path = save_dir / "png" / "v{:}-{:05d}.png".format(version, idx)
+        png_save_path = save_dir / "png" / "v{:}-{:05d}.png".format(version, idx - skip)
         fig.savefig(str(png_save_path), dpi=dpi, bbox_inches="tight", format="png")
         plt.close("all")
     save_dir = save_dir.resolve()
