@@ -75,8 +75,7 @@ class LFNA_Meta(super_core.SuperModule):
 
         # unknown token
         self.register_parameter(
-            "_unknown_token",
-            torch.nn.Parameter(torch.Tensor(1, time_embedding)),
+            "_unknown_token", torch.nn.Parameter(torch.Tensor(1, time_embedding)),
         )
 
         # initialization

@@ -62,10 +62,7 @@ def main(args):
     )
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer,
-        milestones=[
-            int(args.epochs * 0.8),
-            int(args.epochs * 0.9),
-        ],
+        milestones=[int(args.epochs * 0.8), int(args.epochs * 0.9),],
         gamma=0.1,
     )
 
@@ -173,10 +170,7 @@ if __name__ == "__main__":
         help="The synthetic enviornment version.",
     )
     parser.add_argument(
-        "--hidden_dim",
-        type=int,
-        required=True,
-        help="The hidden dimension.",
+        "--hidden_dim", type=int, required=True, help="The hidden dimension.",
     )
     #####
     parser.add_argument(
@@ -186,10 +180,7 @@ if __name__ == "__main__":
         help="The initial learning rate for the optimizer (default is Adam)",
     )
     parser.add_argument(
-        "--meta_batch",
-        type=int,
-        default=64,
-        help="The batch size for the meta-model",
+        "--meta_batch", type=int, default=64, help="The batch size for the meta-model",
     )
     parser.add_argument(
         "--early_stop_thresh",
@@ -198,22 +189,13 @@ if __name__ == "__main__":
         help="The maximum epochs for early stop.",
     )
     parser.add_argument(
-        "--epochs",
-        type=int,
-        default=2000,
-        help="The total number of epochs.",
+        "--epochs", type=int, default=2000, help="The total number of epochs.",
     )
     parser.add_argument(
-        "--per_epoch_step",
-        type=int,
-        default=20,
-        help="The total number of epochs.",
+        "--per_epoch_step", type=int, default=20, help="The total number of epochs.",
     )
     parser.add_argument(
-        "--device",
-        type=str,
-        default="cpu",
-        help="",
+        "--device", type=str, default="cpu", help="",
     )
     # Random Seed
     parser.add_argument("--rand_seed", type=int, default=-1, help="manual seed")
