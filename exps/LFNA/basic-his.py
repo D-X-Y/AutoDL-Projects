@@ -161,7 +161,10 @@ if __name__ == "__main__":
         help="The synthetic enviornment version.",
     )
     parser.add_argument(
-        "--hidden_dim", type=int, required=True, help="The hidden dimension.",
+        "--hidden_dim",
+        type=int,
+        required=True,
+        help="The hidden dimension.",
     )
     parser.add_argument(
         "--init_lr",
@@ -170,10 +173,16 @@ if __name__ == "__main__":
         help="The initial learning rate for the optimizer (default is Adam)",
     )
     parser.add_argument(
-        "--batch_size", type=int, default=512, help="The batch size",
+        "--batch_size",
+        type=int,
+        default=512,
+        help="The batch size",
     )
     parser.add_argument(
-        "--epochs", type=int, default=1000, help="The total number of epochs.",
+        "--epochs",
+        type=int,
+        default=1000,
+        help="The total number of epochs.",
     )
     parser.add_argument(
         "--srange", type=str, required=True, help="The range of models to be evaluated"

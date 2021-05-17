@@ -164,8 +164,10 @@ def compare_cl(save_dir):
         )
     print("Save all figures into {:}".format(save_dir))
     save_dir = save_dir.resolve()
-    base_cmd = "ffmpeg -y -i {xdir}/%04d.png -vf fps=1 -vf scale=2200:1800 -vb 5000k".format(
-        xdir=save_dir
+    base_cmd = (
+        "ffmpeg -y -i {xdir}/%04d.png -vf fps=1 -vf scale=2200:1800 -vb 5000k".format(
+            xdir=save_dir
+        )
     )
     video_cmd = "{:} -pix_fmt yuv420p {xdir}/compare-cl.mp4".format(
         base_cmd, xdir=save_dir
