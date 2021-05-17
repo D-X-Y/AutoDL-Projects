@@ -2,7 +2,8 @@
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
 # python exps/LFNA/lfna.py --env_version v1 --workers 0
-# python exps/LFNA/lfna.py --env_version v1 --device cuda
+# python exps/LFNA/lfna.py --env_version v1 --device cuda --lr 0.001
+# python exps/LFNA/lfna.py --env_version v1 --device cuda --lr 0.002
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -58,9 +59,40 @@ def epoch_train(loader, meta_model, base_model, optimizer, criterion, device, lo
     return loss_meter
 
 
+def epoch_evaluate(loader, meta_model, base_model, criterion, device, logger):
+    with torch.no_grad():
+        base_model.eval()
+        meta_model.eval()
+        loss_meter = AverageMeter()
+        for ibatch, batch_data in enumerate(loader):
+            timestamps, (batch_seq_inputs, batch_seq_targets) = batch_data
+            timestamps = timestamps.squeeze(dim=-1).to(device)
+            batch_seq_inputs = batch_seq_inputs.to(device)
+            batch_seq_targets = batch_seq_targets.to(device)
+
+            batch_seq_containers = meta_model(timestamps)
+            losses = []
+            for seq_containers, seq_inputs, seq_targets in zip(
+                batch_seq_containers, batch_seq_inputs, batch_seq_targets
+            ):
+                for container, inputs, targets in zip(
+                    seq_containers, seq_inputs, seq_targets
+                ):
+                    predictions = base_model.forward_with_container(inputs, container)
+                    loss = criterion(predictions, targets)
+                    losses.append(loss)
+            final_loss = torch.stack(losses).mean()
+            loss_meter.update(final_loss.item())
+    return loss_meter
+
+
 def main(args):
     logger, env_info, model_kwargs = lfna_setup(args)
-    dynamic_env = get_synthetic_env(mode="train", version=args.env_version)
+    train_env = get_synthetic_env(mode="train", version=args.env_version)
+    valid_env = get_synthetic_env(mode="valid", version=args.env_version)
+    logger.log("training enviornment: {:}".format(train_env))
+    logger.log("validation enviornment: {:}".format(valid_env))
+
     base_model = get_model(**model_kwargs)
     base_model = base_model.to(args.device)
     criterion = torch.nn.MSELoss()
@@ -68,26 +100,25 @@ def main(args):
     shape_container = base_model.get_w_container().to_shape_container()
 
     # pre-train the hypernetwork
-    timestamps = dynamic_env.get_timestamp(None)
+    timestamps = train_env.get_timestamp(None)
     meta_model = LFNA_Meta(shape_container, args.layer_dim, args.time_dim, timestamps)
     meta_model = meta_model.to(args.device)
 
     logger.log("The base-model has {:} weights.".format(base_model.numel()))
     logger.log("The meta-model has {:} weights.".format(meta_model.numel()))
 
-    batch_sampler = EnvSampler(dynamic_env, args.meta_batch, args.sampler_enlarge)
-    dynamic_env.reset_max_seq_length(args.seq_length)
-    """
-    env_loader = torch.utils.data.DataLoader(
-        dynamic_env,
+    batch_sampler = EnvSampler(train_env, args.meta_batch, args.sampler_enlarge)
+    train_env.reset_max_seq_length(args.seq_length)
+    valid_env.reset_max_seq_length(args.seq_length)
+    valid_env_loader = torch.utils.data.DataLoader(
+        valid_env,
         batch_size=args.meta_batch,
         shuffle=True,
         num_workers=args.workers,
         pin_memory=True,
     )
-    """
-    env_loader = torch.utils.data.DataLoader(
-        dynamic_env,
+    train_env_loader = torch.utils.data.DataLoader(
+        train_env,
         batch_sampler=batch_sampler,
         num_workers=args.workers,
         pin_memory=True,
@@ -95,7 +126,7 @@ def main(args):
 
     optimizer = torch.optim.Adam(
         meta_model.parameters(),
-        lr=args.init_lr,
+        lr=args.lr,
         weight_decay=args.weight_decay,
         amsgrad=True,
     )
@@ -108,7 +139,7 @@ def main(args):
     logger.log("The meta-model is\n{:}".format(meta_model))
     logger.log("The optimizer is\n{:}".format(optimizer))
     logger.log("The scheduler is\n{:}".format(lr_scheduler))
-    logger.log("Per epoch iterations = {:}".format(len(env_loader)))
+    logger.log("Per epoch iterations = {:}".format(len(train_env_loader)))
 
     if logger.path("model").exists():
         ckp_data = torch.load(logger.path("model"))
@@ -122,7 +153,7 @@ def main(args):
             "epochs",
             "env_version",
             "hidden_dim",
-            "init_lr",
+            "lr",
             "layer_dim",
             "time_dim",
             "seq_length",
@@ -152,7 +183,7 @@ def main(args):
         )
 
         loss_meter = epoch_train(
-            env_loader,
+            train_env_loader,
             meta_model,
             base_model,
             optimizer,
@@ -160,9 +191,16 @@ def main(args):
             args.device,
             logger,
         )
+
+        valid_loss_meter = epoch_evaluate(
+            valid_env_loader, meta_model, base_model, criterion, args.device, logger
+        )
         logger.log(
             head_str
-            + " meta-loss: {meter.avg:.4f} ({meter.count:.0f})".format(meter=loss_meter)
+            + " meta-train-loss: {meter.avg:.4f} ({meter.count:.0f})".format(
+                meter=loss_meter
+            )
+            + " meta-valid-loss: {meter.val:.4f}".format(meter=valid_loss_meter)
             + " :: lr={:.5f}".format(min(lr_scheduler.get_last_lr()))
             + "  :: last-success={:}".format(last_success_epoch)
         )
@@ -231,14 +269,14 @@ def main(args):
         #
         new_param = meta_model.create_meta_embed()
         optimizer = torch.optim.Adam(
-            [new_param], lr=args.init_lr, weight_decay=1e-5, amsgrad=True
+            [new_param], lr=args.refine_lr, weight_decay=1e-5, amsgrad=True
         )
         meta_model.replace_append_learnt(
             torch.Tensor([future_time]).to(args.device), new_param
         )
         meta_model.eval()
         base_model.train()
-        for iepoch in range(args.epochs):
+        for iepoch in range(args.refine_epochs):
             optimizer.zero_grad()
             [seq_containers] = meta_model(time_seqs)
             future_container = seq_containers[-1]
@@ -297,7 +335,7 @@ if __name__ == "__main__":
     )
     #####
     parser.add_argument(
-        "--init_lr",
+        "--lr",
         type=float,
         default=0.005,
         help="The initial learning rate for the optimizer (default is Adam)",
@@ -322,9 +360,18 @@ if __name__ == "__main__":
     )
     parser.add_argument("--epochs", type=int, default=10000, help="The total #epochs.")
     parser.add_argument(
+        "--refine_lr",
+        type=float,
+        default=0.005,
+        help="The learning rate for the optimizer, during refine",
+    )
+    parser.add_argument(
+        "--refine_epochs", type=int, default=1000, help="The final refine #epochs."
+    )
+    parser.add_argument(
         "--early_stop_thresh",
         type=int,
-        default=50,
+        default=20,
         help="The #epochs for early stop.",
     )
     parser.add_argument(
@@ -350,7 +397,7 @@ if __name__ == "__main__":
         args.hidden_dim,
         args.layer_dim,
         args.time_dim,
-        args.init_lr,
+        args.lr,
         args.weight_decay,
         args.epochs,
         args.env_version,

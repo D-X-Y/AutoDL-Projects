@@ -151,12 +151,15 @@ class SyntheticDEnv(data.Dataset):
         return len(self._timestamp_generator)
 
     def __repr__(self):
-        return "{name}({cur_num:}/{total} elements, ndim={ndim}, num_per_task={num_per_task})".format(
+        return "{name}({cur_num:}/{total} elements, ndim={ndim}, num_per_task={num_per_task}, range=[{xrange_min:.5f}~{xrange_max:.5f}], mode={mode})".format(
             name=self.__class__.__name__,
             cur_num=len(self),
             total=len(self._timestamp_generator),
             ndim=self._ndim,
             num_per_task=self._num_per_task,
+            xrange_min=self.min_timestamp,
+            xrange_max=self.max_timestamp,
+            mode=self._timestamp_generator.mode,
         )
 
 
