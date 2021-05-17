@@ -101,21 +101,49 @@ def main(args):
     )
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer,
-        milestones=[
-            int(args.epochs * 0.8),
-            int(args.epochs * 0.9),
-        ],
+        milestones=[1, 2],
         gamma=0.1,
     )
     logger.log("The base-model is\n{:}".format(base_model))
     logger.log("The meta-model is\n{:}".format(meta_model))
     logger.log("The optimizer is\n{:}".format(optimizer))
+    logger.log("The scheduler is\n{:}".format(lr_scheduler))
     logger.log("Per epoch iterations = {:}".format(len(env_loader)))
 
-    # LFNA meta-training
+    if logger.path("model").exists():
+        ckp_data = torch.load(logger.path("model"))
+        base_model.load_state_dict(ckp_data["base_model"])
+        meta_model.load_state_dict(ckp_data["meta_model"])
+        optimizer.load_state_dict(ckp_data["optimizer"])
+        lr_scheduler.load_state_dict(ckp_data["lr_scheduler"])
+        last_success_epoch = ckp_data["last_success_epoch"]
+        start_epoch = ckp_data["iepoch"] + 1
+        check_strs = [
+            "epochs",
+            "env_version",
+            "hidden_dim",
+            "init_lr",
+            "layer_dim",
+            "time_dim",
+            "seq_length",
+        ]
+        for xstr in check_strs:
+            cx = getattr(args, xstr)
+            px = getattr(ckp_data["args"], xstr)
+            assert cx == px, "[{:}] {:} vs {:}".format(xstr, cx, ps)
+        success, _ = meta_model.save_best(ckp_data["cur_score"])
+        logger.log("Load ckp from {:}".format(logger.path("model")))
+        if success:
+            logger.log(
+                "Re-save the best model with score={:}".format(ckp_data["cur_score"])
+            )
+    else:
+        start_epoch, last_success_epoch = 0, 0
+
+    # LFNA meta-train
+    meta_model.set_best_dir(logger.path(None) / "checkpoint")
     per_epoch_time, start_time = AverageMeter(), time.time()
-    last_success_epoch = 0
-    for iepoch in range(args.epochs):
+    for iepoch in range(start_epoch, args.epochs):
 
         head_str = "[{:}] [{:04d}/{:04d}] ".format(
             time_string(), iepoch, args.epochs
@@ -132,11 +160,11 @@ def main(args):
             args.device,
             logger,
         )
-        lr_scheduler.step()
         logger.log(
             head_str
             + " meta-loss: {meter.avg:.4f} ({meter.count:.0f})".format(meter=loss_meter)
             + " :: lr={:.5f}".format(min(lr_scheduler.get_last_lr()))
+            + "  :: last-success={:}".format(last_success_epoch)
         )
         success, best_score = meta_model.save_best(-loss_meter.avg)
         if success:
@@ -145,8 +173,11 @@ def main(args):
             save_checkpoint(
                 {
                     "meta_model": meta_model.state_dict(),
+                    "base_model": base_model.state_dict(),
                     "optimizer": optimizer.state_dict(),
                     "lr_scheduler": lr_scheduler.state_dict(),
+                    "last_success_epoch": last_success_epoch,
+                    "cur_score": -loss_meter.avg,
                     "iepoch": iepoch,
                     "args": args,
                 },
@@ -154,8 +185,12 @@ def main(args):
                 logger,
             )
         if iepoch - last_success_epoch >= args.early_stop_thresh:
-            logger.log("Early stop at {:}".format(iepoch))
-            break
+            if lr_scheduler.last_epoch > 2:
+                logger.log("Early stop at {:}".format(iepoch))
+                break
+            else:
+                last_epoch.step()
+                logger.log("Decay the lr [{:}]".format(lr_scheduler.last_epoch))
 
         per_epoch_time.update(time.time() - start_time)
         start_time = time.time()
@@ -199,7 +234,7 @@ def main(args):
             [new_param], lr=args.init_lr, weight_decay=1e-5, amsgrad=True
         )
         meta_model.replace_append_learnt(
-            torch.Tensor([future_time], device=args.device), new_param
+            torch.Tensor([future_time]).to(args.device), new_param
         )
         meta_model.eval()
         base_model.train()
@@ -289,8 +324,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--early_stop_thresh",
         type=int,
-        default=100,
-        help="The maximum epochs for early stop.",
+        default=50,
+        help="The #epochs for early stop.",
     )
     parser.add_argument(
         "--seq_length", type=int, default=5, help="The sequence length."

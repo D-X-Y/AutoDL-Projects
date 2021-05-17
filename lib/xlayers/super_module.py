@@ -3,6 +3,7 @@
 #####################################################
 
 import os
+from pathlib import Path
 import abc
 import tempfile
 import warnings
@@ -90,6 +91,10 @@ class SuperModule(abc.ABC, nn.Module):
                 total += buf.numel()
         return total
 
+    def set_best_dir(self, xdir):
+        self._meta_info[BEST_DIR_KEY] = str(xdir)
+        Path(xdir).mkdir(parents=True, exist_ok=True)
+
     def save_best(self, score):
         if BEST_DIR_KEY not in self._meta_info:
             tempdir = tempfile.mkdtemp("-xlayers")
@@ -97,7 +102,7 @@ class SuperModule(abc.ABC, nn.Module):
         if BEST_SCORE_KEY not in self._meta_info:
             self._meta_info[BEST_SCORE_KEY] = None
         best_score = self._meta_info[BEST_SCORE_KEY]
-        if best_score is None or best_score < score:
+        if best_score is None or best_score <= score:
             best_save_path = os.path.join(
                 self._meta_info[BEST_DIR_KEY],
                 "best-{:}.pth".format(self.__class__.__name__),
