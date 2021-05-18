@@ -88,7 +88,7 @@
 
 ## 准备工作
 
-请使用`3.6`以上的`Python`，更多的Python包参见[requirements.txt](docs/requirements.txt).
+请使用`3.6`以上的`Python`，更多的Python包参见[requirements.txt](requirements.txt).
 
 请下载并且解压缩`CIFAR`和`ImageNet`到`$TORCH_HOME`.
 

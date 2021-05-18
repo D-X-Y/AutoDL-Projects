@@ -10,23 +10,25 @@ from tqdm import tqdm
 from copy import deepcopy
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint
-from log_utils import time_string
-from log_utils import AverageMeter, convert_secs2time
+from xautodl.procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+)
+from xautodl.log_utils import time_string
+from xautodl.log_utils import AverageMeter, convert_secs2time
 
-from utils import split_str2indexes
+from xautodl.utils import split_str2indexes
 
-from procedures.advanced_main import basic_train_fn, basic_eval_fn
-from procedures.metric_utils import SaveMetric, MSEMetric, ComposeMetric
-from datasets.synthetic_core import get_synthetic_env, EnvSampler
-from models.xcore import get_model
-from xlayers import super_core, trunc_normal_
+from xautodl.procedures.advanced_main import basic_train_fn, basic_eval_fn
+from xautodl.procedures.metric_utils import SaveMetric, MSEMetric, ComposeMetric
+from xautodl.datasets.synthetic_core import get_synthetic_env, EnvSampler
+from xautodl.models.xcore import get_model
+from xautodl.xlayers import super_core, trunc_normal_
 
-from lfna_utils import lfna_setup, train_model, TimeData
-from lfna_meta_model import LFNA_Meta
+from xautodl.lfna_utils import lfna_setup, train_model, TimeData
+from xautodl.lfna_meta_model import LFNA_Meta
 
 
 def epoch_train(loader, meta_model, base_model, optimizer, criterion, device, logger):
