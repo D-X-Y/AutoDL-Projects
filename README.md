@@ -88,7 +88,7 @@ At this moment, this project provides the following algorithms and scripts to ru
 
 ## Requirements and Preparation
 
-Please install `Python>=3.6` and `PyTorch>=1.3.0`. (You could also run this project in lower versions of Python and PyTorch, but may have bugs).
+Please install `Python>=3.6` and `PyTorch>=1.5.0`. (You could also run this project in lower versions of Python and PyTorch, but may have bugs).
 Some visualization codes may require `opencv`.
 
 CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.

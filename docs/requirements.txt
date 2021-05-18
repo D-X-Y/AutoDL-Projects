@@ -1,3 +1,5 @@
 nats_bench>=1.4
 torchvision
 torch
+# Optional
+opencv

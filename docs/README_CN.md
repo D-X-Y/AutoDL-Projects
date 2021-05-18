@@ -6,7 +6,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
 自动深度学习库 (AutoDL-Projects) 是一个开源的，轻量级的，功能强大的项目。
-台项目目前实现了多种网络结构搜索(NAS)和超参数优化(HPO)算法。
+该项目实现了多种网络结构搜索(NAS)和超参数优化(HPO)算法。
 
 **谁应该考虑使用AutoDL-Projects**
 
@@ -88,11 +88,9 @@
 
 ## 准备工作
 
-Please install `Python>=3.6` and `PyTorch>=1.3.0`. (You could also run this project in lower versions of Python and PyTorch, but may have bugs).
-Some visualization codes may require `opencv`.
+请使用`3.6`以上的`Python`，更多的Python包参见[requirements.txt](docs/requirements.txt).
 
-CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
-Some methods use knowledge distillation (KD), which require pre-trained models. Please download these models from [Google Drive](https://drive.google.com/open?id=1ANmiYEGX-IQZTfH8w0aSpj-Wypg-0DR-) (or train by yourself) and save into `.latent-data`.
+请下载并且解压缩`CIFAR`和`ImageNet`到`$TORCH_HOME`.
 
 ## 引用
 
