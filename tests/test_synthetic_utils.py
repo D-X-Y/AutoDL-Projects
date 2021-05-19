@@ -3,17 +3,9 @@
 #####################################################
 # pytest tests/test_synthetic_utils.py -s           #
 #####################################################
-import sys, random
 import unittest
-import pytest
-from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-print("library path: {:}".format(lib_dir))
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-
-from datasets.synthetic_core import TimeStamp
+from xautodl.datasets.synthetic_core import TimeStamp
 
 
 class TestTimeStamp(unittest.TestCase):

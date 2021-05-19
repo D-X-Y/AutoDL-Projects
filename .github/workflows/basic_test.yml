@@ -43,9 +43,13 @@ jobs:
         run: |
           python setup.py install
 
+      - name: Test Import
+        run: |
+          python -m pip install torch torchvision
+          python -m pytest ./tests/test_import.py
+
       - name: Test Search Space
         run: |
-          
           python -m pip install pytest numpy
           python -m pip install parameterized
           echo $PWD
@@ -53,7 +57,6 @@ jobs:
           ls
           python --version
           python -m pytest ./tests/test_basic_space.py -s
-          python -m pytest ./tests/test_import.py
         shell: bash
 
       - name: Test Synthetic Data

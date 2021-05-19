@@ -1,6 +1,13 @@
 #!/bin/bash
 # bash ./scripts/black.sh
 
+# script=$(readlink -f "$0")
+# scriptpath=$(dirname "$script")
+# echo $scriptpath
+
+# delete Python cache files
+find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+
 black ./tests/
 black ./xautodl/procedures
 black ./xautodl/datasets

@@ -3,19 +3,11 @@
 #####################################################
 # pytest ./tests/test_super_model.py -s             #
 #####################################################
-import sys, random
 import unittest
-import pytest
-from pathlib import Path
-
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-print("library path: {:}".format(lib_dir))
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
 
 import torch
-from xlayers.super_core import SuperRunMode
-from trade_models import get_transformer
+from xautodl.xlayers.super_core import SuperRunMode
+from xautodl.trade_models import get_transformer
 
 
 class TestSuperTransformer(unittest.TestCase):
