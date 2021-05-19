@@ -3,6 +3,7 @@
 ##################################################
 import torch
 import torch.nn as nn
+import unittest
 
 from xautodl.models.shape_searchs.SoftSelect import ChannelWiseInter
 
