@@ -4,14 +4,12 @@
 # pytest tests/test_math_adv.py -s                  #
 #####################################################
 import unittest
-import pytest
 
-from xautodl import datasets
-from datasets.math_core import QuadraticFunc
-from datasets.math_core import ConstantFunc
-from datasets.math_core import DynamicLinearFunc
-from datasets.math_core import DynamicQuadraticFunc
-from datasets.math_core import ComposedSinFunc
+from xautodl.datasets.math_core import QuadraticFunc
+from xautodl.datasets.math_core import ConstantFunc
+from xautodl.datasets.math_core import DynamicLinearFunc
+from xautodl.datasets.math_core import DynamicQuadraticFunc
+from xautodl.datasets.math_core import ComposedSinFunc
 
 
 class TestConstantFunc(unittest.TestCase):

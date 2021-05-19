@@ -3,8 +3,9 @@
 #####################################################
 from typing import List, Text, Any
 import torch.nn as nn
-from models.cell_operations import ResNetBasicblock
-from models.cell_infers.cells import InferCell
+
+from ..cell_operations import ResNetBasicblock
+from ..cell_infers.cells import InferCell
 
 
 class DynamicShapeTinyNet(nn.Module):
