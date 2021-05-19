@@ -1,6 +1,6 @@
 # [Searching for A Robust Neural Architecture in Four GPU Hours](https://arxiv.org/abs/1910.04465)
 
-<img align="right" src="https://d-x-y.github.com/resources/paper-icon/CVPR-2019-GDAS.png" width="300">
+<img align="right" src="http://xuanyidong.com/resources/paper-icon/CVPR-2019-GDAS.png" width="300">
 
 Searching for A Robust Neural Architecture in Four GPU Hours is accepted at CVPR 2019.
 In this paper, we proposed a Gradient-based searching algorithm using Differentiable Architecture Sampling (GDAS).

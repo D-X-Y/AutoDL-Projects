@@ -1,6 +1,6 @@
 # [One-Shot Neural Architecture Search via Self-Evaluated Template Network](https://arxiv.org/abs/1910.05733)
 
-<img align="right" src="https://d-x-y.github.com/resources/paper-icon/ICCV-2019-SETN.png" width="450">
+<img align="right" src="http://xuanyidong.com/resources/paper-icon/ICCV-2019-SETN.png" width="450">
 
 <strong>Highlight</strong>: we equip one-shot NAS with an architecture sampler and train network weights using uniformly sampling.
 
