@@ -665,7 +665,7 @@ if __name__ == "__main__":
                     len(args.datasets), len(args.xpaths), len(args.splits)
                 )
             )
-        if args.workers <= 0:
+        if args.workers < 0:
             raise ValueError("invalid number of workers : {:}".format(args.workers))
 
         target_indexes = filter_indexes(
@@ -675,7 +675,7 @@ if __name__ == "__main__":
         assert torch.cuda.is_available(), "CUDA is not available."
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.deterministic = True
-        torch.set_num_threads(args.workers)
+        torch.set_num_threads(args.workers if args.workers > 0 else 1)
 
         main(
             save_dir,

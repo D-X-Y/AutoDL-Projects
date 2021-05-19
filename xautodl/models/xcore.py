@@ -9,11 +9,11 @@ import torch
 __all__ = ["get_model"]
 
 
-from xlayers.super_core import SuperSequential
-from xlayers.super_core import SuperLinear
-from xlayers.super_core import SuperDropout
-from xlayers.super_core import super_name2norm
-from xlayers.super_core import super_name2activation
+from xautodl.xlayers.super_core import SuperSequential
+from xautodl.xlayers.super_core import SuperLinear
+from xautodl.xlayers.super_core import SuperDropout
+from xautodl.xlayers.super_core import super_name2norm
+from xautodl.xlayers.super_core import super_name2activation
 
 
 def get_model(config: Dict[Text, Any], **kwargs):

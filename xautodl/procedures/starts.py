@@ -16,7 +16,7 @@ def prepare_seed(rand_seed):
 
 def prepare_logger(xargs):
     args = copy.deepcopy(xargs)
-    from log_utils import Logger
+    from xautodl.log_utils import Logger
 
     logger = Logger(args.save_dir, args.rand_seed)
     logger.log("Main Function with logger : {:}".format(logger))

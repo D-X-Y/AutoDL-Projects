@@ -7,8 +7,8 @@ In this paper, we proposed a differentiable searching strategy for transformable
 You could see the highlight of our Transformable Architecture Search (TAS) at our [project page](https://xuanyidong.com/assets/projects/NeurIPS-2019-TAS.html).
 
 <p float="left">
-<img src="https://d-x-y.github.com/resources/paper-icon/NIPS-2019-TAS.png" width="680px"/>
-<img src="https://d-x-y.github.com/resources/videos/NeurIPS-2019-TAS/TAS-arch.gif?raw=true" width="180px"/>
+<img src="http://xuanyidong.com/resources/paper-icon/NIPS-2019-TAS.png" width="680px"/>
+<img src="http://xuanyidong.com/resources/videos/NeurIPS-2019-TAS/TAS-arch.gif?raw=true" width="180px"/>
 </p>
 
 
@@ -24,7 +24,7 @@ We provide some logs at [Google Drive](https://drive.google.com/open?id=1_qUY4DT
 
 ## Usage
 
-Use `bash ./scripts/prepare.sh` to prepare data splits for `CIFAR-10`, `CIFARR-100`, and `ILSVRC2012`.
+Use `bash ./scripts/TAS/prepare.sh` to prepare data splits for `CIFAR-10`, `CIFARR-100`, and `ILSVRC2012`.
 If you do not have `ILSVRC2012` data, please comment L12 in `./scripts/prepare.sh`.
 
 args: `cifar10` indicates the dataset name, `ResNet56` indicates the basemodel name, `CIFARX` indicates the searching hyper-parameters, `0.47/0.57` indicates the expected FLOP ratio, `-1` indicates the random seed.

@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from copy import deepcopy
 
-from models.cell_operations import OPS
+from xautodl.models.cell_operations import OPS
 
 
 # Cell for NAS-Bench-201

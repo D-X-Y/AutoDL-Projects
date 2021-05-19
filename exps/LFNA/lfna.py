@@ -27,8 +27,8 @@ from xautodl.datasets.synthetic_core import get_synthetic_env, EnvSampler
 from xautodl.models.xcore import get_model
 from xautodl.xlayers import super_core, trunc_normal_
 
-from xautodl.lfna_utils import lfna_setup, train_model, TimeData
-from xautodl.lfna_meta_model import LFNA_Meta
+from lfna_utils import lfna_setup, train_model, TimeData
+from lfna_meta_model import LFNA_Meta
 
 
 def epoch_train(loader, meta_model, base_model, optimizer, criterion, device, logger):

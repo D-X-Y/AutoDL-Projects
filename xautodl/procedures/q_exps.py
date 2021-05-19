@@ -8,7 +8,6 @@ import pprint
 import logging
 from copy import deepcopy
 
-from log_utils import pickle_load
 import qlib
 from qlib.utils import init_instance_by_config
 from qlib.workflow import R

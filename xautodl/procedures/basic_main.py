@@ -4,8 +4,7 @@
 import os, sys, time, torch
 
 # modules in AutoDL
-from log_utils import AverageMeter
-from log_utils import time_string
+from xautodl.log_utils import AverageMeter, time_string
 from .eval_funcs import obtain_accuracy
 
 

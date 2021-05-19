@@ -4,7 +4,7 @@
 import os, time, copy, torch, pathlib
 
 # modules in AutoDL
-import xautodl.datasets
+from xautodl import datasets
 from xautodl.config_utils import load_config
 from xautodl.procedures import prepare_seed, get_optim_scheduler
 from xautodl.log_utils import AverageMeter, time_string, convert_secs2time

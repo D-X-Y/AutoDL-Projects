@@ -4,8 +4,8 @@
 import copy
 import torch
 from tqdm import tqdm
-from procedures import prepare_seed, prepare_logger
-from datasets.synthetic_core import get_synthetic_env
+from xautodl.procedures import prepare_seed, prepare_logger
+from xautodl.datasets.synthetic_core import get_synthetic_env
 
 
 def lfna_setup(args):

@@ -1,6 +1,10 @@
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.01 #
+#####################################################
 # python exps/prepare.py --name cifar10     --root $TORCH_HOME/cifar.python --save ./data/cifar10.split.pth
 # python exps/prepare.py --name cifar100    --root $TORCH_HOME/cifar.python --save ./data/cifar100.split.pth
 # python exps/prepare.py --name imagenet-1k --root $TORCH_HOME/ILSVRC2012   --save ./data/imagenet-1k.split.pth
+#####################################################
 import sys, time, torch, random, argparse
 from collections import defaultdict
 import os.path as osp
@@ -12,9 +16,6 @@ from pathlib import Path
 import torchvision
 import torchvision.datasets as dset
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
 parser = argparse.ArgumentParser(
     description="Prepare splits for searching",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -35,9 +36,9 @@ def main():
     print("torchvision version : {:}".format(torchvision.__version__))
 
     if name == "cifar10":
-        dataset = dset.CIFAR10(args.root, train=True)
+        dataset = dset.CIFAR10(args.root, train=True, download=True)
     elif name == "cifar100":
-        dataset = dset.CIFAR100(args.root, train=True)
+        dataset = dset.CIFAR100(args.root, train=True, download=True)
     elif name == "imagenet-1k":
         dataset = dset.ImageFolder(osp.join(args.root, "train"))
     else:

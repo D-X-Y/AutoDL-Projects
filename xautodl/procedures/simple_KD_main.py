@@ -5,7 +5,7 @@ import os, sys, time, torch
 import torch.nn.functional as F
 
 # modules in AutoDL
-from log_utils import AverageMeter, time_string
+from xautodl.log_utils import AverageMeter, time_string
 from .eval_funcs import obtain_accuracy
 
 
