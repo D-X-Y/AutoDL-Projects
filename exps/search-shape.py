@@ -15,7 +15,12 @@ from xautodl.config_utils import (
     configure2str,
     obtain_search_single_args as obtain_args,
 )
-from xautodl.procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint
+from xautodl.procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+)
 from xautodl.procedures import get_optim_scheduler, get_procedures
 from xautodl.datasets import get_datasets, SearchDataset
 from xautodl.models import obtain_search_model, obtain_model, change_key

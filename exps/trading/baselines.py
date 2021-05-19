@@ -24,18 +24,13 @@ import copy
 from datetime import datetime
 import argparse
 from collections import OrderedDict
-from pathlib import Path
 from pprint import pprint
 import ruamel.yaml as yaml
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-
-from config_utils import arg_str2bool
-from procedures.q_exps import update_gpu
-from procedures.q_exps import update_market
-from procedures.q_exps import run_exp
+from xautodl.config_utils import arg_str2bool
+from xautodl.procedures.q_exps import update_gpu
+from xautodl.procedures.q_exps import update_market
+from xautodl.procedures.q_exps import run_exp
 
 import qlib
 from qlib.utils import init_instance_by_config

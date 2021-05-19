@@ -10,7 +10,12 @@ from pathlib import Path
 
 from xautodl.datasets import get_datasets
 from xautodl.config_utils import load_config, obtain_basic_args as obtain_args
-from xautodl.procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint
+from xautodl.procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+)
 from xautodl.procedures import get_optim_scheduler, get_procedures
 from xautodl.models import obtain_model
 from xautodl.nas_infer_model import obtain_nas_infer_model

@@ -6,16 +6,11 @@
 # - https://github.com/microsoft/qlib/blob/main/examples/workflow_by_code.py
 # python exps/trading/workflow_tt.py --gpu 1 --market csi300
 #####################################################
-import sys, argparse
-from pathlib import Path
+import argparse
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-
-from procedures.q_exps import update_gpu
-from procedures.q_exps import update_market
-from procedures.q_exps import run_exp
+from xautodl.procedures.q_exps import update_gpu
+from xautodl.procedures.q_exps import update_market
+from xautodl.procedures.q_exps import run_exp
 
 import qlib
 from qlib.config import C

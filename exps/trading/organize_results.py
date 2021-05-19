@@ -7,15 +7,11 @@ import os, re, sys, argparse
 import numpy as np
 from typing import List, Text
 from collections import defaultdict, OrderedDict
-from pathlib import Path
 from pprint import pprint
 import ruamel.yaml as yaml
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
+from xautodl.config_utils import arg_str2bool
 
-from config_utils import arg_str2bool
 import qlib
 from qlib.config import REG_CN
 from qlib.workflow import R
