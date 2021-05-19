@@ -8,17 +8,14 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 from copy import deepcopy
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import load_config, obtain_basic_args as obtain_args
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint
-from procedures import get_optim_scheduler, get_procedures
-from datasets import get_datasets
-from models import obtain_model
-from nas_infer_model import obtain_nas_infer_model
-from utils import get_model_infos
-from log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.datasets import get_datasets
+from xautodl.config_utils import load_config, obtain_basic_args as obtain_args
+from xautodl.procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint
+from xautodl.procedures import get_optim_scheduler, get_procedures
+from xautodl.models import obtain_model
+from xautodl.nas_infer_model import obtain_nas_infer_model
+from xautodl.utils import get_model_infos
+from xautodl.log_utils import AverageMeter, time_string, convert_secs2time
 
 
 def main(args):
@@ -26,7 +23,7 @@ def main(args):
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.benchmark = True
     # torch.backends.cudnn.deterministic = True
-    torch.set_num_threads(args.workers)
+    # torch.set_num_threads(args.workers)
 
     prepare_seed(args.rand_seed)
     logger = prepare_logger(args)

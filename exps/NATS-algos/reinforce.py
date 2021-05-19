@@ -132,7 +132,7 @@ def select_action(policy):
 
 
 def main(xargs, api):
-    torch.set_num_threads(4)
+    # torch.set_num_threads(4)
     prepare_seed(xargs.rand_seed)
     logger = prepare_logger(args)
 

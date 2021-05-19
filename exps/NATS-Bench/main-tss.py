@@ -340,7 +340,7 @@ def train_single_model(
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.deterministic = True
     # torch.backends.cudnn.benchmark = True
-    torch.set_num_threads(workers)
+    # torch.set_num_threads(workers)
 
     save_dir = (
         Path(save_dir)
@@ -675,7 +675,7 @@ if __name__ == "__main__":
         assert torch.cuda.is_available(), "CUDA is not available."
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.deterministic = True
-        torch.set_num_threads(args.workers if args.workers > 0 else 1)
+        # torch.set_num_threads(args.workers if args.workers > 0 else 1)
 
         main(
             save_dir,

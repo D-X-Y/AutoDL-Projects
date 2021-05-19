@@ -470,7 +470,7 @@ if __name__ == "__main__":
     assert torch.cuda.is_available(), "CUDA is not available."
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.deterministic = True
-    torch.set_num_threads(args.workers)
+    # torch.set_num_threads(args.workers)
 
     main(
         save_dir,

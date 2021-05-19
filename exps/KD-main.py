@@ -25,7 +25,7 @@ def main(args):
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.benchmark = True
     # torch.backends.cudnn.deterministic = True
-    torch.set_num_threads(args.workers)
+    # torch.set_num_threads(args.workers)
 
     prepare_seed(args.rand_seed)
     logger = prepare_logger(args)

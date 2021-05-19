@@ -35,3 +35,8 @@ jobs:
           python -m pip install torch torchvision
           python -m pytest ./tests/test_super_*.py
         shell: bash
+
+      - name: Test TAS (NeurIPS 2019)
+        run: |
+          python -m pytest ./tests/test_tas.py
+        shell: bash

@@ -9,9 +9,9 @@ from typing import List, Text, Any
 import random, torch
 import torch.nn as nn
 
-from models.cell_operations import ResNetBasicblock
-from models.cell_infers.cells import InferCell
-from models.shape_searchs.SoftSelect import select2withP, ChannelWiseInter
+from ..cell_operations import ResNetBasicblock
+from ..cell_infers.cells import InferCell
+from .shape_searchs.SoftSelect import select2withP, ChannelWiseInter
 
 
 class GenericNAS301Model(nn.Module):
