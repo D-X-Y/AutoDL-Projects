@@ -11,7 +11,7 @@ Experiments on CIFAR-10, CIFAR-100, ImageNet, PTB, and WT2 are reported.
 
 ## Requirements and Preparation
 
-Please install `Python>=3.6` and `PyTorch>=1.2.0`.
+Please install `Python>=3.6` and `PyTorch>=1.5.0`.
 
 CIFAR and ImageNet should be downloaded and extracted into `$TORCH_HOME`.
 

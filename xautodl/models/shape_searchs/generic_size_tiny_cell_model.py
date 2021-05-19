@@ -11,7 +11,7 @@ import torch.nn as nn
 
 from ..cell_operations import ResNetBasicblock
 from ..cell_infers.cells import InferCell
-from .shape_searchs.SoftSelect import select2withP, ChannelWiseInter
+from .SoftSelect import select2withP, ChannelWiseInter
 
 
 class GenericNAS301Model(nn.Module):
