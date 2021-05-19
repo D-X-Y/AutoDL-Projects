@@ -6,9 +6,9 @@ import torch
 
 import torch.nn.functional as F
 
-from xlayers import super_core
-from xlayers import trunc_normal_
-from models.xcore import get_model
+from xautodl.xlayers import super_core
+from xautodl.xlayers import trunc_normal_
+from xautodl.models.xcore import get_model
 
 
 class LFNA_Meta(super_core.SuperModule):

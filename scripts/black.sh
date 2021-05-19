@@ -6,7 +6,7 @@
 # echo $scriptpath
 
 # delete Python cache files
-find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+find . | grep -E "(__pycache__|\.pyc|\.DS_Store|\.pyo$)" | xargs rm -rf
 
 black ./tests/
 black ./xautodl/procedures
