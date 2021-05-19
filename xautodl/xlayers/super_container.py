@@ -9,7 +9,7 @@ import operator
 from collections import OrderedDict
 from typing import Optional, Union, Callable, TypeVar, Iterator
 
-import spaces
+from xautodl import spaces
 from .super_module import SuperModule
 
 

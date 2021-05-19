@@ -3,19 +3,11 @@
 #####################################################
 # pytest ./tests/test_super_model.py -s             #
 #####################################################
-import sys, random
-import unittest
-import pytest
-from pathlib import Path
-
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-print("library path: {:}".format(lib_dir))
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-
 import torch
-from xlayers import super_core
-import spaces
+import unittest
+
+from xautodl.xlayers import super_core
+from xautodl import spaces
 
 
 class TestSuperLinear(unittest.TestCase):

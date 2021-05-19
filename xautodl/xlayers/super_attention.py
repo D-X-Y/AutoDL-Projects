@@ -13,7 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-import spaces
+from xautodl import spaces
 from .super_module import SuperModule
 from .super_module import IntSpaceType
 from .super_module import BoolSpaceType

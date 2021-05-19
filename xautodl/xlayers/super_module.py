@@ -12,8 +12,7 @@ import torch
 import torch.nn as nn
 from enum import Enum
 
-import spaces
-
+import xautodl.spaces
 from .super_utils import IntSpaceType, BoolSpaceType
 from .super_utils import LayerOrder, SuperRunMode
 from .super_utils import TensorContainer

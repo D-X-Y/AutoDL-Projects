@@ -8,17 +8,12 @@ import unittest
 import pytest
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-print("library path: {:}".format(lib_dir))
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-
-from spaces import Categorical
-from spaces import Continuous
-from spaces import Integer
-from spaces import is_determined
-from spaces import get_min
-from spaces import get_max
+from xautodl.spaces import Categorical
+from xautodl.spaces import Continuous
+from xautodl.spaces import Integer
+from xautodl.spaces import is_determined
+from xautodl.spaces import get_min
+from xautodl.spaces import get_max
 
 
 class TestBasicSpace(unittest.TestCase):

@@ -4,8 +4,9 @@
 import torch
 import torch.nn as nn
 from copy import deepcopy
-from models.cell_searchs.search_cells import NASNetSearchCell as SearchCell
-from models.cell_operations import RAW_OP_CLASSES
+
+from .search_cells import NASNetSearchCell as SearchCell
+from ..cell_operations import RAW_OP_CLASSES
 
 
 # The macro structure is based on NASNet

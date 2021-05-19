@@ -12,9 +12,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import spaces
-from xlayers import trunc_normal_
-from xlayers import super_core
+from xautodl import spaces
+from xautodl.xlayers import trunc_normal_
+from xautodl.xlayers import super_core
 
 
 __all__ = ["DefaultSearchSpace", "DEFAULT_NET_CONFIG", "get_transformer"]

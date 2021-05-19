@@ -1,9 +1,12 @@
-from spaces.basic_space import Space
-from spaces.basic_space import VirtualNode
-from spaces.basic_space import Integer
-from spaces.basic_space import Continuous
-from spaces.basic_space import Categorical
-from spaces.basic_space import _EPS
+#####################################################
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.03 #
+#####################################################
+from .basic_space import Space
+from .basic_space import VirtualNode
+from .basic_space import Integer
+from .basic_space import Continuous
+from .basic_space import Categorical
+from .basic_space import _EPS
 
 
 def has_categorical(space_or_value, x):

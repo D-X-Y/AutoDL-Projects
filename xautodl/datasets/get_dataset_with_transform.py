@@ -9,9 +9,10 @@ import torchvision.transforms as transforms
 from copy import deepcopy
 from PIL import Image
 
+from xautodl.config_utils import load_config
+
 from .DownsampledImageNet import ImageNet16
 from .SearchDatasetWrap import SearchDataset
-from config_utils import load_config
 
 
 Dataset2Class = {

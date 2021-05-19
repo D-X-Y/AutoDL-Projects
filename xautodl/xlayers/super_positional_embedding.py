@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import math
 
-import spaces
+from xautodl import spaces
 from .super_module import SuperModule
 from .super_module import IntSpaceType
 

@@ -19,9 +19,9 @@ __all__ = [
 ]
 
 # useful modules
-from config_utils import dict2config
-from models.SharedUtils import change_key
-from models.cell_searchs import CellStructure, CellArchitectures
+from xautodl.config_utils import dict2config
+from .SharedUtils import change_key
+from .cell_searchs import CellStructure, CellArchitectures
 
 
 # Cell-based NAS Models

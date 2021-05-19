@@ -8,14 +8,8 @@
 import os, sys, time, torch
 import pickle
 import tempfile
-from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-print("library path: {:}".format(lib_dir))
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-
-from trade_models.quant_transformer import QuantTransformer
+from xautodl.trade_models.quant_transformer import QuantTransformer
 
 
 def test_create():

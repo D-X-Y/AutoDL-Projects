@@ -18,7 +18,7 @@
 #
 # [2021.05.18] v1.0
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 NAME = "xautodl"
 REQUIRES_PYTHON = ">=3.6"
@@ -28,12 +28,17 @@ VERSION = "0.9.9"
 
 
 def read(fname="README.md"):
-    with open(os.path.join(os.path.dirname(__file__), fname), encoding="utf-8") as cfile:
+    with open(
+        os.path.join(os.path.dirname(__file__), fname), encoding="utf-8"
+    ) as cfile:
         return cfile.read()
 
 
 # What packages are required for this module to be executed?
 REQUIRED = ["numpy>=1.16.5,<=1.19.5"]
+
+packages = find_packages(exclude=("tests", "scripts", "scripts-search", "lib*", "exps*"))
+print("packages: {:}".format(packages))
 
 setup(
     name=NAME,
@@ -44,7 +49,7 @@ setup(
     license="MIT Licence",
     keywords="NAS Dataset API DeepLearning",
     url="https://github.com/D-X-Y/AutoDL-Projects",
-    packages=["xautodl"],
+    packages=packages,
     install_requires=REQUIRED,
     python_requires=REQUIRES_PYTHON,
     long_description=read("README.md"),

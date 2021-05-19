@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 from enum import Enum
 
-import spaces
+from xautodl import spaces
 
 IntSpaceType = Union[int, spaces.Integer, spaces.Categorical]
 BoolSpaceType = Union[bool, spaces.Categorical]

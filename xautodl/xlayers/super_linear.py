@@ -8,7 +8,7 @@ import torch.nn.functional as F
 import math
 from typing import Optional, Callable
 
-import spaces
+from xautodl import spaces
 from .super_module import SuperModule
 from .super_module import IntSpaceType
 from .super_module import BoolSpaceType

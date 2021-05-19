@@ -6,17 +6,12 @@
 import sys, random
 import unittest
 from parameterized import parameterized
-import pytest
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-print("library path: {:}".format(lib_dir))
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-
 import torch
-from xlayers import super_core
-import spaces
+
+from xautodl import spaces
+from xautodl.xlayers import super_core
 
 
 class TestSuperAttention(unittest.TestCase):
