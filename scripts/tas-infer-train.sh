@@ -40,7 +40,7 @@ python --version
 
 # normal training
 xsave_dir=${save_dir}-NMT
-OMP_NUM_THREADS=4 python ./exps/basic-main.py --dataset ${dataset} \
+OMP_NUM_THREADS=4 python ./exps/basic/basic-main.py --dataset ${dataset} \
 	--data_path ${xpath} \
 	--model_config ./configs/NeurIPS-2019/${model}.config \
 	--optim_config ${opt_config} \
@@ -52,7 +52,7 @@ OMP_NUM_THREADS=4 python ./exps/basic-main.py --dataset ${dataset} \
 
 # KD training
 xsave_dir=${save_dir}-KDT
-OMP_NUM_THREADS=4 python ./exps/KD-main.py --dataset ${dataset} \
+OMP_NUM_THREADS=4 python ./exps/basic/KD-main.py --dataset ${dataset} \
 	--data_path ${xpath} \
 	--model_config ./configs/NeurIPS-2019/${model}.config \
 	--optim_config  ${opt_config} \

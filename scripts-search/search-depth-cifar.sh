@@ -32,7 +32,7 @@ save_dir=${SAVE_ROOT}/search-depth/${dataset}-${model}-${optim}-Gumbel_${gumbel_
 
 python --version
 
-OMP_NUM_THREADS=4 python ./exps/search-shape.py --dataset ${dataset} \
+OMP_NUM_THREADS=4 python ./exps/TAS/search-shape.py --dataset ${dataset} \
 	--data_path $TORCH_HOME/cifar.python \
 	--model_config ./configs/archs/CIFAR-${model}.config \
 	--split_path   ./.latent-data/splits/${dataset}-0.5.pth \
@@ -53,7 +53,7 @@ if [ "$rseed" = "-1" ]; then
 else
   # normal training
   xsave_dir=${save_dir}/seed-${rseed}-NMT
-  OMP_NUM_THREADS=4 python ./exps/basic-main.py --dataset ${dataset} \
+  OMP_NUM_THREADS=4 python ./exps/basic/basic-main.py --dataset ${dataset} \
 	--data_path $TORCH_HOME/cifar.python \
 	--model_config ${save_dir}/seed-${rseed}-last.config \
 	--optim_config ./configs/opts/CIFAR-E300-W5-L1-COS.config \
@@ -64,7 +64,7 @@ else
 	--eval_frequency 1 --print_freq 100 --print_freq_eval 200
   # KD training
   xsave_dir=${save_dir}/seed-${rseed}-KDT
-  OMP_NUM_THREADS=4 python ./exps/KD-main.py --dataset ${dataset} \
+  OMP_NUM_THREADS=4 python ./exps/basic/KD-main.py --dataset ${dataset} \
 	--data_path $TORCH_HOME/cifar.python \
 	--model_config  ${save_dir}/seed-${rseed}-last.config \
 	--optim_config  ./configs/opts/CIFAR-E300-W5-L1-COS.config \

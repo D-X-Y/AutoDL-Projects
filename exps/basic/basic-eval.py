@@ -6,20 +6,13 @@ from PIL import ImageFile
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from copy import deepcopy
-from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import load_config, dict2config
-from procedures import get_procedures, get_optim_scheduler
-from datasets import get_datasets
-from models import obtain_model
-from utils import get_model_infos
-from log_utils import PrintLogger, time_string
-
-
-assert torch.cuda.is_available(), "torch.cuda is not available"
+from xautodl.config_utils import load_config, dict2config
+from xautodl.procedures import get_procedures, get_optim_scheduler
+from xautodl.datasets import get_datasets
+from xautodl.models import obtain_model
+from xautodl.utils import get_model_infos
+from xautodl.log_utils import PrintLogger, time_string
 
 
 def main(args):
@@ -118,4 +111,5 @@ if __name__ == "__main__":
         "--checkpoint", type=str, help="Choose between Cifar10/100 and ImageNet."
     )
     args = parser.parse_args()
+    assert torch.cuda.is_available(), "torch.cuda is not available"
     main(args)

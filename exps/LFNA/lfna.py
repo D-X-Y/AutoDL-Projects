@@ -10,6 +10,10 @@ from tqdm import tqdm
 from copy import deepcopy
 from pathlib import Path
 
+lib_dir = (Path(__file__).parent / "..").resolve()
+if str(lib_dir) not in sys.path:
+    sys.path.insert(0, str(lib_dir))
+
 from xautodl.procedures import (
     prepare_seed,
     prepare_logger,

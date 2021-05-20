@@ -12,16 +12,22 @@ import numpy as np
 from copy import deepcopy
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import load_config, configure2str, obtain_search_args as obtain_args
-from procedures import prepare_seed, prepare_logger, save_checkpoint, copy_checkpoint
-from procedures import get_optim_scheduler, get_procedures
-from datasets import get_datasets, SearchDataset
-from models import obtain_search_model, obtain_model, change_key
-from utils import get_model_infos
-from log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.config_utils import (
+    load_config,
+    configure2str,
+    obtain_search_args as obtain_args,
+)
+from xautodl.procedures import (
+    prepare_seed,
+    prepare_logger,
+    save_checkpoint,
+    copy_checkpoint,
+)
+from xautodl.procedures import get_optim_scheduler, get_procedures
+from xautodl.datasets import get_datasets, SearchDataset
+from xautodl.models import obtain_search_model, obtain_model, change_key
+from xautodl.utils import get_model_infos
+from xautodl.log_utils import AverageMeter, time_string, convert_secs2time
 
 
 def main(args):

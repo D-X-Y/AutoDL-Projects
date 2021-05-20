@@ -3,21 +3,16 @@
 ##############################################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.07                          #
 ##############################################################################
-# python ./exps/NATS-Bench/main-tss.py --mode meta                           #
+# python ./exps/NATS-Bench/show-dataset.py                                   #
 ##############################################################################
 import os, sys, time, torch, random, argparse
 from typing import List, Text, Dict, Any
 from PIL import ImageFile
-
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from copy import deepcopy
-from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import dict2config, load_config
-from datasets import get_datasets
+from xautodl.config_utils import dict2config, load_config
+from xautodl.datasets import get_datasets
 from nats_bench import create
 
 

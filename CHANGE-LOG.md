@@ -9,4 +9,4 @@
 - [2020.10.15] [446262a](https://github.com/D-X-Y/AutoDL-Projects/tree/446262a) Update NATS-BENCH to version 1.0
 - [2020.12.20] [dae387a](https://github.com/D-X-Y/AutoDL-Projects/tree/dae387a) Update NATS-BENCH to version 1.1
 - [2021.05.18] [98fadf8](https://github.com/D-X-Y/AutoDL-Projects/tree/98fadf8) Before moving to `xautodl`
-- [2021.05.19] [129c9e5](https://github.com/D-X-Y/AutoDL-Projects/tree/129c9e5) `xautodl` is close to ready
+- [2021.05.19] [b50ad2a](https://github.com/D-X-Y/AutoDL-Projects/tree/b50ad2a) `xautodl` is close to ready

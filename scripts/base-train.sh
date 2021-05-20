@@ -26,7 +26,7 @@ save_dir=./output/basic/${dataset}/${model}-${epoch}-${LR}-${batch}
 
 python --version
 
-OMP_NUM_THREADS=4 python ./exps/basic-main.py --dataset ${dataset} \
+OMP_NUM_THREADS=4 python ./exps/basic/basic-main.py --dataset ${dataset} \
 	--data_path $TORCH_HOME/cifar.python \
 	--model_config ./configs/archs/CIFAR-${model}.config \
 	--optim_config ./configs/opts/CIFAR-${epoch}-W5-${LR}-COS.config \

@@ -41,7 +41,7 @@ save_dir=${SAVE_ROOT}/nas-infer/${dataset}-BS${batch}-${save_name}
 
 python --version
 
-python ./exps/basic-main.py --dataset ${dataset} \
+python ./exps/basic/basic-main.py --dataset ${dataset} \
 	--data_path ${xpath} --model_source autodl-searched \
 	--model_config ./configs/archs/NAS-${base}-none.config \
 	--optim_config ./configs/opts/NAS-${base}.config \
