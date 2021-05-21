@@ -13,26 +13,22 @@
 import os, sys, time, glob, random, argparse
 import numpy as np, collections
 from copy import deepcopy
-from pathlib import Path
 import torch
 import torch.nn as nn
 from torch.distributions import Categorical
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import load_config, dict2config, configure2str
-from datasets import get_datasets, SearchDataset
-from procedures import (
+from xautodl.config_utils import load_config, dict2config, configure2str
+from xautodl.datasets import get_datasets, SearchDataset
+from xautodl.procedures import (
     prepare_seed,
     prepare_logger,
     save_checkpoint,
     copy_checkpoint,
     get_optim_scheduler,
 )
-from utils import get_model_infos, obtain_accuracy
-from log_utils import AverageMeter, time_string, convert_secs2time
-from models import CellStructure, get_search_spaces
+from xautodl.utils import get_model_infos, obtain_accuracy
+from xautodl.log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.models import CellStructure, get_search_spaces
 from nats_bench import create
 
 
@@ -206,7 +202,6 @@ def main(xargs, api):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("The REINFORCE Algorithm")
-    parser.add_argument("--data_path", type=str, help="Path to dataset")
     parser.add_argument(
         "--dataset",
         type=str,

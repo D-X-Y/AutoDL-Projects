@@ -8,6 +8,7 @@
 import os, sys, time, torch, random, argparse
 from typing import List, Text, Dict, Any
 from PIL import ImageFile
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from copy import deepcopy
 

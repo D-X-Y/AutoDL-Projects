@@ -12,25 +12,47 @@ import numpy as np, collections
 from copy import deepcopy
 import torch
 import torch.nn as nn
-from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import load_config, dict2config, configure2str
-from datasets import get_datasets, SearchDataset
-from procedures import (
+from xautodl.config_utils import load_config, dict2config, configure2str
+from xautodl.datasets import get_datasets, SearchDataset
+from xautodl.procedures import (
     prepare_seed,
     prepare_logger,
     save_checkpoint,
     copy_checkpoint,
     get_optim_scheduler,
 )
-from utils import get_model_infos, obtain_accuracy
-from log_utils import AverageMeter, time_string, convert_secs2time
-from models import get_search_spaces
+from xautodl.utils import get_model_infos, obtain_accuracy
+from xautodl.log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.models import CellStructure, get_search_spaces
 from nats_bench import create
-from regularized_ea import random_topology_func, random_size_func
+
+
+def random_topology_func(op_names, max_nodes=4):
+    # Return a random architecture
+    def random_architecture():
+        genotypes = []
+        for i in range(1, max_nodes):
+            xlist = []
+            for j in range(i):
+                node_str = "{:}<-{:}".format(i, j)
+                op_name = random.choice(op_names)
+                xlist.append((op_name, j))
+            genotypes.append(tuple(xlist))
+        return CellStructure(genotypes)
+
+    return random_architecture
+
+
+def random_size_func(info):
+    # Return a random architecture
+    def random_architecture():
+        channels = []
+        for i in range(info["numbers"]):
+            channels.append(str(random.choice(info["candidates"])))
+        return ":".join(channels)
+
+    return random_architecture
 
 
 def main(xargs, api):

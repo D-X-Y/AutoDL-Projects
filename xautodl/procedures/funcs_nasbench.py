@@ -3,7 +3,6 @@
 #####################################################
 import os, time, copy, torch, pathlib
 
-# modules in AutoDL
 from xautodl import datasets
 from xautodl.config_utils import load_config
 from xautodl.procedures import prepare_seed, get_optim_scheduler
@@ -83,7 +82,7 @@ def procedure(xloader, network, criterion, scheduler, optimizer, mode: str):
 def evaluate_for_seed(
     arch_config, opt_config, train_loader, valid_loaders, seed: int, logger
 ):
-
+    """A modular function to train and evaluate a single network, using the given random seed and optimization config with the provided loaders."""
     prepare_seed(seed)  # random seed
     net = get_cell_based_tiny_net(arch_config)
     # net = TinyNetwork(arch_config['channel'], arch_config['num_cells'], arch, config.class_num)
