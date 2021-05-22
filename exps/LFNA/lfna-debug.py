@@ -1,7 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/LFNA/lfna.py --env_version v1 --workers 0
+# python exps/LFNA/lfna-debug.py --env_version v1 --workers 0
 # python exps/LFNA/lfna.py --env_version v1 --device cuda --lr 0.001
 # python exps/LFNA/lfna.py --env_version v1 --device cuda --lr 0.002
 #####################################################
@@ -93,80 +93,10 @@ def epoch_evaluate(loader, meta_model, base_model, criterion, device, logger):
     return loss_meter
 
 
-def pretrain_v2(base_model, meta_model, criterion, xenv, args, logger):
-    optimizer = torch.optim.Adam(
-        meta_model.parameters(),
-        lr=args.lr,
-        weight_decay=args.weight_decay,
-        amsgrad=True,
-    )
-    logger.log("Pre-train the meta-model")
-    logger.log("Using the optimizer: {:}".format(optimizer))
-
-    meta_model.set_best_dir(logger.path(None) / "checkpoint-pretrain")
-    per_epoch_time, start_time = AverageMeter(), time.time()
-    for iepoch in range(args.epochs):
-        left_time = "Time Left: {:}".format(
-            convert_secs2time(per_epoch_time.avg * (args.epochs - iepoch), True)
-        )
-        total_meta_losses, total_match_losses = [], []
-        for ibatch in range(args.meta_batch):
-            rand_index = random.randint(0, meta_model.meta_length - xenv.seq_length - 1)
-            timestamps = meta_model.meta_timestamps[
-                rand_index : rand_index + xenv.seq_length
-            ]
-
-            seq_timestamps, (seq_inputs, seq_targets) = xenv.seq_call(timestamps)
-            [seq_containers], time_embeds = meta_model(
-                torch.unsqueeze(timestamps, dim=0)
-            )
-            # performance loss
-            losses = []
-            seq_inputs, seq_targets = seq_inputs.to(args.device), seq_targets.to(
-                args.device
-            )
-            for container, inputs, targets in zip(
-                seq_containers, seq_inputs, seq_targets
-            ):
-                predictions = base_model.forward_with_container(inputs, container)
-                loss = criterion(predictions, targets)
-                losses.append(loss)
-            meta_loss = torch.stack(losses).mean()
-            match_loss = criterion(
-                torch.squeeze(time_embeds, dim=0),
-                meta_model.super_meta_embed[rand_index : rand_index + xenv.seq_length],
-            )
-            # batch_loss = meta_loss + match_loss * 0.1
-            # total_losses.append(batch_loss)
-            total_meta_losses.append(meta_loss)
-            total_match_losses.append(match_loss)
-        final_meta_loss = torch.stack(total_meta_losses).mean()
-        final_match_loss = torch.stack(total_match_losses).mean()
-        total_loss = final_meta_loss + final_match_loss
-        total_loss.backward()
-        optimizer.step()
-        # success
-        success, best_score = meta_model.save_best(-total_loss.item())
-        logger.log(
-            "{:} [{:04d}/{:}] loss : {:.5f} = {:.5f} + {:.5f} (match)".format(
-                time_string(),
-                iepoch,
-                args.epochs,
-                total_loss.item(),
-                final_meta_loss.item(),
-                final_match_loss.item(),
-            )
-            + ", batch={:}".format(len(total_meta_losses))
-            + ", success={:}, best_score={:.4f}".format(success, -best_score)
-            + " {:}".format(left_time)
-        )
-        per_epoch_time.update(time.time() - start_time)
-        start_time = time.time()
-
-
 def pretrain(base_model, meta_model, criterion, xenv, args, logger):
     base_model.train()
     meta_model.train()
+
     optimizer = torch.optim.Adam(
         meta_model.parameters(),
         lr=args.lr,
@@ -177,20 +107,16 @@ def pretrain(base_model, meta_model, criterion, xenv, args, logger):
     logger.log("Using the optimizer: {:}".format(optimizer))
 
     meta_model.set_best_dir(logger.path(None) / "ckps-basic-pretrain")
-    meta_model.set_best_name("pretrain-{:}.pth".format(args.rand_seed))
-    per_epoch_time, start_time = AverageMeter(), time.time()
+    rand_index = random.randint(0, meta_model.meta_length - xenv.seq_length - 1)
     for iepoch in range(args.epochs):
         left_time = "Time Left: {:}".format(
             convert_secs2time(per_epoch_time.avg * (args.epochs - iepoch), True)
         )
         losses = []
-        optimizer.zero_grad()
         for ibatch in range(args.meta_batch):
-            rand_index = random.randint(0, meta_model.meta_length - xenv.seq_length - 1)
             timestamps = meta_model.meta_timestamps[
                 rand_index : rand_index + xenv.seq_length
             ]
-
             seq_timestamps, (seq_inputs, seq_targets) = xenv.seq_call(timestamps)
             time_embeds = meta_model.super_meta_embed[
                 rand_index : rand_index + xenv.seq_length

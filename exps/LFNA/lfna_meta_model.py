@@ -85,7 +85,6 @@ class LFNA_Meta(super_core.SuperModule):
             dropout=dropout,
         )
         self._generator = get_model(**model_kwargs)
-        # print("generator: {:}".format(self._generator))
 
         # initialization
         trunc_normal_(
@@ -163,9 +162,12 @@ class LFNA_Meta(super_core.SuperModule):
         corrected_embeds = self.meta_corrector(init_timestamp_embeds)
         return corrected_embeds
 
-    def forward_raw(self, timestamps):
-        batch, seq = timestamps.shape
-        time_embed = self._obtain_time_embed(timestamps)
+    def forward_raw(self, timestamps, time_embed):
+        if time_embed is None:
+            batch, seq = timestamps.shape
+            time_embed = self._obtain_time_embed(timestamps)
+        else:
+            batch, seq, _ = time_embed.shape
         # create joint embed
         num_layer, _ = self._super_layer_embed.shape
         meta_embed = time_embed.view(batch, seq, 1, -1).expand(-1, -1, num_layer, -1)
