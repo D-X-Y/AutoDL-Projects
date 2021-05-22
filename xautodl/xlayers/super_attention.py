@@ -78,7 +78,7 @@ class SuperSelfAttention(SuperModule):
         return root_node
 
     def apply_candidate(self, abstract_child: spaces.VirtualNode):
-        super(SuperAttention, self).apply_candidate(abstract_child)
+        super(SuperSelfAttention, self).apply_candidate(abstract_child)
         if "q_fc" in abstract_child:
             self.q_fc.apply_candidate(abstract_child["q_fc"])
         if "k_fc" in abstract_child:
@@ -222,7 +222,7 @@ class SuperQKVAttention(SuperModule):
         return root_node
 
     def apply_candidate(self, abstract_child: spaces.VirtualNode):
-        super(SuperAttention, self).apply_candidate(abstract_child)
+        super(SuperQVKAttention, self).apply_candidate(abstract_child)
         if "q_fc" in abstract_child:
             self.q_fc.apply_candidate(abstract_child["q_fc"])
         if "k_fc" in abstract_child:

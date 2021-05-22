@@ -14,14 +14,14 @@ from xautodl import spaces
 from xautodl.xlayers import super_core
 
 
-class TestSuperAttention(unittest.TestCase):
+class TestSuperSelfAttention(unittest.TestCase):
     """Test the super attention layer."""
 
     def _internal_func(self, inputs, model):
         outputs = model(inputs)
         abstract_space = model.abstract_search_space
         print(
-            "The abstract search space for SuperAttention is:\n{:}".format(
+            "The abstract search space for SuperSelfAttention is:\n{:}".format(
                 abstract_space
             )
         )
@@ -36,7 +36,7 @@ class TestSuperAttention(unittest.TestCase):
     def test_super_attention(self):
         proj_dim = spaces.Categorical(12, 24, 36)
         num_heads = spaces.Categorical(2, 4, 6)
-        model = super_core.SuperAttention(10, proj_dim, num_heads)
+        model = super_core.SuperSelfAttention(10, proj_dim, num_heads)
         print(model)
         model.apply_verbose(True)
 

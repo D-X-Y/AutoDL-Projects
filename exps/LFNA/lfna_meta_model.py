@@ -20,7 +20,7 @@ class LFNA_Meta(super_core.SuperModule):
         layer_embedding,
         time_embedding,
         meta_timestamps,
-        mha_depth: int = 1,
+        mha_depth: int = 2,
         dropout: float = 0.1,
     ):
         super(LFNA_Meta, self).__init__()
@@ -73,7 +73,7 @@ class LFNA_Meta(super_core.SuperModule):
                 )
             )
         layers.append(super_core.SuperLinear(time_embedding * 2, time_embedding))
-        self.meta_corrector = super_core.SuperSequential(*layers)
+        self._meta_corrector = super_core.SuperSequential(*layers)
 
         model_kwargs = dict(
             config=dict(model_type="dual_norm_mlp"),
@@ -91,6 +91,18 @@ class LFNA_Meta(super_core.SuperModule):
             [self._super_layer_embed, self._super_meta_embed],
             std=0.02,
         )
+
+    def get_parameters(self, time_embed, meta_corrector, generator):
+        parameters = []
+        if time_embed:
+            parameters.append(self._super_meta_embed)
+        if meta_corrector:
+            parameters.extend(list(self._trans_att.parameters()))
+            parameters.extend(list(self._meta_corrector.parameters()))
+        if generator:
+            parameters.append(self._super_layer_embed)
+            parameters.extend(list(self._generator.parameters()))
+        return parameters
 
     @property
     def meta_timestamps(self):
@@ -159,7 +171,7 @@ class LFNA_Meta(super_core.SuperModule):
         # relative_timestamps = timestamps - timestamps[:, :1]
         # relative_pos_embeds = self._tscalar_embed(relative_timestamps)
         init_timestamp_embeds = torch.cat((timestamp_q_embed, timestamp_embeds), dim=-1)
-        corrected_embeds = self.meta_corrector(init_timestamp_embeds)
+        corrected_embeds = self._meta_corrector(init_timestamp_embeds)
         return corrected_embeds
 
     def forward_raw(self, timestamps, time_embed):
