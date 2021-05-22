@@ -45,6 +45,7 @@ class SuperTransformerEncoderLayer(SuperModule):
         norm_affine: bool = True,
         act_layer: Callable[[], nn.Module] = nn.GELU,
         order: LayerOrder = LayerOrder.PreNorm,
+        use_mask: bool = False,
     ):
         super(SuperTransformerEncoderLayer, self).__init__()
         mha = SuperSelfAttention(
@@ -54,6 +55,7 @@ class SuperTransformerEncoderLayer(SuperModule):
             qkv_bias=qkv_bias,
             attn_drop=drop,
             proj_drop=drop,
+            use_mask=use_mask,
         )
         mlp = SuperMLPv2(
             d_model,

@@ -70,6 +70,7 @@ class LFNA_Meta(super_core.SuperModule):
                     dropout,
                     norm_affine=False,
                     order=super_core.LayerOrder.PostNorm,
+                    use_mask=True,
                 )
             )
         layers.append(super_core.SuperLinear(time_embedding * 2, time_embedding))
@@ -162,11 +163,14 @@ class LFNA_Meta(super_core.SuperModule):
     def _obtain_time_embed(self, timestamps):
         # timestamps is a batch of sequence of timestamps
         batch, seq = timestamps.shape
+        meta_timestamps, meta_embeds = self.meta_timestamps, self.super_meta_embed
         timestamp_q_embed = self._tscalar_embed(timestamps)
-        timestamp_k_embed = self._tscalar_embed(self.meta_timestamps.view(1, -1))
-        timestamp_v_embed = self.super_meta_embed.unsqueeze(dim=0)
+        timestamp_k_embed = self._tscalar_embed(meta_timestamps.view(1, -1))
+        timestamp_v_embed = meta_embeds.unsqueeze(dim=0)
+        # create the mask
+        mask = torch.unsqueeze(timestamps, dim=-1) <= meta_timestamps.view(1, 1, -1)
         timestamp_embeds = self._trans_att(
-            timestamp_q_embed, timestamp_k_embed, timestamp_v_embed
+            timestamp_q_embed, timestamp_k_embed, timestamp_v_embed, mask
         )
         # relative_timestamps = timestamps - timestamps[:, :1]
         # relative_pos_embeds = self._tscalar_embed(relative_timestamps)
@@ -186,8 +190,12 @@ class LFNA_Meta(super_core.SuperModule):
         layer_embed = self._super_layer_embed.view(1, 1, num_layer, -1).expand(
             batch, seq, -1, -1
         )
-        joint_embed = torch.cat((meta_embed, layer_embed), dim=-1)
-        batch_weights = self._generator(joint_embed)
+        joint_embed = torch.cat(
+            (meta_embed, layer_embed), dim=-1
+        )  # batch, seq, num-layers, input-dim
+        batch_weights = self._generator(
+            joint_embed
+        )  # batch, seq, num-layers, num-weights
         batch_containers = []
         for seq_weights in torch.split(batch_weights, 1):
             seq_containers = []
