@@ -16,7 +16,7 @@
 #
 # TODO(xuanyidong): upload it to conda
 #
-# [2021.05.18] v1.0
+# [2021.05.21] v0.9.9
 import os
 from setuptools import setup, find_packages
 

@@ -19,7 +19,7 @@ from .super_module import LayerOrder
 from .super_module import SuperModule
 from .super_linear import SuperMLPv2
 from .super_norm import SuperLayerNorm1D
-from .super_attention import SuperAttention
+from .super_attention import SuperSelfAttention
 
 
 class SuperTransformerEncoderLayer(SuperModule):
@@ -47,7 +47,7 @@ class SuperTransformerEncoderLayer(SuperModule):
         order: LayerOrder = LayerOrder.PreNorm,
     ):
         super(SuperTransformerEncoderLayer, self).__init__()
-        mha = SuperAttention(
+        mha = SuperSelfAttention(
             d_model,
             d_model,
             num_heads=num_heads,

@@ -10,7 +10,8 @@ from tqdm import tqdm
 from copy import deepcopy
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / "..").resolve()
+lib_dir = (Path(__file__).parent / ".." / "..").resolve()
+print("LIB-DIR: {:}".format(lib_dir))
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 

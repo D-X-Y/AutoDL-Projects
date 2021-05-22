@@ -24,7 +24,8 @@ super_name2norm = {
     "identity": SuperIdentity,
 }
 
-from .super_attention import SuperAttention
+from .super_attention import SuperSelfAttention
+from .super_attention import SuperQKVAttention
 from .super_transformer import SuperTransformerEncoderLayer
 
 from .super_activations import SuperReLU
