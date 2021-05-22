@@ -63,7 +63,7 @@ class LFNA_Meta(super_core.SuperModule):
         for ilayer in range(mha_depth):
             layers.append(
                 super_core.SuperTransformerEncoderLayer(
-                    time_embedding,
+                    time_embedding * 2,
                     4,
                     True,
                     4,
@@ -72,7 +72,7 @@ class LFNA_Meta(super_core.SuperModule):
                     order=super_core.LayerOrder.PostNorm,
                 )
             )
-        layers.append(super_core.SuperLinear(time_embedding, time_embedding))
+        layers.append(super_core.SuperLinear(time_embedding * 2, time_embedding))
         self.meta_corrector = super_core.SuperSequential(*layers)
 
         model_kwargs = dict(
@@ -95,10 +95,11 @@ class LFNA_Meta(super_core.SuperModule):
 
     @property
     def meta_timestamps(self):
-        meta_timestamps = [self._meta_timestamps]
-        for key in ("fixed", "learnt"):
-            if self._append_meta_timestamps[key] is not None:
-                meta_timestamps.append(self._append_meta_timestamps[key])
+        with torch.no_grad():
+            meta_timestamps = [self._meta_timestamps]
+            for key in ("fixed", "learnt"):
+                if self._append_meta_timestamps[key] is not None:
+                    meta_timestamps.append(self._append_meta_timestamps[key])
         return torch.cat(meta_timestamps)
 
     @property
@@ -124,6 +125,10 @@ class LFNA_Meta(super_core.SuperModule):
     def replace_append_learnt(self, timestamp, meta_embed):
         self._append_meta_timestamps["learnt"] = timestamp
         self._append_meta_embed["learnt"] = meta_embed
+
+    @property
+    def meta_length(self):
+        return self.meta_timestamps.numel()
 
     def append_fixed(self, timestamp, meta_embed):
         with torch.no_grad():
@@ -152,15 +157,18 @@ class LFNA_Meta(super_core.SuperModule):
         timestamp_embeds = self._trans_att(
             timestamp_q_embed, timestamp_k_embed, timestamp_v_embed
         )
-        corrected_embeds = self.meta_corrector(timestamp_embeds)
+        # relative_timestamps = timestamps - timestamps[:, :1]
+        # relative_pos_embeds = self._tscalar_embed(relative_timestamps)
+        init_timestamp_embeds = torch.cat((timestamp_q_embed, timestamp_embeds), dim=-1)
+        corrected_embeds = self.meta_corrector(init_timestamp_embeds)
         return corrected_embeds
 
     def forward_raw(self, timestamps):
         batch, seq = timestamps.shape
-        meta_embed = self._obtain_time_embed(timestamps)
+        time_embed = self._obtain_time_embed(timestamps)
         # create joint embed
         num_layer, _ = self._super_layer_embed.shape
-        meta_embed = meta_embed.view(batch, seq, 1, -1).expand(-1, -1, num_layer, -1)
+        meta_embed = time_embed.view(batch, seq, 1, -1).expand(-1, -1, num_layer, -1)
         layer_embed = self._super_layer_embed.view(1, 1, num_layer, -1).expand(
             batch, seq, -1, -1
         )
@@ -173,7 +181,7 @@ class LFNA_Meta(super_core.SuperModule):
                 weights = torch.split(weights.squeeze(0), 1)
                 seq_containers.append(self._shape_container.translate(weights))
             batch_containers.append(seq_containers)
-        return batch_containers
+        return batch_containers, time_embed
 
     def forward_candidate(self, input):
         raise NotImplementedError

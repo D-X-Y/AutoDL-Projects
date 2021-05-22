@@ -93,6 +93,67 @@ def epoch_evaluate(loader, meta_model, base_model, criterion, device, logger):
     return loss_meter
 
 
+def pretrain(base_model, meta_model, criterion, xenv, args, logger):
+    optimizer = torch.optim.Adam(
+        meta_model.parameters(),
+        lr=args.lr,
+        weight_decay=args.weight_decay,
+        amsgrad=True,
+    )
+
+    meta_model.set_best_dir(logger.path(None) / "checkpoint-pretrain")
+    for iepoch in range(args.epochs):
+        total_meta_losses, total_match_losses = [], []
+        for ibatch in range(args.meta_batch):
+            rand_index = random.randint(0, meta_model.meta_length - xenv.seq_length - 1)
+            timestamps = meta_model.meta_timestamps[
+                rand_index : rand_index + xenv.seq_length
+            ]
+
+            seq_timestamps, (seq_inputs, seq_targets) = xenv.seq_call(timestamps)
+            [seq_containers], time_embeds = meta_model(
+                torch.unsqueeze(timestamps, dim=0)
+            )
+            # performance loss
+            losses = []
+            seq_inputs, seq_targets = seq_inputs.to(args.device), seq_targets.to(
+                args.device
+            )
+            for container, inputs, targets in zip(
+                seq_containers, seq_inputs, seq_targets
+            ):
+                predictions = base_model.forward_with_container(inputs, container)
+                loss = criterion(predictions, targets)
+                losses.append(loss)
+            meta_loss = torch.stack(losses).mean()
+            match_loss = criterion(
+                torch.squeeze(time_embeds, dim=0),
+                meta_model.super_meta_embed[rand_index : rand_index + xenv.seq_length],
+            )
+            # batch_loss = meta_loss + match_loss * 0.1
+            # total_losses.append(batch_loss)
+            total_meta_losses.append(meta_loss)
+            total_match_losses.append(match_loss)
+        final_meta_loss = torch.stack(total_meta_losses).mean()
+        final_match_loss = torch.stack(total_match_losses).mean()
+        total_loss = final_meta_loss + final_match_loss
+        total_loss.backward()
+        optimizer.step()
+        # success
+        success, best_score = meta_model.save_best(-total_loss.item())
+        logger.log(
+            "{:} [{:04d}/{:}] loss : {:.5f} = {:.5f} + {:.5f} (match)".format(
+                time_string(),
+                iepoch,
+                args.epochs,
+                total_loss.item(),
+                final_meta_loss.item(),
+                final_match_loss.item(),
+            )
+            + ", batch={:}".format(len(total_meta_losses))
+        )
+
+
 def main(args):
     logger, env_info, model_kwargs = lfna_setup(args)
     train_env = get_synthetic_env(mode="train", version=args.env_version)
@@ -147,6 +208,8 @@ def main(args):
     logger.log("The optimizer is\n{:}".format(optimizer))
     logger.log("The scheduler is\n{:}".format(lr_scheduler))
     logger.log("Per epoch iterations = {:}".format(len(train_env_loader)))
+
+    pretrain(base_model, meta_model, criterion, train_env, args, logger)
 
     if logger.path("model").exists():
         ckp_data = torch.load(logger.path("model"))
@@ -345,7 +408,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lr",
         type=float,
-        default=0.005,
+        default=0.002,
         help="The initial learning rate for the optimizer (default is Adam)",
     )
     parser.add_argument(

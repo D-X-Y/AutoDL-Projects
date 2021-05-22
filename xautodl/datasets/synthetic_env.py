@@ -69,6 +69,10 @@ class SyntheticDEnv(data.Dataset):
         self._seq_length = None
 
     @property
+    def seq_length(self):
+        return self._seq_length
+
+    @property
     def min_timestamp(self):
         return self._timestamp_generator.min_timestamp
 
@@ -125,6 +129,14 @@ class SyntheticDEnv(data.Dataset):
                 timestamp + i * self.timestamp_interval + noise
                 for i in range(self._seq_length)
             ]
+            # xdata = [self.__call__(timestamp) for timestamp in timestamps]
+            # return zip_sequence(xdata)
+            return self.seq_call(timestamps)
+
+    def seq_call(self, timestamps):
+        with torch.no_grad():
+            if isinstance(timestamps, torch.Tensor):
+                timestamps = timestamps.cpu().tolist()
             xdata = [self.__call__(timestamp) for timestamp in timestamps]
             return zip_sequence(xdata)
 
