@@ -276,10 +276,10 @@ class LFNA_Meta(super_core.SuperModule):
     def forward_candidate(self, input):
         raise NotImplementedError
 
-    def adapt(self, base_model, criterion, timestamp, x, y, lr, epochs):
+    def adapt(self, base_model, criterion, timestamp, x, y, lr, epochs, init_info):
         distance = self.get_closest_meta_distance(timestamp)
         if distance + self._interval * 1e-2 <= self._interval:
-            return False
+            return False, None
         x, y = x.to(self._meta_timestamps.device), y.to(self._meta_timestamps.device)
         with torch.set_grad_enabled(True):
             new_param = self.create_meta_embed()
@@ -290,7 +290,11 @@ class LFNA_Meta(super_core.SuperModule):
             self.replace_append_learnt(timestamp, new_param)
             self.train()
             base_model.train()
-            best_new_param, best_loss = None, 1e9
+            if init_info is not None:
+                best_loss = init_info["loss"]
+                new_param.data.copy_(init_info["param"].data)
+            else:
+                best_new_param, best_loss = None, 1e9
             for iepoch in range(epochs):
                 optimizer.zero_grad()
                 _, [_], time_embed = self(timestamp.view(1, 1), None, True)
@@ -303,14 +307,14 @@ class LFNA_Meta(super_core.SuperModule):
                 loss.backward()
                 optimizer.step()
                 # print("{:03d}/{:03d} : loss : {:.4f} = {:.4f} + {:.4f}".format(iepoch, epochs, loss.item(), meta_loss.item(), match_loss.item()))
-                if loss.item() < best_loss:
+                if meta_loss.item() < best_loss:
                     with torch.no_grad():
-                        best_loss = loss.item()
+                        best_loss = meta_loss.item()
                         best_new_param = new_param.detach()
         with torch.no_grad():
             self.replace_append_learnt(None, None)
             self.append_fixed(timestamp, best_new_param)
-        return True
+        return True, meta_loss.item()
 
     def extra_repr(self) -> str:
         return "(_super_layer_embed): {:}, (_super_meta_embed): {:}, (_meta_timestamps): {:}".format(
