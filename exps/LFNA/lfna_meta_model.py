@@ -22,6 +22,7 @@ class LFNA_Meta(super_core.SuperModule):
         meta_timestamps,
         mha_depth: int = 2,
         dropout: float = 0.1,
+        thresh: float = 0.05,
     ):
         super(LFNA_Meta, self).__init__()
         self._shape_container = shape_container
@@ -30,6 +31,7 @@ class LFNA_Meta(super_core.SuperModule):
         for ilayer in range(self._num_layers):
             self._numel_per_layer.append(shape_container[ilayer].numel())
         self._raw_meta_timestamps = meta_timestamps
+        self._thresh = thresh
 
         self.register_parameter(
             "_super_layer_embed",
@@ -168,7 +170,14 @@ class LFNA_Meta(super_core.SuperModule):
         timestamp_k_embed = self._tscalar_embed(meta_timestamps.view(1, -1))
         timestamp_v_embed = meta_embeds.unsqueeze(dim=0)
         # create the mask
-        mask = torch.unsqueeze(timestamps, dim=-1) <= meta_timestamps.view(1, 1, -1)
+        mask = (
+            torch.unsqueeze(timestamps, dim=-1) <= meta_timestamps.view(1, 1, -1)
+        ) | (
+            torch.abs(
+                torch.unsqueeze(timestamps, dim=-1) - meta_timestamps.view(1, 1, -1)
+            )
+            > self._thresh
+        )
         timestamp_embeds = self._trans_att(
             timestamp_q_embed, timestamp_k_embed, timestamp_v_embed, mask
         )
