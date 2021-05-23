@@ -60,6 +60,17 @@ class LFNA_Meta(super_core.SuperModule):
         )
 
         # build transformer
+        self._trans_att = super_core.SuperQKVAttentionV2(
+            qk_att_dim=time_embedding,
+            in_v_dim=time_embedding,
+            hidden_dim=time_embedding,
+            num_heads=4,
+            proj_dim=time_embedding,
+            qkv_bias=True,
+            attn_drop=None,
+            proj_drop=dropout,
+        )
+        """
         self._trans_att = super_core.SuperQKVAttention(
             time_embedding,
             time_embedding,
@@ -70,6 +81,7 @@ class LFNA_Meta(super_core.SuperModule):
             attn_drop=None,
             proj_drop=dropout,
         )
+        """
         layers = []
         for ilayer in range(mha_depth):
             layers.append(
@@ -153,6 +165,13 @@ class LFNA_Meta(super_core.SuperModule):
     def meta_length(self):
         return self.meta_timestamps.numel()
 
+    def clear_fixed(self):
+        self._append_meta_timestamps["fixed"] = None
+        self._append_meta_embed["fixed"] = None
+
+    def clear_learnt(self):
+        self.replace_append_learnt(None, None)
+
     def append_fixed(self, timestamp, meta_embed):
         with torch.no_grad():
             device = self._super_meta_embed.device
@@ -175,9 +194,15 @@ class LFNA_Meta(super_core.SuperModule):
         # timestamps is a batch of sequence of timestamps
         batch, seq = timestamps.shape
         meta_timestamps, meta_embeds = self.meta_timestamps, self.super_meta_embed
+        """
         timestamp_q_embed = self._tscalar_embed(timestamps)
         timestamp_k_embed = self._tscalar_embed(meta_timestamps.view(1, -1))
         timestamp_v_embed = meta_embeds.unsqueeze(dim=0)
+        """
+        timestamp_v_embed = meta_embeds.unsqueeze(dim=0)
+        timestamp_qk_att_embed = self._tscalar_embed(
+            torch.unsqueeze(timestamps, dim=-1) - meta_timestamps
+        )
         # create the mask
         mask = (
             torch.unsqueeze(timestamps, dim=-1) <= meta_timestamps.view(1, 1, -1)
@@ -188,7 +213,10 @@ class LFNA_Meta(super_core.SuperModule):
             > self._thresh
         )
         timestamp_embeds = self._trans_att(
-            timestamp_q_embed, timestamp_k_embed, timestamp_v_embed, mask
+            # timestamp_q_embed, timestamp_k_embed, timestamp_v_embed, mask
+            timestamp_qk_att_embed,
+            timestamp_v_embed,
+            mask,
         )
         relative_timestamps = timestamps - timestamps[:, :1]
         relative_pos_embeds = self._tscalar_embed(relative_timestamps)
@@ -248,18 +276,41 @@ class LFNA_Meta(super_core.SuperModule):
     def forward_candidate(self, input):
         raise NotImplementedError
 
-    def adapt(self, timestamp, x, y, threshold, lr, epochs):
-        if distance + threshold * 1e-2 <= threshold:
+    def adapt(self, base_model, criterion, timestamp, x, y, lr, epochs):
+        distance = self.get_closest_meta_distance(timestamp)
+        if distance + self._interval * 1e-2 <= self._interval:
             return False
+        x, y = x.to(self._meta_timestamps.device), y.to(self._meta_timestamps.device)
         with torch.set_grad_enabled(True):
             new_param = self.create_meta_embed()
             optimizer = torch.optim.Adam(
-                [new_param], lr=args.refine_lr, weight_decay=1e-5, amsgrad=True
+                [new_param], lr=lr, weight_decay=1e-5, amsgrad=True
             )
-        import pdb
+            timestamp = torch.Tensor([timestamp]).to(new_param.device)
+            self.replace_append_learnt(timestamp, new_param)
+            self.train()
+            base_model.train()
+            best_new_param, best_loss = None, 1e9
+            for iepoch in range(epochs):
+                optimizer.zero_grad()
+                _, [_], time_embed = self(timestamp.view(1, 1), None, True)
+                match_loss = criterion(new_param, time_embed)
 
-        pdb.set_trace()
-        print("-")
+                _, [container], time_embed = self(None, new_param.view(1, 1, -1), True)
+                y_hat = base_model.forward_with_container(x, container)
+                meta_loss = criterion(y_hat, y)
+                loss = meta_loss + match_loss
+                loss.backward()
+                optimizer.step()
+                # print("{:03d}/{:03d} : loss : {:.4f} = {:.4f} + {:.4f}".format(iepoch, epochs, loss.item(), meta_loss.item(), match_loss.item()))
+                if loss.item() < best_loss:
+                    with torch.no_grad():
+                        best_loss = loss.item()
+                        best_new_param = new_param.detach()
+        with torch.no_grad():
+            self.replace_append_learnt(None, None)
+            self.append_fixed(timestamp, best_new_param)
+        return True
 
     def extra_repr(self) -> str:
         return "(_super_layer_embed): {:}, (_super_meta_embed): {:}, (_meta_timestamps): {:}".format(
