@@ -22,7 +22,9 @@ class LFNA_Meta(super_core.SuperModule):
         meta_timestamps,
         mha_depth: int = 2,
         dropout: float = 0.1,
-        thresh: float = 0.05,
+        seq_length: int = 10,
+        interval: float = None,
+        thresh: float = None,
     ):
         super(LFNA_Meta, self).__init__()
         self._shape_container = shape_container
@@ -31,7 +33,10 @@ class LFNA_Meta(super_core.SuperModule):
         for ilayer in range(self._num_layers):
             self._numel_per_layer.append(shape_container[ilayer].numel())
         self._raw_meta_timestamps = meta_timestamps
-        self._thresh = thresh
+        assert interval is not None
+        self._interval = interval
+        self._seq_length = seq_length
+        self._thresh = interval * 30 if thresh is None else thresh
 
         self.register_parameter(
             "_super_layer_embed",
@@ -42,6 +47,10 @@ class LFNA_Meta(super_core.SuperModule):
             torch.nn.Parameter(torch.Tensor(len(meta_timestamps), time_embedding)),
         )
         self.register_buffer("_meta_timestamps", torch.Tensor(meta_timestamps))
+        # register a time difference buffer
+        time_interval = [-i * self._interval for i in range(self._seq_length)]
+        time_interval.reverse()
+        self.register_buffer("_time_interval", torch.Tensor(time_interval))
         self._time_embed_dim = time_embedding
         self._append_meta_embed = dict(fixed=None, learnt=None)
         self._append_meta_timestamps = dict(fixed=None, learnt=None)
@@ -51,12 +60,12 @@ class LFNA_Meta(super_core.SuperModule):
         )
 
         # build transformer
-        self._trans_att = super_core.SuperQKVAttentionV2(
-            qk_att_dim=time_embedding,
-            in_v_dim=time_embedding,
-            hidden_dim=time_embedding,
+        self._trans_att = super_core.SuperQKVAttention(
+            time_embedding,
+            time_embedding,
+            time_embedding,
+            time_embedding,
             num_heads=4,
-            proj_dim=time_embedding,
             qkv_bias=True,
             attn_drop=None,
             proj_drop=dropout,
@@ -166,12 +175,9 @@ class LFNA_Meta(super_core.SuperModule):
         # timestamps is a batch of sequence of timestamps
         batch, seq = timestamps.shape
         meta_timestamps, meta_embeds = self.meta_timestamps, self.super_meta_embed
-        # timestamp_q_embed = self._tscalar_embed(timestamps)
-        # timestamp_k_embed = self._tscalar_embed(meta_timestamps.view(1, -1))
+        timestamp_q_embed = self._tscalar_embed(timestamps)
+        timestamp_k_embed = self._tscalar_embed(meta_timestamps.view(1, -1))
         timestamp_v_embed = meta_embeds.unsqueeze(dim=0)
-        timestamp_qk_att_embed = self._tscalar_embed(
-            torch.unsqueeze(timestamps, dim=-1) - meta_timestamps
-        )
         # create the mask
         mask = (
             torch.unsqueeze(timestamps, dim=-1) <= meta_timestamps.view(1, 1, -1)
@@ -182,7 +188,7 @@ class LFNA_Meta(super_core.SuperModule):
             > self._thresh
         )
         timestamp_embeds = self._trans_att(
-            timestamp_qk_att_embed, timestamp_v_embed, mask
+            timestamp_q_embed, timestamp_k_embed, timestamp_v_embed, mask
         )
         relative_timestamps = timestamps - timestamps[:, :1]
         relative_pos_embeds = self._tscalar_embed(relative_timestamps)
@@ -192,35 +198,68 @@ class LFNA_Meta(super_core.SuperModule):
         corrected_embeds = self._meta_corrector(init_timestamp_embeds)
         return corrected_embeds
 
-    def forward_raw(self, timestamps, time_embed):
-        if time_embed is None:
-            batch, seq = timestamps.shape
-            time_embed = self._obtain_time_embed(timestamps)
+    def forward_raw(self, timestamps, time_embeds, get_seq_last):
+        if time_embeds is None:
+            time_seq = timestamps.view(-1, 1) + self._time_interval.view(1, -1)
+            B, S = time_seq.shape
+            time_embeds = self._obtain_time_embed(time_seq)
         else:
-            batch, seq, _ = time_embed.shape
+            time_seq = None
+            B, S, _ = time_embeds.shape
         # create joint embed
         num_layer, _ = self._super_layer_embed.shape
-        meta_embed = time_embed.view(batch, seq, 1, -1).expand(-1, -1, num_layer, -1)
-        layer_embed = self._super_layer_embed.view(1, 1, num_layer, -1).expand(
-            batch, seq, -1, -1
-        )
-        joint_embed = torch.cat(
-            (meta_embed, layer_embed), dim=-1
-        )  # batch, seq, num-layers, input-dim
-        batch_weights = self._generator(
-            joint_embed
-        )  # batch, seq, num-layers, num-weights
+        if get_seq_last:
+            time_embeds = time_embeds[:, -1, :]
+            # The shape of `joint_embed` is batch * num-layers * input-dim
+            joint_embeds = torch.cat(
+                (
+                    time_embeds.view(B, 1, -1).expand(-1, num_layer, -1),
+                    self._super_layer_embed.view(1, num_layer, -1).expand(B, -1, -1),
+                ),
+                dim=-1,
+            )
+        else:
+            # The shape of `joint_embed` is batch * seq * num-layers * input-dim
+            joint_embeds = torch.cat(
+                (
+                    time_embeds.view(B, S, 1, -1).expand(-1, -1, num_layer, -1),
+                    self._super_layer_embed.view(1, 1, num_layer, -1).expand(
+                        B, S, -1, -1
+                    ),
+                ),
+                dim=-1,
+            )
+        batch_weights = self._generator(joint_embeds)
         batch_containers = []
-        for seq_weights in torch.split(batch_weights, 1):
-            seq_containers = []
-            for weights in torch.split(seq_weights.squeeze(0), 1):
-                weights = torch.split(weights.squeeze(0), 1)
-                seq_containers.append(self._shape_container.translate(weights))
-            batch_containers.append(seq_containers)
-        return batch_containers, time_embed
+        for weights in torch.split(batch_weights, 1):
+            if get_seq_last:
+                batch_containers.append(
+                    self._shape_container.translate(torch.split(weights.squeeze(0), 1))
+                )
+            else:
+                seq_containers = []
+                for ws in torch.split(weights.squeeze(0), 1):
+                    seq_containers.append(
+                        self._shape_container.translate(torch.split(ws.squeeze(0), 1))
+                    )
+                batch_containers.append(seq_containers)
+        return time_seq, batch_containers, time_embeds
 
     def forward_candidate(self, input):
         raise NotImplementedError
+
+    def adapt(self, timestamp, x, y, threshold, lr, epochs):
+        if distance + threshold * 1e-2 <= threshold:
+            return False
+        with torch.set_grad_enabled(True):
+            new_param = self.create_meta_embed()
+            optimizer = torch.optim.Adam(
+                [new_param], lr=args.refine_lr, weight_decay=1e-5, amsgrad=True
+            )
+        import pdb
+
+        pdb.set_trace()
+        print("-")
 
     def extra_repr(self) -> str:
         return "(_super_layer_embed): {:}, (_super_meta_embed): {:}, (_meta_timestamps): {:}".format(
