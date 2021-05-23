@@ -26,6 +26,7 @@ super_name2norm = {
 
 from .super_attention import SuperSelfAttention
 from .super_attention import SuperQKVAttention
+from .super_attention_v2 import SuperQKVAttentionV2
 from .super_transformer import SuperTransformerEncoderLayer
 
 from .super_activations import SuperReLU
