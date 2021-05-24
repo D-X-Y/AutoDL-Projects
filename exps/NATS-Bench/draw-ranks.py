@@ -21,12 +21,9 @@ matplotlib.use("agg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import dict2config, load_config
-from log_utils import time_string
-from models import get_cell_based_tiny_net
+from xautodl.config_utils import dict2config, load_config
+from xautodl.log_utils import time_string
+from xautodl.models import get_cell_based_tiny_net
 from nats_bench import create
 
 

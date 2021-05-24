@@ -17,15 +17,16 @@ from pathlib import Path
 from collections import defaultdict, OrderedDict
 from typing import Dict, Any, Text, List
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from log_utils import AverageMeter, time_string, convert_secs2time
-from config_utils import dict2config
-from models import CellStructure, get_cell_based_tiny_net
+from xautodl.log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.config_utils import dict2config
+from xautodl.models import CellStructure, get_cell_based_tiny_net
+from xautodl.procedures import (
+    bench_pure_evaluate as pure_evaluate,
+    get_nas_bench_loaders,
+)
+from xautodl.utils import get_md5_file
+
 from nats_bench import pickle_save, pickle_load, ArchResults, ResultsCount
-from procedures import bench_pure_evaluate as pure_evaluate, get_nas_bench_loaders
-from utils import get_md5_file
 
 
 NATS_SSS_BASE_NAME = "NATS-sss-v1_0"  # 2020.08.28

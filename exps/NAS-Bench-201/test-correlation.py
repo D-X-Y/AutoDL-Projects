@@ -10,11 +10,8 @@ from tqdm import tqdm
 import torch
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from log_utils import time_string
-from models import CellStructure
+from xautodl.log_utils import time_string
+from xautodl.models import CellStructure
 from nas_201_api import NASBench201API as API
 
 

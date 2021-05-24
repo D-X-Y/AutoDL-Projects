@@ -8,10 +8,7 @@ import torch
 from pathlib import Path
 from collections import defaultdict
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.log_utils import AverageMeter, time_string, convert_secs2time
 
 
 def check_files(save_dir, meta_file, basestr):

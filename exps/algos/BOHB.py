@@ -12,15 +12,12 @@ from copy import deepcopy
 from pathlib import Path
 import torch
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import load_config
-from datasets import get_datasets, SearchDataset
-from procedures import prepare_seed, prepare_logger
-from log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.config_utils import load_config
+from xautodl.datasets import get_datasets, SearchDataset
+from xautodl.procedures import prepare_seed, prepare_logger
+from xautodl.log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.models import CellStructure, get_search_spaces
 from nas_201_api import NASBench201API as API
-from models import CellStructure, get_search_spaces
 
 # BOHB: Robust and Efficient Hyperparameter Optimization at Scale, ICML 2018
 import ConfigSpace

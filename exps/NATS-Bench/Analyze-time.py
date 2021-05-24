@@ -8,11 +8,8 @@
 import os, sys, time, tqdm, argparse
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import dict2config, load_config
-from datasets import get_datasets
+from xautodl.config_utils import dict2config, load_config
+from xautodl.datasets import get_datasets
 from nats_bench import create
 
 

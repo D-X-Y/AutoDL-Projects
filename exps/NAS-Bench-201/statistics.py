@@ -7,17 +7,14 @@ import torch
 from pathlib import Path
 from collections import defaultdict
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from log_utils import AverageMeter, time_string, convert_secs2time
-from config_utils import load_config, dict2config
-from datasets import get_datasets
+from xautodl.log_utils import AverageMeter, time_string, convert_secs2time
+from xautodl.config_utils import load_config, dict2config
+from xautodl.datasets import get_datasets
 
 # NAS-Bench-201 related module or function
-from models import CellStructure, get_cell_based_tiny_net
+from xautodl.models import CellStructure, get_cell_based_tiny_net
+from xautodl.procedures import bench_pure_evaluate as pure_evaluate
 from nas_201_api import ArchResults, ResultsCount
-from procedures import bench_pure_evaluate as pure_evaluate
 
 
 def create_result_count(used_seed, dataset, arch_config, results, dataloader_dict):

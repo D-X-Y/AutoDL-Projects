@@ -10,16 +10,13 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 from copy import deepcopy
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import load_config
-from procedures import save_checkpoint, copy_checkpoint
-from procedures import get_machine_info
-from datasets import get_datasets
-from log_utils import Logger, AverageMeter, time_string, convert_secs2time
-from models import CellStructure, CellArchitectures, get_search_spaces
-from functions import evaluate_for_seed
+from xautodl.config_utils import load_config
+from xautodl.procedures import save_checkpoint, copy_checkpoint
+from xautodl.procedures import get_machine_info
+from xautodl.datasets import get_datasets
+from xautodl.log_utils import Logger, AverageMeter, time_string, convert_secs2time
+from xautodl.models import CellStructure, CellArchitectures, get_search_spaces
+from xautodl.functions import evaluate_for_seed
 
 
 def evaluate_all_datasets(

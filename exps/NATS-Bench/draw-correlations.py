@@ -19,12 +19,9 @@ matplotlib.use("agg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from config_utils import dict2config, load_config
+from xautodl.config_utils import dict2config, load_config
+from xautodl.log_utils import time_string
 from nats_bench import create
-from log_utils import time_string
 
 
 def get_valid_test_acc(api, arch, dataset):

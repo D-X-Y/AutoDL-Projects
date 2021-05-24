@@ -17,10 +17,7 @@ from mpl_toolkits.mplot3d import Axes3D
 matplotlib.use("agg")
 import matplotlib.pyplot as plt
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-from log_utils import time_string
+from xautodl.log_utils import time_string
 from nas_201_api import NASBench201API as API
 
 
