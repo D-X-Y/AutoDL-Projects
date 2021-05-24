@@ -10,8 +10,8 @@ from xautodl.xlayers import trunc_normal_
 from xautodl.models.xcore import get_model
 
 
-class LFNA_Meta(super_core.SuperModule):
-    """Learning to Forecast Neural Adaptation (Meta Model Design)."""
+class MetaModelV1(super_core.SuperModule):
+    """Learning to Generate Models One Step Ahead (Meta Model Design)."""
 
     def __init__(
         self,
