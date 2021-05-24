@@ -1,8 +1,8 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.02 #
 ############################################################################
-# python exps/LFNA/vis-synthetic.py --env_version v1                       #
-# python exps/LFNA/vis-synthetic.py --env_version v2                       #
+# python exps/GMOA/vis-synthetic.py --env_version v1                       #
+# python exps/GMOA/vis-synthetic.py --env_version v2                       #
 ############################################################################
 import os, sys, copy, random
 import torch
@@ -185,7 +185,6 @@ def visualize_env(save_dir, version):
         sub_save_dir.mkdir(parents=True, exist_ok=True)
 
     dynamic_env = get_synthetic_env(version=version)
-    # min_t, max_t = dynamic_env.min_timestamp, dynamic_env.max_timestamp
     allxs, allys = [], []
     for idx, (timestamp, (allx, ally)) in enumerate(tqdm(dynamic_env, ncols=50)):
         allxs.append(allx)
@@ -235,9 +234,12 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
     figsize = width / float(dpi), height / float(dpi)
     LabelSize, LegendFontsize, font_gap = 80, 80, 5
 
-    cache_path = Path(alg_dir) / "env-{:}-info.pth".format(version)
-    assert cache_path.exists(), "{:} does not exist".format(cache_path)
-    env_info = torch.load(cache_path)
+    dynamic_env = get_synthetic_env(mode=None, version=version)
+    allxs, allys = [], []
+    for idx, (timestamp, (allx, ally)) in enumerate(tqdm(dynamic_env, ncols=50)):
+        allxs.append(allx)
+        allys.append(ally)
+    allxs, allys = torch.cat(allxs).view(-1), torch.cat(allys).view(-1)
 
     alg_name2dir = OrderedDict()
     # alg_name2dir["Supervised Learning (History Data)"] = "use-all-past-data"
@@ -245,17 +247,16 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
     # alg_name2dir["LFNA (fix init)"] = "lfna-fix-init"
     if version == "v1":
         # alg_name2dir["Optimal"] = "use-same-timestamp"
-        alg_name2dir["LFNA"] = "lfna-battle-v1-d16_16_16-e200"
         alg_name2dir[
-            "Previous Timestamp"
-        ] = "use-prev-timestamp-d16_e500_lr0.1-prev5-envv1"
+            "GMOA"
+        ] = "lfna-battle-bs128-d16_16_16-s16-lr0.002-wd1e-05-e10000-envv1"
     else:
         raise ValueError("Invalid version: {:}".format(version))
     alg_name2all_containers = OrderedDict()
     for idx_alg, (alg, xdir) in enumerate(alg_name2dir.items()):
         ckp_path = Path(alg_dir) / str(xdir) / "final-ckp.pth"
         xdata = torch.load(ckp_path, map_location="cpu")
-        alg_name2all_containers[alg] = xdata["w_container_per_epoch"]
+        alg_name2all_containers[alg] = xdata["w_containers"]
     # load the basic model
     model = get_model(
         dict(model_type="norm_mlp"),
@@ -268,9 +269,6 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
 
     alg2xs, alg2ys = defaultdict(list), defaultdict(list)
     colors = ["r", "g", "b", "m", "y"]
-
-    dynamic_env = env_info["dynamic_env"]
-    min_t, max_t = dynamic_env.min_timestamp, dynamic_env.max_timestamp
 
     linewidths, skip = 10, 5
     for idx, (timestamp, (ori_allx, ori_ally)) in enumerate(
@@ -287,7 +285,6 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
 
         for idx_alg, (alg, xdir) in enumerate(alg_name2dir.items()):
             with torch.no_grad():
-                # predicts = ckp_data["model"](ori_allx)
                 predicts = model.forward_with_container(
                     ori_allx, alg_name2all_containers[alg][idx]
                 )
@@ -307,12 +304,8 @@ def compare_algs(save_dir, version, alg_dir="./outputs/lfna-synthetic"):
             tick.label.set_rotation(10)
         for tick in cur_ax.yaxis.get_major_ticks():
             tick.label.set_fontsize(LabelSize - font_gap)
-        if version == "v1":
-            cur_ax.set_xlim(-2, 2)
-            cur_ax.set_ylim(-8, 8)
-        elif version == "v2":
-            cur_ax.set_xlim(-10, 10)
-            cur_ax.set_ylim(-60, 60)
+        cur_ax.set_xlim(round(allxs.min().item(), 1), round(allxs.max().item(), 1))
+        cur_ax.set_ylim(round(allys.min().item(), 1), round(allys.max().item(), 1))
         cur_ax.legend(loc=1, fontsize=LegendFontsize)
 
         # the trajectory data
@@ -374,7 +367,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    visualize_env(os.path.join(args.save_dir, "vis-env"), "v1")
+    # visualize_env(os.path.join(args.save_dir, "vis-env"), "v1")
     # visualize_env(os.path.join(args.save_dir, "vis-env"), "v2")
-    # compare_algs(os.path.join(args.save_dir, "compare-alg"), args.env_version)
+    compare_algs(os.path.join(args.save_dir, "compare-alg"), args.env_version)
     # compare_cl(os.path.join(args.save_dir, "compare-cl"))
