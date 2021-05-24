@@ -25,7 +25,7 @@ class MetaModelV1(super_core.SuperModule):
         interval: float = None,
         thresh: float = None,
     ):
-        super(LFNA_Meta, self).__init__()
+        super(MetaModelV1, self).__init__()
         self._shape_container = shape_container
         self._num_layers = len(shape_container)
         self._numel_per_layer = []
