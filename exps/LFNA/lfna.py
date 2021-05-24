@@ -28,7 +28,7 @@ from xautodl.utils import split_str2indexes
 
 from xautodl.procedures.advanced_main import basic_train_fn, basic_eval_fn
 from xautodl.procedures.metric_utils import SaveMetric, MSEMetric, ComposeMetric
-from xautodl.datasets.synthetic_core import get_synthetic_env, EnvSampler
+from xautodl.datasets.synthetic_core import get_synthetic_env
 from xautodl.models.xcore import get_model
 from xautodl.xlayers import super_core, trunc_normal_
 
@@ -244,7 +244,7 @@ def main(args):
         args.time_dim,
         timestamps,
         seq_length=args.seq_length,
-        interval=train_env.timestamp_interval,
+        interval=train_env.time_interval,
     )
     meta_model = meta_model.to(args.device)
 
@@ -253,7 +253,7 @@ def main(args):
     logger.log("The base-model is\n{:}".format(base_model))
     logger.log("The meta-model is\n{:}".format(meta_model))
 
-    batch_sampler = EnvSampler(train_env, args.meta_batch, args.sampler_enlarge)
+    # batch_sampler = EnvSampler(train_env, args.meta_batch, args.sampler_enlarge)
     pretrain_v2(base_model, meta_model, criterion, train_env, args, logger)
 
     # try to evaluate once
@@ -387,7 +387,7 @@ def main(args):
         future_time = env_info["{:}-timestamp".format(idx)].item()
         time_seqs = []
         for iseq in range(args.seq_length):
-            time_seqs.append(future_time - iseq * eval_env.timestamp_interval)
+            time_seqs.append(future_time - iseq * eval_env.time_interval)
         time_seqs.reverse()
         with torch.no_grad():
             meta_model.eval()
@@ -409,7 +409,7 @@ def main(args):
 
         # creating the new meta-time-embedding
         distance = meta_model.get_closest_meta_distance(future_time)
-        if distance < eval_env.timestamp_interval:
+        if distance < eval_env.time_interval:
             continue
         #
         new_param = meta_model.create_meta_embed()

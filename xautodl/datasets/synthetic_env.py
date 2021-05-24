@@ -115,7 +115,7 @@ class SyntheticDEnv(data.Dataset):
             name=self.__class__.__name__,
             cur_num=len(self),
             total=len(self._time_generator),
-            ndim=self._ndim,
+            ndim=self._data_generator.ndim,
             num_per_task=self._num_per_task,
             xrange_min=self.min_timestamp,
             xrange_max=self.max_timestamp,

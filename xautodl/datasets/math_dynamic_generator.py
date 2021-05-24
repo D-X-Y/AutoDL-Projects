@@ -21,6 +21,8 @@ class DynamicGenerator(abc.ABC):
 
 
 class GaussianDGenerator(DynamicGenerator):
+    """Generate data from Gaussian distribution."""
+
     def __init__(self, mean_functors, cov_functors, trunc=(-1, 1)):
         super(GaussianDGenerator, self).__init__()
         self._ndim = assert_list_tuple(mean_functors)
@@ -40,6 +42,10 @@ class GaussianDGenerator(DynamicGenerator):
         if trunc is not None:
             assert assert_list_tuple(trunc) == 2 and trunc[0] < trunc[1]
         self._trunc = trunc
+
+    @property
+    def ndim(self):
+        return self._ndim
 
     def __call__(self, time, num):
         mean_list = [functor(time) for functor in self._mean_functors]

@@ -16,8 +16,8 @@ class LFNA_Meta(super_core.SuperModule):
     def __init__(
         self,
         shape_container,
-        layer_embedding,
-        time_embedding,
+        layer_dim,
+        time_dim,
         meta_timestamps,
         mha_depth: int = 2,
         dropout: float = 0.1,
@@ -39,53 +39,41 @@ class LFNA_Meta(super_core.SuperModule):
 
         self.register_parameter(
             "_super_layer_embed",
-            torch.nn.Parameter(torch.Tensor(self._num_layers, layer_embedding)),
+            torch.nn.Parameter(torch.Tensor(self._num_layers, layer_dim)),
         )
         self.register_parameter(
             "_super_meta_embed",
-            torch.nn.Parameter(torch.Tensor(len(meta_timestamps), time_embedding)),
+            torch.nn.Parameter(torch.Tensor(len(meta_timestamps), time_dim)),
         )
         self.register_buffer("_meta_timestamps", torch.Tensor(meta_timestamps))
         # register a time difference buffer
         time_interval = [-i * self._interval for i in range(self._seq_length)]
         time_interval.reverse()
         self.register_buffer("_time_interval", torch.Tensor(time_interval))
-        self._time_embed_dim = time_embedding
+        self._time_embed_dim = time_dim
         self._append_meta_embed = dict(fixed=None, learnt=None)
         self._append_meta_timestamps = dict(fixed=None, learnt=None)
 
         self._tscalar_embed = super_core.SuperDynamicPositionE(
-            time_embedding, scale=500
+            time_dim, scale=1 / interval
         )
 
         # build transformer
         self._trans_att = super_core.SuperQKVAttentionV2(
-            qk_att_dim=time_embedding,
-            in_v_dim=time_embedding,
-            hidden_dim=time_embedding,
+            qk_att_dim=time_dim,
+            in_v_dim=time_dim,
+            hidden_dim=time_dim,
             num_heads=4,
-            proj_dim=time_embedding,
+            proj_dim=time_dim,
             qkv_bias=True,
             attn_drop=None,
             proj_drop=dropout,
         )
-        """
-        self._trans_att = super_core.SuperQKVAttention(
-            time_embedding,
-            time_embedding,
-            time_embedding,
-            time_embedding,
-            num_heads=4,
-            qkv_bias=True,
-            attn_drop=None,
-            proj_drop=dropout,
-        )
-        """
         layers = []
         for ilayer in range(mha_depth):
             layers.append(
                 super_core.SuperTransformerEncoderLayer(
-                    time_embedding * 2,
+                    time_dim * 2,
                     4,
                     True,
                     4,
@@ -95,14 +83,14 @@ class LFNA_Meta(super_core.SuperModule):
                     use_mask=True,
                 )
             )
-        layers.append(super_core.SuperLinear(time_embedding * 2, time_embedding))
+        layers.append(super_core.SuperLinear(time_dim * 2, time_dim))
         self._meta_corrector = super_core.SuperSequential(*layers)
 
         model_kwargs = dict(
             config=dict(model_type="dual_norm_mlp"),
-            input_dim=layer_embedding + time_embedding,
+            input_dim=layer_dim + time_dim,
             output_dim=max(self._numel_per_layer),
-            hidden_dims=[(layer_embedding + time_embedding) * 2] * 3,
+            hidden_dims=[(layer_dim + time_dim) * 2] * 3,
             act_cls="gelu",
             norm_cls="layer_norm_1d",
             dropout=dropout,
@@ -193,11 +181,6 @@ class LFNA_Meta(super_core.SuperModule):
         # timestamps is a batch of sequence of timestamps
         batch, seq = timestamps.shape
         meta_timestamps, meta_embeds = self.meta_timestamps, self.super_meta_embed
-        """
-        timestamp_q_embed = self._tscalar_embed(timestamps)
-        timestamp_k_embed = self._tscalar_embed(meta_timestamps.view(1, -1))
-        timestamp_v_embed = meta_embeds.unsqueeze(dim=0)
-        """
         timestamp_v_embed = meta_embeds.unsqueeze(dim=0)
         timestamp_qk_att_embed = self._tscalar_embed(
             torch.unsqueeze(timestamps, dim=-1) - meta_timestamps
@@ -212,7 +195,6 @@ class LFNA_Meta(super_core.SuperModule):
             > self._thresh
         )
         timestamp_embeds = self._trans_att(
-            # timestamp_q_embed, timestamp_k_embed, timestamp_v_embed, mask
             timestamp_qk_att_embed,
             timestamp_v_embed,
             mask,
