@@ -337,11 +337,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--refine_lr",
         type=float,
-        default=0.002,
+        default=0.001,
         help="The learning rate for the optimizer, during refine",
     )
     parser.add_argument(
-        "--refine_epochs", type=int, default=100, help="The final refine #epochs."
+        "--refine_epochs", type=int, default=150, help="The final refine #epochs."
     )
     parser.add_argument(
         "--early_stop_thresh",
