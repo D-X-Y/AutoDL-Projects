@@ -28,7 +28,7 @@ class UnifiedSplit:
             self._indexes = all_indexes[num_of_train : num_of_train + num_of_valid]
         elif mode.lower() in ("test", "testing"):
             self._indexes = all_indexes[num_of_train + num_of_valid :]
-        elif mode.lower() in ("trainval", "trainvalidation"):
+        elif mode.lower() in ("trainval", "trainvalid", "trainvalidation"):
             self._indexes = all_indexes[: num_of_train + num_of_valid]
         else:
             raise ValueError("Unkonwn mode of {:}".format(mode))

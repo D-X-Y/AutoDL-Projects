@@ -9,6 +9,12 @@ from tqdm import tqdm
 from copy import deepcopy
 from pathlib import Path
 
+lib_dir = (Path(__file__).parent / ".." / "..").resolve()
+print("LIB-DIR: {:}".format(lib_dir))
+if str(lib_dir) not in sys.path:
+    sys.path.insert(0, str(lib_dir))
+
+
 from xautodl.procedures import (
     prepare_seed,
     prepare_logger,
@@ -38,28 +44,30 @@ def subsample(historical_x, historical_y, maxn=10000):
 
 
 def main(args):
-    logger, env_info, model_kwargs = lfna_setup(args)
+    logger, model_kwargs = lfna_setup(args)
 
-    w_container_per_epoch = dict()
+    env = get_synthetic_env(mode=None, version=args.env_version)
+    logger.log("The total enviornment: {:}".format(env))
+    w_containers = dict()
 
     per_timestamp_time, start_time = AverageMeter(), time.time()
-    for idx in range(1, env_info["total"]):
+    for idx, (future_time, (future_x, future_y)) in enumerate(env):
 
         need_time = "Time Left: {:}".format(
-            convert_secs2time(per_timestamp_time.avg * (env_info["total"] - idx), True)
+            convert_secs2time(per_timestamp_time.avg * (len(env) - idx), True)
         )
         logger.log(
             "[{:}]".format(time_string())
-            + " [{:04d}/{:04d}]".format(idx, env_info["total"])
+            + " [{:04d}/{:04d}]".format(idx, len(env))
             + " "
             + need_time
         )
         # train the same data
-        historical_x = env_info["{:}-x".format(idx)]
-        historical_y = env_info["{:}-y".format(idx)]
+        historical_x = future_x.to(args.device)
+        historical_y = future_y.to(args.device)
         # build model
         model = get_model(**model_kwargs)
-        print(model)
+        model = model.to(args.device)
         # build optimizer
         optimizer = torch.optim.Adam(model.parameters(), lr=args.init_lr, amsgrad=True)
         criterion = torch.nn.MSELoss()
@@ -93,7 +101,7 @@ def main(args):
 
         metric = ComposeMetric(MSEMetric(), SaveMetric())
         eval_dataset = torch.utils.data.TensorDataset(
-            env_info["{:}-x".format(idx)], env_info["{:}-y".format(idx)]
+            future_x.to(args.device), future_y.to(args.device)
         )
         eval_loader = torch.utils.data.DataLoader(
             eval_dataset, batch_size=args.batch_size, shuffle=False, num_workers=0
@@ -101,23 +109,21 @@ def main(args):
         results = basic_eval_fn(eval_loader, model, metric, logger)
         log_str = (
             "[{:}]".format(time_string())
-            + " [{:04d}/{:04d}]".format(idx, env_info["total"])
+            + " [{:04d}/{:04d}]".format(idx, len(env))
             + " train-mse: {:.5f}, eval-mse: {:.5f}".format(
                 train_results["mse"], results["mse"]
             )
         )
         logger.log(log_str)
 
-        save_path = logger.path(None) / "{:04d}-{:04d}.pth".format(
-            idx, env_info["total"]
-        )
-        w_container_per_epoch[idx] = model.get_w_container().no_grad_clone()
+        save_path = logger.path(None) / "{:04d}-{:04d}.pth".format(idx, len(env))
+        w_containers[idx] = model.get_w_container().no_grad_clone()
         save_checkpoint(
             {
                 "model_state_dict": model.state_dict(),
                 "model": model,
                 "index": idx,
-                "timestamp": env_info["{:}-timestamp".format(idx)],
+                "timestamp": future_time.item(),
             },
             save_path,
             logger,
@@ -127,7 +133,7 @@ def main(args):
         start_time = time.time()
 
     save_checkpoint(
-        {"w_container_per_epoch": w_container_per_epoch},
+        {"w_containers": w_containers},
         logger.path(None) / "final-ckp.pth",
         logger,
     )
@@ -173,6 +179,12 @@ if __name__ == "__main__":
         type=int,
         default=300,
         help="The total number of epochs.",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cpu",
+        help="",
     )
     parser.add_argument(
         "--workers",

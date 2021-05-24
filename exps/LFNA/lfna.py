@@ -225,9 +225,11 @@ def main(args):
     logger, model_kwargs = lfna_setup(args)
     train_env = get_synthetic_env(mode="train", version=args.env_version)
     valid_env = get_synthetic_env(mode="valid", version=args.env_version)
+    trainval_env = get_synthetic_env(mode="trainval", version=args.env_version)
     all_env = get_synthetic_env(mode=None, version=args.env_version)
     logger.log("The training enviornment: {:}".format(train_env))
     logger.log("The validation enviornment: {:}".format(valid_env))
+    logger.log("The trainval enviornment: {:}".format(trainval_env))
     logger.log("The total enviornment: {:}".format(all_env))
 
     base_model = get_model(**model_kwargs)
@@ -237,14 +239,14 @@ def main(args):
     shape_container = base_model.get_w_container().to_shape_container()
 
     # pre-train the hypernetwork
-    timestamps = train_env.get_timestamp(None)
+    timestamps = trainval_env.get_timestamp(None)
     meta_model = LFNA_Meta(
         shape_container,
         args.layer_dim,
         args.time_dim,
         timestamps,
         seq_length=args.seq_length,
-        interval=train_env.time_interval,
+        interval=trainval_env.time_interval,
     )
     meta_model = meta_model.to(args.device)
 
@@ -253,8 +255,7 @@ def main(args):
     logger.log("The base-model is\n{:}".format(base_model))
     logger.log("The meta-model is\n{:}".format(meta_model))
 
-    # batch_sampler = EnvSampler(train_env, args.meta_batch, args.sampler_enlarge)
-    pretrain_v2(base_model, meta_model, criterion, train_env, args, logger)
+    pretrain_v2(base_model, meta_model, criterion, trainval_env, args, logger)
 
     # try to evaluate once
     # online_evaluate(train_env, meta_model, base_model, criterion, args, logger)
