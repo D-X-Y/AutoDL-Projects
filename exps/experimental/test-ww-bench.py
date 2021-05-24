@@ -19,9 +19,11 @@ import seaborn as sns
 matplotlib.use("agg")
 import matplotlib.pyplot as plt
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
+lib_dir = (Path(__file__).parent / ".." / "..").resolve()
+print("LIB-DIR: {:}".format(lib_dir))
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
+
 from log_utils import time_string
 from nats_bench import create
 from models import get_cell_based_tiny_net

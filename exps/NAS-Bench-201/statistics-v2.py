@@ -13,7 +13,10 @@ from xautodl.config_utils import dict2config
 
 # NAS-Bench-201 related module or function
 from xautodl.models import CellStructure, get_cell_based_tiny_net
-from xautodl.procedures import bench_pure_evaluate as pure_evaluate, get_nas_bench_loaders
+from xautodl.procedures import (
+    bench_pure_evaluate as pure_evaluate,
+    get_nas_bench_loaders,
+)
 from nas_201_api import NASBench201API, ArchResults, ResultsCount
 
 api = NASBench201API(

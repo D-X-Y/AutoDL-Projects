@@ -3,11 +3,7 @@ from copy import deepcopy
 import torchvision.models as models
 from pathlib import Path
 
-lib_dir = (Path(__file__).parent / ".." / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-
-from utils import weight_watcher
+from xautodl.utils import weight_watcher
 
 
 def main():

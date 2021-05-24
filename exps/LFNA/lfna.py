@@ -222,7 +222,7 @@ def pretrain_v2(base_model, meta_model, criterion, xenv, args, logger):
 
 
 def main(args):
-    logger, env_info, model_kwargs = lfna_setup(args)
+    logger, model_kwargs = lfna_setup(args)
     train_env = get_synthetic_env(mode="train", version=args.env_version)
     valid_env = get_synthetic_env(mode="valid", version=args.env_version)
     all_env = get_synthetic_env(mode=None, version=args.env_version)

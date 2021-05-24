@@ -13,11 +13,11 @@ class UnifiedSplit:
     """A class to unify the split strategy."""
 
     def __init__(self, total_num, mode):
-        # Training Set 60%
-        num_of_train = int(total_num * 0.6)
-        # Validation Set 20%
-        num_of_valid = int(total_num * 0.2)
-        # Test Set 20%
+        # Training Set 65%
+        num_of_train = int(total_num * 0.65)
+        # Validation Set 05%
+        num_of_valid = int(total_num * 0.05)
+        # Test Set 30%
         num_of_set = total_num - num_of_train - num_of_valid
         all_indexes = list(range(total_num))
         if mode is None:
@@ -28,6 +28,8 @@ class UnifiedSplit:
             self._indexes = all_indexes[num_of_train : num_of_train + num_of_valid]
         elif mode.lower() in ("test", "testing"):
             self._indexes = all_indexes[num_of_train + num_of_valid :]
+        elif mode.lower() in ("trainval", "trainvalidation"):
+            self._indexes = all_indexes[: num_of_train + num_of_valid]
         else:
             raise ValueError("Unkonwn mode of {:}".format(mode))
         self._all_indexes = all_indexes

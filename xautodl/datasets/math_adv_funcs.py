@@ -17,10 +17,10 @@ from .math_base_funcs import QuarticFunc
 class ConstantFunc(FitFunc):
     """The constant function: f(x) = c."""
 
-    def __init__(self, constant=None):
+    def __init__(self, constant=None, xstr="x"):
         param = dict()
         param[0] = constant
-        super(ConstantFunc, self).__init__(0, None, param)
+        super(ConstantFunc, self).__init__(0, None, param, xstr)
 
     def __call__(self, x):
         self.check_valid()
@@ -38,13 +38,41 @@ class ConstantFunc(FitFunc):
 
 class ComposedSinFunc(FitFunc):
     """The composed sin function that outputs:
+    f(x) = a * sin( b*x ) + c
+    """
+
+    def __init__(self, params, xstr="x"):
+        super(ComposedSinFunc, self).__init__(3, None, params, xstr)
+
+    def __call__(self, x):
+        self.check_valid()
+        a = self._params[0]
+        b = self._params[1]
+        c = self._params[2]
+        return a * math.sin(b * x) + c
+
+    def _getitem(self, x, weights):
+        raise NotImplementedError
+
+    def __repr__(self):
+        return "{name}({a} * sin({b} * {x}) + {c})".format(
+            name=self.__class__.__name__,
+            a=self._params[0],
+            b=self._params[1],
+            c=self._params[2],
+            x=self.xstr,
+        )
+
+
+class ComposedSinFuncV2(FitFunc):
+    """The composed sin function that outputs:
       f(x) = amplitude-scale-of(x) * sin( period-phase-shift-of(x) )
     - the amplitude scale is a quadratic function of x
     - the period-phase-shift is another quadratic function of x
     """
 
     def __init__(self, **kwargs):
-        super(ComposedSinFunc, self).__init__(0, None)
+        super(ComposedSinFuncV2, self).__init__(0, None)
         self.fit(**kwargs)
 
     def __call__(self, x):

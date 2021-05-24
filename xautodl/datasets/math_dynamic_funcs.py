@@ -15,20 +15,19 @@ from .math_base_funcs import FitFunc
 class DynamicFunc(FitFunc):
     """The dynamic quadratic function, where each param is a function."""
 
-    def __init__(self, freedom: int, params=None):
-        super(DynamicFunc, self).__init__(freedom, None, params)
-        self._timestamp = None
+    def __init__(self, freedom: int, params=None, xstr="x"):
+        if params is not None:
+            for param in params:
+                param.reset_xstr("t") if isinstance(param, FitFunc) else None
+        super(DynamicFunc, self).__init__(freedom, None, params, xstr)
 
-    def __call__(self, x, timestamp=None):
+    def __call__(self, x, timestamp):
         raise NotImplementedError
 
     def _getitem(self, x, weights):
         raise NotImplementedError
 
-    def set_timestamp(self, timestamp):
-        self._timestamp = timestamp
-
-    def noise_call(self, x, timestamp=None, std=0.1):
+    def noise_call(self, x, timestamp, std):
         clean_y = self.__call__(x, timestamp)
         if isinstance(clean_y, np.ndarray):
             noise_y = clean_y + np.random.normal(scale=std, size=clean_y.shape)
@@ -42,13 +41,10 @@ class DynamicLinearFunc(DynamicFunc):
     The a and b is a function of timestamp.
     """
 
-    def __init__(self, params=None):
-        super(DynamicLinearFunc, self).__init__(3, params)
+    def __init__(self, params=None, xstr="x"):
+        super(DynamicLinearFunc, self).__init__(3, params, xstr)
 
-    def __call__(self, x, timestamp=None):
-        self.check_valid()
-        if timestamp is None:
-            timestamp = self._timestamp
+    def __call__(self, x, timestamp):
         a = self._params[0](timestamp)
         b = self._params[1](timestamp)
         convert_fn = lambda x: x[-1] if isinstance(x, (tuple, list)) else x
@@ -56,11 +52,11 @@ class DynamicLinearFunc(DynamicFunc):
         return a * x + b
 
     def __repr__(self):
-        return "{name}({a} * x + {b}, timestamp={timestamp})".format(
+        return "{name}({a} * {x} + {b})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],
-            timestamp=self._timestamp,
+            x=self.xstr,
         )
 
 
