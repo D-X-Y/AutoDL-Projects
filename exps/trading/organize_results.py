@@ -1,22 +1,27 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.02 #
 #####################################################
-# python exps/trading/organize_results.py           #
+# python exps/trading/organize_results.py --save_dir outputs/qlib-baselines-all
 #####################################################
 import os, re, sys, argparse
 import numpy as np
 from typing import List, Text
 from collections import defaultdict, OrderedDict
 from pprint import pprint
+from pathlib import Path
 import ruamel.yaml as yaml
 
+lib_dir = (Path(__file__).parent / ".." / "..").resolve()
+print("LIB-DIR: {:}".format(lib_dir))
+if str(lib_dir) not in sys.path:
+    sys.path.insert(0, str(lib_dir))
+
 from xautodl.config_utils import arg_str2bool
+from xautodl.utils.qlib_utils import QResult
 
 import qlib
 from qlib.config import REG_CN
 from qlib.workflow import R
-
-from utils.qlib_utils import QResult
 
 
 def compare_results(
