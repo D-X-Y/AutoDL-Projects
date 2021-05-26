@@ -68,6 +68,8 @@ def main(args):
         # build model
         model = get_model(**model_kwargs)
         model = model.to(args.device)
+        if idx == 0:
+            print(model)
         # build optimizer
         optimizer = torch.optim.Adam(model.parameters(), lr=args.init_lr, amsgrad=True)
         criterion = torch.nn.MSELoss()

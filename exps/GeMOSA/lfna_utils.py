@@ -16,7 +16,7 @@ def lfna_setup(args):
         input_dim=1,
         output_dim=1,
         hidden_dims=[args.hidden_dim] * 2,
-        act_cls="gelu",
+        act_cls="relu",
         norm_cls="layer_norm_1d",
     )
     return logger, model_kwargs
