@@ -1,6 +1,3 @@
-#####################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.03 #
-#####################################################
 import math
 import abc
 import numpy as np
@@ -13,11 +10,11 @@ class UnifiedSplit:
     """A class to unify the split strategy."""
 
     def __init__(self, total_num, mode):
-        # Training Set 65%
-        num_of_train = int(total_num * 0.65)
+        # Training Set 75%
+        num_of_train = int(total_num * 0.75)
         # Validation Set 05%
         num_of_valid = int(total_num * 0.05)
-        # Test Set 30%
+        # Test Set 20%
         num_of_set = total_num - num_of_train - num_of_valid
         all_indexes = list(range(total_num))
         if mode is None:
