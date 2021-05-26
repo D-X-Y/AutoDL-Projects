@@ -28,7 +28,9 @@ class FitFunc(abc.ABC):
         self._params = copy.deepcopy(params)
 
     def check_valid(self):
-        for key, value in self._params.items():
+        # for key, value in self._params.items():
+        for key in range(self._freedom):
+            value = self._params[key]
             if value is None:
                 raise ValueError("The {:} is None".format(key))
 

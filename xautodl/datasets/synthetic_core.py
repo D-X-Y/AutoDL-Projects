@@ -44,6 +44,7 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
             params={
                 0: LinearFunc(params={0: 0.1, 1: 0}),  # 0.1 * t
                 1: SinFunc(params={0: 1, 1: 1, 2: 0}),  # sin(t)
+                2: ConstantFunc(0),
             }
         )
         dynamic_env = SyntheticDEnv(
