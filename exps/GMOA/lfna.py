@@ -6,10 +6,11 @@
 # python exps/GMOA/lfna.py --env_version v1 --device cuda --lr 0.002 --seq_length 16 --meta_batch 128
 # python exps/GMOA/lfna.py --env_version v1 --device cuda --lr 0.002 --seq_length 24 --time_dim 32 --meta_batch 128
 #####################################################
-import pdb, sys, time, copy, torch, random, argparse
+import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
 from copy import deepcopy
 from pathlib import Path
+from torch.nn import functional as F
 
 lib_dir = (Path(__file__).parent / ".." / "..").resolve()
 print("LIB-DIR: {:}".format(lib_dir))
@@ -103,7 +104,7 @@ def online_evaluate(env, meta_model, base_model, criterion, args, logger, save=F
             meta_model.eval()
             base_model.eval()
             _, [future_container], time_embeds = meta_model(
-                future_time.to(args.device).view(1, 1), None, True
+                future_time.to(args.device).view(1, 1), None, False
             )
             if save:
                 w_containers[idx] = future_container.no_grad_clone()
@@ -159,50 +160,57 @@ def pretrain_v2(base_model, meta_model, criterion, xenv, args, logger):
         left_time = "Time Left: {:}".format(
             convert_secs2time(per_epoch_time.avg * (args.epochs - iepoch), True)
         )
-        total_meta_v1_losses, total_meta_v2_losses, total_match_losses = [], [], []
+        total_future_losses, total_present_losses, total_regu_losses = [], [], []
         optimizer.zero_grad()
         for ibatch in range(args.meta_batch):
             rand_index = random.randint(0, meta_model.meta_length - 1)
             timestamp = meta_model.meta_timestamps[rand_index]
-            meta_embed = meta_model.super_meta_embed[rand_index]
 
             _, [container], time_embed = meta_model(
-                torch.unsqueeze(timestamp, dim=0), None, True
+                torch.unsqueeze(timestamp, dim=0), None, False
             )
             _, (inputs, targets) = xenv(timestamp.item())
             inputs, targets = inputs.to(device), targets.to(device)
             # generate models one step ahead
             predictions = base_model.forward_with_container(inputs, container)
-            total_meta_v1_losses.append(criterion(predictions, targets))
-            # the matching loss
-            match_loss = criterion(torch.squeeze(time_embed, dim=0), meta_embed)
-            total_match_losses.append(match_loss)
+            total_future_losses.append(criterion(predictions, targets))
+            # randomly sample
+            rand_index = random.randint(0, meta_model.meta_length - 1)
+            timestamp = meta_model.meta_timestamps[rand_index]
+            meta_embed = meta_model.super_meta_embed[rand_index]
+
+            time_embed = meta_model(torch.unsqueeze(timestamp, dim=0), None, True)
+            total_regu_losses.append(
+                F.mse_loss(
+                    torch.squeeze(time_embed, dim=0), meta_embed, reduction="mean"
+                )
+            )
             # generate models via memory
-            _, [container], _ = meta_model(None, meta_embed.view(1, 1, -1), True)
+            _, [container], _ = meta_model(None, meta_embed.view(1, 1, -1), False)
             predictions = base_model.forward_with_container(inputs, container)
-            total_meta_v2_losses.append(criterion(predictions, targets))
+            total_present_losses.append(criterion(predictions, targets))
         with torch.no_grad():
-            meta_std = torch.stack(total_meta_v1_losses).std().item()
-        meta_v1_loss = torch.stack(total_meta_v1_losses).mean()
-        meta_v2_loss = torch.stack(total_meta_v2_losses).mean()
-        match_loss = torch.stack(total_match_losses).mean()
-        total_loss = meta_v1_loss + meta_v2_loss + match_loss
+            meta_std = torch.stack(total_future_losses).std().item()
+        loss_future = torch.stack(total_future_losses).mean()
+        loss_present = torch.stack(total_present_losses).mean()
+        regularization_loss = torch.stack(total_regu_losses).mean()
+        total_loss = loss_future + loss_present + regularization_loss
         total_loss.backward()
         optimizer.step()
         # success
         success, best_score = meta_model.save_best(-total_loss.item())
         logger.log(
-            "{:} [Pre-V2 {:04d}/{:}] loss : {:.4f} +- {:.4f} = {:.4f} + {:.4f} + {:.4f} (match)".format(
+            "{:} [Pre-V2 {:04d}/{:}] loss : {:.4f} +- {:.4f} = {:.4f} + {:.4f} + {:.4f}".format(
                 time_string(),
                 iepoch,
                 args.epochs,
                 total_loss.item(),
                 meta_std,
-                meta_v1_loss.item(),
-                meta_v2_loss.item(),
-                match_loss.item(),
+                loss_future.item(),
+                loss_present.item(),
+                regularization_loss.item(),
             )
-            + ", batch={:}".format(len(total_meta_v1_losses))
+            + ", batch={:}".format(len(total_future_losses))
             + ", success={:}, best={:.4f}".format(success, -best_score)
             + ", LS={:}/{:}".format(iepoch - last_success_epoch, early_stop_thresh)
             + ", {:}".format(left_time)

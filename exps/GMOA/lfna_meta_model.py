@@ -34,7 +34,7 @@ class MetaModelV1(super_core.SuperModule):
         assert interval is not None
         self._interval = interval
         self._seq_length = seq_length
-        self._thresh = interval * 30 if thresh is None else thresh
+        self._thresh = interval * 50 if thresh is None else thresh
 
         self.register_parameter(
             "_super_layer_embed",
@@ -183,7 +183,7 @@ class MetaModelV1(super_core.SuperModule):
         )
         return timestamp_embeds
 
-    def forward_raw(self, timestamps, time_embeds, get_seq_last):
+    def forward_raw(self, timestamps, time_embeds, tembed_only=False):
         if time_embeds is None:
             time_seq = timestamps.view(-1, 1) + self._time_interval.view(1, -1)
             B, S = time_seq.shape
@@ -193,41 +193,23 @@ class MetaModelV1(super_core.SuperModule):
             B, S, _ = time_embeds.shape
         # create joint embed
         num_layer, _ = self._super_layer_embed.shape
-        if get_seq_last:
-            time_embeds = time_embeds[:, -1, :]
-            # The shape of `joint_embed` is batch * num-layers * input-dim
-            joint_embeds = torch.cat(
-                (
-                    time_embeds.view(B, 1, -1).expand(-1, num_layer, -1),
-                    self._super_layer_embed.view(1, num_layer, -1).expand(B, -1, -1),
-                ),
-                dim=-1,
-            )
-        else:
-            # The shape of `joint_embed` is batch * seq * num-layers * input-dim
-            joint_embeds = torch.cat(
-                (
-                    time_embeds.view(B, S, 1, -1).expand(-1, -1, num_layer, -1),
-                    self._super_layer_embed.view(1, 1, num_layer, -1).expand(
-                        B, S, -1, -1
-                    ),
-                ),
-                dim=-1,
-            )
+        time_embeds = time_embeds[:, -1, :]
+        if tembed_only:
+            return time_embeds
+        # The shape of `joint_embed` is batch * num-layers * input-dim
+        joint_embeds = torch.cat(
+            (
+                time_embeds.view(B, 1, -1).expand(-1, num_layer, -1),
+                self._super_layer_embed.view(1, num_layer, -1).expand(B, -1, -1),
+            ),
+            dim=-1,
+        )
         batch_weights = self._generator(joint_embeds)
         batch_containers = []
         for weights in torch.split(batch_weights, 1):
-            if get_seq_last:
-                batch_containers.append(
-                    self._shape_container.translate(torch.split(weights.squeeze(0), 1))
-                )
-            else:
-                seq_containers = []
-                for ws in torch.split(weights.squeeze(0), 1):
-                    seq_containers.append(
-                        self._shape_container.translate(torch.split(ws.squeeze(0), 1))
-                    )
-                batch_containers.append(seq_containers)
+            batch_containers.append(
+                self._shape_container.translate(torch.split(weights.squeeze(0), 1))
+            )
         return time_seq, batch_containers, time_embeds
 
     def forward_candidate(self, input):
@@ -241,7 +223,9 @@ class MetaModelV1(super_core.SuperModule):
         with torch.set_grad_enabled(True):
             new_param = self.create_meta_embed()
 
-            optimizer = torch.optim.Adam([new_param], lr=lr, weight_decay=1e-5, amsgrad=True)
+            optimizer = torch.optim.Adam(
+                [new_param], lr=lr, weight_decay=1e-5, amsgrad=True
+            )
             timestamp = torch.Tensor([timestamp]).to(new_param.device)
             self.replace_append_learnt(timestamp, new_param)
             self.train()
@@ -255,10 +239,10 @@ class MetaModelV1(super_core.SuperModule):
                 best_new_param = new_param.detach().clone()
             for iepoch in range(epochs):
                 optimizer.zero_grad()
-                _, [_], time_embed = self(timestamp.view(1, 1), None, True)
+                _, [_], time_embed = self(timestamp.view(1, 1), None)
                 match_loss = criterion(new_param, time_embed)
 
-                _, [container], time_embed = self(None, new_param.view(1, 1, -1), True)
+                _, [container], time_embed = self(None, new_param.view(1, 1, -1))
                 y_hat = base_model.forward_with_container(x, container)
                 meta_loss = criterion(y_hat, y)
                 loss = meta_loss + match_loss
