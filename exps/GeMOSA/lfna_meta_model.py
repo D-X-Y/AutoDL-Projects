@@ -181,21 +181,20 @@ class MetaModelV1(super_core.SuperModule):
             timestamp_v_embed,
             mask,
         )
-        return timestamp_embeds
+        return timestamp_embeds[:, -1, :]
 
     def forward_raw(self, timestamps, time_embeds, tembed_only=False):
         if time_embeds is None:
             time_seq = timestamps.view(-1, 1) + self._time_interval.view(1, -1)
             B, S = time_seq.shape
             time_embeds = self._obtain_time_embed(time_seq)
-        else:
+        else:  # use the hyper-net only
             time_seq = None
-            B, S, _ = time_embeds.shape
-        # create joint embed
-        num_layer, _ = self._super_layer_embed.shape
-        time_embeds = time_embeds[:, -1, :]
+            B, _ = time_embeds.shape
         if tembed_only:
             return time_embeds
+        # create joint embed
+        num_layer, _ = self._super_layer_embed.shape
         # The shape of `joint_embed` is batch * num-layers * input-dim
         joint_embeds = torch.cat(
             (

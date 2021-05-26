@@ -1,10 +1,10 @@
 #####################################################
 # Learning to Generate Model One Step Ahead         #
 #####################################################
-# python exps/GMOA/lfna.py --env_version v1 --workers 0
-# python exps/GMOA/lfna.py --env_version v1 --device cuda --lr 0.001
-# python exps/GMOA/lfna.py --env_version v1 --device cuda --lr 0.002 --seq_length 16 --meta_batch 128
-# python exps/GMOA/lfna.py --env_version v1 --device cuda --lr 0.002 --seq_length 24 --time_dim 32 --meta_batch 128
+# python exps/GeMOSA/lfna.py --env_version v1 --workers 0
+# python exps/GeMOSA/lfna.py --env_version v1 --device cuda --lr 0.001
+# python exps/GeMOSA/main.py --env_version v1 --device cuda --lr 0.002 --seq_length 16 --meta_batch 128
+# python exps/GeMOSA/lfna.py --env_version v1 --device cuda --lr 0.002 --seq_length 24 --time_dim 32 --meta_batch 128
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -36,63 +36,6 @@ from xautodl.xlayers import super_core, trunc_normal_
 
 from lfna_utils import lfna_setup, train_model, TimeData
 from lfna_meta_model import MetaModelV1
-
-
-def epoch_train(loader, meta_model, base_model, optimizer, criterion, device, logger):
-    base_model.train()
-    meta_model.train()
-    loss_meter = AverageMeter()
-    for ibatch, batch_data in enumerate(loader):
-        timestamps, (batch_seq_inputs, batch_seq_targets) = batch_data
-        timestamps = timestamps.squeeze(dim=-1).to(device)
-        batch_seq_inputs = batch_seq_inputs.to(device)
-        batch_seq_targets = batch_seq_targets.to(device)
-
-        optimizer.zero_grad()
-
-        batch_seq_containers = meta_model(timestamps)
-        losses = []
-        for seq_containers, seq_inputs, seq_targets in zip(
-            batch_seq_containers, batch_seq_inputs, batch_seq_targets
-        ):
-            for container, inputs, targets in zip(
-                seq_containers, seq_inputs, seq_targets
-            ):
-                predictions = base_model.forward_with_container(inputs, container)
-                loss = criterion(predictions, targets)
-                losses.append(loss)
-        final_loss = torch.stack(losses).mean()
-        final_loss.backward()
-        optimizer.step()
-        loss_meter.update(final_loss.item())
-    return loss_meter
-
-
-def epoch_evaluate(loader, meta_model, base_model, criterion, device, logger):
-    with torch.no_grad():
-        base_model.eval()
-        meta_model.eval()
-        loss_meter = AverageMeter()
-        for ibatch, batch_data in enumerate(loader):
-            timestamps, (batch_seq_inputs, batch_seq_targets) = batch_data
-            timestamps = timestamps.squeeze(dim=-1).to(device)
-            batch_seq_inputs = batch_seq_inputs.to(device)
-            batch_seq_targets = batch_seq_targets.to(device)
-
-            batch_seq_containers = meta_model(timestamps)
-            losses = []
-            for seq_containers, seq_inputs, seq_targets in zip(
-                batch_seq_containers, batch_seq_inputs, batch_seq_targets
-            ):
-                for container, inputs, targets in zip(
-                    seq_containers, seq_inputs, seq_targets
-                ):
-                    predictions = base_model.forward_with_container(inputs, container)
-                    loss = criterion(predictions, targets)
-                    losses.append(loss)
-            final_loss = torch.stack(losses).mean()
-            loss_meter.update(final_loss.item())
-    return loss_meter
 
 
 def online_evaluate(env, meta_model, base_model, criterion, args, logger, save=False):
@@ -133,7 +76,7 @@ def online_evaluate(env, meta_model, base_model, criterion, args, logger, save=F
     return w_containers, loss_meter
 
 
-def pretrain_v2(base_model, meta_model, criterion, xenv, args, logger):
+def meta_train_procedure(base_model, meta_model, criterion, xenv, args, logger):
     base_model.train()
     meta_model.train()
     optimizer = torch.optim.Adam(
@@ -152,6 +95,7 @@ def pretrain_v2(base_model, meta_model, criterion, xenv, args, logger):
         logger.log("Directly load the best model from {:}".format(final_best_name))
         return
 
+    total_indexes = list(range(meta_model.meta_length))
     meta_model.set_best_name("pretrain-{:}.pth".format(args.rand_seed))
     last_success_epoch, early_stop_thresh = 0, args.pretrain_early_stop_thresh
     per_epoch_time, start_time = AverageMeter(), time.time()
@@ -160,47 +104,50 @@ def pretrain_v2(base_model, meta_model, criterion, xenv, args, logger):
         left_time = "Time Left: {:}".format(
             convert_secs2time(per_epoch_time.avg * (args.epochs - iepoch), True)
         )
-        total_future_losses, total_present_losses, total_regu_losses = [], [], []
         optimizer.zero_grad()
-        for ibatch in range(args.meta_batch):
-            rand_index = random.randint(0, meta_model.meta_length - 1)
-            timestamp = meta_model.meta_timestamps[rand_index]
 
-            _, [container], time_embed = meta_model(
-                torch.unsqueeze(timestamp, dim=0), None, False
-            )
-            _, (inputs, targets) = xenv(timestamp.item())
+        generated_time_embeds = meta_model(meta_model.meta_timestamps, None, True)
+
+        batch_indexes = random.choices(total_indexes, k=args.meta_batch)
+
+        raw_time_steps = meta_model.meta_timestamps[batch_indexes]
+
+        regularization_loss = F.l1_loss(
+            generated_time_embeds, meta_model.super_meta_embed, reduction="mean"
+        )
+        # future loss
+        total_future_losses, total_present_losses = [], []
+        _, future_containers, _ = meta_model(
+            None, generated_time_embeds[batch_indexes], False
+        )
+        _, present_containers, _ = meta_model(
+            None, meta_model.super_meta_embed[batch_indexes], False
+        )
+        for ibatch, time_step in enumerate(raw_time_steps.cpu().tolist()):
+            _, (inputs, targets) = xenv(time_step)
             inputs, targets = inputs.to(device), targets.to(device)
-            # generate models one step ahead
-            predictions = base_model.forward_with_container(inputs, container)
-            total_future_losses.append(criterion(predictions, targets))
-            # randomly sample
-            rand_index = random.randint(0, meta_model.meta_length - 1)
-            timestamp = meta_model.meta_timestamps[rand_index]
-            meta_embed = meta_model.super_meta_embed[rand_index]
 
-            time_embed = meta_model(torch.unsqueeze(timestamp, dim=0), None, True)
-            total_regu_losses.append(
-                F.mse_loss(
-                    torch.squeeze(time_embed, dim=0), meta_embed, reduction="mean"
-                )
+            predictions = base_model.forward_with_container(
+                inputs, future_containers[ibatch]
             )
-            # generate models via memory
-            _, [container], _ = meta_model(None, meta_embed.view(1, 1, -1), False)
-            predictions = base_model.forward_with_container(inputs, container)
+            total_future_losses.append(criterion(predictions, targets))
+
+            predictions = base_model.forward_with_container(
+                inputs, present_containers[ibatch]
+            )
             total_present_losses.append(criterion(predictions, targets))
+
         with torch.no_grad():
             meta_std = torch.stack(total_future_losses).std().item()
         loss_future = torch.stack(total_future_losses).mean()
         loss_present = torch.stack(total_present_losses).mean()
-        regularization_loss = torch.stack(total_regu_losses).mean()
         total_loss = loss_future + loss_present + regularization_loss
         total_loss.backward()
         optimizer.step()
         # success
         success, best_score = meta_model.save_best(-total_loss.item())
         logger.log(
-            "{:} [Pre-V2 {:04d}/{:}] loss : {:.4f} +- {:.4f} = {:.4f} + {:.4f} + {:.4f}".format(
+            "{:} [META {:04d}/{:}] loss : {:.4f} +- {:.4f} = {:.4f} + {:.4f} + {:.4f}".format(
                 time_string(),
                 iepoch,
                 args.epochs,
@@ -264,7 +211,7 @@ def main(args):
     logger.log("The base-model is\n{:}".format(base_model))
     logger.log("The meta-model is\n{:}".format(meta_model))
 
-    pretrain_v2(base_model, meta_model, criterion, trainval_env, args, logger)
+    meta_train_procedure(base_model, meta_model, criterion, trainval_env, args, logger)
 
     # try to evaluate once
     # online_evaluate(train_env, meta_model, base_model, criterion, args, logger)

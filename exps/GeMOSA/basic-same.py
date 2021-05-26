@@ -1,8 +1,8 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/LFNA/basic-same.py --env_version v1 --hidden_dim 16 --epochs 500 --init_lr 0.1
-# python exps/LFNA/basic-same.py --env_version v2 --hidden_dim 16 --epochs 1000 --init_lr 0.05
+# python exps/GeMOSA/basic-same.py --env_version v1 --hidden_dim 16 --epochs 500 --init_lr 0.1
+# python exps/GeMOSA/basic-same.py --env_version v2 --hidden_dim 16 --epochs 1000 --init_lr 0.05
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
