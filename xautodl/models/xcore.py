@@ -1,6 +1,4 @@
 #######################################################
-# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04   #
-#######################################################
 # Use module in xlayers to construct different models #
 #######################################################
 from typing import List, Text, Dict, Any
@@ -41,8 +39,8 @@ def get_model(config: Dict[Text, Any], **kwargs):
         norm_cls = super_name2norm[kwargs["norm_cls"]]
         sub_layers, last_dim = [], kwargs["input_dim"]
         for i, hidden_dim in enumerate(kwargs["hidden_dims"]):
-            if last_dim > 1:
-                sub_layers.append(norm_cls(last_dim, elementwise_affine=False))
+            if hidden_dim > 1:
+                sub_layers.append(norm_cls(hidden_dim, elementwise_affine=False))
             sub_layers.append(SuperLinear(last_dim, hidden_dim))
             sub_layers.append(act_cls())
             last_dim = hidden_dim
