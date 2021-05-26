@@ -241,7 +241,7 @@ class MetaModelV1(super_core.SuperModule):
                 _, [_], time_embed = self(timestamp.view(1, 1), None)
                 match_loss = criterion(new_param, time_embed)
 
-                _, [container], time_embed = self(None, new_param.view(1, 1, -1))
+                _, [container], time_embed = self(None, new_param.view(1, -1))
                 y_hat = base_model.forward_with_container(x, container)
                 meta_loss = criterion(y_hat, y)
                 loss = meta_loss + match_loss
