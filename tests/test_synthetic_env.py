@@ -16,5 +16,5 @@ class TestSynethicEnv(unittest.TestCase):
         for version in versions:
             env = get_synthetic_env(version=version)
         print(env)
-        for timestamp, tau in env:
-            self.assertEqual(tau.shape, (1000, env.ndim))
+        for timestamp, (x, y) in env:
+            self.assertEqual(x.shape, (1000, env.ndim))
