@@ -155,6 +155,8 @@ def main(args):
                 allys = allys.view(-1)
             historical_x, historical_y = allxs.to(args.device), allys.to(args.device)
             future_container = maml.adapt(historical_x, historical_y)
+
+            future_x, future_y = future_x.to(args.device), future_y.to(args.device)
             future_y_hat = maml.predict(future_x, future_container)
             future_loss = maml.criterion(future_y_hat, future_y)
             meta_losses.append(future_loss)
@@ -212,7 +214,7 @@ def main(args):
         )
 
         # build optimizer
-        future_x.to(args.device), future_y.to(args.device)
+        future_x, future_y = future_x.to(args.device), future_y.to(args.device)
         future_y_hat = maml.predict(future_x, future_container)
         future_loss = criterion(future_y_hat, future_y)
         metric(future_y_hat, future_y)
@@ -237,7 +239,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir",
         type=str,
-        default="./outputs/lfna-synthetic/use-maml-nft",
+        default="./outputs/GeMOSA-synthetic/use-maml-nft",
         help="The checkpoint directory.",
     )
     parser.add_argument(
