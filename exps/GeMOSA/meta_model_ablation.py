@@ -1,3 +1,8 @@
+#
+# This is used for the ablation studies:
+# The meta-model in this file uses the traditional attention in
+# transformer.
+#
 import torch
 
 import torch.nn.functional as F
@@ -7,7 +12,7 @@ from xautodl.xlayers import trunc_normal_
 from xautodl.models.xcore import get_model
 
 
-class MetaModelV1(super_core.SuperModule):
+class MetaModel_TraditionalAtt(super_core.SuperModule):
     """Learning to Generate Models One Step Ahead (Meta Model Design)."""
 
     def __init__(
@@ -21,7 +26,7 @@ class MetaModelV1(super_core.SuperModule):
         interval: float = None,
         thresh: float = None,
     ):
-        super(MetaModelV1, self).__init__()
+        super(MetaModel_TraditionalAtt, self).__init__()
         self._shape_container = shape_container
         self._num_layers = len(shape_container)
         self._numel_per_layer = []
@@ -50,10 +55,10 @@ class MetaModelV1(super_core.SuperModule):
         )
 
         # build transformer
-        self._trans_att = super_core.SuperQKVAttentionV2(
-            qk_att_dim=time_dim,
+        self._trans_att = super_core.SuperQKVAttention(
+            in_q_dim=time_dim,
+            in_k_dim=time_dim,
             in_v_dim=time_dim,
-            hidden_dim=time_dim,
             num_heads=4,
             proj_dim=time_dim,
             qkv_bias=True,
@@ -158,9 +163,9 @@ class MetaModelV1(super_core.SuperModule):
         timestamps = timestamps.view(-1, 1)
         meta_timestamps, meta_embeds = self.meta_timestamps, self.super_meta_embed
         timestamp_v_embed = meta_embeds.unsqueeze(dim=0)
-        timestamp_qk_att_embed = self._tscalar_embed(
-            torch.unsqueeze(timestamps, dim=-1) - meta_timestamps
-        )
+        timestamp_q_embed = self._tscalar_embed(timestamps)
+        timestamp_k_embed = self._tscalar_embed(meta_timestamps.view(1, -1))
+
         # create the mask
         mask = (
             torch.unsqueeze(timestamps, dim=-1) <= meta_timestamps.view(1, 1, -1)
@@ -171,9 +176,7 @@ class MetaModelV1(super_core.SuperModule):
             > self._thresh
         )
         timestamp_embeds = self._trans_att(
-            timestamp_qk_att_embed,
-            timestamp_v_embed,
-            mask,
+            timestamp_q_embed, timestamp_k_embed, timestamp_v_embed, mask
         )
         return timestamp_embeds[:, -1, :]
 
