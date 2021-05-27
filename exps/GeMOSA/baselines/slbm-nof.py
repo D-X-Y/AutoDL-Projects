@@ -130,7 +130,7 @@ def main(args):
 
         # build optimizer
         xmetric = ComposeMetric(metric_cls(True), SaveMetric())
-        future_x.to(args.device), future_y.to(args.device)
+        future_x, future_y = future_x.to(args.device), future_y.to(args.device)
         future_y_hat = model(future_x)
         future_loss = criterion(future_y_hat, future_y)
         metric(future_y_hat, future_y)

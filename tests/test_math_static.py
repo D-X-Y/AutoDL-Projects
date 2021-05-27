@@ -22,11 +22,11 @@ class TestQuadraticSFunc(unittest.TestCase):
     """Test the quadratic function."""
 
     def test_simple(self):
-        function = QuadraticSFunc([[0, 1], [0.5, 4], [1, 1]])
+        function = QuadraticSFunc({0: 1, 1: 2, 2: 1})
         print(function)
         for x in (0, 0.5, 1):
             print("f({:})={:}".format(x, function(x)))
-        thresh = 0.2
+        thresh = 1e-7
         self.assertTrue(abs(function(0) - 1) < thresh)
-        self.assertTrue(abs(function(0.5) - 4) < thresh)
-        self.assertTrue(abs(function(1) - 1) < thresh)
+        self.assertTrue(abs(function(0.5) - 0.5 * 0.5 - 2 * 0.5 - 1) < thresh)
+        self.assertTrue(abs(function(1) - 1 - 2 - 1) < thresh)
