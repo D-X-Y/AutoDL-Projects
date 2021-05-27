@@ -33,7 +33,7 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
             }
         )
         dynamic_env = SyntheticDEnv(
-            data_generator, oracle_map, time_generator, num_per_task
+            data_generator, oracle_map, time_generator, num_per_task, noise=0.1
         )
         dynamic_env.set_regression()
     elif version.lower() == "v2":
@@ -53,7 +53,7 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
             }
         )
         dynamic_env = SyntheticDEnv(
-            data_generator, oracle_map, time_generator, num_per_task
+            data_generator, oracle_map, time_generator, num_per_task, noise=0.1
         )
         dynamic_env.set_regression()
     elif version.lower() == "v3":
@@ -73,7 +73,7 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
             }
         )
         dynamic_env = SyntheticDEnv(
-            data_generator, oracle_map, time_generator, num_per_task
+            data_generator, oracle_map, time_generator, num_per_task, noise=0.05
         )
         dynamic_env.set_regression()
     elif version.lower() == "v4":

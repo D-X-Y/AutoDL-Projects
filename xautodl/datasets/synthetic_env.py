@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.utils.data as data
 
@@ -44,10 +45,16 @@ class SyntheticDEnv(data.Dataset):
 
     def set_regression(self):
         self._meta_info["task"] = "regression"
+        self._meta_info["input_dim"] = self._data_generator.ndim
+        self._meta_info["output_shape"] = self._oracle_map.output_shape(self._data_generator.output_shape())
+        self._meta_info['output_dim'] = int(np.prod(self._meta_info["output_shape"]))
 
     def set_classification(self, num_classes):
         self._meta_info["task"] = "classification"
+        self._meta_info["input_dim"] = self._data_generator.ndim
         self._meta_info["num_classes"] = int(num_classes)
+        self._meta_info["output_shape"] = self._oracle_map.output_shape(self._data_generator.output_shape())
+        self._meta_info['output_dim'] = int(np.prod(self._meta_info["output_shape"]))
 
     @property
     def oracle_map(self):

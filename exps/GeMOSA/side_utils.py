@@ -8,20 +8,6 @@ from xautodl.procedures import prepare_seed, prepare_logger
 from xautodl.datasets.synthetic_core import get_synthetic_env
 
 
-def lfna_setup(args):
-    prepare_seed(args.rand_seed)
-    logger = prepare_logger(args)
-    model_kwargs = dict(
-        config=dict(model_type="norm_mlp"),
-        input_dim=1,
-        output_dim=1,
-        hidden_dims=[args.hidden_dim] * 2,
-        act_cls="relu",
-        norm_cls="layer_norm_1d",
-    )
-    return logger, model_kwargs
-
-
 def train_model(model, dataset, lr, epochs):
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)

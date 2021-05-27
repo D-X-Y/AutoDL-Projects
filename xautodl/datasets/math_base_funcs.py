@@ -40,6 +40,9 @@ class MathFunc(abc.ABC):
     def reset_xstr(self, xstr):
         self._xstr = str(xstr)
 
+    def output_shape(self, input_shape):
+        return input_shape
+
     @abc.abstractmethod
     def __call__(self, x):
         raise NotImplementedError

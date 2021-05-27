@@ -47,6 +47,9 @@ class GaussianDGenerator(DynamicGenerator):
     def ndim(self):
         return self._ndim
 
+    def output_shape(self):
+        return (self._ndim,)
+
     def __call__(self, time, num):
         mean_list = [functor(time) for functor in self._mean_functors]
         cov_matrix = [

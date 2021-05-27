@@ -33,7 +33,6 @@ from xautodl.datasets.synthetic_core import get_synthetic_env
 from xautodl.models.xcore import get_model
 from xautodl.xlayers import super_core, trunc_normal_
 
-from lfna_utils import lfna_setup, train_model, TimeData
 from meta_model import MetaModelV1
 
 
@@ -182,7 +181,8 @@ def meta_train_procedure(base_model, meta_model, criterion, xenv, args, logger):
 
 
 def main(args):
-    logger, model_kwargs = lfna_setup(args)
+    prepare_seed(args.rand_seed)
+    logger = prepare_logger(args)
     train_env = get_synthetic_env(mode="train", version=args.env_version)
     valid_env = get_synthetic_env(mode="valid", version=args.env_version)
     trainval_env = get_synthetic_env(mode="trainval", version=args.env_version)
@@ -191,6 +191,14 @@ def main(args):
     logger.log("The validation enviornment: {:}".format(valid_env))
     logger.log("The trainval enviornment: {:}".format(trainval_env))
     logger.log("The total enviornment: {:}".format(all_env))
+    model_kwargs = dict(
+        config=dict(model_type="norm_mlp"),
+        input_dim=all_env.meta_info["input_dim"],
+        output_dim=all_env.meta_info["output_dim"],
+        hidden_dims=[args.hidden_dim] * 2,
+        act_cls="relu",
+        norm_cls="layer_norm_1d",
+    )
 
     base_model = get_model(**model_kwargs)
     base_model = base_model.to(args.device)
