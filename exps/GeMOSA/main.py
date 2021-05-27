@@ -272,19 +272,11 @@ def main(args):
     )
     logger.log("In this enviornment, the total loss-meter is {:}".format(loss_meter))
     """
-<<<<<<< HEAD
-    _, loss_adapt_v1, metric_adapt_v1 = online_evaluate(
-        test_env, meta_model, base_model, criterion, metric, args, logger, False, False
-    )
-    _, loss_adapt_v2, metric_adapt_v2 = online_evaluate(
-        test_env, meta_model, base_model, criterion, metric, args, logger, False, True
-=======
     w_containers_care_adapt, loss_adapt_v1, metric_adapt_v1 = online_evaluate(
-        valid_env, meta_model, base_model, criterion, metric, args, logger, True, False
+        test_env, meta_model, base_model, criterion, metric, args, logger, True, False
     )
     w_containers_easy_adapt, loss_adapt_v2, metric_adapt_v2 = online_evaluate(
-        valid_env, meta_model, base_model, criterion, metric, args, logger, True, True
->>>>>>> d4b846a9717279c08f1264398972c00aa949a69f
+        test_env, meta_model, base_model, criterion, metric, args, logger, True, True
     )
     logger.log(
         "[Refine-Adapt] loss = {:.6f}, metric = {:.6f}".format(
