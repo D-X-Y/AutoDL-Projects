@@ -1,8 +1,9 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/GeMOSA/basic-same.py --env_version v1 --hidden_dim 16 --epochs 500 --init_lr 0.1
-# python exps/GeMOSA/basic-same.py --env_version v2 --hidden_dim 16 --epochs 1000 --init_lr 0.05
+# python exps/GeMOSA/basic-same.py --env_version v1 --hidden_dim 16 --epochs 500 --init_lr 0.1 --device cuda
+# python exps/GeMOSA/basic-same.py --env_version v2 --hidden_dim 16 --epochs 500 --init_lr 0.1 --device cuda
+# python exps/GeMOSA/basic-same.py --env_version v3 --hidden_dim 32 --epochs 1000 --init_lr 0.05 --device cuda
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -31,8 +32,6 @@ from xautodl.procedures.metric_utils import SaveMetric, MSEMetric, ComposeMetric
 from xautodl.datasets.synthetic_core import get_synthetic_env
 from xautodl.models.xcore import get_model
 
-from lfna_utils import lfna_setup
-
 
 def subsample(historical_x, historical_y, maxn=10000):
     total = historical_x.size(0)
@@ -44,9 +43,17 @@ def subsample(historical_x, historical_y, maxn=10000):
 
 
 def main(args):
-    logger, model_kwargs = lfna_setup(args)
-
+    prepare_seed(args.rand_seed)
+    logger = prepare_logger(args)
     env = get_synthetic_env(mode=None, version=args.env_version)
+    model_kwargs = dict(
+        config=dict(model_type="norm_mlp"),
+        input_dim=env.meta_info["input_dim"],
+        output_dim=env.meta_info["output_dim"],
+        hidden_dims=[args.hidden_dim] * 2,
+        act_cls="relu",
+        norm_cls="layer_norm_1d",
+    )
     logger.log("The total enviornment: {:}".format(env))
     w_containers = dict()
 
@@ -149,7 +156,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir",
         type=str,
-        default="./outputs/lfna-synthetic/use-same-timestamp",
+        default="./outputs/GeMOSA-synthetic/use-same-timestamp",
         help="The checkpoint directory.",
     )
     parser.add_argument(

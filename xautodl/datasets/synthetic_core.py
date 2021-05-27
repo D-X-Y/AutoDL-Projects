@@ -21,7 +21,7 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
         mean_generator = ConstantFunc(0)
         std_generator = ConstantFunc(1)
         data_generator = GaussianDGenerator(
-            [mean_generator], [[std_generator]], (-2, 2)
+            [mean_generator], [[std_generator]], (-3, 3)
         )
         time_generator = TimeStamp(
             min_timestamp=0, max_timestamp=max_time, num=total_timestamp, mode=mode
@@ -40,7 +40,7 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
         mean_generator = ConstantFunc(0)
         std_generator = ConstantFunc(1)
         data_generator = GaussianDGenerator(
-            [mean_generator], [[std_generator]], (-2, 2)
+            [mean_generator], [[std_generator]], (-3, 3)
         )
         time_generator = TimeStamp(
             min_timestamp=0, max_timestamp=max_time, num=total_timestamp, mode=mode
@@ -60,7 +60,7 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
         mean_generator = SinFunc(params={0: 1, 1: 1, 2: 0})  # sin(t)
         std_generator = CosFunc(params={0: 0.5, 1: 1, 2: 1})  # 0.5 cos(t) + 1
         data_generator = GaussianDGenerator(
-            [mean_generator], [[std_generator]], (-2, 2)
+            [mean_generator], [[std_generator]], (-3, 3)
         )
         time_generator = TimeStamp(
             min_timestamp=0, max_timestamp=max_time, num=total_timestamp, mode=mode
@@ -77,6 +77,9 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
         )
         dynamic_env.set_regression()
     elif version.lower() == "v4":
+        dynamic_env = SyntheticDEnv(
+            data_generator, oracle_map, time_generator, num_per_task, noise=0.05
+        )
         dynamic_env.set_classification(2)
     else:
         raise ValueError("Unknown version: {:}".format(version))

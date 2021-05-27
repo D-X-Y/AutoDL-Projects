@@ -2,8 +2,9 @@
 # Learning to Generate Model One Step Ahead         #
 #####################################################
 # python exps/GeMOSA/main.py --env_version v1 --workers 0
-# python exps/GeMOSA/main.py --env_version v1 --device cuda --lr 0.002 --seq_length 8 --meta_batch 256
-# python exps/GeMOSA/main.py --env_version v1 --device cuda --lr 0.002 --seq_length 24 --time_dim 32 --meta_batch 128
+# python exps/GeMOSA/main.py --env_version v1 --device cuda --lr 0.002 --hidden_dim 16 --meta_batch 256
+# python exps/GeMOSA/main.py --env_version v2 --device cuda --lr 0.002 --hidden_dim 16 --meta_batch 256
+# python exps/GeMOSA/main.py --env_version v3 --device cuda --lr 0.002 --hidden_dim 32 --meta_batch 256
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -269,7 +270,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir",
         type=str,
-        default="./outputs/lfna-synthetic/lfna-battle",
+        default="./outputs/GeMOSA-synthetic/GeMOSA",
         help="The checkpoint directory.",
     )
     parser.add_argument(
