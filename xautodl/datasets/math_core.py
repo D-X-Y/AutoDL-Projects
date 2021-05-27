@@ -10,5 +10,10 @@ from .math_static_funcs import (
     ComposedSinSFunc,
     ComposedCosSFunc,
 )
-from .math_dynamic_funcs import LinearDFunc, QuadraticDFunc, SinQuadraticDFunc
-from .math_dynamic_generator import GaussianDGenerator
+from .math_dynamic_funcs import (
+    LinearDFunc,
+    QuadraticDFunc,
+    SinQuadraticDFunc,
+    BinaryQuadraticDFunc,
+)
+from .math_dynamic_generator import UniformDGenerator, GaussianDGenerator

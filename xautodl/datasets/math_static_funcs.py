@@ -47,7 +47,7 @@ class LinearSFunc(StaticFunc):
         return weights[0] * x + weights[1]
 
     def __repr__(self):
-        return "{name}({a} * {x} + {b})".format(
+        return "({a} * {x} + {b})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],
@@ -69,7 +69,7 @@ class QuadraticSFunc(StaticFunc):
         return weights[0] * x * x + weights[1] * x + weights[2]
 
     def __repr__(self):
-        return "{name}({a} * {x}^2 + {b} * {x} + {c})".format(
+        return "({a} * {x}^2 + {b} * {x} + {c})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],
@@ -97,7 +97,7 @@ class CubicSFunc(StaticFunc):
         return weights[0] * x ** 3 + weights[1] * x ** 2 + weights[2] * x + weights[3]
 
     def __repr__(self):
-        return "{name}({a} * {x}^3 + {b} * {x}^2 + {c} * {x} + {d})".format(
+        return "({a} * {x}^3 + {b} * {x}^2 + {c} * {x} + {d})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],
@@ -166,7 +166,7 @@ class ConstantFunc(StaticFunc):
         raise NotImplementedError
 
     def __repr__(self):
-        return "{name}({a})".format(name=self.__class__.__name__, a=self._params[0])
+        return "{a}".format(name=self.__class__.__name__, a=self._params[0])
 
 
 class ComposedSinSFunc(StaticFunc):
@@ -188,7 +188,7 @@ class ComposedSinSFunc(StaticFunc):
         raise NotImplementedError
 
     def __repr__(self):
-        return "{name}({a} * sin({b} * {x}) + {c})".format(
+        return "({a} * sin({b} * {x}) + {c})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],
@@ -216,7 +216,7 @@ class ComposedCosSFunc(StaticFunc):
         raise NotImplementedError
 
     def __repr__(self):
-        return "{name}({a} * sin({b} * {x}) + {c})".format(
+        return "({a} * sin({b} * {x}) + {c})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],

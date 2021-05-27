@@ -20,6 +20,37 @@ class DynamicGenerator(abc.ABC):
         raise NotImplementedError
 
 
+class UniformDGenerator(DynamicGenerator):
+    """Generate data from the uniform distribution."""
+
+    def __init__(self, l_functors, r_functors):
+        super(UniformDGenerator, self).__init__()
+        self._ndim = assert_list_tuple(l_functors)
+        assert self._ndim == assert_list_tuple(r_functors)
+        self._l_functors = l_functors
+        self._r_functors = r_functors
+
+    @property
+    def ndim(self):
+        return self._ndim
+
+    def output_shape(self):
+        return (self._ndim,)
+
+    def __call__(self, time, num):
+        l_list = [functor(time) for functor in self._l_functors]
+        r_list = [functor(time) for functor in self._r_functors]
+        values = []
+        for l, r in zip(l_list, r_list):
+            values.append(np.random.uniform(low=l, high=r, size=num))
+        return np.stack(values, axis=-1)
+
+    def __repr__(self):
+        return "{name}({ndim} dims)".format(
+            name=self.__class__.__name__, ndim=self._ndim
+        )
+
+
 class GaussianDGenerator(DynamicGenerator):
     """Generate data from Gaussian distribution."""
 
