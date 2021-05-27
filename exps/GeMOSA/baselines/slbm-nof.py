@@ -178,7 +178,7 @@ if __name__ == "__main__":
         help="The hidden dimension.",
     )
     parser.add_argument(
-        "--seq_length", type=int, default=10, help="The sequence length."
+        "--seq_length", type=int, default=20, help="The sequence length."
     )
     parser.add_argument(
         "--init_lr",
