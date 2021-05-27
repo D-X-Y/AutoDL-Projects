@@ -3,7 +3,7 @@ from .synthetic_utils import TimeStamp
 from .synthetic_env import SyntheticDEnv
 from .math_core import LinearFunc
 from .math_core import DynamicLinearFunc
-from .math_core import DynamicQuadraticFunc
+from .math_core import DynamicQuadraticFunc, DynamicSinQuadraticFunc
 from .math_core import (
     ConstantFunc,
     ComposedSinFunc as SinFunc,
@@ -63,9 +63,9 @@ def get_synthetic_env(total_timestamp=1600, num_per_task=1000, mode=None, versio
         time_generator = TimeStamp(
             min_timestamp=0, max_timestamp=max_time, num=total_timestamp, mode=mode
         )
-        oracle_map = DynamicQuadraticFunc(
+        oracle_map = DynamicSinQuadraticFunc(
             params={
-                0: LinearFunc(params={0: 0.1, 1: 0}),  # 0.1 * t
+                0: CosFunc(params={0: 0.5, 1: 1, 2: 1}),  # 0.5 cos(t) + 1
                 1: SinFunc(params={0: 1, 1: 1, 2: 0}),  # sin(t)
                 2: ConstantFunc(0),
             }

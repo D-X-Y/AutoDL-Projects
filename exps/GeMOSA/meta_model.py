@@ -154,8 +154,9 @@ class MetaModelV1(super_core.SuperModule):
                     (self._append_meta_embed["fixed"], meta_embed), dim=0
                 )
 
-    def _obtain_time_embed(self, timestamps):
-        # timestamps is a batch of sequence of timestamps
+    def gen_time_embed(self, timestamps):
+        # timestamps is a batch of timestamps
+        [B] = timestamps.shape
         # batch, seq = timestamps.shape
         timestamps = timestamps.view(-1, 1)
         meta_timestamps, meta_embeds = self.meta_timestamps, self.super_meta_embed
@@ -179,15 +180,8 @@ class MetaModelV1(super_core.SuperModule):
         )
         return timestamp_embeds[:, -1, :]
 
-    def forward_raw(self, timestamps, time_embeds, tembed_only=False):
-        if time_embeds is None:
-            [B] = timestamps.shape
-            time_embeds = self._obtain_time_embed(timestamps)
-        else:  # use the hyper-net only
-            time_seq = None
-            B, _ = time_embeds.shape
-        if tembed_only:
-            return time_embeds
+    def gen_model(self, time_embeds):
+        B, _ = time_embeds.shape
         # create joint embed
         num_layer, _ = self._super_layer_embed.shape
         # The shape of `joint_embed` is batch * num-layers * input-dim
@@ -205,6 +199,9 @@ class MetaModelV1(super_core.SuperModule):
                 self._shape_container.translate(torch.split(weights.squeeze(0), 1))
             )
         return batch_containers, time_embeds
+
+    def forward_raw(self, timestamps, time_embeds, tembed_only=False):
+        raise NotImplementedError
 
     def forward_candidate(self, input):
         raise NotImplementedError

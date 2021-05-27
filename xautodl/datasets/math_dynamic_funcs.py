@@ -5,9 +5,6 @@ import math
 import abc
 import copy
 import numpy as np
-from typing import Optional
-import torch
-import torch.utils.data as data
 
 from .math_base_funcs import FitFunc
 
@@ -68,10 +65,11 @@ class DynamicQuadraticFunc(DynamicFunc):
     def __init__(self, params=None):
         super(DynamicQuadraticFunc, self).__init__(3, params)
 
-    def __call__(self, x, timestamp=None):
+    def __call__(
+        self,
+        x,
+    ):
         self.check_valid()
-        if timestamp is None:
-            timestamp = self._timestamp
         a = self._params[0](timestamp)
         b = self._params[1](timestamp)
         c = self._params[2](timestamp)
@@ -80,10 +78,38 @@ class DynamicQuadraticFunc(DynamicFunc):
         return a * x * x + b * x + c
 
     def __repr__(self):
-        return "{name}({a} * x^2 + {b} * x + {c}, timestamp={timestamp})".format(
+        return "{name}({a} * x^2 + {b} * x + {c})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],
             c=self._params[2],
-            timestamp=self._timestamp,
+        )
+
+
+class DynamicSinQuadraticFunc(DynamicFunc):
+    """The dynamic quadratic function that outputs f(x) = sin(a * x^2 + b * x + c).
+    The a, b, and c is a function of timestamp.
+    """
+
+    def __init__(self, params=None):
+        super(DynamicSinQuadraticFunc, self).__init__(3, params)
+
+    def __call__(
+        self,
+        x,
+    ):
+        self.check_valid()
+        a = self._params[0](timestamp)
+        b = self._params[1](timestamp)
+        c = self._params[2](timestamp)
+        convert_fn = lambda x: x[-1] if isinstance(x, (tuple, list)) else x
+        a, b, c = convert_fn(a), convert_fn(b), convert_fn(c)
+        return math.sin(a * x * x + b * x + c)
+
+    def __repr__(self):
+        return "{name}({a} * x^2 + {b} * x + {c})".format(
+            name=self.__class__.__name__,
+            a=self._params[0],
+            b=self._params[1],
+            c=self._params[2],
         )
