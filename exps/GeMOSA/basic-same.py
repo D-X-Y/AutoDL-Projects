@@ -28,7 +28,6 @@ from xautodl.log_utils import AverageMeter, convert_secs2time
 
 from xautodl.utils import split_str2indexes
 
-from xautodl.procedures.advanced_main import basic_train_fn, basic_eval_fn
 from xautodl.procedures.metric_utils import (
     SaveMetric,
     MSEMetric,
