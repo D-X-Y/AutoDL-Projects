@@ -234,7 +234,7 @@ class MetaModelV1(super_core.SuperModule):
             for iepoch in range(epochs):
                 optimizer.zero_grad()
                 time_embed = self.gen_time_embed(timestamp.view(1))
-                match_loss = criterion(new_param, time_embed)
+                match_loss = F.l1_loss(new_param, time_embed)
 
                 [container] = self.gen_model(new_param.view(1, -1))
                 y_hat = base_model.forward_with_container(x, container)
