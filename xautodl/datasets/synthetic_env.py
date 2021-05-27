@@ -50,6 +50,10 @@ class SyntheticDEnv(data.Dataset):
         self._meta_info["num_classes"] = int(num_classes)
 
     @property
+    def oracle_map(self):
+        return self._oracle_map
+
+    @property
     def meta_info(self):
         return self._meta_info
 

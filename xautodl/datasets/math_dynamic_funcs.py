@@ -6,23 +6,17 @@ import abc
 import copy
 import numpy as np
 
-from .math_base_funcs import FitFunc
+from .math_base_funcs import MathFunc
 
 
-class DynamicFunc(FitFunc):
-    """The dynamic quadratic function, where each param is a function."""
+class DynamicFunc(MathFunc):
+    """The dynamic function, where each param is a function."""
 
     def __init__(self, freedom: int, params=None, xstr="x"):
         if params is not None:
-            for param in params:
-                param.reset_xstr("t") if isinstance(param, FitFunc) else None
-        super(DynamicFunc, self).__init__(freedom, None, params, xstr)
-
-    def __call__(self, x, timestamp):
-        raise NotImplementedError
-
-    def _getitem(self, x, weights):
-        raise NotImplementedError
+            for key, param in params.items():
+                param.reset_xstr("t") if isinstance(param, MathFunc) else None
+        super(DynamicFunc, self).__init__(freedom, params, xstr)
 
     def noise_call(self, x, timestamp, std):
         clean_y = self.__call__(x, timestamp)
@@ -33,13 +27,13 @@ class DynamicFunc(FitFunc):
         return noise_y
 
 
-class DynamicLinearFunc(DynamicFunc):
+class LinearDFunc(DynamicFunc):
     """The dynamic linear function that outputs f(x) = a * x + b.
     The a and b is a function of timestamp.
     """
 
-    def __init__(self, params=None, xstr="x"):
-        super(DynamicLinearFunc, self).__init__(3, params, xstr)
+    def __init__(self, params, xstr="x"):
+        super(LinearDFunc, self).__init__(2, params, xstr)
 
     def __call__(self, x, timestamp):
         a = self._params[0](timestamp)
@@ -57,18 +51,15 @@ class DynamicLinearFunc(DynamicFunc):
         )
 
 
-class DynamicQuadraticFunc(DynamicFunc):
+class QuadraticDFunc(DynamicFunc):
     """The dynamic quadratic function that outputs f(x) = a * x^2 + b * x + c.
     The a, b, and c is a function of timestamp.
     """
 
-    def __init__(self, params=None):
-        super(DynamicQuadraticFunc, self).__init__(3, params)
+    def __init__(self, params, xstr="x"):
+        super(QuadraticDFunc, self).__init__(3, params)
 
-    def __call__(
-        self,
-        x,
-    ):
+    def __call__(self, x, timestamp):
         self.check_valid()
         a = self._params[0](timestamp)
         b = self._params[1](timestamp)
@@ -78,38 +69,37 @@ class DynamicQuadraticFunc(DynamicFunc):
         return a * x * x + b * x + c
 
     def __repr__(self):
-        return "{name}({a} * x^2 + {b} * x + {c})".format(
+        return "{name}({a} * {x}^2 + {b} * {x} + {c})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],
             c=self._params[2],
+            x=self.xstr,
         )
 
 
-class DynamicSinQuadraticFunc(DynamicFunc):
+class SinQuadraticDFunc(DynamicFunc):
     """The dynamic quadratic function that outputs f(x) = sin(a * x^2 + b * x + c).
     The a, b, and c is a function of timestamp.
     """
 
     def __init__(self, params=None):
-        super(DynamicSinQuadraticFunc, self).__init__(3, params)
+        super(SinQuadraticDFunc, self).__init__(3, params)
 
-    def __call__(
-        self,
-        x,
-    ):
+    def __call__(self, x, timestamp):
         self.check_valid()
         a = self._params[0](timestamp)
         b = self._params[1](timestamp)
         c = self._params[2](timestamp)
         convert_fn = lambda x: x[-1] if isinstance(x, (tuple, list)) else x
         a, b, c = convert_fn(a), convert_fn(b), convert_fn(c)
-        return math.sin(a * x * x + b * x + c)
+        return np.sin(a * x * x + b * x + c)
 
     def __repr__(self):
-        return "{name}({a} * x^2 + {b} * x + {c})".format(
+        return "{name}({a} * {x}^2 + {b} * {x} + {c})".format(
             name=self.__class__.__name__,
             a=self._params[0],
             b=self._params[1],
             c=self._params[2],
+            x=self.xstr,
         )

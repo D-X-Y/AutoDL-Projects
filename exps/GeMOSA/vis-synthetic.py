@@ -191,6 +191,8 @@ def visualize_env(save_dir, version):
         allxs.append(allx)
         allys.append(ally)
     allxs, allys = torch.cat(allxs).view(-1), torch.cat(allys).view(-1)
+    print("env: {:}".format(dynamic_env))
+    print("oracle_map: {:}".format(dynamic_env.oracle_map))
     print("x - min={:.3f}, max={:.3f}".format(allxs.min().item(), allxs.max().item()))
     print("y - min={:.3f}, max={:.3f}".format(allys.min().item(), allys.max().item()))
     for idx, (timestamp, (allx, ally)) in enumerate(tqdm(dynamic_env, ncols=50)):
