@@ -11,3 +11,4 @@ from .affine_utils import normalize_points, denormalize_points
 from .affine_utils import identity2affine, solve2theta, affine2image
 from .hash_utils import get_md5_file
 from .str_utils import split_str2indexes
+from .str_utils import show_mean_var

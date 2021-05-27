@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def split_str2indexes(string: str, max_check: int, length_limit=5):
     if not isinstance(string, str):
         raise ValueError("Invalid scheme for {:}".format(string))
@@ -19,3 +22,13 @@ def split_str2indexes(string: str, max_check: int, length_limit=5):
         for i in range(srange[0], srange[1] + 1):
             indexes.add(i)
     return indexes
+
+
+def show_mean_var(xlist):
+    values = np.array(xlist)
+    print(
+        "{:.3f}".format(values.mean())
+        + "$_{{\pm}{"
+        + "{:.3f}".format(values.std())
+        + "}}$"
+    )
