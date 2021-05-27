@@ -1,10 +1,10 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.04 #
 #####################################################
-# python exps/GeMOSA/baselines/slbm-nof.py --env_version v1 --hidden_dim 16 --epochs 500 --init_lr 0.1 --device cuda
-# python exps/GeMOSA/baselines/slbm-nof.py --env_version v2 --hidden_dim 16 --epochs 500 --init_lr 0.1 --device cuda
-# python exps/GeMOSA/baselines/slbm-nof.py --env_version v3 --hidden_dim 32 --epochs 1000 --init_lr 0.05 --device cuda
-# python exps/GeMOSA/baselines/slbm-nof.py --env_version v4 --hidden_dim 32 --epochs 1000 --init_lr 0.05 --device cuda
+# python exps/GeMOSA/baselines/slbm-ft.py --env_version v1 --hidden_dim 16 --epochs 500 --init_lr 0.1 --device cuda
+# python exps/GeMOSA/baselines/slbm-ft.py --env_version v2 --hidden_dim 16 --epochs 500 --init_lr 0.1 --device cuda
+# python exps/GeMOSA/baselines/slbm-ft.py --env_version v3 --hidden_dim 32 --epochs 1000 --init_lr 0.05 --device cuda
+# python exps/GeMOSA/baselines/slbm-ft.py --env_version v4 --hidden_dim 32 --epochs 1000 --init_lr 0.05 --device cuda
 #####################################################
 import sys, time, copy, torch, random, argparse
 from tqdm import tqdm
@@ -72,46 +72,46 @@ def main(args):
             "This task ({:}) is not supported.".format(all_env.meta_info["task"])
         )
 
-    seq_times = env.get_seq_times(0, args.seq_length)
-    _, (allxs, allys) = env.seq_call(seq_times)
-    allxs, allys = allxs.view(-1, allxs.shape[-1]), allys.view(-1, 1)
-    if env.meta_info["task"] == "classification":
-        allys = allys.view(-1)
+    def finetune(index):
+        seq_times = env.get_seq_times(index, args.seq_length)
+        _, (allxs, allys) = env.seq_call(seq_times)
+        allxs, allys = allxs.view(-1, allxs.shape[-1]), allys.view(-1, 1)
+        if env.meta_info["task"] == "classification":
+            allys = allys.view(-1)
+        historical_x, historical_y = allxs.to(args.device), allys.to(args.device)
+        model = get_model(**model_kwargs)
+        model = model.to(args.device)
 
-    historical_x, historical_y = allxs.to(args.device), allys.to(args.device)
-    model = get_model(**model_kwargs)
-    model = model.to(args.device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.init_lr, amsgrad=True)
+        lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            optimizer,
+            milestones=[
+                int(args.epochs * 0.25),
+                int(args.epochs * 0.5),
+                int(args.epochs * 0.75),
+            ],
+            gamma=0.3,
+        )
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.init_lr, amsgrad=True)
-    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
-        optimizer,
-        milestones=[
-            int(args.epochs * 0.25),
-            int(args.epochs * 0.5),
-            int(args.epochs * 0.75),
-        ],
-        gamma=0.3,
-    )
-
-    train_metric = metric_cls(True)
-    best_loss, best_param = None, None
-    for _iepoch in range(args.epochs):
-        preds = model(historical_x)
-        optimizer.zero_grad()
-        loss = criterion(preds, historical_y)
-        loss.backward()
-        optimizer.step()
-        lr_scheduler.step()
-        # save best
-        if best_loss is None or best_loss > loss.item():
-            best_loss = loss.item()
-            best_param = copy.deepcopy(model.state_dict())
-    model.load_state_dict(best_param)
-    model.analyze_weights()
-    with torch.no_grad():
-        train_metric(preds, historical_y)
-    train_results = train_metric.get_info()
-    print(train_results)
+        train_metric = metric_cls(True)
+        best_loss, best_param = None, None
+        for _iepoch in range(args.epochs):
+            preds = model(historical_x)
+            optimizer.zero_grad()
+            loss = criterion(preds, historical_y)
+            loss.backward()
+            optimizer.step()
+            lr_scheduler.step()
+            # save best
+            if best_loss is None or best_loss > loss.item():
+                best_loss = loss.item()
+                best_param = copy.deepcopy(model.state_dict())
+        model.load_state_dict(best_param)
+        # model.analyze_weights()
+        with torch.no_grad():
+            train_metric(preds, historical_y)
+        train_results = train_metric.get_info()
+        return train_results, model
 
     metric = metric_cls(True)
     per_timestamp_time, start_time = AverageMeter(), time.time()
@@ -127,6 +127,7 @@ def main(args):
             + need_time
         )
         # train the same data
+        train_results, model = finetune(idx)
 
         # build optimizer
         xmetric = ComposeMetric(metric_cls(True), SaveMetric())
@@ -162,7 +163,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_dir",
         type=str,
-        default="./outputs/GeMOSA-synthetic/use-same-nof-timestamp",
+        default="./outputs/GeMOSA-synthetic/use-same-ft-timestamp",
         help="The checkpoint directory.",
     )
     parser.add_argument(
@@ -178,13 +179,13 @@ if __name__ == "__main__":
         help="The hidden dimension.",
     )
     parser.add_argument(
-        "--seq_length", type=int, default=10, help="The sequence length."
-    )
-    parser.add_argument(
         "--init_lr",
         type=float,
         default=0.1,
         help="The initial learning rate for the optimizer (default is Adam)",
+    )
+    parser.add_argument(
+        "--seq_length", type=int, default=20, help="The sequence length."
     )
     parser.add_argument(
         "--batch_size",

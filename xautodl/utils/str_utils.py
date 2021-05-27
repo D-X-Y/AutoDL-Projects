@@ -27,8 +27,8 @@ def split_str2indexes(string: str, max_check: int, length_limit=5):
 def show_mean_var(xlist):
     values = np.array(xlist)
     print(
-        "{:.3f}".format(values.mean())
+        "{:.2f}".format(values.mean())
         + "$_{{\pm}{"
-        + "{:.3f}".format(values.std())
+        + "{:.2f}".format(values.std())
         + "}}$"
     )

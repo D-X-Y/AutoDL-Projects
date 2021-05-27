@@ -88,7 +88,7 @@ class SyntheticDEnv(data.Dataset):
         index, timestamp = self._time_generator[index]
         xtimes = []
         for i in range(1, seq_length + 1):
-          xtimes.append(timestamp - i * self.time_interval)
+            xtimes.append(timestamp - i * self.time_interval)
         xtimes.reverse()
         return xtimes
 
