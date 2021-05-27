@@ -24,7 +24,7 @@ from xautodl.procedures import (
 from xautodl.log_utils import time_string
 from xautodl.log_utils import AverageMeter, convert_secs2time
 
-from xautodl.procedures.metric_utils import SaveMetric, MSEMetric, ComposeMetric
+from xautodl.procedures.metric_utils import SaveMetric, MSEMetric, Top1AccMetric
 from xautodl.datasets.synthetic_core import get_synthetic_env
 from xautodl.models.xcore import get_model
 from xautodl.xlayers import super_core
