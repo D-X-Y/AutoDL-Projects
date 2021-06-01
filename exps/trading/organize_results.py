@@ -151,7 +151,9 @@ if __name__ == "__main__":
     key_map = dict()
     for xset in ("train", "valid", "test"):
         key_map["{:}-mean-IC".format(xset)] = "IC ({:})".format(xset)
-        key_map["{:}-mean-ICIR".format(xset)] = "ICIR ({:})".format(xset)
+        # key_map["{:}-mean-ICIR".format(xset)] = "ICIR ({:})".format(xset)
+        key_map["{:}-mean-Rank-IC".format(xset)] = "Rank IC ({:})".format(xset)
+        # key_map["{:}-mean-Rank-ICIR".format(xset)] = "Rank ICIR ({:})".format(xset)
 
     all_qresults = []
     for save_dir in args.save_dir:

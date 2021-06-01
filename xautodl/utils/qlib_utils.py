@@ -97,6 +97,7 @@ class QResult:
         separate: Text = "& ",
         space: int = 20,
         verbose: bool = True,
+        version: str = "v1",
     ):
         avaliable_keys = []
         for key in keys:
@@ -113,8 +114,14 @@ class QResult:
                 current_values = self._result[key]
             mean = np.mean(current_values)
             std = np.std(current_values)
-            # values.append("{:.4f} $\pm$ {:.4f}".format(mean, std))
-            values.append("{:.2f} $\pm$ {:.2f}".format(mean, std))
+            if version == "v0":
+                values.append("{:.2f} $\pm$ {:.2f}".format(mean, std))
+            elif version == "v1":
+                values.append(
+                    "{:.2f}".format(mean) + " \\subs{" + "{:.2f}".format(std) + "}"
+                )
+            else:
+                raise ValueError("Unknown version")
         value_str = separate.join([self.full_str(x, space) for x in values])
         if verbose:
             print(head_str)
