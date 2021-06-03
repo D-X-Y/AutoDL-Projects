@@ -16,15 +16,14 @@ from .super_module import IntSpaceType
 from .super_module import BoolSpaceType
 
 
-class SuperRearrange(SuperModule):
+class SuperReArrange(SuperModule):
     """Applies the rearrange operation."""
 
     def __init__(self, pattern, **axes_lengths):
-        super(SuperRearrange, self).__init__()
+        super(SuperReArrange, self).__init__()
 
         self._pattern = pattern
         self._axes_lengths = axes_lengths
-        self.reset_parameters()
 
     @property
     def abstract_search_space(self):
