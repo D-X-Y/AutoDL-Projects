@@ -1,10 +1,10 @@
 #!/bin/bash
-# bash ./scripts-search/algos/DARTS-V2.sh cifar10 0 -1
+# bash ./scripts-search/NAS-Bench-201-algos/BOHB.sh -1
 echo script name: $0
 echo $# arguments
-if [ "$#" -ne 3 ] ;then
+if [ "$#" -ne 2 ] ;then
   echo "Input illegal number of parameters " $#
-  echo "Need 3 parameters for dataset, tracking_status, and seed"
+  echo "Need 2 parameters for dataset and seed"
   exit 1
 fi
 if [ "$TORCH_HOME" = "" ]; then
@@ -15,29 +15,21 @@ else
 fi
 
 dataset=$1
-BN=$2
-seed=$3
+seed=$2
 channel=16
 num_cells=5
 max_nodes=4
 space=nas-bench-201
-
-if [ "$dataset" == "cifar10" ] || [ "$dataset" == "cifar100" ]; then
-  data_path="$TORCH_HOME/cifar.python"
-else
-  data_path="$TORCH_HOME/cifar.python/ImageNet16"
-fi
 #benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth
 benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_1-096897.pth
 
-save_dir=./output/search-cell-${space}/DARTS-V2-${dataset}-BN${BN}
+save_dir=./output/search-cell-${space}/BOHB-${dataset}
 
-OMP_NUM_THREADS=4 python ./exps/algos/DARTS-V2.py \
+OMP_NUM_THREADS=4 python ./exps/NAS-Bench-201-algos/BOHB.py \
 	--save_dir ${save_dir} --max_nodes ${max_nodes} --channel ${channel} --num_cells ${num_cells} \
-	--dataset ${dataset} --data_path ${data_path} \
+	--dataset ${dataset} \
 	--search_space_name ${space} \
-	--config_path configs/nas-benchmark/algos/DARTS.config \
 	--arch_nas_dataset ${benchmark_file} \
-	--track_running_stats ${BN} \
-	--arch_learning_rate 0.0003 --arch_weight_decay 0.001 \
+	--time_budget 12000  \
+	--n_iters 50 --num_samples 4 --random_fraction 0.0 --bandwidth_factor 3 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}

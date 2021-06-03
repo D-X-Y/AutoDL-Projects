@@ -224,16 +224,16 @@ If researchers can provide better results with different hyper-parameters, we ar
 
 **Note that** you need to prepare the training and test data as described in [Preparation and Download](#preparation-and-download)
 
-- [1] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V1.sh cifar10 1 -1`, where `cifar10` can be replaced with `cifar100` or `ImageNet16-120`.
-- [2] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/DARTS-V2.sh cifar10 1 -1`
-- [3] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/GDAS.sh     cifar10 1 -1`
-- [4] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/SETN.sh     cifar10 1 -1`
-- [5] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/ENAS.sh     cifar10 1 -1`
-- [6] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/algos/RANDOM-NAS.sh cifar10 1 -1`
-- [7] `bash ./scripts-search/algos/R-EA.sh cifar10 3 -1`
-- [8] `bash ./scripts-search/algos/Random.sh cifar10 -1`
-- [9] `bash ./scripts-search/algos/REINFORCE.sh cifar10 0.5 -1`
-- [10] `bash ./scripts-search/algos/BOHB.sh cifar10 -1`
+- [1] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201-algos/DARTS-V1.sh cifar10 1 -1`, where `cifar10` can be replaced with `cifar100` or `ImageNet16-120`.
+- [2] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201-algos/DARTS-V2.sh cifar10 1 -1`
+- [3] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201-algos/GDAS.sh     cifar10 1 -1`
+- [4] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201-algos/SETN.sh     cifar10 1 -1`
+- [5] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201-algos/ENAS.sh     cifar10 1 -1`
+- [6] `CUDA_VISIBLE_DEVICES=0 bash ./scripts-search/NAS-Bench-201-algos/RANDOM-NAS.sh cifar10 1 -1`
+- [7] `bash ./scripts-search/NAS-Bench-201-algos/R-EA.sh cifar10 3 -1`
+- [8] `bash ./scripts-search/NAS-Bench-201-algos/Random.sh cifar10 -1`
+- [9] `bash ./scripts-search/NAS-Bench-201-algos/REINFORCE.sh cifar10 0.5 -1`
+- [10] `bash ./scripts-search/NAS-Bench-201-algos/BOHB.sh cifar10 -1`
 
 In commands [1-6], the first args `cifar10` indicates the dataset name, the second args `1` indicates the behavior of BN, and the first args `-1` indicates the random seed.
 

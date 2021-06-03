@@ -1,10 +1,11 @@
 #!/bin/bash
-# bash ./scripts-search/algos/DARTS-V1.sh cifar10 0 -1
+# Regularized Evolution for Image Classifier Architecture Search, AAAI 2019
+# bash ./scripts-search/NAS-Bench-201-algos/R-EA.sh cifar10 3 -1
 echo script name: $0
 echo $# arguments
 if [ "$#" -ne 3 ] ;then
   echo "Input illegal number of parameters " $#
-  echo "Need 3 parameters for dataset, tracking_status, and seed"
+  echo "Need 3 parameters for the-dataset-name, the-ea-sample-size and the-seed"
   exit 1
 fi
 if [ "$TORCH_HOME" = "" ]; then
@@ -14,30 +15,24 @@ else
   echo "TORCH_HOME : $TORCH_HOME"
 fi
 
+#dataset=cifar10
 dataset=$1
-BN=$2
+sample_size=$2
 seed=$3
 channel=16
 num_cells=5
 max_nodes=4
 space=nas-bench-201
-
-if [ "$dataset" == "cifar10" ] || [ "$dataset" == "cifar100" ]; then
-  data_path="$TORCH_HOME/cifar.python"
-else
-  data_path="$TORCH_HOME/cifar.python/ImageNet16"
-fi
 #benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_0-e61699.pth
 benchmark_file=${TORCH_HOME}/NAS-Bench-201-v1_1-096897.pth
 
-save_dir=./output/search-cell-${space}/DARTS-V1-${dataset}-BN${BN}
+save_dir=./output/search-cell-${space}/R-EA-${dataset}-SS${sample_size}
 
-OMP_NUM_THREADS=4 python ./exps/algos/DARTS-V1.py \
+OMP_NUM_THREADS=4 python ./exps/NAS-Bench-201-algos/R_EA.py \
 	--save_dir ${save_dir} --max_nodes ${max_nodes} --channel ${channel} --num_cells ${num_cells} \
-	--dataset ${dataset} --data_path ${data_path} \
+	--dataset ${dataset} \
 	--search_space_name ${space} \
-	--config_path configs/nas-benchmark/algos/DARTS.config \
 	--arch_nas_dataset ${benchmark_file} \
-	--track_running_stats ${BN} \
-	--arch_learning_rate 0.0003 --arch_weight_decay 0.001 \
+	--time_budget 12000 \
+	--ea_cycles 200 --ea_population 10 --ea_sample_size ${sample_size} --ea_fast_by_api 1 \
 	--workers 4 --print_freq 200 --rand_seed ${seed}

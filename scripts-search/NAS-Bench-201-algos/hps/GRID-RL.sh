@@ -6,5 +6,5 @@ lrs="0.01 0.02 0.1 0.2 0.5"
 
 for lr in ${lrs}
 do
-  bash ./scripts-search/algos/REINFORCE.sh ${lr} -1
+  bash ./scripts-search/NAS-Bench-201-algos/REINFORCE.sh ${lr} -1
 done
