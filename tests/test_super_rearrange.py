@@ -26,3 +26,5 @@ class TestSuperReArrange(unittest.TestCase):
         tensor = torch.rand((8, 4, 32, 32))
         print("The tensor shape: {:}".format(tensor.shape))
         print(layer)
+        outs = layer(tensor)
+        print("The output tensor shape: {:}".format(outs.shape))
