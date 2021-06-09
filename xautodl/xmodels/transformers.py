@@ -3,7 +3,7 @@
 #####################################################
 # Vision Transformer: arxiv.org/pdf/2010.11929.pdf  #
 #####################################################
-import math
+import copy, math
 from functools import partial
 from typing import Optional, Text, List
 
@@ -35,40 +35,67 @@ def _init_weights(m):
 
 
 name2config = {
-    "vit-base": dict(
+    "vit-cifar10-p4-d4-h4-c32": dict(
         type="vit",
-        image_size=256,
+        image_size=32,
+        patch_size=4,
+        num_classes=10,
+        dim=32,
+        depth=4,
+        heads=4,
+        dropout=0.1,
+        att_dropout=0.0,
+    ),
+    "vit-base-16": dict(
+        type="vit",
+        image_size=224,
         patch_size=16,
         num_classes=1000,
         dim=768,
         depth=12,
         heads=12,
         dropout=0.1,
-        emb_dropout=0.1,
+        att_dropout=0.0,
     ),
-    "vit-large": dict(
+    "vit-large-16": dict(
         type="vit",
-        image_size=256,
+        image_size=224,
         patch_size=16,
         num_classes=1000,
         dim=1024,
         depth=24,
         heads=16,
         dropout=0.1,
-        emb_dropout=0.1,
+        att_dropout=0.0,
     ),
-    "vit-huge": dict(
+    "vit-huge-14": dict(
         type="vit",
-        image_size=256,
-        patch_size=16,
+        image_size=224,
+        patch_size=14,
         num_classes=1000,
         dim=1280,
         depth=32,
         heads=16,
         dropout=0.1,
-        emb_dropout=0.1,
+        att_dropout=0.0,
     ),
 }
+
+
+def extend_cifar100(configs):
+    new_configs = dict()
+    for name, config in configs.items():
+        new_configs[name] = config
+        if "cifar10" in name and "cifar100" not in name:
+            config = copy.deepcopy(config)
+            config["num_classes"] = 100
+            a, b = name.split("cifar10")
+            new_name = "{:}cifar100{:}".format(a, b)
+            new_configs[new_name] = config
+    return new_configs
+
+
+name2config = extend_cifar100(name2config)
 
 
 class SuperViT(xlayers.SuperModule):
@@ -85,7 +112,7 @@ class SuperViT(xlayers.SuperModule):
         mlp_multiplier=4,
         channels=3,
         dropout=0.0,
-        emb_dropout=0.0,
+        att_dropout=0.0,
     ):
         super(SuperViT, self).__init__()
         image_height, image_width = pair(image_size)
@@ -107,14 +134,19 @@ class SuperViT(xlayers.SuperModule):
 
         self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 1, dim))
         self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
-        self.dropout = nn.Dropout(emb_dropout)
+        self.dropout = nn.Dropout(dropout)
 
         # build the transformer encode layers
         layers = []
         for ilayer in range(depth):
             layers.append(
                 xlayers.SuperTransformerEncoderLayer(
-                    dim, heads, False, mlp_multiplier, dropout
+                    dim,
+                    heads,
+                    False,
+                    mlp_multiplier,
+                    dropout=dropout,
+                    att_dropout=att_dropout,
                 )
             )
         self.backbone = xlayers.SuperSequential(*layers)
@@ -167,7 +199,7 @@ def get_transformer(config):
             depth=config.get("depth"),
             heads=config.get("heads"),
             dropout=config.get("dropout"),
-            emb_dropout=config.get("emb_dropout"),
+            att_dropout=config.get("att_dropout"),
         )
     else:
         raise ValueError("Unknown model type: {:}".format(model_type))
