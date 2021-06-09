@@ -1,8 +1,6 @@
-opyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.03 #
 #####################################################
-from __future__ import division
-from __future__ import print_function
-
+# Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.06 #
+#####################################################
 import math
 from functools import partial
 from typing import Optional, Text, List

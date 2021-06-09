@@ -5,12 +5,6 @@
 #####################################################
 import sys
 import unittest
-from pathlib import Path
-
-lib_dir = (Path(__file__).parent / "..").resolve()
-print("LIB-DIR: {:}".format(lib_dir))
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
 
 import torch
 from xautodl import xlayers
@@ -28,3 +22,4 @@ class TestSuperReArrange(unittest.TestCase):
         print(layer)
         outs = layer(tensor)
         print("The output tensor shape: {:}".format(outs.shape))
+        assert tuple(outs.shape) == (8, 32 * 32 // 16, 4 * 4 * 4)

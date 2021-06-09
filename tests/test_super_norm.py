@@ -38,6 +38,7 @@ class TestSuperSimpleNorm(unittest.TestCase):
         print("The abstract child program:\n{:}".format(abstract_child))
 
         model.set_super_run_type(super_core.SuperRunMode.Candidate)
+        model.enable_candidate()
         model.apply_candidate(abstract_child)
 
         output_shape = (20, abstract_child["1"]["_out_features"].value)
@@ -70,6 +71,7 @@ class TestSuperSimpleNorm(unittest.TestCase):
         print("The abstract child program:\n{:}".format(abstract_child))
 
         model.set_super_run_type(super_core.SuperRunMode.Candidate)
+        model.enable_candidate()
         model.apply_candidate(abstract_child)
 
         output_shape = (20, abstract_child["2"]["_out_features"].value)

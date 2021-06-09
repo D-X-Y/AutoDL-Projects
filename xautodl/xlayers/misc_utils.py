@@ -1,4 +1,28 @@
 # borrowed from https://github.com/arogozhnikov/einops/blob/master/einops/parsing.py
+import warnings
+import keyword
+from typing import List
+
+
+class AnonymousAxis:
+    """Important thing: all instances of this class are not equal to each other"""
+
+    def __init__(self, value: str):
+        self.value = int(value)
+        if self.value <= 1:
+            if self.value == 1:
+                raise EinopsError(
+                    "No need to create anonymous axis of length 1. Report this as an issue"
+                )
+            else:
+                raise EinopsError(
+                    "Anonymous axis should have positive length, not {}".format(
+                        self.value
+                    )
+                )
+
+    def __repr__(self):
+        return "{}-axis".format(str(self.value))
 
 
 class ParsedExpression:
@@ -8,24 +32,13 @@ class ParsedExpression:
     """
 
     def __init__(self, expression):
-        self.has_ellipsis = False
-        self.has_ellipsis_parenthesized = None
         self.identifiers = set()
         # that's axes like 2, 3 or 5. Axes with size 1 are exceptional and replaced with empty composition
         self.has_non_unitary_anonymous_axes = False
         # composition keeps structure of composite axes, see how different corner cases are handled in tests
         self.composition = []
         if "." in expression:
-            if "..." not in expression:
-                raise ValueError(
-                    "Expression may contain dots only inside ellipsis (...)"
-                )
-            if str.count(expression, "...") != 1 or str.count(expression, ".") != 3:
-                raise ValueError(
-                    "Expression may contain dots only inside ellipsis (...); only one ellipsis for tensor "
-                )
-            expression = expression.replace("...", _ellipsis)
-            self.has_ellipsis = True
+            raise ValueError("Does not support . in the expression.")
 
         bracket_group = None
 
@@ -37,37 +50,28 @@ class ParsedExpression:
                             x
                         )
                     )
-                if x == _ellipsis:
-                    self.identifiers.add(_ellipsis)
+                is_number = str.isdecimal(x)
+                if is_number and int(x) == 1:
+                    # handling the case of anonymous axis of length 1
                     if bracket_group is None:
-                        self.composition.append(_ellipsis)
-                        self.has_ellipsis_parenthesized = False
+                        self.composition.append([])
                     else:
-                        bracket_group.append(_ellipsis)
-                        self.has_ellipsis_parenthesized = True
+                        pass  # no need to think about 1s inside parenthesis
+                    return
+                is_axis_name, reason = self.check_axis_name(x, return_reason=True)
+                if not (is_number or is_axis_name):
+                    raise ValueError(
+                        "Invalid axis identifier: {}\n{}".format(x, reason)
+                    )
+                if is_number:
+                    x = AnonymousAxis(x)
+                self.identifiers.add(x)
+                if is_number:
+                    self.has_non_unitary_anonymous_axes = True
+                if bracket_group is None:
+                    self.composition.append([x])
                 else:
-                    is_number = str.isdecimal(x)
-                    if is_number and int(x) == 1:
-                        # handling the case of anonymous axis of length 1
-                        if bracket_group is None:
-                            self.composition.append([])
-                        else:
-                            pass  # no need to think about 1s inside parenthesis
-                        return
-                    is_axis_name, reason = self.check_axis_name(x, return_reason=True)
-                    if not (is_number or is_axis_name):
-                        raise ValueError(
-                            "Invalid axis identifier: {}\n{}".format(x, reason)
-                        )
-                    if is_number:
-                        x = AnonymousAxis(x)
-                    self.identifiers.add(x)
-                    if is_number:
-                        self.has_non_unitary_anonymous_axes = True
-                    if bracket_group is None:
-                        self.composition.append([x])
-                    else:
-                        bracket_group.append(x)
+                    bracket_group.append(x)
 
         current_identifier = None
         for char in expression:
@@ -85,7 +89,7 @@ class ParsedExpression:
                         raise ValueError("Brackets are not balanced")
                     self.composition.append(bracket_group)
                     bracket_group = None
-            elif str.isalnum(char) or char in ["_", _ellipsis]:
+            elif str.isalnum(char) or char == "_":
                 if current_identifier is None:
                     current_identifier = char
                 else:
@@ -143,3 +147,8 @@ class ParsedExpression:
             return result
         else:
             return result[0]
+
+    def __repr__(self) -> str:
+        return "{name}({composition})".format(
+            name=self.__class__.__name__, composition=self.composition
+        )

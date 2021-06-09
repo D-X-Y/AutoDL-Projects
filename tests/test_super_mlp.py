@@ -37,6 +37,7 @@ class TestSuperLinear(unittest.TestCase):
         print("The abstract child program:\n{:}".format(abstract_child))
 
         model.set_super_run_type(super_core.SuperRunMode.Candidate)
+        model.enable_candidate()
         model.apply_candidate(abstract_child)
 
         output_shape = (20, abstract_child["_out_features"].value)
@@ -77,6 +78,7 @@ class TestSuperLinear(unittest.TestCase):
         )
 
         mlp.set_super_run_type(super_core.SuperRunMode.Candidate)
+        mlp.enable_candidate()
         mlp.apply_candidate(abstract_child)
         outputs = mlp(inputs)
         output_shape = (4, abstract_child["fc2"]["_out_features"].value)
@@ -103,6 +105,7 @@ class TestSuperLinear(unittest.TestCase):
         print("The abstract child program is:\n{:}".format(abstract_child))
 
         mlp.set_super_run_type(super_core.SuperRunMode.Candidate)
+        mlp.enable_candidate()
         mlp.apply_candidate(abstract_child)
         outputs = mlp(inputs)
         output_shape = (4, abstract_child["_out_features"].value)
@@ -120,6 +123,7 @@ class TestSuperLinear(unittest.TestCase):
         print("The abstract child program:\n{:}".format(abstract_child))
 
         model.set_super_run_type(super_core.SuperRunMode.Candidate)
+        model.enable_candidate()
         model.apply_candidate(abstract_child)
         outputs = model(inputs)
         output_shape = (4, 60, abstract_child["_embed_dim"].value)

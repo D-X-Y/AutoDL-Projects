@@ -29,6 +29,7 @@ class TestSuperSelfAttention(unittest.TestCase):
         abstract_child = abstract_space.random(reuse_last=True)
         print("The abstract child program is:\n{:}".format(abstract_child))
         model.set_super_run_type(super_core.SuperRunMode.Candidate)
+        model.enable_candidate()
         model.apply_candidate(abstract_child)
         outputs = model(inputs)
         return abstract_child, outputs
