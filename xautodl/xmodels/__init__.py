@@ -3,3 +3,5 @@
 #####################################################
 # The models in this folder is written with xlayers #
 #####################################################
+
+from .transformers import get_transformer
