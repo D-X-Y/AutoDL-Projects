@@ -47,7 +47,7 @@ class SuperSelfAttention(SuperModule):
         self.v_fc = SuperLinear(input_dim, input_dim, bias=qkv_bias)
 
         self.attn_drop = SuperDrop(attn_drop or 0.0, [-1, -1, -1, -1], recover=True)
-        if proj_dim is None:
+        if proj_dim is not None:
             self.proj = SuperLinear(input_dim, proj_dim)
             self.proj_drop = SuperDropout(proj_drop or 0.0)
         else:

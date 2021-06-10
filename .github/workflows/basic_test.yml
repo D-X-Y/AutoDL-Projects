@@ -32,7 +32,7 @@ jobs:
           echo $PWD ; ls
           python -m black ./exps -l 88 --check --diff --verbose
           python -m black ./tests -l 88 --check --diff --verbose
-          python -m black ./xautodl/xlayers -l 88 --check --diff --verbose
+          python -m black ./xautodl/x* -l 88 --check --diff --verbose
           python -m black ./xautodl/spaces -l 88 --check --diff --verbose
           python -m black ./xautodl/trade_models -l 88 --check --diff --verbose
           python -m black ./xautodl/procedures -l 88 --check --diff --verbose
