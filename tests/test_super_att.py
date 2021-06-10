@@ -3,13 +3,11 @@
 #####################################################
 # pytest ./tests/test_super_att.py -s               #
 #####################################################
-import sys, random
+import random
 import unittest
 from parameterized import parameterized
-from pathlib import Path
 
 import torch
-
 from xautodl import spaces
 from xautodl.xlayers import super_core
 

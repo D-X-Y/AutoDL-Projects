@@ -3,10 +3,9 @@
 #####################################################
 # pytest ./tests/test_super_container.py -s         #
 #####################################################
-import sys, random
+import random
 import unittest
 import pytest
-from pathlib import Path
 
 import torch
 from xautodl import spaces

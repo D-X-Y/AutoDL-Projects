@@ -22,6 +22,10 @@ save_dir=./outputs/${dataset}/vit-experimental
 python --version
 
 python ./exps/basic/xmain.py --save_dir ${save_dir} --rand_seed ${rseed} \
-	--train_data_config ./configs/data.yaml/${dataset}.train \
-	--valid_data_config ./configs/data.yaml/${dataset}.test \
-	--data_path $TORCH_HOME/cifar.python
+	--train_data_config ./configs/yaml.data/${dataset}.train \
+	--valid_data_config ./configs/yaml.data/${dataset}.test \
+	--data_path $TORCH_HOME/cifar.python \
+	--model_config ./configs/yaml.model/vit-cifar10.s0 \
+	--optim_config ./configs/yaml.opt/vit.cifar \
+	--loss_config ./configs/yaml.loss/cross-entropy \
+	--lr 0.003 --weight_decay 0.3 

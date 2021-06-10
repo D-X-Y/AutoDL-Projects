@@ -3,7 +3,6 @@
 #####################################################
 # pytest ./tests/test_super_rearrange.py -s         #
 #####################################################
-import sys
 import unittest
 
 import torch

@@ -1,0 +1,4 @@
+class_or_func: get_transformer
+module_path: xautodl.xmodels.transformers
+args: [vit-cifar10-p4-d4-h4-c32]
+kwargs: {}

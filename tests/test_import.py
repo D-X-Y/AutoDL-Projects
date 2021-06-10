@@ -3,12 +3,6 @@
 #####################################################
 # pytest ./tests/test_import.py                     #
 #####################################################
-import os, sys, time, torch
-import pickle
-import tempfile
-from pathlib import Path
-
-
 def test_import():
     from xautodl import config_utils
     from xautodl import datasets
@@ -19,6 +13,9 @@ def test_import():
     from xautodl import spaces
     from xautodl import trade_models
     from xautodl import utils
+
     from xautodl import xlayers
+    from xautodl import xmisc
+    from xautodl import xmmodels
 
     print("Check all imports done")

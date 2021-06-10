@@ -62,18 +62,25 @@ def call_by_yaml(path, *args, **kwargs) -> object:
 
 def nested_call_by_dict(config: Union[Dict[Text, Any], Any], *args, **kwargs) -> object:
     """Similar to `call_by_dict`, but differently, the args may contain another dict needs to be called."""
-    if not has_key_words(config):
+    if isinstance(config, list):
+        return [nested_call_by_dict(x) for x in config]
+    elif isinstance(config, tuple):
+        return (nested_call_by_dict(x) for x in config)
+    elif not isinstance(config, dict):
         return config
-    module = get_module_by_module_path(config["module_path"])
-    cls_or_func = getattr(module, config[CLS_FUNC_KEY])
-    args = tuple(list(config["args"]) + list(args))
-    kwargs = {**config["kwargs"], **kwargs}
-    # check whether there are nested special dict
-    new_args = [nested_call_by_dict(x) for x in args]
-    new_kwargs = {}
-    for key, x in kwargs.items():
-        new_kwargs[key] = nested_call_by_dict(x)
-    return cls_or_func(*new_args, **new_kwargs)
+    elif not has_key_words(config):
+        return {key: nested_call_by_dict(x) for x, key in config.items()}
+    else:
+        module = get_module_by_module_path(config["module_path"])
+        cls_or_func = getattr(module, config[CLS_FUNC_KEY])
+        args = tuple(list(config["args"]) + list(args))
+        kwargs = {**config["kwargs"], **kwargs}
+        # check whether there are nested special dict
+        new_args = [nested_call_by_dict(x) for x in args]
+        new_kwargs = {}
+        for key, x in kwargs.items():
+            new_kwargs[key] = nested_call_by_dict(x)
+        return cls_or_func(*new_args, **new_kwargs)
 
 
 def nested_call_by_yaml(path, *args, **kwargs) -> object:

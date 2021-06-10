@@ -1,7 +1,0 @@
-class_or_func: CIFAR10
-module_path: torchvision.datasets
-args: []
-kwargs:
-  train: True
-  download: True
-  transform: null

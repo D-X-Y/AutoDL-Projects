@@ -1,0 +1,30 @@
+class_or_func: CIFAR10
+module_path: torchvision.datasets
+args: []
+kwargs:
+  train: True
+  download: True
+  transform:
+    class_or_func: Compose
+    module_path: torchvision.transforms
+    args:
+      -
+        - class_or_func: RandomHorizontalFlip
+          module_path: torchvision.transforms
+          args: []
+          kwargs: {}
+        - class_or_func: RandomCrop
+          module_path: torchvision.transforms
+          args: [32]
+          kwargs: {padding: 4}
+        - class_or_func: ToTensor
+          module_path: torchvision.transforms
+          args: []
+          kwargs: {}
+        - class_or_func: Normalize
+          module_path: torchvision.transforms
+          args: []
+          kwargs:
+            mean: (0.491, 0.482, 0.447)
+            std: (0.247, 0.244, 0.262)
+    kwargs: {}

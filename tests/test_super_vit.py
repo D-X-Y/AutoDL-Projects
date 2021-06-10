@@ -3,8 +3,8 @@
 #####################################################
 # pytest ./tests/test_super_vit.py -s               #
 #####################################################
-import sys
 import unittest
+from parameterized import parameterized
 
 import torch
 from xautodl.xmodels import transformers
@@ -16,25 +16,28 @@ class TestSuperViT(unittest.TestCase):
 
     def test_super_vit(self):
         model = transformers.get_transformer("vit-base-16")
-        tensor = torch.rand((16, 3, 224, 224))
+        tensor = torch.rand((2, 3, 224, 224))
         print("The tensor shape: {:}".format(tensor.shape))
         # print(model)
         outs = model(tensor)
         print("The output tensor shape: {:}".format(outs.shape))
 
-    def test_imagenet(self):
-        name2config = transformers.name2config
-        print("There are {:} models in total.".format(len(name2config)))
-        for name, config in name2config.items():
-            if "cifar" in name:
-                tensor = torch.rand((16, 3, 32, 32))
-            else:
-                tensor = torch.rand((16, 3, 224, 224))
-            model = transformers.get_transformer(config)
-            outs = model(tensor)
-            size = count_parameters(model, "mb", True)
-            print(
-                "{:10s} : size={:.2f}MB, out-shape: {:}".format(
-                    name, size, tuple(outs.shape)
-                )
+    @parameterized.expand(
+        [
+            ["vit-cifar10-p4-d4-h4-c32", 32],
+            ["vit-base-16", 224],
+            ["vit-large-16", 224],
+            ["vit-huge-14", 224],
+        ]
+    )
+    def test_imagenet(self, name, resolution):
+        tensor = torch.rand((2, 3, resolution, resolution))
+        config = transformers.name2config[name]
+        model = transformers.get_transformer(config)
+        outs = model(tensor)
+        size = count_parameters(model, "mb", True)
+        print(
+            "{:10s} : size={:.2f}MB, out-shape: {:}".format(
+                name, size, tuple(outs.shape)
             )
+        )

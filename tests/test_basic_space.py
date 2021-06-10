@@ -3,10 +3,8 @@
 #####################################################
 # pytest tests/test_basic_space.py -s               #
 #####################################################
-import sys, random
+import random
 import unittest
-import pytest
-from pathlib import Path
 
 from xautodl.spaces import Categorical
 from xautodl.spaces import Continuous
