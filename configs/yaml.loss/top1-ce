@@ -1,0 +1,12 @@
+class_or_func: ComposeMetric
+module_path: xautodl.xmisc.meter_utils
+args:
+  - class_or_func: Top1AccMetric
+    module_path: xautodl.xmisc.meter_utils
+    args: [False]
+    kwargs: {}
+  - class_or_func: CrossEntropyMetric
+    module_path: xautodl.xmisc.meter_utils
+    args: [False]
+    kwargs: {}
+kwargs: {}
