@@ -5,6 +5,3 @@
 #####################################################
 
 from .transformers import get_transformer
-
-def obtain_model(config):
-  raise NotImplementedError

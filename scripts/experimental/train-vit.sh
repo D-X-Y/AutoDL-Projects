@@ -28,4 +28,4 @@ python ./exps/basic/xmain.py --save_dir ${save_dir} --rand_seed ${rseed} \
 	--model_config ./configs/yaml.model/vit-cifar10.s0 \
 	--optim_config ./configs/yaml.opt/vit.cifar \
 	--loss_config ./configs/yaml.loss/cross-entropy \
-	--lr 0.003 --weight_decay 0.3 
+	--lr 0.003 --weight_decay 0.3 --scheduler warm-cos --steps 10000
