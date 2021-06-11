@@ -30,7 +30,7 @@ jobs:
 
       - name: Test Super Model
         run: |
-          python -m pip install pytest numpy
+          python -m pip install pytest
           python -m pip install parameterized
           python -m pip install torch torchvision
           python -m pytest ./tests/test_super_*.py

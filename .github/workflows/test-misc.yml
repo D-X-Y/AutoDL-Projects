@@ -30,7 +30,7 @@ jobs:
 
       - name: Test Xmisc
         run: |
-          python -m pip install pytest numpy
+          python -m pip install pytest
           python -m pip install torch torchvision
           python -m pip install parameterized
           echo $PWD
