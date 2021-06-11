@@ -17,6 +17,6 @@ kwargs:
           module_path: torchvision.transforms
           args: []
           kwargs:
-            mean: (0.491, 0.482, 0.447)
-            std: (0.247, 0.244, 0.262)
+            mean: [0.491, 0.482, 0.447]
+            std: [0.247, 0.244, 0.262]
     kwargs: {}

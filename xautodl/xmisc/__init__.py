@@ -1,6 +1,7 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2021.06 #
 #####################################################
+"""The module and yaml related functions."""
 from .module_utils import call_by_dict
 from .module_utils import call_by_yaml
 from .module_utils import nested_call_by_dict
@@ -11,10 +12,13 @@ from .torch_utils import count_parameters
 
 from .logger_utils import Logger
 
-# sampler
+"""The data sampler related classes."""
 from .sampler_utils import BatchSampler
 
-# scheduler related
+"""The meter related classes."""
+from .meter_utils import AverageMeter
+
+"""The scheduler related classes."""
 from .scheduler_utils import CosineParamScheduler, WarmupParamScheduler, LRMultiplier
 
 
