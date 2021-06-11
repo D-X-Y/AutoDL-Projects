@@ -10,12 +10,12 @@ def test_import():
     from xautodl import models
     from xautodl import nas_infer_model
     from xautodl import procedures
-    from xautodl import spaces
     from xautodl import trade_models
     from xautodl import utils
 
     from xautodl import xlayers
     from xautodl import xmisc
-    from xautodl import xmmodels
+    from xautodl import xmodels
+    from xautodl import spaces
 
     print("Check all imports done")
