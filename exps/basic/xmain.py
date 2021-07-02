@@ -74,8 +74,11 @@ def main(args):
     logger.log("The optimizer is:\n{:}".format(optimizer))
     logger.log("The objective is {:}".format(objective))
     logger.log("The metric is {:}".format(metric))
-    logger.log("The iters_per_epoch = {:}, estimated epochs = {:}".format(
-      iters_per_epoch, args.steps // iters_per_epoch))
+    logger.log(
+        "The iters_per_epoch = {:}, estimated epochs = {:}".format(
+            iters_per_epoch, args.steps // iters_per_epoch
+        )
+    )
 
     model, objective = torch.nn.DataParallel(model).cuda(), objective.cuda()
     scheduler = xmisc.LRMultiplier(

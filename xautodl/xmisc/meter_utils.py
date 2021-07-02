@@ -1,6 +1,12 @@
 #####################################################
 # Copyright (c) Xuanyi Dong [GitHub D-X-Y], 2020.06 #
 #####################################################
+# In this python file, it contains the meter classes#
+# , which may need to use PyTorch or Numpy.         #
+#####################################################
+import abc
+import torch
+import torch.nn.functional as F
 
 
 class AverageMeter:
