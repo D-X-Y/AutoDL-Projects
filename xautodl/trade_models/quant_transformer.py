@@ -21,10 +21,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data as th_data
 
-from log_utils import AverageMeter
-from utils import count_parameters
+from xautodl.xmisc import AverageMeter
+from xautodl.xmisc import count_parameters
 
-from xlayers import super_core
+from xautodl.xlayers import super_core
 from .transformers import DEFAULT_NET_CONFIG
 from .transformers import get_transformer
 

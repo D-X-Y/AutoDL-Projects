@@ -16,76 +16,8 @@ from xautodl import xlayers
 from xautodl.xlayers import weight_init
 
 
-def pair(t):
-    return t if isinstance(t, tuple) else (t, t)
-
-
-name2config = {
-    "vit-cifar10-p4-d4-h4-c32": dict(
-        type="vit",
-        image_size=32,
-        patch_size=4,
-        num_classes=10,
-        dim=32,
-        depth=4,
-        heads=4,
-        dropout=0.1,
-        att_dropout=0.0,
-    ),
-    "vit-base-16": dict(
-        type="vit",
-        image_size=224,
-        patch_size=16,
-        num_classes=1000,
-        dim=768,
-        depth=12,
-        heads=12,
-        dropout=0.1,
-        att_dropout=0.0,
-    ),
-    "vit-large-16": dict(
-        type="vit",
-        image_size=224,
-        patch_size=16,
-        num_classes=1000,
-        dim=1024,
-        depth=24,
-        heads=16,
-        dropout=0.1,
-        att_dropout=0.0,
-    ),
-    "vit-huge-14": dict(
-        type="vit",
-        image_size=224,
-        patch_size=14,
-        num_classes=1000,
-        dim=1280,
-        depth=32,
-        heads=16,
-        dropout=0.1,
-        att_dropout=0.0,
-    ),
-}
-
-
-def extend_cifar100(configs):
-    new_configs = dict()
-    for name, config in configs.items():
-        new_configs[name] = config
-        if "cifar10" in name and "cifar100" not in name:
-            config = copy.deepcopy(config)
-            config["num_classes"] = 100
-            a, b = name.split("cifar10")
-            new_name = "{:}cifar100{:}".format(a, b)
-            new_configs[new_name] = config
-    return new_configs
-
-
-name2config = extend_cifar100(name2config)
-
-
-class SuperViT(xlayers.SuperModule):
-    """The super model for transformer."""
+class SuperQuaT(xlayers.SuperModule):
+    """The super transformer for transformer."""
 
     def __init__(
         self,
@@ -100,7 +32,7 @@ class SuperViT(xlayers.SuperModule):
         dropout=0.0,
         att_dropout=0.0,
     ):
-        super(SuperViT, self).__init__()
+        super(SuperQuaT, self).__init__()
         image_height, image_width = pair(image_size)
         patch_height, patch_width = pair(patch_size)
 
@@ -141,14 +73,14 @@ class SuperViT(xlayers.SuperModule):
         )
 
         weight_init.trunc_normal_(self.cls_token, std=0.02)
-        self.apply(weight_init.init_transformer)
+        self.apply(_init_weights)
 
     @property
     def abstract_search_space(self):
         raise NotImplementedError
 
     def apply_candidate(self, abstract_child: spaces.VirtualNode):
-        super(SuperViT, self).apply_candidate(abstract_child)
+        super(SuperQuaT, self).apply_candidate(abstract_child)
         raise NotImplementedError
 
     def forward_candidate(self, input: torch.Tensor) -> torch.Tensor:
@@ -177,7 +109,7 @@ def get_transformer(config):
         raise ValueError("Invalid Configuration: {:}".format(config))
     model_type = config.get("type", "vit").lower()
     if model_type == "vit":
-        model = SuperViT(
+        model = SuperQuaT(
             image_size=config.get("image_size"),
             patch_size=config.get("patch_size"),
             num_classes=config.get("num_classes"),

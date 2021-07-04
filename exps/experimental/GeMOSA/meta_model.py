@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from xautodl.xlayers import super_core
 from xautodl.xlayers import trunc_normal_
-from xautodl.models.xcore import get_model
+from xautodl.xmodels.xcore import get_model
 
 
 class MetaModelV1(super_core.SuperModule):

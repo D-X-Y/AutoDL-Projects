@@ -4,5 +4,4 @@
 # This file is expected to be self-contained, expect
 # for importing from spaces to include search space.
 #####################################################
-from .weight_init import trunc_normal_
 from .super_core import *

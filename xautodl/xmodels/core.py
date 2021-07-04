@@ -15,7 +15,7 @@ from xautodl.xlayers.super_core import super_name2activation
 
 
 def get_model(config: Dict[Text, Any], **kwargs):
-    model_type = config.get("model_type", "simple_mlp")
+    model_type = config.get("model_type", "simple_mlp").lower()
     if model_type == "simple_mlp":
         act_cls = super_name2activation[kwargs["act_cls"]]
         norm_cls = super_name2norm[kwargs["norm_cls"]]
@@ -60,6 +60,8 @@ def get_model(config: Dict[Text, Any], **kwargs):
             last_dim = hidden_dim
         sub_layers.append(SuperLinear(last_dim, kwargs["output_dim"]))
         model = SuperSequential(*sub_layers)
+    elif model_type == "quant_transformer":
+        raise NotImplementedError
     else:
         raise TypeError("Unkonwn model type: {:}".format(model_type))
     return model
