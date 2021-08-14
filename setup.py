@@ -17,6 +17,8 @@
 # TODO(xuanyidong): upload it to conda
 #
 # [2021.06.01] v0.9.9
+# [2021.08.14] v1.0.0
+# 
 import os
 from setuptools import setup, find_packages
 
@@ -24,7 +26,7 @@ NAME = "xautodl"
 REQUIRES_PYTHON = ">=3.6"
 DESCRIPTION = "Automated Deep Learning Package"
 
-VERSION = "0.9.9"
+VERSION = "1.0.0"
 
 
 def read(fname="README.md"):
@@ -35,7 +37,7 @@ def read(fname="README.md"):
 
 
 # What packages are required for this module to be executed?
-REQUIRED = ["numpy>=1.16.5,<=1.19.5", "pyyaml>=5.0.0"]
+REQUIRED = ["numpy>=1.16.5,<=1.19.5", "pyyaml>=5.0.0", "fvcore"]
 
 packages = find_packages(
     exclude=("tests", "scripts", "scripts-search", "lib*", "exps*")

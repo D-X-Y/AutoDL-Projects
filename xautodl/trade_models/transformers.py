@@ -42,12 +42,13 @@ def _assert_types(x, expected_types):
 
 
 DEFAULT_NET_CONFIG = None
-_default_max_depth = 5
+_default_max_depth = 6
 DefaultSearchSpace = dict(
     d_feat=6,
-    embed_dim=spaces.Categorical(*_get_list_mul(8, 16)),
-    num_heads=_get_mul_specs((1, 2, 4, 8), _default_max_depth),
-    mlp_hidden_multipliers=_get_mul_specs((0.5, 1, 2, 4, 8), _default_max_depth),
+    embed_dim=32,
+    # embed_dim=spaces.Categorical(*_get_list_mul(8, 16)),
+    num_heads=[4] * _default_max_depth,
+    mlp_hidden_multipliers=[4] * _default_max_depth,
     qkv_bias=True,
     pos_drop=0.0,
     other_drop=0.0,

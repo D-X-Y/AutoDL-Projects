@@ -7,5 +7,6 @@
 
 
 def version():
-    versions = ["0.9.9"]  # 2021.05.19
+    versions = ["0.9.9"]  # 2021.06.01
+    versions = ["1.0.0"]  # 2021.08.14
     return versions[-1]

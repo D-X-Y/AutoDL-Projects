@@ -47,7 +47,7 @@ task:
             net_config:
                 name: basic
                 d_feat: 6
-                embed_dim: 48
+                embed_dim: 32
                 num_heads: [4, 4, 4, 4, 4]
                 mlp_hidden_multipliers: [4, 4, 4, 4, 4]
                 qkv_bias: True
