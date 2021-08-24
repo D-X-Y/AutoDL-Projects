@@ -1,9 +1,9 @@
 [submodule ".latent-data/qlib"]
 	path = .latent-data/qlib
-	url = git@github.com:microsoft/qlib.git
+	url = https://github.com/microsoft/qlib.git
 [submodule ".latent-data/NATS-Bench"]
 	path = .latent-data/NATS-Bench
-	url = git@github.com:D-X-Y/NATS-Bench.git
+	url = https://github.com/D-X-Y/NATS-Bench.git
 [submodule ".latent-data/NAS-Bench-201"]
 	path = .latent-data/NAS-Bench-201
-	url = git@github.com:D-X-Y/NAS-Bench-201.git
+	url = https://github.com/D-X-Y/NAS-Bench-201.git
