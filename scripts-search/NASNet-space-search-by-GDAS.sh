@@ -27,7 +27,7 @@ fi
 
 save_dir=./output/search-cell-${space}/GDAS-${dataset}-BN${track_running_stats}
 
-OMP_NUM_THREADS=4 python ./exps/algos/GDAS.py \
+OMP_NUM_THREADS=4 python ./exps/NAS-Bench-201-algos/GDAS.py \
 	--save_dir ${save_dir} \
 	--dataset ${dataset} --data_path ${data_path} \
 	--search_space_name ${space} \
