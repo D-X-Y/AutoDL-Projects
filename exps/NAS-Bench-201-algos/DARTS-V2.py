@@ -433,7 +433,7 @@ def main(xargs):
         )
     )
     if api is not None:
-        logger.log("{:}".format(api.query_by_arch(genotypes[total_epoch - 1]), "200"))
+        logger.log("{:}".format(api.query_by_arch(genotypes[total_epoch - 1], "200")))
     logger.close()
 
 
