@@ -155,7 +155,7 @@ class ExponentialLR(_LRScheduler):
             if self.current_epoch >= self.warmup_epochs:
                 last_epoch = self.current_epoch - self.warmup_epochs
                 assert last_epoch >= 0, "invalid last_epoch : {:}".format(last_epoch)
-                lr = base_lr * (self.gamma ** last_epoch)
+                lr = base_lr * (self.gamma**last_epoch)
             else:
                 lr = (
                     self.current_epoch / self.warmup_epochs

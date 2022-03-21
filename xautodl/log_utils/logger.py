@@ -156,7 +156,7 @@ class Logger(object):
         hist.max = float(np.max(values))
         hist.num = int(np.prod(values.shape))
         hist.sum = float(np.sum(values))
-        hist.sum_squares = float(np.sum(values ** 2))
+        hist.sum_squares = float(np.sum(values**2))
 
         # Drop the start of the first bin
         bin_edges = bin_edges[1:]
