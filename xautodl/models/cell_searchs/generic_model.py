@@ -347,6 +347,10 @@ class GenericNAS201Model(nn.Module):
                     feature = cell.forward_gdas(feature, alphas, index)
                     if self.verbose:
                         verbose_str += "-forward_gdas"
+                elif self.mode == "gdas_v1":
+                    feature = cell.forward_gdas_v1(feature, alphas, index)
+                    if self.verbose:
+                        verbose_str += "-forward_gdas_v1"
                 else:
                     raise ValueError("invalid mode={:}".format(self.mode))
             else:
