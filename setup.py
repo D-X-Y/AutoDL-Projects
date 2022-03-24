@@ -37,7 +37,7 @@ def read(fname="README.md"):
 
 
 # What packages are required for this module to be executed?
-REQUIRED = ["numpy>=1.16.5,<=1.19.5", "pyyaml>=5.0.0", "fvcore"]
+REQUIRED = ["numpy>=1.16.5", "pyyaml>=5.0.0", "fvcore"]
 
 packages = find_packages(
     exclude=("tests", "scripts", "scripts-search", "lib*", "exps*")
