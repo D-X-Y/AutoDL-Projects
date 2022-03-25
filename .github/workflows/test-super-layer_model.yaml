@@ -26,7 +26,7 @@ jobs:
 
       - name: Install XAutoDL from source
         run: |
-          python setup.py install
+          pip install .
 
       - name: Test Super Model
         run: |

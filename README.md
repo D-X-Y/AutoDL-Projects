@@ -89,7 +89,7 @@ At this moment, this project provides the following algorithms and scripts to ru
 ## Requirements and Preparation
 
 
-**First of all**, please use `python setup.py install` to install `xautodl` library.
+**First of all**, please use `pip install .` to install `xautodl` library.
 
 Please install `Python>=3.6` and `PyTorch>=1.5.0`. (You could use lower versions of Python and PyTorch, but may have bugs).
 Some visualization codes may require `opencv`.
