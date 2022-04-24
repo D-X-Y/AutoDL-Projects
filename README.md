@@ -61,13 +61,13 @@ At this moment, this project provides the following algorithms and scripts to ru
     <tr> <!-- (6-th row) -->
     <td align="center" valign="middle"> NATS-Bench </td>
     <td align="center" valign="middle"> <a href="https://xuanyidong.com/assets/projects/NATS-Bench"> NATS-Bench: Benchmarking NAS Algorithms for Architecture Topology and Size</a> </td>
-    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/NATS-Bench">NATS-Bench.md</a> </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/NATS-Bench/blob/main/README.md">NATS-Bench.md</a> </td>
     </tr>
     <tr> <!-- (7-th row) -->
     <td align="center" valign="middle"> ... </td>
     <td align="center" valign="middle"> ENAS / REA / REINFORCE / BOHB </td>
     <td align="center" valign="middle"> Please check the original papers </td>
-    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/main/docs/NAS-Bench-201.md">NAS-Bench-201.md</a>  <a href="https://github.com/D-X-Y/NATS-Bench">NATS-Bench.md</a> </td>
+    <td align="center" valign="middle"> <a href="https://github.com/D-X-Y/AutoDL-Projects/tree/main/docs/NAS-Bench-201.md">NAS-Bench-201.md</a>  <a href="https://github.com/D-X-Y/NATS-Bench/blob/main/README.md">NATS-Bench.md</a> </td>
     </tr>
     <tr> <!-- (start second block) -->
     <td rowspan="1" align="center" valign="middle" halign="middle"> HPO </td>
