@@ -3,7 +3,7 @@
 </p>
 
 ---------
-[![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](../LICENSE.md)
 
 自动深度学习库 (AutoDL-Projects) 是一个开源的，轻量级的，功能强大的项目。
 该项目实现了多种网络结构搜索(NAS)和超参数优化(HPO)算法。
@@ -142,8 +142,8 @@
 
 # 其他
 
-如果你想要给这份代码库做贡献，请看[CONTRIBUTING.md](.github/CONTRIBUTING.md)。
-此外，使用规范请参考[CODE-OF-CONDUCT.md](.github/CODE-OF-CONDUCT.md)。
+如果你想要给这份代码库做贡献，请看[CONTRIBUTING.md](../.github/CONTRIBUTING.md)。
+此外，使用规范请参考[CODE-OF-CONDUCT.md](../.github/CODE-OF-CONDUCT.md)。
 
 # 许可证
-The entire codebase is under [MIT license](LICENSE.md)
+The entire codebase is under [MIT license](../LICENSE.md)
